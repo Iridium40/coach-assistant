@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { Hero } from "@/components/hero"
 import { ResourcesTab } from "@/components/resources-tab"
+import { BlogTab } from "@/components/blog-tab"
 import { RecipesTab } from "@/components/recipes-tab"
 import type { UserData, Module, Recipe } from "@/lib/types"
 
@@ -14,18 +15,18 @@ interface DashboardProps {
 }
 
 export function Dashboard({ userData, setUserData, onSelectModule, onSelectRecipe }: DashboardProps) {
-  const [activeTab, setActiveTab] = useState<"resources" | "recipes">("resources")
+  const [activeTab, setActiveTab] = useState<"resources" | "blog" | "recipes">("resources")
 
   return (
     <>
       <Hero userData={userData} />
 
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 py-4 sm:py-8 bg-white">
         {/* Tab Navigation */}
-        <div className="flex gap-8 border-b border-optavia-border mb-8">
+        <div className="flex gap-4 sm:gap-8 border-b border-optavia-border mb-6 sm:mb-8 overflow-x-auto scrollbar-hide -mx-4 px-4">
           <button
             onClick={() => setActiveTab("resources")}
-            className={`pb-4 px-2 font-heading font-semibold text-lg transition-colors relative ${
+            className={`pb-3 sm:pb-4 px-2 sm:px-3 font-heading font-semibold text-sm sm:text-lg transition-colors relative whitespace-nowrap flex-shrink-0 ${
               activeTab === "resources"
                 ? "text-[hsl(var(--optavia-green))]"
                 : "text-optavia-gray hover:text-[hsl(var(--optavia-green))]"
@@ -37,14 +38,29 @@ export function Dashboard({ userData, setUserData, onSelectModule, onSelectRecip
             )}
           </button>
           <button
+            onClick={() => setActiveTab("blog")}
+            className={`pb-3 sm:pb-4 px-2 sm:px-3 font-heading font-semibold text-sm sm:text-lg transition-colors relative whitespace-nowrap flex-shrink-0 ${
+              activeTab === "blog"
+                ? "text-[hsl(var(--optavia-green))]"
+                : "text-optavia-gray hover:text-[hsl(var(--optavia-green))]"
+            }`}
+          >
+            <span className="hidden sm:inline">OPTAVIA Blog</span>
+            <span className="sm:hidden">Blog</span>
+            {activeTab === "blog" && (
+              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[hsl(var(--optavia-green))]" />
+            )}
+          </button>
+          <button
             onClick={() => setActiveTab("recipes")}
-            className={`pb-4 px-2 font-heading font-semibold text-lg transition-colors relative ${
+            className={`pb-3 sm:pb-4 px-2 sm:px-3 font-heading font-semibold text-sm sm:text-lg transition-colors relative whitespace-nowrap flex-shrink-0 ${
               activeTab === "recipes"
                 ? "text-[hsl(var(--optavia-green))]"
                 : "text-optavia-gray hover:text-[hsl(var(--optavia-green))]"
             }`}
           >
-            Lean & Green Recipes
+            <span className="hidden sm:inline">Lean & Green Recipes</span>
+            <span className="sm:hidden">Recipes</span>
             {activeTab === "recipes" && (
               <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[hsl(var(--optavia-green))]" />
             )}
@@ -55,6 +71,8 @@ export function Dashboard({ userData, setUserData, onSelectModule, onSelectRecip
         {activeTab === "resources" && (
           <ResourcesTab userData={userData} setUserData={setUserData} onSelectModule={onSelectModule} />
         )}
+
+        {activeTab === "blog" && <BlogTab />}
 
         {activeTab === "recipes" && (
           <RecipesTab userData={userData} setUserData={setUserData} onSelectRecipe={onSelectRecipe} />

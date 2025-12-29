@@ -49,10 +49,10 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-white">
       <Header onReset={handleReset} showReset={currentView === "dashboard"} />
 
-      <main className="flex-1">
+      <main className="flex-1 bg-white">
         {currentView === "onboarding" && <Onboarding onComplete={handleOnboardingComplete} />}
 
         {currentView === "dashboard" && !selectedModule && !selectedRecipe && (
