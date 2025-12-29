@@ -8,7 +8,6 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { ProgressBar } from "@/components/progress-bar"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { ArrowLeft, Bookmark, ExternalLink, FileText, Video, X } from "lucide-react"
-import { useToast } from "@/hooks/use-toast"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import type { Module, UserData } from "@/lib/types"
 
@@ -20,37 +19,72 @@ interface ModuleDetailProps {
 }
 
 export function ModuleDetail({ module, userData, setUserData, onBack }: ModuleDetailProps) {
-  const { toast } = useToast()
   const [openResource, setOpenResource] = useState<{ url: string; title: string } | null>(null)
   const completedCount = module.resources.filter((resource) => userData.completedResources.includes(resource.id)).length
 
   const progress = module.resources.length > 0 ? Math.round((completedCount / module.resources.length) * 100) : 0
 
-  const handleResourceClick = (url: string, title: string, openInNewTab: boolean = false) => {
-    if (openInNewTab) {
-      // Show toast notification
-      toast({
-        title: "Opening in new tab",
-        description: `${title} opened in a new tab. Switch back to this tab to return to the app.`,
-        duration: 4000,
-      })
-      // Open the link
-      window.open(url, "_blank", "noopener,noreferrer")
-    } else {
-      // Open in modal
-      setOpenResource({ url, title })
-    }
+  const handleOpenInNewTab = (url: string) => {
+    window.open(url, "_blank", "noopener,noreferrer")
   }
 
-  // Convert Google Docs edit URL to view/embed URL if possible
+  // Convert URLs to embeddable format
   const getEmbedUrl = (url: string) => {
-    // For Google Docs, try to convert to embeddable format
+    // For Google Docs, convert to embeddable format
     if (url.includes("docs.google.com/document/d/")) {
       const docId = url.match(/\/document\/d\/([a-zA-Z0-9-_]+)/)?.[1]
       if (docId) {
         return `https://docs.google.com/document/d/${docId}/preview`
       }
     }
+    
+    // For Vimeo videos, convert to embeddable format
+    if (url.includes("vimeo.com")) {
+      // Handle different Vimeo URL formats:
+      // https://vimeo.com/123456789
+      // https://vimeo.com/123456789?fl=tl&fe=ec
+      // https://vimeo.com/123456789/hash
+      // https://vimeo.com/manage/videos/123456789/hash
+      let videoId: string | undefined
+      
+      // Try to extract from manage URL format
+      const manageMatch = url.match(/\/manage\/videos\/(\d+)/)
+      if (manageMatch) {
+        videoId = manageMatch[1]
+      } else {
+        // Try to extract from standard format
+        const standardMatch = url.match(/vimeo\.com\/(\d+)/)
+        if (standardMatch) {
+          videoId = standardMatch[1]
+        }
+      }
+      
+      if (videoId) {
+        return `https://player.vimeo.com/video/${videoId}`
+      }
+    }
+    
+    // For YouTube videos, convert to embeddable format
+    if (url.includes("youtube.com") || url.includes("youtu.be")) {
+      let videoId: string | undefined
+      
+      // Handle youtube.com/watch?v=VIDEO_ID
+      const watchMatch = url.match(/[?&]v=([a-zA-Z0-9_-]+)/)
+      if (watchMatch) {
+        videoId = watchMatch[1]
+      } else {
+        // Handle youtu.be/VIDEO_ID
+        const shortMatch = url.match(/youtu\.be\/([a-zA-Z0-9_-]+)/)
+        if (shortMatch) {
+          videoId = shortMatch[1]
+        }
+      }
+      
+      if (videoId) {
+        return `https://www.youtube.com/embed/${videoId}`
+      }
+    }
+    
     // For other URLs, try to use the original URL
     return url
   }
@@ -156,38 +190,22 @@ export function ModuleDetail({ module, userData, setUserData, onBack }: ModuleDe
                       {isBookmarked ? "Remove bookmark" : "Bookmark this resource"}
                     </TooltipContent>
                   </Tooltip>
-                  <div className="flex gap-1">
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button
-                          size="sm"
-                          className="gap-1 sm:gap-2 bg-[hsl(var(--optavia-green))] hover:bg-[hsl(var(--optavia-green-dark))] text-xs sm:text-sm px-2 sm:px-3"
-                          onClick={() => handleResourceClick(resource.url, resource.title, false)}
-                        >
-                          <span className="hidden sm:inline">View</span>
-                          <span className="sm:hidden">View</span>
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        View in app (opens in modal)
-                      </TooltipContent>
-                    </Tooltip>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          className="gap-1 sm:gap-2 text-xs sm:text-sm px-2 sm:px-3"
-                          onClick={() => handleResourceClick(resource.url, resource.title, true)}
-                        >
-                          <ExternalLink className="h-3 w-3 sm:h-4 sm:w-4" />
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        Open in new tab
-                      </TooltipContent>
-                    </Tooltip>
-                  </div>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        size="sm"
+                        className="gap-1 sm:gap-2 bg-[hsl(var(--optavia-green))] hover:bg-[hsl(var(--optavia-green-dark))] text-xs sm:text-sm px-2 sm:px-3"
+                        onClick={() => setOpenResource({ url: resource.url, title: resource.title })}
+                      >
+                        <span className="hidden sm:inline">Open</span>
+                        <span className="sm:hidden">Open</span>
+                        <ExternalLink className="h-3 w-3 sm:h-4 sm:w-4" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      View document in app
+                    </TooltipContent>
+                  </Tooltip>
                 </div>
               </div>
             </Card>
@@ -207,7 +225,7 @@ export function ModuleDetail({ module, userData, setUserData, onBack }: ModuleDe
                   size="sm"
                   onClick={() => {
                     if (openResource) {
-                      handleResourceClick(openResource.url, openResource.title, true)
+                      handleOpenInNewTab(openResource.url)
                       setOpenResource(null)
                     }
                   }}
@@ -235,8 +253,9 @@ export function ModuleDetail({ module, userData, setUserData, onBack }: ModuleDe
                   src={getEmbedUrl(openResource.url)}
                   className="w-full h-full border-0"
                   title={openResource.title}
-                  allow="clipboard-read; clipboard-write"
-                  sandbox="allow-same-origin allow-scripts allow-popups allow-forms allow-top-navigation-by-user-activation"
+                  allow="clipboard-read; clipboard-write; autoplay; fullscreen; picture-in-picture"
+                  allowFullScreen
+                  frameBorder="0"
                 />
                 {/* Fallback message if iframe fails */}
                 <div className="absolute inset-0 flex items-center justify-center bg-white p-6 hidden" id="iframe-fallback">
@@ -247,7 +266,7 @@ export function ModuleDetail({ module, userData, setUserData, onBack }: ModuleDe
                     <Button
                       onClick={() => {
                         if (openResource) {
-                          handleResourceClick(openResource.url, openResource.title, true)
+                          handleOpenInNewTab(openResource.url)
                           setOpenResource(null)
                         }
                       }}
