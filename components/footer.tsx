@@ -1,3 +1,6 @@
+"use client"
+
+import Link from "next/link"
 import { Facebook, Instagram, Youtube } from "lucide-react"
 
 export function Footer() {
@@ -39,6 +42,20 @@ export function Footer() {
             >
               <Youtube className="h-5 w-5" />
             </a>
+          </div>
+
+          <div className="flex flex-wrap justify-center gap-4 text-xs text-gray-400">
+            <Link href="/terms" className="hover:text-white transition-colors">
+              Terms and Conditions
+            </Link>
+            <span>•</span>
+            <Link href="/privacy" className="hover:text-white transition-colors">
+              Privacy Policy
+            </Link>
+            <span>•</span>
+            <Link href="/cookies" className="hover:text-white transition-colors">
+              Cookie Usage
+            </Link>
           </div>
 
           <p className="text-xs text-gray-400">© {new Date().getFullYear()} Coaching Amplifier. All rights reserved.</p>

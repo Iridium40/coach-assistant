@@ -1,14 +1,17 @@
 "use client"
 
 import { Button } from "@/components/ui/button"
-import { ExternalLink, RotateCcw } from "lucide-react"
+import { ExternalLink } from "lucide-react"
+import { UserMenu } from "@/components/user-menu"
+import { useAuth } from "@/hooks/use-auth"
 
 interface HeaderProps {
-  onReset: () => void
-  showReset: boolean
+  onSettingsClick?: () => void
 }
 
-export function Header({ onReset, showReset }: HeaderProps) {
+export function Header({ onSettingsClick }: HeaderProps) {
+  const { user, loading } = useAuth()
+
   return (
     <header className="border-b border-optavia-border bg-white sticky top-0 z-50">
       <div className="container mx-auto px-4 py-3 sm:py-4 flex items-center justify-between gap-2">
@@ -21,12 +24,6 @@ export function Header({ onReset, showReset }: HeaderProps) {
         </div>
 
         <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
-          {showReset && (
-            <Button variant="outline" size="sm" onClick={onReset} className="gap-1 sm:gap-2 bg-transparent px-2 sm:px-3">
-              <RotateCcw className="h-4 w-4" />
-              <span className="hidden sm:inline">Reset</span>
-            </Button>
-          )}
           <Button
             size="sm"
             className="gap-1 sm:gap-2 bg-[hsl(var(--optavia-green))] hover:bg-[hsl(var(--optavia-green-dark))] px-2 sm:px-3 text-xs sm:text-sm"
@@ -38,6 +35,7 @@ export function Header({ onReset, showReset }: HeaderProps) {
               <ExternalLink className="h-3 w-3 sm:h-4 sm:w-4" />
             </a>
           </Button>
+          {!loading && user && <UserMenu onSettingsClick={onSettingsClick} />}
         </div>
       </div>
     </header>

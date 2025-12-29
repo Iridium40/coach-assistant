@@ -9,6 +9,8 @@ import { ProgressBar } from "@/components/progress-bar"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { ArrowLeft, Bookmark, ExternalLink, FileText, Video, X } from "lucide-react"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
+import { useAuth } from "@/hooks/use-auth"
+import { useSupabaseData } from "@/hooks/use-supabase-data"
 import type { Module, UserData } from "@/lib/types"
 
 interface ModuleDetailProps {
@@ -19,14 +21,16 @@ interface ModuleDetailProps {
 }
 
 export function ModuleDetail({ module, userData, setUserData, onBack }: ModuleDetailProps) {
+  const { user } = useAuth()
+  const { completedResources, bookmarks, toggleCompletedResource, toggleBookmark } = useSupabaseData(user)
   const [openResource, setOpenResource] = useState<{ url: string; title: string } | null>(null)
-  const completedCount = module.resources.filter((resource) => userData.completedResources.includes(resource.id)).length
+  
+  // Use Supabase data if available, otherwise fall back to userData prop
+  const effectiveCompletedResources = completedResources.length > 0 ? completedResources : userData.completedResources
+  const effectiveBookmarks = bookmarks.length > 0 ? bookmarks : userData.bookmarks
+  const completedCount = module.resources.filter((resource) => effectiveCompletedResources.includes(resource.id)).length
 
   const progress = module.resources.length > 0 ? Math.round((completedCount / module.resources.length) * 100) : 0
-
-  const handleOpenInNewTab = (url: string) => {
-    window.open(url, "_blank", "noopener,noreferrer")
-  }
 
   // Convert URLs to embeddable format
   const getEmbedUrl = (url: string) => {
@@ -89,26 +93,36 @@ export function ModuleDetail({ module, userData, setUserData, onBack }: ModuleDe
     return url
   }
 
-  const toggleComplete = (resourceId: string) => {
-    const newCompleted = userData.completedResources.includes(resourceId)
-      ? userData.completedResources.filter((id) => id !== resourceId)
-      : [...userData.completedResources, resourceId]
+  const handleToggleComplete = (resourceId: string) => {
+    if (user && toggleCompletedResource) {
+      toggleCompletedResource(resourceId)
+    } else {
+      // Fallback to local state if not authenticated
+      const newCompleted = userData.completedResources.includes(resourceId)
+        ? userData.completedResources.filter((id) => id !== resourceId)
+        : [...userData.completedResources, resourceId]
 
-    setUserData({
-      ...userData,
-      completedResources: newCompleted,
-    })
+      setUserData({
+        ...userData,
+        completedResources: newCompleted,
+      })
+    }
   }
 
-  const toggleBookmark = (resourceId: string) => {
-    const newBookmarks = userData.bookmarks.includes(resourceId)
-      ? userData.bookmarks.filter((id) => id !== resourceId)
-      : [...userData.bookmarks, resourceId]
+  const handleToggleBookmark = (resourceId: string) => {
+    if (user && toggleBookmark) {
+      toggleBookmark(resourceId)
+    } else {
+      // Fallback to local state if not authenticated
+      const newBookmarks = userData.bookmarks.includes(resourceId)
+        ? userData.bookmarks.filter((id) => id !== resourceId)
+        : [...userData.bookmarks, resourceId]
 
-    setUserData({
-      ...userData,
-      bookmarks: newBookmarks,
-    })
+      setUserData({
+        ...userData,
+        bookmarks: newBookmarks,
+      })
+    }
   }
 
   return (
@@ -146,14 +160,14 @@ export function ModuleDetail({ module, userData, setUserData, onBack }: ModuleDe
       <div className="space-y-4">
         <h2 className="font-heading font-bold text-xl text-optavia-dark">Resources</h2>
         {module.resources.map((resource) => {
-          const isCompleted = userData.completedResources.includes(resource.id)
-          const isBookmarked = userData.bookmarks.includes(resource.id)
+          const isCompleted = effectiveCompletedResources.includes(resource.id)
+          const isBookmarked = effectiveBookmarks.includes(resource.id)
 
           return (
             <Card key={resource.id} className="p-3 sm:p-4">
               <div className="flex items-start gap-2 sm:gap-4">
                 <div className="pt-1 flex-shrink-0">
-                  <Checkbox checked={isCompleted} onCheckedChange={() => toggleComplete(resource.id)} />
+                  <Checkbox checked={isCompleted} onCheckedChange={() => handleToggleComplete(resource.id)} />
                 </div>
 
                 <div className="flex-1 min-w-0">
@@ -180,7 +194,7 @@ export function ModuleDetail({ module, userData, setUserData, onBack }: ModuleDe
                       <Button
                         variant="ghost"
                         size="icon"
-                        onClick={() => toggleBookmark(resource.id)}
+                        onClick={() => handleToggleBookmark(resource.id)}
                         className={`h-8 w-8 sm:h-10 sm:w-10 ${isBookmarked ? "text-[hsl(var(--optavia-green))]" : "text-optavia-gray"}`}
                       >
                         <Bookmark className={`h-3 w-3 sm:h-4 sm:w-4 ${isBookmarked ? "fill-current" : ""}`} />
@@ -219,31 +233,14 @@ export function ModuleDetail({ module, userData, setUserData, onBack }: ModuleDe
           <DialogHeader className="px-4 sm:px-6 py-3 sm:py-4 border-b flex-shrink-0">
             <div className="flex items-center justify-between gap-2">
               <DialogTitle className="text-base sm:text-lg font-heading truncate flex-1">{openResource?.title}</DialogTitle>
-              <div className="flex items-center gap-2 flex-shrink-0">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => {
-                    if (openResource) {
-                      handleOpenInNewTab(openResource.url)
-                      setOpenResource(null)
-                    }
-                  }}
-                  className="gap-1 sm:gap-2 text-xs sm:text-sm"
-                >
-                  <span className="hidden sm:inline">Open in New Tab</span>
-                  <span className="sm:hidden">New Tab</span>
-                  <ExternalLink className="h-3 w-3 sm:h-4 sm:w-4" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => setOpenResource(null)}
-                  className="h-8 w-8 sm:h-10 sm:w-10"
-                >
-                  <X className="h-4 w-4" />
-                </Button>
-              </div>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setOpenResource(null)}
+                className="h-8 w-8 sm:h-10 sm:w-10"
+              >
+                <X className="h-4 w-4" />
+              </Button>
             </div>
           </DialogHeader>
           <div className="flex-1 overflow-hidden relative bg-gray-50">
@@ -257,26 +254,6 @@ export function ModuleDetail({ module, userData, setUserData, onBack }: ModuleDe
                   allowFullScreen
                   frameBorder="0"
                 />
-                {/* Fallback message if iframe fails */}
-                <div className="absolute inset-0 flex items-center justify-center bg-white p-6 hidden" id="iframe-fallback">
-                  <Card className="p-6 max-w-md text-center">
-                    <p className="text-optavia-gray mb-4">
-                      This document cannot be displayed in the app. Please use the "Open in New Tab" button to view it.
-                    </p>
-                    <Button
-                      onClick={() => {
-                        if (openResource) {
-                          handleOpenInNewTab(openResource.url)
-                          setOpenResource(null)
-                        }
-                      }}
-                      className="gap-2"
-                    >
-                      Open in New Tab
-                      <ExternalLink className="h-4 w-4" />
-                    </Button>
-                  </Card>
-                </div>
               </>
             )}
           </div>

@@ -7,39 +7,67 @@ import { Onboarding } from "@/components/onboarding"
 import { Dashboard } from "@/components/dashboard"
 import { ModuleDetail } from "@/components/module-detail"
 import { RecipeDetail } from "@/components/recipe-detail"
-import { useStorage } from "@/hooks/use-storage"
+import { useRouter } from "next/navigation"
+import { UserSettings } from "@/components/user-settings"
+import { Announcements } from "@/components/announcements"
+import { useAuth } from "@/hooks/use-auth"
+import { useSupabaseData } from "@/hooks/use-supabase-data"
+import { createClient } from "@/lib/supabase/client"
 import type { Module, Recipe } from "@/lib/types"
 
 export default function Home() {
-  const [userData, setUserData] = useStorage()
-  const [currentView, setCurrentView] = useState<"onboarding" | "dashboard">("onboarding")
+  const router = useRouter()
+  const { user, loading: authLoading } = useAuth()
+  const {
+    profile,
+    completedResources,
+    bookmarks,
+    favoriteRecipes,
+    loading: dataLoading,
+    toggleCompletedResource,
+    toggleBookmark,
+    toggleFavoriteRecipe,
+    updateProfile,
+  } = useSupabaseData(user)
+
+  const [currentView, setCurrentView] = useState<"onboarding" | "dashboard" | "settings">("onboarding")
   const [selectedModule, setSelectedModule] = useState<Module | null>(null)
   const [selectedRecipe, setSelectedRecipe] = useState<Recipe | null>(null)
 
   useEffect(() => {
-    if (userData) {
+    if (authLoading || dataLoading) return
+
+    if (!user) {
+      router.push("/login")
+      return
+    }
+
+    // If user exists but no profile, show onboarding
+    if (user && !profile) {
+      setCurrentView("onboarding")
+      return
+    }
+
+    // If profile exists, show dashboard
+    if (profile) {
       setCurrentView("dashboard")
     }
-  }, [userData])
+  }, [user, profile, authLoading, dataLoading])
 
-  const handleOnboardingComplete = (isNewCoach: boolean) => {
-    const newUserData = {
-      isNewCoach,
-      completedResources: [],
-      bookmarks: [],
-      favoriteRecipes: [],
-      createdAt: new Date().toISOString(),
-    }
-    setUserData(newUserData)
-    setCurrentView("dashboard")
-  }
+  const handleOnboardingComplete = async (isNewCoach: boolean) => {
+    if (!user) return
 
-  const handleReset = () => {
-    if (confirm("Are you sure you want to reset all your progress? This cannot be undone.")) {
-      setUserData(null)
-      setCurrentView("onboarding")
-      setSelectedModule(null)
-      setSelectedRecipe(null)
+    const supabase = createClient()
+    const { error } = await supabase
+      .from("profiles")
+      .upsert({
+        id: user.id,
+        email: user.email,
+        is_new_coach: isNewCoach,
+      })
+
+    if (!error) {
+      setCurrentView("dashboard")
     }
   }
 
@@ -48,28 +76,90 @@ export default function Home() {
     setSelectedRecipe(null)
   }
 
+  const handleSettingsClose = () => {
+    setCurrentView("dashboard")
+  }
+
+  // Convert Supabase data to UserData format for compatibility
+  const userData = profile
+    ? {
+        isNewCoach: profile.is_new_coach,
+        completedResources,
+        bookmarks,
+        favoriteRecipes,
+        createdAt: profile.created_at,
+      }
+    : null
+
+  if (authLoading || dataLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-white">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[hsl(var(--optavia-green))] mx-auto mb-4"></div>
+          <p className="text-optavia-gray">Loading...</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (authLoading || dataLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-white">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[hsl(var(--optavia-green))] mx-auto mb-4"></div>
+          <p className="text-optavia-gray">Loading...</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (!user) {
+    return null // Will redirect to /login
+  }
+
   return (
     <div className="min-h-screen flex flex-col bg-white">
-      <Header onReset={handleReset} showReset={currentView === "dashboard"} />
+      <Header onSettingsClick={() => setCurrentView("settings")} />
 
       <main className="flex-1 bg-white">
-        {currentView === "onboarding" && <Onboarding onComplete={handleOnboardingComplete} />}
-
-        {currentView === "dashboard" && !selectedModule && !selectedRecipe && (
-          <Dashboard
-            userData={userData!}
-            setUserData={setUserData}
-            onSelectModule={setSelectedModule}
-            onSelectRecipe={setSelectedRecipe}
-          />
+        {currentView === "onboarding" && (
+          <Onboarding onComplete={handleOnboardingComplete} />
         )}
 
-        {selectedModule && (
-          <ModuleDetail module={selectedModule} userData={userData!} setUserData={setUserData} onBack={handleBack} />
+        {currentView === "settings" && user && (
+          <UserSettings onClose={handleSettingsClose} />
         )}
 
-        {selectedRecipe && (
-          <RecipeDetail recipe={selectedRecipe} userData={userData!} setUserData={setUserData} onBack={handleBack} />
+        {currentView === "dashboard" && user && userData && (
+          <>
+            <Announcements />
+            {!selectedModule && !selectedRecipe && (
+              <Dashboard
+                userData={userData}
+                setUserData={() => {}} // No longer needed, using hooks directly
+                onSelectModule={setSelectedModule}
+                onSelectRecipe={setSelectedRecipe}
+              />
+            )}
+
+            {selectedModule && (
+              <ModuleDetail
+                module={selectedModule}
+                userData={userData}
+                setUserData={() => {}} // No longer needed
+                onBack={handleBack}
+              />
+            )}
+
+            {selectedRecipe && (
+              <RecipeDetail
+                recipe={selectedRecipe}
+                userData={userData}
+                setUserData={() => {}} // No longer needed
+                onBack={handleBack}
+              />
+            )}
+          </>
         )}
       </main>
 
