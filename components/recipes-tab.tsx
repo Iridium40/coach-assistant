@@ -52,6 +52,16 @@ export function RecipesTab({ userData, setUserData, toggleFavoriteRecipe, onSele
 
   return (
     <div>
+      {/* Title and Description */}
+      <div className="text-center py-4 sm:py-8 mb-6">
+        <h2 className="font-heading font-bold text-2xl sm:text-3xl text-optavia-dark mb-3 sm:mb-4">
+          Lean & Green Recipes
+        </h2>
+        <p className="text-optavia-gray text-base sm:text-lg max-w-2xl mx-auto px-4">
+          Discover delicious Lean & Green meal recipes to share with your clients and support their health journey.
+        </p>
+      </div>
+
       {/* Search and Filter */}
       <div className="mb-6 space-y-4">
         <div className="relative max-w-md">

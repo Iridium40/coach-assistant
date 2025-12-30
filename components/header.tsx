@@ -2,7 +2,6 @@
 
 import { useState } from "react"
 import Link from "next/link"
-import Image from "next/image"
 import { usePathname } from "next/navigation"
 import { UserMenu } from "@/components/user-menu"
 import { useAuth } from "@/hooks/use-auth"
@@ -53,14 +52,11 @@ export function Header({ onSettingsClick, onHomeClick, onAnnouncementsClick, onR
                 }
               }}
             >
-                <Image
-                    src="/branding/ca-logo.svg"
+                <img
+                    src="/branding/ca_icon_large.svg"
                     alt="Coaching Amplifier"
-                    width={300}
-                    height={100}
                     className="h-8 sm:h-10 md:h-12 w-auto"
-                    priority
-                  />
+                />
             </Link>
           </div>
 
