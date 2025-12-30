@@ -30,7 +30,7 @@ export function useAuth() {
     // Listen for auth changes
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((event, session) => {
+    } = supabase.auth.onAuthStateChange(async (event, session) => {
       // Handle token refresh errors gracefully
       if (event === "TOKEN_REFRESHED") {
         setUser(session?.user ?? null)
@@ -38,6 +38,18 @@ export function useAuth() {
         setUser(null)
       } else if (event === "SIGNED_IN" || event === "USER_UPDATED") {
         setUser(session?.user ?? null)
+        // Update last_sign_in_at in profiles when user signs in
+        if (session?.user && event === "SIGNED_IN") {
+          await supabase
+            .from("profiles")
+            .update({ last_sign_in_at: new Date().toISOString() })
+            .eq("id", session.user.id)
+            .then(({ error }) => {
+              if (error) {
+                console.error("Failed to update last_sign_in_at:", error)
+              }
+            })
+        }
       } else {
         setUser(session?.user ?? null)
       }
@@ -85,6 +97,24 @@ export function useAuth() {
       email,
       password,
     })
+
+    if (error) {
+      return { data, error }
+    }
+
+    // Update last_sign_in_at in profiles
+    if (data?.user) {
+      await supabase
+        .from("profiles")
+        .update({ last_sign_in_at: new Date().toISOString() })
+        .eq("id", data.user.id)
+        .then(({ error: updateError }) => {
+          if (updateError) {
+            console.error("Failed to update last_sign_in_at:", updateError)
+          }
+        })
+    }
+
     return { data, error }
   }
 

@@ -17,7 +17,7 @@ export function generateInviteKey(): string {
  */
 export function createInviteLink(inviteKey: string, baseUrl?: string): string {
   const url = baseUrl || (typeof window !== 'undefined' ? window.location.origin : '')
-  return `${url}/signup?invite=${inviteKey}`
+  return `${url}/set-password?invite=${inviteKey}`
 }
 
 /**

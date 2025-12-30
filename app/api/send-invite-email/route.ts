@@ -39,11 +39,11 @@ export async function POST(request: NextRequest) {
           </div>
         ` : ""}
         
-        <p style="font-size: 16px; color: #333; margin: 20px 0;">Click the button below to create your account and get started:</p>
+        <p style="font-size: 16px; color: #333; margin: 20px 0;">Click the button below to set your password and create your account:</p>
         
         <div style="text-align: center; margin: 30px 0;">
           <a href="${inviteLink}" style="${getButtonStyle()}">
-            Accept Invitation
+            Set Password & Create Account
           </a>
         </div>
         
@@ -54,7 +54,7 @@ export async function POST(request: NextRequest) {
         
         <div style="background-color: #fff3cd; padding: 15px; border-radius: 6px; margin: 20px 0; border-left: 4px solid #ffc107;">
           <p style="margin: 0; font-size: 14px; color: #856404;">
-            <strong>Note:</strong> This invitation link will expire in 30 days. If you didn't expect this invitation, you can safely ignore this email.
+            <strong>Note:</strong> This invitation link will expire in 30 days. After setting your password, you can sign in to access Coaching Amplifier.
           </p>
         </div>
         
@@ -77,11 +77,11 @@ Hi ${fullName},
 You've been invited by ${invitedByName} to join Coaching Amplifier, your hub for coaching resources, training, and support.
 
 ${coachRank ? `Your Coach Rank: ${coachRank}\n\n` : ""}
-Click the link below to create your account and get started:
+Click the link below to set your password and create your account:
 
 ${inviteLink}
 
-This invitation link will expire in 30 days. If you didn't expect this invitation, you can safely ignore this email.
+This invitation link will expire in 30 days. After setting your password, you can sign in to access Coaching Amplifier.
 
 Best regards,
 The Coaching Amplifier Team
