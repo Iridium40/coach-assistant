@@ -52,8 +52,6 @@ export function AdminAnnouncements({ onClose }: { onClose?: () => void }) {
   const [isActive, setIsActive] = useState(true)
   const [sendPushNow, setSendPushNow] = useState(false) // true = send now, false = schedule
   const [pushScheduledAt, setPushScheduledAt] = useState("")
-  const [startDate, setStartDate] = useState("")
-  const [endDate, setEndDate] = useState("")
 
   // Check if user is admin (case-insensitive)
   const isAdmin = profile?.user_role?.toLowerCase() === "admin"
@@ -91,8 +89,6 @@ export function AdminAnnouncements({ onClose }: { onClose?: () => void }) {
     setIsActive(true)
     setSendPushNow(false)
     setPushScheduledAt("")
-    setStartDate("")
-    setEndDate("")
     setEditingId(null)
     setShowForm(false)
   }
@@ -108,8 +104,6 @@ export function AdminAnnouncements({ onClose }: { onClose?: () => void }) {
     // If push_scheduled_at exists, it's scheduled; otherwise it's "send now"
     setSendPushNow(!announcement.push_scheduled_at && announcement.send_push)
     setPushScheduledAt(announcement.push_scheduled_at ? new Date(announcement.push_scheduled_at).toISOString().slice(0, 16) : "")
-    setStartDate(announcement.start_date ? new Date(announcement.start_date).toISOString().slice(0, 16) : "")
-    setEndDate(announcement.end_date ? new Date(announcement.end_date).toISOString().slice(0, 16) : "")
     setEditingId(announcement.id)
     setShowForm(true)
   }
@@ -153,8 +147,8 @@ export function AdminAnnouncements({ onClose }: { onClose?: () => void }) {
       push_scheduled_at: !sendPushNow && pushScheduledAt 
         ? new Date(pushScheduledAt).toISOString() 
         : null,
-      start_date: startDate ? new Date(startDate).toISOString() : null,
-      end_date: endDate ? new Date(endDate).toISOString() : null,
+      start_date: null,
+      end_date: null,
       created_by: user.id,
     }
 
@@ -278,34 +272,6 @@ export function AdminAnnouncements({ onClose }: { onClose?: () => void }) {
                   rows={6}
                   className="border-gray-300 focus:border-[hsl(var(--optavia-green))] focus:ring-[hsl(var(--optavia-green-light))]"
                 />
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="startDate" className="text-optavia-dark">Start Date</Label>
-                  <Input
-                    id="startDate"
-                    type="datetime-local"
-                    value={startDate}
-                    onChange={(e) => setStartDate(e.target.value)}
-                    onClick={(e) => e.stopPropagation()}
-                    onFocus={(e) => e.stopPropagation()}
-                    className="border-gray-300 focus:border-[hsl(var(--optavia-green))] focus:ring-[hsl(var(--optavia-green-light))]"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="endDate" className="text-optavia-dark">End Date</Label>
-                  <Input
-                    id="endDate"
-                    type="datetime-local"
-                    value={endDate}
-                    onChange={(e) => setEndDate(e.target.value)}
-                    onClick={(e) => e.stopPropagation()}
-                    onFocus={(e) => e.stopPropagation()}
-                    className="border-gray-300 focus:border-[hsl(var(--optavia-green))] focus:ring-[hsl(var(--optavia-green-light))]"
-                  />
-                </div>
               </div>
 
               <div className="space-y-4">

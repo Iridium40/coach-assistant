@@ -11,6 +11,7 @@ import { useRouter } from "next/navigation"
 import { UserSettings } from "@/components/user-settings"
 import { Announcements } from "@/components/announcements"
 import { AdminAnnouncements } from "@/components/admin-announcements"
+import { AdminReports } from "@/components/admin-reports"
 import { useAuth } from "@/hooks/use-auth"
 import { useSupabaseData } from "@/hooks/use-supabase-data"
 import { createClient } from "@/lib/supabase/client"
@@ -31,10 +32,11 @@ export default function Home() {
     updateProfile,
   } = useSupabaseData(user)
 
-  const [currentView, setCurrentView] = useState<"onboarding" | "dashboard" | "settings" | "admin-announcements">("onboarding")
+  const [currentView, setCurrentView] = useState<"onboarding" | "dashboard" | "settings" | "admin-announcements" | "admin-reports">("onboarding")
   const [selectedModule, setSelectedModule] = useState<Module | null>(null)
   const [selectedRecipe, setSelectedRecipe] = useState<Recipe | null>(null)
   const [dashboardKey, setDashboardKey] = useState(0) // Key to force Dashboard remount
+  const [activeTab, setActiveTab] = useState<"resources" | "blog" | "recipes" | "connect">("resources")
 
   useEffect(() => {
     if (authLoading || dataLoading) return
@@ -83,6 +85,7 @@ export default function Home() {
     setCurrentView("dashboard")
     setSelectedModule(null)
     setSelectedRecipe(null)
+    setActiveTab("resources")
     setDashboardKey((prev) => prev + 1) // Force Dashboard remount to reset tab state
   }
 
@@ -133,6 +136,14 @@ export default function Home() {
         onSettingsClick={() => setCurrentView("settings")}
         onHomeClick={handleHomeNavigation}
         onAnnouncementsClick={() => setCurrentView("admin-announcements")}
+        onReportsClick={() => setCurrentView("admin-reports")}
+        activeTab={activeTab}
+        onTabChange={(tab) => {
+          setActiveTab(tab)
+          setCurrentView("dashboard")
+          setSelectedModule(null)
+          setSelectedRecipe(null)
+        }}
       />
 
       <main className="flex-1 bg-white">
@@ -148,6 +159,10 @@ export default function Home() {
           <AdminAnnouncements onClose={() => setCurrentView("dashboard")} />
         )}
 
+        {currentView === "admin-reports" && user && (
+          <AdminReports onClose={() => setCurrentView("dashboard")} />
+        )}
+
         {currentView === "dashboard" && user && userData && (
           <>
             <Announcements />
@@ -160,6 +175,7 @@ export default function Home() {
                 toggleFavoriteRecipe={toggleFavoriteRecipe}
                 onSelectModule={setSelectedModule}
                 onSelectRecipe={setSelectedRecipe}
+                activeTab={activeTab}
               />
             )}
 

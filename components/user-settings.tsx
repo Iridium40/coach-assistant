@@ -7,6 +7,13 @@ import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Switch } from "@/components/ui/switch"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { useAuth } from "@/hooks/use-auth"
 import { useSupabaseData } from "@/hooks/use-supabase-data"
 import { useToast } from "@/hooks/use-toast"
@@ -36,17 +43,17 @@ export function UserSettings({ onClose }: UserSettingsProps) {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [uploading, setUploading] = useState(false)
   const [fullName, setFullName] = useState(profile?.full_name || "")
-  const [isNewCoach, setIsNewCoach] = useState(profile?.is_new_coach ?? true)
+  const [coachRank, setCoachRank] = useState<string>(profile?.coach_rank || "")
 
   // Update local state when profile changes
   useEffect(() => {
     if (profile) {
       setFullName(profile.full_name || "")
-      setIsNewCoach(profile.is_new_coach ?? true)
+      setCoachRank(profile.coach_rank || "")
     } else {
       // Reset to defaults if profile is null
       setFullName("")
-      setIsNewCoach(true)
+      setCoachRank("")
     }
   }, [profile])
 
@@ -158,9 +165,13 @@ export function UserSettings({ onClose }: UserSettingsProps) {
   const handleSaveProfile = async () => {
     if (!user) return
 
+    // Automatically set is_new_coach based on coach rank
+    const isNewCoach = coachRank === "Coach" || coachRank === ""
+
     const { error } = await updateProfile({
       full_name: fullName,
       is_new_coach: isNewCoach,
+      coach_rank: coachRank || null,
     })
 
     if (error) {
@@ -280,15 +291,31 @@ export function UserSettings({ onClose }: UserSettingsProps) {
               />
             </div>
 
-            <div className="flex items-center space-x-2">
-              <Switch
-                id="isNewCoach"
-                checked={isNewCoach}
-                onCheckedChange={setIsNewCoach}
-              />
-              <Label htmlFor="isNewCoach" className="cursor-pointer text-optavia-dark">
-                I'm a new coach
-              </Label>
+            <div className="space-y-2">
+              <Label htmlFor="coachRank" className="text-optavia-dark">Coach Rank</Label>
+              <Select value={coachRank || "none"} onValueChange={(value) => setCoachRank(value === "none" ? "" : value)}>
+                <SelectTrigger 
+                  id="coachRank" 
+                  className="w-full bg-white border-2 border-gray-300 text-optavia-dark hover:border-[hsl(var(--optavia-green))] focus:border-[hsl(var(--optavia-green))]"
+                >
+                  <SelectValue placeholder="Select coach rank" />
+                </SelectTrigger>
+                <SelectContent className="bg-white border-2 border-gray-300">
+                  <SelectItem value="none" className="text-optavia-dark hover:bg-gray-100">None</SelectItem>
+                  <SelectItem value="Coach" className="text-optavia-dark hover:bg-gray-100">Coach</SelectItem>
+                  <SelectItem value="SC" className="text-optavia-dark hover:bg-gray-100">Senior Coach (SC)</SelectItem>
+                  <SelectItem value="MG" className="text-optavia-dark hover:bg-gray-100">Manager (MG)</SelectItem>
+                  <SelectItem value="AD" className="text-optavia-dark hover:bg-gray-100">Associate Director (AD)</SelectItem>
+                  <SelectItem value="DR" className="text-optavia-dark hover:bg-gray-100">Director (DR)</SelectItem>
+                  <SelectItem value="ED" className="text-optavia-dark hover:bg-gray-100">Executive Director (ED)</SelectItem>
+                  <SelectItem value="IED" className="text-optavia-dark hover:bg-gray-100">Integrated Executive Director (IED)</SelectItem>
+                  <SelectItem value="FIBC" className="text-optavia-dark hover:bg-gray-100">Fully Integrated Business Coach (FIBC)</SelectItem>
+                  <SelectItem value="IGD" className="text-optavia-dark hover:bg-gray-100">Integrated Global Director (IGD)</SelectItem>
+                  <SelectItem value="FIBL" className="text-optavia-dark hover:bg-gray-100">Fully Integrated Business Leader (FIBL)</SelectItem>
+                  <SelectItem value="IND" className="text-optavia-dark hover:bg-gray-100">Integrated National Director (IND)</SelectItem>
+                  <SelectItem value="IPD" className="text-optavia-dark hover:bg-gray-100">Integrated Presidential Director (IPD)</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
             <Button 

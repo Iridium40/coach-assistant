@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS profiles (
   avatar_url TEXT,
   is_new_coach BOOLEAN DEFAULT true,
   user_role TEXT CHECK (user_role IN ('admin', 'coach')),
-  coach_rank TEXT CHECK (coach_rank IN ('SC', 'ED', 'IN', 'IR', 'GB', 'IPD')),
+  coach_rank TEXT CHECK (coach_rank IN ('Coach', 'SC', 'MG', 'AD', 'DR', 'ED', 'IED', 'FIBC', 'IGD', 'FIBL', 'IND', 'IPD')),
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );

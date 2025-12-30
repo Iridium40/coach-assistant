@@ -1,6 +1,7 @@
 "use client"
 
 import Link from "next/link"
+import Image from "next/image"
 import { Facebook, Instagram, Youtube } from "lucide-react"
 
 export function Footer() {
@@ -8,9 +9,15 @@ export function Footer() {
     <footer className="bg-[hsl(var(--optavia-footer))] text-white py-8 sm:py-12 mt-12 sm:mt-16">
       <div className="container mx-auto px-4">
         <div className="flex flex-col items-center gap-4 sm:gap-6">
-          <div className="text-xl sm:text-2xl font-heading tracking-wider">
-            <span className="font-light text-gray-300 uppercase">Coaching</span>
-            <span className="font-bold text-white uppercase"> Amplifier</span>
+          <div className="flex items-center justify-center">
+            <Image
+              src="/branding/ca_logo_dark.png"
+              alt="Coaching Amplifier"
+              width={300}
+              height={100}
+              className="h-12 sm:h-16 md:h-20 w-auto"
+              priority
+            />
           </div>
 
           <p className="text-center text-xs sm:text-sm text-gray-300 max-w-md px-4">

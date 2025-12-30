@@ -11,16 +11,17 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Settings, LogOut, User, Bell } from "lucide-react"
+import { Settings, LogOut, User, Bell, BarChart3 } from "lucide-react"
 import { useAuth } from "@/hooks/use-auth"
 import { useSupabaseData } from "@/hooks/use-supabase-data"
 
 interface UserMenuProps {
   onSettingsClick?: () => void
   onAnnouncementsClick?: () => void
+  onReportsClick?: () => void
 }
 
-export function UserMenu({ onSettingsClick, onAnnouncementsClick }: UserMenuProps) {
+export function UserMenu({ onSettingsClick, onAnnouncementsClick, onReportsClick }: UserMenuProps) {
   const { user, signOut } = useAuth()
   const { profile, refreshData } = useSupabaseData(user)
   const [loading, setLoading] = useState(false)
@@ -83,16 +84,29 @@ export function UserMenu({ onSettingsClick, onAnnouncementsClick }: UserMenuProp
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator className="bg-gray-200" />
-        {profile?.user_role?.toLowerCase() === "admin" && onAnnouncementsClick && (
+        {profile?.user_role?.toLowerCase() === "admin" && (
           <>
-            <DropdownMenuItem 
-              onClick={onAnnouncementsClick}
-              className="text-optavia-dark hover:bg-gray-100 cursor-pointer"
-            >
-              <Bell className="mr-2 h-4 w-4" />
-              <span>Manage Announcements</span>
-            </DropdownMenuItem>
-            <DropdownMenuSeparator className="bg-gray-200" />
+            {onAnnouncementsClick && (
+              <DropdownMenuItem 
+                onClick={onAnnouncementsClick}
+                className="text-optavia-dark hover:bg-gray-100 cursor-pointer"
+              >
+                <Bell className="mr-2 h-4 w-4" />
+                <span>Manage Announcements</span>
+              </DropdownMenuItem>
+            )}
+            {onReportsClick && (
+              <DropdownMenuItem 
+                onClick={onReportsClick}
+                className="text-optavia-dark hover:bg-gray-100 cursor-pointer"
+              >
+                <BarChart3 className="mr-2 h-4 w-4" />
+                <span>Reports</span>
+              </DropdownMenuItem>
+            )}
+            {(onAnnouncementsClick || onReportsClick) && (
+              <DropdownMenuSeparator className="bg-gray-200" />
+            )}
           </>
         )}
         <DropdownMenuItem 
