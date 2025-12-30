@@ -193,7 +193,7 @@ export function InviteManagement({ onClose }: InviteManagementProps) {
     try {
       const inviteKey = generateInviteKey()
       const expiresAt = new Date()
-      expiresAt.setDate(expiresAt.getDate() + 30) // 30 days expiration
+      expiresAt.setHours(expiresAt.getHours() + 48) // 48 hours expiration
 
       const { data, error } = await supabase
         .from("invites")
