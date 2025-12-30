@@ -72,14 +72,14 @@ export function Onboarding({ onComplete }: OnboardingProps) {
               </div>
               <h2 className="font-heading font-bold text-xl sm:text-2xl text-optavia-dark">I'm an Existing Coach</h2>
               <p className="text-optavia-gray">
-                Access all resources, training modules, and recipes. Continue building your coaching business with full
+                Access all training modules and recipes. Continue building your coaching business with full
                 access.
               </p>
               <Button
                 className="w-full bg-[hsl(var(--optavia-green))] hover:bg-[hsl(var(--optavia-green-dark))]"
                 onClick={() => onComplete(false)}
               >
-                Access All Resources
+                Access All Training
               </Button>
             </div>
           </Card>

@@ -60,7 +60,7 @@ export async function POST(request: NextRequest) {
           <h3 style="color: #2d5016; margin-top: 0; font-size: 18px; font-weight: bold;">Quick Tips to Get Started</h3>
           <div style="margin-top: 15px;">
             <p style="margin: 10px 0; font-size: 15px; color: #333;">
-              <strong style="color: #2d5016;">📚 Resources Tab:</strong> Browse modules organized by category - Getting Started, Business Building, Client Support, and Training.
+              <strong style="color: #2d5016;">📚 Training Tab:</strong> Browse modules organized by category - Getting Started, Business Building, Client Support, and Training.
             </p>
             <p style="margin: 10px 0; font-size: 15px; color: #333;">
               <strong style="color: #2d5016;">🍽️ Recipes Tab:</strong> Access a collection of Lean & Green recipes to share with your clients.
@@ -109,7 +109,7 @@ Ready to get started? Visit your dashboard: ${appUrl}
 
 Quick Tips to Get Started:
 
-📚 Resources Tab: Browse modules organized by category - Getting Started, Business Building, Client Support, and Training.
+📚 Training Tab: Browse modules organized by category - Getting Started, Business Building, Client Support, and Training.
 
 🍽️ Recipes Tab: Access a collection of Lean & Green recipes to share with your clients.
 

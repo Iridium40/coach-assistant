@@ -411,7 +411,7 @@ export function UserSettings({ onClose }: UserSettingsProps) {
           <CardContent className="space-y-4">
             <div>
               <div className="flex justify-between items-center mb-2">
-                <span className="text-sm font-medium text-optavia-dark">Completed Resources</span>
+                <span className="text-sm font-medium text-optavia-dark">Completed Training</span>
                 <span className="text-sm text-optavia-gray font-semibold">{completedResources.length}</span>
               </div>
             </div>

@@ -31,7 +31,7 @@ export function Header({ onSettingsClick, onHomeClick, onAnnouncementsClick, onR
   }
 
   const navItems = [
-    { id: "resources" as const, label: "Resources" },
+    { id: "resources" as const, label: "Training" },
     { id: "recipes" as const, label: "Recipes" },
     { id: "blog" as const, label: "Optavia Blog" },
     { id: "connect" as const, label: "OPTAVIA Connect", mobileLabel: "Connect" },

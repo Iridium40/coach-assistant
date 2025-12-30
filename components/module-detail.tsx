@@ -130,7 +130,7 @@ export function ModuleDetail({ module, userData, setUserData, onBack }: ModuleDe
     <div className="container mx-auto px-4 py-4 sm:py-8">
       <Button variant="ghost" onClick={onBack} className="mb-4 sm:mb-6 gap-2 text-sm sm:text-base">
         <ArrowLeft className="h-4 w-4" />
-        <span className="hidden sm:inline">Back to Resources</span>
+        <span className="hidden sm:inline">Back to Training</span>
         <span className="sm:hidden">Back</span>
       </Button>
 
@@ -159,7 +159,7 @@ export function ModuleDetail({ module, userData, setUserData, onBack }: ModuleDe
       </div>
 
       <div className="space-y-4">
-        <h2 className="font-heading font-bold text-xl text-optavia-dark">Resources</h2>
+        <h2 className="font-heading font-bold text-xl text-optavia-dark">Training</h2>
         {module.resources.map((resource) => {
           const isCompleted = effectiveCompletedResources.includes(resource.id)
           const isBookmarked = effectiveBookmarks.includes(resource.id)
