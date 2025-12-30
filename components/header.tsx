@@ -5,7 +5,8 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { UserMenu } from "@/components/user-menu"
 import { useAuth } from "@/hooks/use-auth"
-import { Menu, X } from "lucide-react"
+import { useSupabaseData } from "@/hooks/use-supabase-data"
+import { Menu, X, ExternalLink } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
 interface HeaderProps {
@@ -14,16 +15,17 @@ interface HeaderProps {
   onAnnouncementsClick?: () => void
   onReportsClick?: () => void
   onInviteClick?: () => void
-  activeTab?: "resources" | "blog" | "recipes" | "connect"
-  onTabChange?: (tab: "resources" | "blog" | "recipes" | "connect") => void
+  activeTab?: "resources" | "blog" | "recipes"
+  onTabChange?: (tab: "resources" | "blog" | "recipes") => void
 }
 
 export function Header({ onSettingsClick, onHomeClick, onAnnouncementsClick, onReportsClick, onInviteClick, activeTab = "resources", onTabChange }: HeaderProps) {
   const { user, loading } = useAuth()
+  const { profile } = useSupabaseData(user)
   const pathname = usePathname()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
-  const handleTabChange = (tab: "resources" | "blog" | "recipes" | "connect") => {
+  const handleTabChange = (tab: "resources" | "blog" | "recipes") => {
     onTabChange?.(tab)
     setMobileMenuOpen(false) // Close mobile menu when tab is selected
   }
@@ -32,8 +34,12 @@ export function Header({ onSettingsClick, onHomeClick, onAnnouncementsClick, onR
     { id: "resources" as const, label: "Resources" },
     { id: "recipes" as const, label: "Recipes" },
     { id: "blog" as const, label: "Blog" },
-    { id: "connect" as const, label: "OPTAVIA Connect", mobileLabel: "Connect" },
   ]
+
+  // Optavia Profile URL (only if user has optavia_id)
+  const optaviaProfileUrl = profile?.optavia_id 
+    ? `https://www.optavia.com/us/en/coach/${profile.optavia_id}` 
+    : null
 
   return (
     <header className="border-b border-optavia-border bg-white sticky top-0 z-50">
@@ -100,6 +106,28 @@ export function Header({ onSettingsClick, onHomeClick, onAnnouncementsClick, onR
                 )}
               </button>
             ))}
+            {/* Optavia Profile - External Link */}
+            {optaviaProfileUrl && (
+              <a
+                href={optaviaProfileUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="pb-3 lg:pb-4 px-2 lg:px-3 font-heading font-semibold text-sm lg:text-base transition-colors relative whitespace-nowrap flex-shrink-0 text-optavia-dark hover:text-[hsl(var(--optavia-green))] flex items-center gap-1"
+              >
+                OPTAVIA Profile
+                <ExternalLink className="h-3 w-3" />
+              </a>
+            )}
+            {/* OPTAVIA Connect - External Link */}
+            <a
+              href="https://portal.optaviaconnect.com/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="pb-3 lg:pb-4 px-2 lg:px-3 font-heading font-semibold text-sm lg:text-base transition-colors relative whitespace-nowrap flex-shrink-0 text-optavia-dark hover:text-[hsl(var(--optavia-green))] flex items-center gap-1"
+            >
+              OPTAVIA Connect
+              <ExternalLink className="h-3 w-3" />
+            </a>
           </nav>
         )}
 
@@ -111,15 +139,39 @@ export function Header({ onSettingsClick, onHomeClick, onAnnouncementsClick, onR
                 <button
                   key={item.id}
                   onClick={() => handleTabChange(item.id)}
-                  className={`px-4 py-3 text-left font-heading font-semibold text-base transition-colors border-b border-gray-100 last:border-b-0 ${
+                  className={`px-4 py-3 text-left font-heading font-semibold text-base transition-colors border-b border-gray-100 ${
                     activeTab === item.id
                       ? "text-[hsl(var(--optavia-green))] bg-green-50"
                       : "text-optavia-dark hover:text-[hsl(var(--optavia-green))] hover:bg-gray-50"
                   }`}
                 >
-                  {item.mobileLabel || item.label}
+                  {item.label}
                 </button>
               ))}
+              {/* Optavia Profile - External Link */}
+              {optaviaProfileUrl && (
+                <a
+                  href={optaviaProfileUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="px-4 py-3 text-left font-heading font-semibold text-base transition-colors border-b border-gray-100 text-optavia-dark hover:text-[hsl(var(--optavia-green))] hover:bg-gray-50 flex items-center gap-2"
+                >
+                  OPTAVIA Profile
+                  <ExternalLink className="h-4 w-4" />
+                </a>
+              )}
+              {/* OPTAVIA Connect - External Link */}
+              <a
+                href="https://portal.optaviaconnect.com/"
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => setMobileMenuOpen(false)}
+                className="px-4 py-3 text-left font-heading font-semibold text-base transition-colors text-optavia-dark hover:text-[hsl(var(--optavia-green))] hover:bg-gray-50 flex items-center gap-2"
+              >
+                Connect
+                <ExternalLink className="h-4 w-4" />
+              </a>
             </div>
           </nav>
         )}
