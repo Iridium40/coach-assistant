@@ -9,6 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { useAuth } from "@/hooks/use-auth"
 import { useToast } from "@/hooks/use-toast"
 import { createClient } from "@/lib/supabase/client"
+import { sendWelcomeEmail } from "@/lib/email"
 
 interface SignupFormProps {
   onSuccess?: () => void
@@ -161,6 +162,20 @@ export function SignupForm({ onSuccess, onSwitchToLogin, inviteKey }: SignupForm
           used_at: new Date().toISOString(),
         })
         .eq("invite_key", inviteKey)
+    }
+
+    // Send welcome email
+    if (signUpData?.user && email && fullName) {
+      try {
+        await sendWelcomeEmail({
+          to: email,
+          fullName: fullName,
+          // Coach rank will be set later in settings, so we don't include it here
+        })
+      } catch (emailError) {
+        // Don't fail signup if email fails, just log it
+        console.error("Failed to send welcome email:", emailError)
+      }
     }
 
     toast({

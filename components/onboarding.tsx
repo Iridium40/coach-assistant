@@ -23,10 +23,10 @@ export function Onboarding({ onComplete }: OnboardingProps) {
             backgroundRepeat: "no-repeat",
           }}
         />
-        {/* Green Gradient Overlay (85-90% opacity) */}
+        {/* Green Gradient Overlay (reduced opacity for better visibility) */}
         <div 
           className="absolute inset-0 bg-[hsl(var(--optavia-green))]"
-          style={{ opacity: 0.87 }}
+          style={{ opacity: 0.5 }}
         />
         <div className="relative container mx-auto px-4 h-full flex flex-col items-center justify-center text-center text-white z-10">
           <h1 className="font-heading font-bold text-2xl sm:text-3xl md:text-4xl lg:text-5xl mb-3 sm:mb-4 px-4">Welcome to Coaching Amplifier</h1>

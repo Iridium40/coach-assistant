@@ -1,5 +1,6 @@
 import { Resend } from "resend"
 import { NextRequest, NextResponse } from "next/server"
+import { getEmailWrapper, getEmailHeader, getEmailFooter, getButtonStyle } from "@/lib/email-templates"
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 
@@ -20,48 +21,53 @@ export async function POST(request: NextRequest) {
     // Create email content
     const subject = `You're Invited to Join Coaching Amplifier`
     
-    const htmlContent = `
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <meta charset="utf-8">
-          <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          <title>Coaching Amplifier Invitation</title>
-        </head>
-        <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
-          <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
-            <h1 style="color: #2d5016; margin-top: 0;">Welcome to Coaching Amplifier!</h1>
+    const header = getEmailHeader("Welcome to Coaching Amplifier!", "Your invitation awaits")
+    
+    const bodyContent = `
+      <div style="padding: 30px 20px;">
+        <p style="font-size: 16px; color: #333; margin: 0 0 20px 0;">Hi ${fullName},</p>
+        
+        <p style="font-size: 16px; color: #333; margin: 0 0 20px 0;">
+          You've been invited by <strong>${invitedByName}</strong> to join <strong>Coaching Amplifier</strong>, your hub for coaching resources, training, and support.
+        </p>
+        
+        ${coachRank ? `
+          <div style="background-color: #f8f9fa; padding: 15px; border-radius: 6px; margin: 20px 0; border-left: 4px solid #2d5016;">
+            <p style="margin: 0; font-size: 15px; color: #333;">
+              <strong style="color: #2d5016;">Your Coach Rank:</strong> ${coachRank}
+            </p>
           </div>
-          
-          <p>Hi ${fullName},</p>
-          
-          <p>You've been invited by ${invitedByName} to join <strong>Coaching Amplifier</strong>, your hub for coaching resources, training, and support.</p>
-          
-          ${coachRank ? `<p><strong>Your Coach Rank:</strong> ${coachRank}</p>` : ""}
-          
-          <p>Click the button below to create your account and get started:</p>
-          
-          <div style="text-align: center; margin: 30px 0;">
-            <a href="${inviteLink}" 
-               style="background-color: #2d5016; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block; font-weight: bold;">
-              Accept Invitation
-            </a>
-          </div>
-          
-          <p>Or copy and paste this link into your browser:</p>
-          <p style="word-break: break-all; color: #666; font-size: 14px;">${inviteLink}</p>
-          
-          <p style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee; color: #666; font-size: 14px;">
-            This invitation link will expire in 30 days. If you didn't expect this invitation, you can safely ignore this email.
+        ` : ""}
+        
+        <p style="font-size: 16px; color: #333; margin: 20px 0;">Click the button below to create your account and get started:</p>
+        
+        <div style="text-align: center; margin: 30px 0;">
+          <a href="${inviteLink}" style="${getButtonStyle()}">
+            Accept Invitation
+          </a>
+        </div>
+        
+        <div style="background-color: #f8f9fa; padding: 15px; border-radius: 6px; margin: 20px 0;">
+          <p style="margin: 0 0 10px 0; font-size: 14px; color: #666; font-weight: bold;">Or copy and paste this link:</p>
+          <p style="word-break: break-all; color: #2d5016; font-size: 13px; margin: 0; font-family: monospace;">${inviteLink}</p>
+        </div>
+        
+        <div style="background-color: #fff3cd; padding: 15px; border-radius: 6px; margin: 20px 0; border-left: 4px solid #ffc107;">
+          <p style="margin: 0; font-size: 14px; color: #856404;">
+            <strong>Note:</strong> This invitation link will expire in 30 days. If you didn't expect this invitation, you can safely ignore this email.
           </p>
-          
-          <p style="margin-top: 20px; color: #666; font-size: 14px;">
-            Best regards,<br>
-            The Coaching Amplifier Team
-          </p>
-        </body>
-      </html>
+        </div>
+        
+        <p style="font-size: 16px; color: #333; margin: 30px 0 0 0;">
+          Best regards,<br>
+          <strong>The Coaching Amplifier Team</strong>
+        </p>
+      </div>
     `
+    
+    const footer = getEmailFooter()
+    
+    const htmlContent = getEmailWrapper(header + bodyContent + footer, "Coaching Amplifier Invitation")
 
     const textContent = `
 Welcome to Coaching Amplifier!

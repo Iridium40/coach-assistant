@@ -18,6 +18,7 @@ import { useAuth } from "@/hooks/use-auth"
 import { useSupabaseData } from "@/hooks/use-supabase-data"
 import { createClient } from "@/lib/supabase/client"
 import { useToast } from "@/hooks/use-toast"
+import { sendAnnouncementEmail } from "@/lib/email"
 import { X, Plus, Edit, Trash2 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 
@@ -28,6 +29,7 @@ interface Announcement {
   priority: "low" | "normal" | "high" | "urgent"
   is_active: boolean
   send_push: boolean
+  send_email: boolean
   push_scheduled_at: string | null
   start_date: string | null
   end_date: string | null
@@ -52,6 +54,7 @@ export function AdminAnnouncements({ onClose }: { onClose?: () => void }) {
   const [isActive, setIsActive] = useState(true)
   const [sendPushNow, setSendPushNow] = useState(false) // true = send now, false = schedule
   const [pushScheduledAt, setPushScheduledAt] = useState("")
+  const [sendEmail, setSendEmail] = useState(false) // Send email notification
 
   // Check if user is admin (case-insensitive)
   const isAdmin = profile?.user_role?.toLowerCase() === "admin"
@@ -89,6 +92,7 @@ export function AdminAnnouncements({ onClose }: { onClose?: () => void }) {
     setIsActive(true)
     setSendPushNow(false)
     setPushScheduledAt("")
+    setSendEmail(false)
     setEditingId(null)
     setShowForm(false)
   }
@@ -104,6 +108,7 @@ export function AdminAnnouncements({ onClose }: { onClose?: () => void }) {
     // If push_scheduled_at exists, it's scheduled; otherwise it's "send now"
     setSendPushNow(!announcement.push_scheduled_at && announcement.send_push)
     setPushScheduledAt(announcement.push_scheduled_at ? new Date(announcement.push_scheduled_at).toISOString().slice(0, 16) : "")
+    setSendEmail(announcement.send_email || false)
     setEditingId(announcement.id)
     setShowForm(true)
   }
@@ -142,6 +147,7 @@ export function AdminAnnouncements({ onClose }: { onClose?: () => void }) {
       priority,
       is_active: isActive,
       send_push: true, // Always true if we're setting notification time
+      send_email: sendEmail, // Send email notifications
       // If sendPushNow is true, push_scheduled_at is null (send immediately)
       // If sendPushNow is false, use the scheduled date/time
       push_scheduled_at: !sendPushNow && pushScheduledAt 
@@ -178,7 +184,49 @@ export function AdminAnnouncements({ onClose }: { onClose?: () => void }) {
       resetForm()
       loadAnnouncements()
 
-      // Send notifications if enabled and sending now
+      // Send email notifications if enabled
+      if (sendEmail && isActive) {
+        try {
+          // Get all users with email notifications enabled
+          const { data: usersData, error: usersError } = await supabase
+            .from("profiles")
+            .select("id, email, full_name")
+            .not("email", "is", null)
+
+          if (!usersError && usersData) {
+            // Get users with email notifications enabled
+            const { data: notificationSettings } = await supabase
+              .from("notification_settings")
+              .select("user_id")
+              .eq("email_notifications", true)
+              .eq("announcements_enabled", true)
+
+            const userIdsWithEmailEnabled = new Set(
+              notificationSettings?.map((ns) => ns.user_id) || []
+            )
+
+            // Send emails to users with email notifications enabled
+            const emailPromises = usersData
+              .filter((user) => userIdsWithEmailEnabled.has(user.id) && user.email)
+              .map((user) =>
+                sendAnnouncementEmail({
+                  to: user.email!,
+                  fullName: user.full_name || "Coach",
+                  announcementTitle: title,
+                  announcementContent: content,
+                  priority: priority,
+                })
+              )
+
+            await Promise.allSettled(emailPromises)
+          }
+        } catch (emailError) {
+          console.error("Error sending announcement emails:", emailError)
+          // Don't fail the announcement creation if emails fail
+        }
+      }
+
+      // Send push notifications if enabled and sending now
       if (sendPushNow && isActive) {
         // TODO: Implement push notification sending
         // This would query users with announcements_enabled and send notifications
@@ -307,6 +355,22 @@ export function AdminAnnouncements({ onClose }: { onClose?: () => void }) {
                   </p>
                 )}
               </div>
+
+              <div className="flex items-center space-x-2 pt-2">
+                <Switch
+                  id="sendEmail"
+                  checked={sendEmail}
+                  onCheckedChange={setSendEmail}
+                />
+                <Label htmlFor="sendEmail" className="cursor-pointer text-optavia-dark">
+                  Send Email Notification
+                </Label>
+              </div>
+              {sendEmail && (
+                <p className="text-xs text-optavia-gray -mt-2">
+                  An email will be sent to all users with email notifications enabled
+                </p>
+              )}
 
               <div className="flex gap-2">
                 <Button

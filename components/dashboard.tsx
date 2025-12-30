@@ -11,6 +11,7 @@ import type { UserProfile } from "@/hooks/use-supabase-data"
 interface DashboardProps {
   userData: UserData
   profile: UserProfile | null
+  badges?: Array<{ category: string | null; badgeType: string; earnedAt: string }>
   setUserData: (data: UserData) => void
   toggleFavoriteRecipe?: (recipeId: string) => Promise<void>
   onSelectModule: (module: Module) => void
@@ -18,14 +19,32 @@ interface DashboardProps {
   activeTab?: "resources" | "blog" | "recipes" | "connect"
 }
 
-export function Dashboard({ userData, profile, setUserData, toggleFavoriteRecipe, onSelectModule, onSelectRecipe, activeTab = "resources" }: DashboardProps) {
+export function Dashboard({ userData, profile, badges = [], setUserData, toggleFavoriteRecipe, onSelectModule, onSelectRecipe, activeTab = "resources" }: DashboardProps) {
 
   // Extract first name from full_name
   const firstName = profile?.full_name?.split(" ")[0] || null
 
+  // Determine background image based on active tab
+  const getHeroBackgroundImage = (tab: string) => {
+    switch (tab) {
+      case "resources":
+        return "/media/two-women-walking-exercising-with-water-bottles2.jpg"
+      case "recipes":
+        return "/media/two-women-walking-exercising-outdoors-fitness.jpg"
+      case "blog":
+        return "/media/two-women-walking-exercising-with-water-bottles3.jpg"
+      case "connect":
+        return "/media/two-women-walking-exercising-with-water-bottles.jpg"
+      default:
+        return "/media/two-women-walking-exercising-with-water-bottles2.jpg"
+    }
+  }
+
+  const heroBackgroundImage = getHeroBackgroundImage(activeTab)
+
   return (
     <>
-      <Hero userData={userData} firstName={firstName} />
+      <Hero userData={userData} firstName={firstName} badges={badges} backgroundImage={heroBackgroundImage} />
 
       <div className="container mx-auto px-4 py-4 sm:py-8 bg-white">
         {/* Tab Content */}

@@ -26,6 +26,7 @@ export default function Home() {
     completedResources,
     bookmarks,
     favoriteRecipes,
+    badges,
     loading: dataLoading,
     toggleCompletedResource,
     toggleBookmark,
@@ -177,6 +178,7 @@ export default function Home() {
                 key={dashboardKey}
                 userData={userData}
                 profile={profile}
+                badges={badges}
                 setUserData={() => {}} // No longer needed, using hooks directly
                 toggleFavoriteRecipe={toggleFavoriteRecipe}
                 onSelectModule={setSelectedModule}

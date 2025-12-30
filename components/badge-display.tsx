@@ -3,6 +3,7 @@
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Trophy, Rocket, Building2, Users, GraduationCap } from "lucide-react"
+import { badgeConfig } from "@/lib/badge-config"
 
 export interface AchievementBadge {
   id: string
@@ -15,32 +16,20 @@ interface BadgeDisplayProps {
   badges: AchievementBadge[]
 }
 
-// Badge configuration with icons and colors
-const badgeConfig: Record<string, { icon: React.ReactNode; name: string; color: string; description: string }> = {
-  "Getting Started": {
-    icon: <Rocket className="h-6 w-6" />,
-    name: "Getting Started Master",
-    color: "bg-blue-500",
-    description: "Completed all resources in Getting Started",
-  },
-  "Business Building": {
-    icon: <Building2 className="h-6 w-6" />,
-    name: "Business Builder",
-    color: "bg-purple-500",
-    description: "Completed all resources in Business Building",
-  },
-  "Client Support": {
-    icon: <Users className="h-6 w-6" />,
-    name: "Client Champion",
-    color: "bg-green-500",
-    description: "Completed all resources in Client Support",
-  },
-  "Training": {
-    icon: <GraduationCap className="h-6 w-6" />,
-    name: "Training Expert",
-    color: "bg-orange-500",
-    description: "Completed all resources in Training",
-  },
+// Icon mapping for badge categories
+const badgeIcons: Record<string, React.ReactNode> = {
+  "Getting Started": <Rocket className="h-6 w-6" />,
+  "Business Building": <Building2 className="h-6 w-6" />,
+  "Client Support": <Users className="h-6 w-6" />,
+  "Training": <GraduationCap className="h-6 w-6" />,
+}
+
+// Color mapping for badge categories (Tailwind classes)
+const badgeColors: Record<string, string> = {
+  "Getting Started": "bg-blue-500",
+  "Business Building": "bg-purple-500",
+  "Client Support": "bg-green-500",
+  "Training": "bg-orange-500",
 }
 
 export function BadgeDisplay({ badges }: BadgeDisplayProps) {
@@ -82,13 +71,16 @@ export function BadgeDisplay({ badges }: BadgeDisplayProps) {
             const config = badgeConfig[badge.category]
             if (!config) return null
 
+            const icon = badgeIcons[badge.category] || <Trophy className="h-6 w-6" />
+            const color = badgeColors[badge.category] || "bg-gray-500"
+
             return (
               <div
                 key={badge.id}
                 className="flex items-center gap-4 p-4 border border-gray-200 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors"
               >
-                <div className={`${config.color} text-white p-3 rounded-lg flex-shrink-0`}>
-                  {config.icon}
+                <div className={`${color} text-white p-3 rounded-lg flex-shrink-0`}>
+                  {icon}
                 </div>
                 <div className="flex-1 min-w-0">
                   <h3 className="font-heading font-semibold text-optavia-dark text-sm sm:text-base">

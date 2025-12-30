@@ -4,6 +4,8 @@ import { useState, useEffect, useCallback } from "react"
 import { createClient } from "@/lib/supabase/client"
 import type { User } from "@supabase/supabase-js"
 import { getEarnedBadges } from "@/lib/badges"
+import { sendBadgeEmail } from "@/lib/email"
+import { badgeConfig } from "@/lib/badge-config"
 
 export interface UserProfile {
   id: string
@@ -169,7 +171,7 @@ export function useSupabaseData(user: User | null) {
   // Check and award badges for completed categories
   const checkAndAwardBadges = useCallback(
     async (completedResourceIds: string[], isNewCoach: boolean) => {
-      if (!user) return
+      if (!user || !profile) return
 
       const earnedBadges = getEarnedBadges(completedResourceIds, isNewCoach)
 
@@ -202,11 +204,25 @@ export function useSupabaseData(user: User | null) {
             if (badgesData) {
               setBadges(badgesData)
             }
+
+            // Send badge award email if user has email and email notifications enabled
+            if (profile.email && notificationSettings?.email_notifications) {
+              const badgeInfo = badgeConfig[badge.category]
+              if (badgeInfo) {
+                await sendBadgeEmail({
+                  to: profile.email,
+                  fullName: profile.full_name || "Coach",
+                  badgeName: badgeInfo.name,
+                  badgeCategory: badge.category,
+                  badgeDescription: badgeInfo.description,
+                })
+              }
+            }
           }
         }
       }
     },
-    [user, supabase]
+    [user, profile, notificationSettings, supabase]
   )
 
   useEffect(() => {

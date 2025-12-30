@@ -6,6 +6,13 @@ import { recipes } from "@/lib/data"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Search } from "lucide-react"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import type { UserData, Recipe } from "@/lib/types"
 
 interface RecipesTabProps {
@@ -58,7 +65,24 @@ export function RecipesTab({ userData, setUserData, toggleFavoriteRecipe, onSele
           />
         </div>
 
-        <div className="flex flex-wrap gap-2 overflow-x-auto scrollbar-hide -mx-4 px-4">
+        {/* Category Filter - Mobile Dropdown */}
+        <div className="md:hidden">
+          <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+            <SelectTrigger className="w-full border-2 border-gray-300 text-optavia-dark bg-white hover:border-[hsl(var(--optavia-green))] focus:border-[hsl(var(--optavia-green))] focus:ring-[hsl(var(--optavia-green-light))]">
+              <SelectValue placeholder="Select category" />
+            </SelectTrigger>
+            <SelectContent className="bg-white text-optavia-dark">
+              {categories.map((category) => (
+                <SelectItem key={category} value={category}>
+                  {category}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* Category Filter - Desktop Buttons */}
+        <div className="hidden md:flex flex-wrap gap-2">
           {categories.map((category) => (
             <Button
               key={category}
