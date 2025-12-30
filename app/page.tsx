@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react"
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
-import { Onboarding } from "@/components/onboarding"
 import { Dashboard } from "@/components/dashboard"
 import { ModuleDetail } from "@/components/module-detail"
 import { RecipeDetail } from "@/components/recipe-detail"
@@ -34,7 +33,7 @@ export default function Home() {
     updateProfile,
   } = useSupabaseData(user)
 
-  const [currentView, setCurrentView] = useState<"onboarding" | "dashboard" | "settings" | "admin-announcements" | "admin-reports" | "invite-management">("onboarding")
+  const [currentView, setCurrentView] = useState<"dashboard" | "settings" | "admin-announcements" | "admin-reports" | "invite-management">("dashboard")
   const [selectedModule, setSelectedModule] = useState<Module | null>(null)
   const [selectedRecipe, setSelectedRecipe] = useState<Recipe | null>(null)
   const [dashboardKey, setDashboardKey] = useState(0) // Key to force Dashboard remount
@@ -48,9 +47,13 @@ export default function Home() {
       return
     }
 
-    // If user exists but no profile, show onboarding
+    // If user exists but no profile, this shouldn't happen with invite flow
+    // But if it does, redirect to training (profile will be created by database trigger)
     if (user && !profile) {
-      setCurrentView("onboarding")
+      // Wait a moment for profile to be created by trigger, then redirect
+      setTimeout(() => {
+        router.replace("/training")
+      }, 1000)
       return
     }
 
@@ -60,22 +63,6 @@ export default function Home() {
     }
   }, [user, profile, authLoading, dataLoading, router])
 
-  const handleOnboardingComplete = async (isNewCoach: boolean) => {
-    if (!user) return
-
-    const supabase = createClient()
-    const { error } = await supabase
-      .from("profiles")
-      .upsert({
-        id: user.id,
-        email: user.email,
-        is_new_coach: isNewCoach,
-      })
-
-    if (!error) {
-      setCurrentView("dashboard")
-    }
-  }
 
   const handleBack = () => {
     setSelectedModule(null)
@@ -139,10 +126,6 @@ export default function Home() {
       />
 
       <main className="flex-1 bg-white">
-        {currentView === "onboarding" && (
-          <Onboarding onComplete={handleOnboardingComplete} />
-        )}
-
         {currentView === "settings" && user && (
           <UserSettings onClose={handleSettingsClose} />
         )}
