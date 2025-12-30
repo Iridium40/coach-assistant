@@ -15,8 +15,8 @@ interface HeaderProps {
   onAnnouncementsClick?: () => void
   onReportsClick?: () => void
   onInviteClick?: () => void
-  activeTab?: "resources" | "blog" | "recipes" | "connect"
-  onTabChange?: (tab: "resources" | "blog" | "recipes" | "connect") => void
+  activeTab?: "resources" | "blog" | "recipes" | "connect" | "optavia-profile"
+  onTabChange?: (tab: "resources" | "blog" | "recipes" | "connect" | "optavia-profile") => void
 }
 
 export function Header({ onSettingsClick, onHomeClick, onAnnouncementsClick, onReportsClick, onInviteClick, activeTab = "resources", onTabChange }: HeaderProps) {
@@ -25,7 +25,7 @@ export function Header({ onSettingsClick, onHomeClick, onAnnouncementsClick, onR
   const pathname = usePathname()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
-  const handleTabChange = (tab: "resources" | "blog" | "recipes" | "connect") => {
+  const handleTabChange = (tab: "resources" | "blog" | "recipes" | "connect" | "optavia-profile") => {
     onTabChange?.(tab)
     setMobileMenuOpen(false) // Close mobile menu when tab is selected
   }
@@ -35,12 +35,8 @@ export function Header({ onSettingsClick, onHomeClick, onAnnouncementsClick, onR
     { id: "recipes" as const, label: "Recipes" },
     { id: "blog" as const, label: "Optavia Blog" },
     { id: "connect" as const, label: "OPTAVIA Connect", mobileLabel: "Connect" },
+    ...(profile?.optavia_id ? [{ id: "optavia-profile" as const, label: "OPTAVIA Profile", mobileLabel: "Profile" }] : []),
   ]
-
-  // Optavia Profile URL (only if user has optavia_id)
-  const optaviaProfileUrl = profile?.optavia_id 
-    ? `https://www.optavia.com/us/en/coach/${profile.optavia_id}` 
-    : null
 
   return (
     <header className="border-b border-optavia-border bg-white sticky top-0 z-50">
@@ -137,17 +133,6 @@ export function Header({ onSettingsClick, onHomeClick, onAnnouncementsClick, onR
                 )}
               </button>
             ))}
-            {/* Optavia Profile - External Link */}
-            {optaviaProfileUrl && (
-              <a
-                href={optaviaProfileUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="pb-3 lg:pb-4 px-2 lg:px-3 font-heading font-semibold text-sm lg:text-base transition-colors relative whitespace-nowrap flex-shrink-0 text-optavia-dark hover:text-[hsl(var(--optavia-green))]"
-              >
-                OPTAVIA Profile
-              </a>
-            )}
           </nav>
         )}
 
@@ -168,18 +153,6 @@ export function Header({ onSettingsClick, onHomeClick, onAnnouncementsClick, onR
                   {item.mobileLabel || item.label}
                 </button>
               ))}
-              {/* Optavia Profile - External Link */}
-              {optaviaProfileUrl && (
-                <a
-                  href={optaviaProfileUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="px-4 py-3 text-left font-heading font-semibold text-base transition-colors border-b border-gray-100 text-optavia-dark hover:text-[hsl(var(--optavia-green))] hover:bg-gray-50"
-                >
-                  OPTAVIA Profile
-                </a>
-              )}
             </div>
           </nav>
         )}

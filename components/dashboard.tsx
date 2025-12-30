@@ -5,6 +5,7 @@ import { ResourcesTab } from "@/components/resources-tab"
 import { BlogTab } from "@/components/blog-tab"
 import { RecipesTab } from "@/components/recipes-tab"
 import { ConnectTab } from "@/components/connect-tab"
+import { OptaviaProfileTab } from "@/components/optavia-profile-tab"
 import type { UserData, Module, Recipe } from "@/lib/types"
 import type { UserProfile } from "@/hooks/use-supabase-data"
 
@@ -16,7 +17,7 @@ interface DashboardProps {
   toggleFavoriteRecipe?: (recipeId: string) => Promise<void>
   onSelectModule: (module: Module) => void
   onSelectRecipe: (recipe: Recipe) => void
-  activeTab?: "resources" | "blog" | "recipes" | "connect"
+  activeTab?: "resources" | "blog" | "recipes" | "connect" | "optavia-profile"
 }
 
 export function Dashboard({ userData, profile, badges = [], setUserData, toggleFavoriteRecipe, onSelectModule, onSelectRecipe, activeTab = "resources" }: DashboardProps) {
@@ -42,6 +43,10 @@ export function Dashboard({ userData, profile, badges = [], setUserData, toggleF
         )}
 
         {activeTab === "connect" && <ConnectTab />}
+
+        {activeTab === "optavia-profile" && profile?.optavia_id && (
+          <OptaviaProfileTab optaviaId={profile.optavia_id} />
+        )}
       </div>
     </>
   )
