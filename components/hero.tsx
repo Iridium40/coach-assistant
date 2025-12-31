@@ -13,9 +13,9 @@ export function Hero({ userData, firstName, badges = [], backgroundImage }: Hero
     >
       <div className="container mx-auto px-4 h-full flex items-center justify-center">
         <picture>
-          <source srcSet="/branding/ca_logo_large.svg" type="image/svg+xml" />
+          <source srcSet="/branding/ca-logo.svg" type="image/svg+xml" />
           <img 
-            src="/branding/ca_logo_large.png" 
+            src="/branding/ca_logo.png" 
             alt="Coaching Amplifier" 
             className="h-auto max-h-[96px] sm:max-h-[120px] md:max-h-[144px] w-auto"
           />
