@@ -426,60 +426,65 @@ export function AdminAnnouncements({ onClose }: { onClose?: () => void }) {
                   onClick={(e) => e.stopPropagation()}
                   onFocus={(e) => e.stopPropagation()}
                   required
-                  rows={6}
-                  className="border-gray-300 focus:border-[hsl(var(--optavia-green))] focus:ring-[hsl(var(--optavia-green-light))]"
+                  rows={8}
+                  className="border-gray-300 focus:border-[hsl(var(--optavia-green))] focus:ring-[hsl(var(--optavia-green-light))] min-h-[150px]"
                 />
               </div>
 
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="pushScheduledAt" className="text-optavia-dark">
-                    Notification Time
-                  </Label>
-                  <Input
-                    id="pushScheduledAt"
-                    type="datetime-local"
-                    value={pushScheduledAt}
-                    onChange={(e) => setPushScheduledAt(e.target.value)}
-                    onClick={(e) => e.stopPropagation()}
-                    onFocus={(e) => e.stopPropagation()}
-                    disabled={sendPushNow}
-                    className="border-gray-300 focus:border-[hsl(var(--optavia-green))] focus:ring-[hsl(var(--optavia-green-light))] disabled:bg-gray-100 disabled:cursor-not-allowed"
-                  />
+              {/* Notification Settings - Compact Layout */}
+              <div className="bg-gray-50 rounded-lg p-4 space-y-4">
+                <h4 className="font-medium text-optavia-dark text-sm">Notification Settings</h4>
+                
+                {/* Toggles Row */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="flex items-center justify-between sm:justify-start sm:gap-3 p-3 bg-white rounded-md border border-gray-200">
+                    <Label htmlFor="sendPushNow" className="cursor-pointer text-optavia-dark text-sm">
+                      Send Push Now
+                    </Label>
+                    <Switch
+                      id="sendPushNow"
+                      checked={sendPushNow}
+                      onCheckedChange={setSendPushNow}
+                    />
+                  </div>
+                  <div className="flex items-center justify-between sm:justify-start sm:gap-3 p-3 bg-white rounded-md border border-gray-200">
+                    <Label htmlFor="sendEmail" className="cursor-pointer text-optavia-dark text-sm">
+                      Send Email
+                    </Label>
+                    <Switch
+                      id="sendEmail"
+                      checked={sendEmail}
+                      onCheckedChange={setSendEmail}
+                    />
+                  </div>
                 </div>
 
-                <div className="flex items-center space-x-2">
-                  <Switch
-                    id="sendPushNow"
-                    checked={sendPushNow}
-                    onCheckedChange={setSendPushNow}
-                  />
-                  <Label htmlFor="sendPushNow" className="cursor-pointer text-optavia-dark">
-                    Send Push Notification Now
-                  </Label>
-                </div>
-                {sendPushNow && (
-                  <p className="text-xs text-optavia-gray">
-                    Notification will be sent immediately when announcement is created/updated
-                  </p>
+                {/* Schedule Time - Only shown when not sending now */}
+                {!sendPushNow && (
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 p-3 bg-white rounded-md border border-gray-200">
+                    <Label htmlFor="pushScheduledAt" className="text-optavia-dark text-sm whitespace-nowrap">
+                      Schedule for:
+                    </Label>
+                    <Input
+                      id="pushScheduledAt"
+                      type="datetime-local"
+                      value={pushScheduledAt}
+                      onChange={(e) => setPushScheduledAt(e.target.value)}
+                      onClick={(e) => e.stopPropagation()}
+                      onFocus={(e) => e.stopPropagation()}
+                      className="border-gray-300 focus:border-[hsl(var(--optavia-green))] focus:ring-[hsl(var(--optavia-green-light))] flex-1"
+                    />
+                  </div>
                 )}
-              </div>
 
-              <div className="flex items-center space-x-2 pt-2">
-                <Switch
-                  id="sendEmail"
-                  checked={sendEmail}
-                  onCheckedChange={setSendEmail}
-                />
-                <Label htmlFor="sendEmail" className="cursor-pointer text-optavia-dark">
-                  Send Email Notification
-                </Label>
-              </div>
-              {sendEmail && (
-                <p className="text-xs text-optavia-gray -mt-2">
-                  An email will be sent to all users with email notifications enabled
+                {/* Helper text */}
+                <p className="text-xs text-optavia-gray">
+                  {sendPushNow 
+                    ? "Notifications will be sent immediately when announcement is saved." 
+                    : "Select a date and time to schedule the notification."}
+                  {sendEmail && " Email will be sent to users with notifications enabled."}
                 </p>
-              )}
+              </div>
 
               <div className="flex gap-2">
                 <Button

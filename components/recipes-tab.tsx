@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useMemo, useCallback, memo } from "react"
+import { useRouter } from "next/navigation"
 import { RecipeCard } from "@/components/recipe-card"
 import { SearchWithHistory } from "@/components/search-with-history"
 import { Button } from "@/components/ui/button"
@@ -11,6 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { Calendar } from "lucide-react"
 import type { UserData, Recipe } from "@/lib/types"
 
 interface RecipesTabProps {
@@ -25,6 +27,7 @@ interface RecipesTabProps {
 const categories = ["All", "Favorites", "Chicken", "Seafood", "Beef", "Turkey", "Pork", "Vegetarian", "Breakfast"]
 
 export const RecipesTab = memo(function RecipesTab({ userData, setUserData, toggleFavoriteRecipe, onSelectRecipe, recipes }: RecipesTabProps) {
+  const router = useRouter()
   const [selectedCategory, setSelectedCategory] = useState<string>("All")
   const [searchQuery, setSearchQuery] = useState("")
 
@@ -81,9 +84,16 @@ export const RecipesTab = memo(function RecipesTab({ userData, setUserData, togg
         <h2 className="font-heading font-bold text-2xl sm:text-3xl text-optavia-dark mb-3 sm:mb-4">
           Lean & Green Recipes
         </h2>
-        <p className="text-optavia-gray text-base sm:text-lg max-w-2xl mx-auto px-4">
+        <p className="text-optavia-gray text-base sm:text-lg max-w-2xl mx-auto px-4 mb-4">
           Discover delicious Lean & Green meal recipes to share with your clients and support their health journey.
         </p>
+        <Button
+          onClick={() => router.push("/meal-planner")}
+          className="gap-2 bg-[hsl(var(--optavia-green))] hover:bg-[hsl(var(--optavia-green-dark))] text-white"
+        >
+          <Calendar className="h-4 w-4" />
+          Create Meal Plan
+        </Button>
       </div>
 
       {/* Search and Filter */}

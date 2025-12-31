@@ -1,9 +1,11 @@
 "use client"
 
+import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card } from "@/components/ui/card"
-import { ArrowLeft, Clock, Users, Heart, ChefHat } from "lucide-react"
+import { ArrowLeft, Clock, Users, Heart, ChefHat, Share2, Copy, Check } from "lucide-react"
+import { useToast } from "@/hooks/use-toast"
 import type { Recipe, UserData } from "@/lib/types"
 
 interface RecipeDetailProps {
@@ -15,7 +17,61 @@ interface RecipeDetailProps {
 }
 
 export function RecipeDetail({ recipe, userData, setUserData, toggleFavoriteRecipe, onBack }: RecipeDetailProps) {
+  const { toast } = useToast()
+  const [copied, setCopied] = useState(false)
   const isFavorite = userData.favoriteRecipes.includes(recipe.id)
+
+  // Format ingredients for sharing
+  const getIngredientsText = () => {
+    return `${recipe.title}\n\nIngredients:\n${recipe.ingredients.map(i => `- ${i}`).join('\n')}`
+  }
+
+  // Copy ingredients to clipboard
+  const handleCopyIngredients = async () => {
+    try {
+      await navigator.clipboard.writeText(getIngredientsText())
+      setCopied(true)
+      toast({
+        title: "Copied!",
+        description: "Ingredient list copied to clipboard",
+      })
+      setTimeout(() => setCopied(false), 2000)
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to copy ingredients",
+        variant: "destructive",
+      })
+    }
+  }
+
+  // Share ingredients using Web Share API
+  const handleShareIngredients = async () => {
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: `${recipe.title} - Ingredients`,
+          text: getIngredientsText(),
+        })
+        toast({
+          title: "Shared!",
+          description: "Ingredient list shared successfully",
+        })
+      } catch (error: any) {
+        // User cancelled share - don't show error
+        if (error.name !== "AbortError") {
+          toast({
+            title: "Error",
+            description: "Failed to share ingredients",
+            variant: "destructive",
+          })
+        }
+      }
+    } else {
+      // Fallback to copy if share not available
+      handleCopyIngredients()
+    }
+  }
 
   const toggleFavorite = async () => {
     if (toggleFavoriteRecipe) {
@@ -126,7 +182,7 @@ export function RecipeDetail({ recipe, userData, setUserData, toggleFavoriteReci
         <div>
           <h2 className="font-heading font-bold text-xl sm:text-2xl text-optavia-dark mb-3 sm:mb-4">Ingredients</h2>
           <Card className="p-4 sm:p-6">
-            <ul className="space-y-2">
+            <ul className="space-y-2 mb-4">
               {recipe.ingredients.map((ingredient, index) => (
                 <li key={index} className="flex gap-2 text-sm sm:text-base text-optavia-gray">
                   <span className="text-[hsl(var(--optavia-green))] flex-shrink-0">•</span>
@@ -134,6 +190,29 @@ export function RecipeDetail({ recipe, userData, setUserData, toggleFavoriteReci
                 </li>
               ))}
             </ul>
+            {/* Share/Copy Buttons */}
+            <div className="flex gap-2 pt-3 border-t border-gray-200">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleCopyIngredients}
+                className="flex-1 gap-2 border-gray-300 text-optavia-dark hover:bg-gray-100"
+              >
+                {copied ? <Check className="h-4 w-4 text-green-600" /> : <Copy className="h-4 w-4" />}
+                {copied ? "Copied!" : "Copy List"}
+              </Button>
+              {typeof window !== "undefined" && typeof navigator !== "undefined" && "share" in navigator && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleShareIngredients}
+                  className="flex-1 gap-2 border-gray-300 text-optavia-dark hover:bg-gray-100"
+                >
+                  <Share2 className="h-4 w-4" />
+                  Share
+                </Button>
+              )}
+            </div>
           </Card>
         </div>
 
