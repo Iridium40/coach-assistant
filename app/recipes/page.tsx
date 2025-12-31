@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useMemo, useCallback } from "react"
+import { useMemo, useCallback } from "react"
 import { useRouter } from "next/navigation"
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
@@ -33,7 +33,14 @@ export default function RecipesPage() {
           favoriteRecipes,
           createdAt: profile.created_at,
         }
-      : null
+      : {
+          // Default values while loading
+          isNewCoach: true,
+          completedResources: [],
+          bookmarks: [],
+          favoriteRecipes: favoriteRecipes || [],
+          createdAt: new Date().toISOString(),
+        }
   }, [profile, completedResources, bookmarks, favoriteRecipes])
 
   // Memoize the onSelectRecipe callback to prevent re-renders
@@ -46,40 +53,13 @@ export default function RecipesPage() {
     // No-op: user data updates are handled by useSupabaseData hook
   }, [])
 
-  useEffect(() => {
-    if (authLoading || dataLoading) return
-
-    if (!user) {
-      router.replace("/login")
-      return
-    }
-
-    // If user exists but no profile, redirect to home for onboarding
-    if (user && !profile) {
-      router.replace("/")
-      return
-    }
-  }, [user, profile, authLoading, dataLoading, router])
-
-  // Show loading state
-  if (authLoading || dataLoading) {
+  // Show loading only during initial auth check
+  if (authLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-white">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[hsl(var(--optavia-green))] mx-auto mb-4"></div>
           <p className="text-optavia-gray">Loading...</p>
-        </div>
-      </div>
-    )
-  }
-
-  // Don't render anything if redirecting
-  if (!user || !userData) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-white">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[hsl(var(--optavia-green))] mx-auto mb-4"></div>
-          <p className="text-optavia-gray">Redirecting...</p>
         </div>
       </div>
     )

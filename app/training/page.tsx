@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useMemo, useCallback } from "react"
+import { useMemo, useCallback } from "react"
 import { useRouter } from "next/navigation"
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
@@ -19,7 +19,6 @@ export default function TrainingPage() {
     completedResources,
     bookmarks,
     favoriteRecipes,
-    loading: dataLoading,
   } = useSupabaseData(user)
 
   // Convert Supabase data to UserData format - memoize to prevent unnecessary re-renders
@@ -32,7 +31,14 @@ export default function TrainingPage() {
           favoriteRecipes,
           createdAt: profile.created_at,
         }
-      : null
+      : {
+          // Default values while loading
+          isNewCoach: true,
+          completedResources: completedResources || [],
+          bookmarks: bookmarks || [],
+          favoriteRecipes: favoriteRecipes || [],
+          createdAt: new Date().toISOString(),
+        }
   }, [profile, completedResources, bookmarks, favoriteRecipes])
 
   // Memoize the onSelectModule callback to prevent re-renders
@@ -45,44 +51,8 @@ export default function TrainingPage() {
     // No-op: user data updates are handled by useSupabaseData hook
   }, [])
 
-  useEffect(() => {
-    if (authLoading || dataLoading) return
-
-    if (!user) {
-      router.replace("/login")
-      return
-    }
-
-    // Don't redirect if profile is missing - it will be created by database trigger
-    // Just wait for it to load
-  }, [user, authLoading, dataLoading, router])
-
-  // Show loading state while auth or data is loading, or if user exists but profile hasn't been created yet
-  if (authLoading || dataLoading || (user && !profile)) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-white">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[hsl(var(--optavia-green))] mx-auto mb-4"></div>
-          <p className="text-optavia-gray">Loading...</p>
-        </div>
-      </div>
-    )
-  }
-
-  // Redirect to login if no user
-  if (!user) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-white">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[hsl(var(--optavia-green))] mx-auto mb-4"></div>
-          <p className="text-optavia-gray">Redirecting...</p>
-        </div>
-      </div>
-    )
-  }
-
-  // If no userData, show loading (shouldn't happen if profile exists)
-  if (!userData) {
+  // Show loading only during initial auth check
+  if (authLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-white">
         <div className="text-center">

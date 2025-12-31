@@ -20,7 +20,6 @@ export default function TrainingModulePage() {
     completedResources,
     bookmarks,
     favoriteRecipes,
-    loading: dataLoading,
   } = useSupabaseData(user)
 
   // Find the module by ID
@@ -38,7 +37,14 @@ export default function TrainingModulePage() {
           favoriteRecipes,
           createdAt: profile.created_at,
         }
-      : null
+      : {
+          // Default values while loading
+          isNewCoach: true,
+          completedResources: completedResources || [],
+          bookmarks: bookmarks || [],
+          favoriteRecipes: favoriteRecipes || [],
+          createdAt: new Date().toISOString(),
+        }
   }, [profile, completedResources, bookmarks, favoriteRecipes])
 
   // Memoize setUserData to prevent re-renders (no-op function for this page)
@@ -51,23 +57,15 @@ export default function TrainingModulePage() {
     router.push("/training")
   }, [router])
 
+  // Only redirect if module is not found (invalid URL)
   useEffect(() => {
-    if (authLoading || dataLoading) return
-
-    if (!user) {
-      router.replace("/login")
-      return
-    }
-
-    // If module not found, redirect to training page
-    if (!module) {
+    if (!module && moduleId) {
       router.replace("/training")
-      return
     }
-  }, [user, module, authLoading, dataLoading, router])
+  }, [module, moduleId, router])
 
-  // Show loading state while auth or data is loading, or if user exists but profile hasn't been created yet
-  if (authLoading || dataLoading || (user && !profile)) {
+  // Show loading only during initial auth check
+  if (authLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-white">
         <div className="text-center">
@@ -78,25 +76,13 @@ export default function TrainingModulePage() {
     )
   }
 
-  // Redirect to login if no user
-  if (!user) {
+  // If module not found, show redirecting message
+  if (!module) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-white">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[hsl(var(--optavia-green))] mx-auto mb-4"></div>
-          <p className="text-optavia-gray">Redirecting...</p>
-        </div>
-      </div>
-    )
-  }
-
-  // If no userData or module not found, show loading (will redirect)
-  if (!userData || !module) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-white">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[hsl(var(--optavia-green))] mx-auto mb-4"></div>
-          <p className="text-optavia-gray">Loading...</p>
+          <p className="text-optavia-gray">Module not found, redirecting...</p>
         </div>
       </div>
     )
