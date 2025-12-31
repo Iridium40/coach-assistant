@@ -279,18 +279,20 @@ export function DashboardOverview() {
                 <ExternalLink className="h-3 w-3 text-optavia-gray flex-shrink-0" />
               </a>
               
-              <a 
-                href="https://profile.optavia.com" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="flex items-center gap-2 p-2.5 rounded-lg border-2 border-[hsl(var(--optavia-green))] hover:bg-[hsl(var(--optavia-green-light))] transition-colors cursor-pointer group"
-              >
-                <img src="/media/optavia_logo.svg" alt="" className="h-4 w-4 flex-shrink-0" />
-                <span className="font-medium text-sm text-optavia-dark group-hover:text-[hsl(var(--optavia-green))] flex-1">
-                  OPTAVIA Profile
-                </span>
-                <ExternalLink className="h-3 w-3 text-optavia-gray flex-shrink-0" />
-              </a>
+              {profile?.optavia_id && (
+                <a 
+                  href={`https://www.optavia.com/us/en/coach/${profile.optavia_id}`} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 p-2.5 rounded-lg border-2 border-[hsl(var(--optavia-green))] hover:bg-[hsl(var(--optavia-green-light))] transition-colors cursor-pointer group"
+                >
+                  <img src="/media/optavia_logo.svg" alt="" className="h-4 w-4 flex-shrink-0" />
+                  <span className="font-medium text-sm text-optavia-dark group-hover:text-[hsl(var(--optavia-green))] flex-1">
+                    OPTAVIA Profile
+                  </span>
+                  <ExternalLink className="h-3 w-3 text-optavia-gray flex-shrink-0" />
+                </a>
+              )}
             </div>
           </CardContent>
         </Card>
