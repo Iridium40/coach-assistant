@@ -48,7 +48,7 @@ export function AdminZoomCalls({ onClose }: { onClose?: () => void }) {
   const [zoomMeetingId, setZoomMeetingId] = useState("")
   const [zoomPasscode, setZoomPasscode] = useState("")
   const [recordingUrl, setRecordingUrl] = useState("")
-  const [recordingPlatform, setRecordingPlatform] = useState<"zoom" | "vimeo" | "youtube" | "">("")
+  const [recordingPlatform, setRecordingPlatform] = useState<"zoom" | "vimeo" | "youtube" | "">("vimeo")
   const [status, setStatus] = useState<"upcoming" | "live" | "completed" | "cancelled">("upcoming")
 
   // Check if user is admin (case-insensitive)
@@ -93,7 +93,7 @@ export function AdminZoomCalls({ onClose }: { onClose?: () => void }) {
     setZoomMeetingId("")
     setZoomPasscode("")
     setRecordingUrl("")
-    setRecordingPlatform("")
+    setRecordingPlatform("vimeo")
     setStatus("upcoming")
     setEditingId(null)
     setShowForm(false)
@@ -464,17 +464,17 @@ export function AdminZoomCalls({ onClose }: { onClose?: () => void }) {
                 <div className="bg-green-50 rounded-lg p-4 space-y-4">
                   <h4 className="font-medium text-optavia-dark text-sm flex items-center gap-2">
                     <PlayCircle className="h-4 w-4 text-green-600" />
-                    Recording (add after call ends)
+                    Vimeo Recording (add after call ends)
                   </h4>
                   
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div className="space-y-2 md:col-span-2">
-                      <Label htmlFor="recordingUrl" className="text-optavia-dark">Recording URL</Label>
+                      <Label htmlFor="recordingUrl" className="text-optavia-dark">Vimeo URL</Label>
                       <Input
                         id="recordingUrl"
                         value={recordingUrl}
                         onChange={(e) => setRecordingUrl(e.target.value)}
-                        placeholder="https://..."
+                        placeholder="https://vimeo.com/..."
                         className="border-gray-300"
                       />
                     </div>
@@ -482,11 +482,11 @@ export function AdminZoomCalls({ onClose }: { onClose?: () => void }) {
                       <Label htmlFor="recordingPlatform" className="text-optavia-dark">Platform</Label>
                       <Select value={recordingPlatform} onValueChange={(v) => setRecordingPlatform(v as typeof recordingPlatform)}>
                         <SelectTrigger className="border-gray-300">
-                          <SelectValue placeholder="Select" />
+                          <SelectValue placeholder="Vimeo" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="zoom">Zoom</SelectItem>
                           <SelectItem value="vimeo">Vimeo</SelectItem>
+                          <SelectItem value="zoom">Zoom</SelectItem>
                           <SelectItem value="youtube">YouTube</SelectItem>
                         </SelectContent>
                       </Select>
