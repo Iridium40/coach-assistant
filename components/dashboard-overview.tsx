@@ -223,14 +223,14 @@ export function DashboardOverview() {
                         <Button
                           asChild
                           size="sm"
-                          className={`w-full mt-2 ${
+                          className={`w-full mt-2 text-white ${
                             meeting.status === "live" 
                               ? "bg-red-500 hover:bg-red-600" 
                               : "bg-blue-600 hover:bg-blue-700"
                           }`}
                         >
-                          <a href={meeting.zoom_link} target="_blank" rel="noopener noreferrer">
-                            <Video className="h-4 w-4 mr-1" />
+                          <a href={meeting.zoom_link} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center text-white">
+                            <Video className="h-4 w-4 mr-1 text-white" />
                             {meeting.status === "live" ? "Join Now" : "Join Meeting"}
                           </a>
                         </Button>
