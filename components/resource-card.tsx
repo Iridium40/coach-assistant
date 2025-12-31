@@ -1,22 +1,56 @@
 "use client"
 
-import { ExternalLink } from "lucide-react"
+import { ExternalLink, Pin } from "lucide-react"
 import { Card } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
 
 interface ResourceCardProps {
+  id?: string
   title: string
   description: string
   url: string
   buttonText: string
   features?: string[]
+  isPinned?: boolean
+  onTogglePin?: () => void
 }
 
-export function ResourceCard({ title, description, url, buttonText, features }: ResourceCardProps) {
+export function ResourceCard({ 
+  id, 
+  title, 
+  description, 
+  url, 
+  buttonText, 
+  features, 
+  isPinned, 
+  onTogglePin 
+}: ResourceCardProps) {
   // Show only top 3 features for compactness
   const displayFeatures = features?.slice(0, 3) || []
 
   return (
     <Card className="group relative overflow-hidden bg-white border-2 border-gray-200 hover:border-[hsl(var(--optavia-green))] transition-all duration-300 hover:shadow-lg">
+      {/* Pin Button */}
+      {onTogglePin && (
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={(e) => {
+            e.preventDefault()
+            e.stopPropagation()
+            onTogglePin()
+          }}
+          className={`absolute top-2 right-2 z-10 h-8 w-8 ${
+            isPinned 
+              ? "text-[hsl(var(--optavia-green))] bg-[hsl(var(--optavia-green-light))] hover:bg-[hsl(var(--optavia-green-light))]" 
+              : "text-gray-400 hover:text-[hsl(var(--optavia-green))] hover:bg-[hsl(var(--optavia-green-light))] opacity-0 group-hover:opacity-100"
+          } transition-all`}
+          title={isPinned ? "Unpin from Quick Links" : "Pin to Quick Links"}
+        >
+          <Pin className={`h-4 w-4 ${isPinned ? "fill-current" : ""}`} />
+        </Button>
+      )}
+
       <a
         href={url}
         target="_blank"
@@ -24,7 +58,7 @@ export function ResourceCard({ title, description, url, buttonText, features }: 
         className="block p-5 sm:p-6"
       >
         {/* Header with title and icon */}
-        <div className="flex items-start justify-between gap-4 mb-3">
+        <div className="flex items-start justify-between gap-4 mb-3 pr-8">
           <h3 className="font-heading font-bold text-lg sm:text-xl text-optavia-dark group-hover:text-[hsl(var(--optavia-green))] transition-colors flex-1">
             {title}
           </h3>
@@ -51,4 +85,3 @@ export function ResourceCard({ title, description, url, buttonText, features }: 
     </Card>
   )
 }
-
