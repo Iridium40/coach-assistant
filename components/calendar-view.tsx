@@ -12,6 +12,7 @@ import {
 import { createClient } from "@/lib/supabase/client"
 import { useAuth } from "@/hooks/use-auth"
 import { useToast } from "@/hooks/use-toast"
+import { useIsMobile } from "@/hooks/use-mobile"
 import { AddToCalendar } from "@/components/add-to-calendar"
 import type { ZoomCall } from "@/lib/types"
 
@@ -20,9 +21,10 @@ type ViewMode = "month" | "week"
 export function CalendarView() {
   const { user } = useAuth()
   const { toast } = useToast()
+  const isMobile = useIsMobile()
   const [zoomCalls, setZoomCalls] = useState<ZoomCall[]>([])
   const [loading, setLoading] = useState(true)
-  const [viewMode, setViewMode] = useState<ViewMode>("month")
+  const [viewMode, setViewMode] = useState<ViewMode>("week") // Default to week for better mobile UX
   const [currentDate, setCurrentDate] = useState(new Date())
   const [copiedId, setCopiedId] = useState<string | null>(null)
   const [selectedEvent, setSelectedEvent] = useState<ZoomCall | null>(null)
@@ -190,47 +192,48 @@ export function CalendarView() {
   return (
     <div className="space-y-4">
       {/* Header Controls */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div className="flex items-center gap-2">
-          <Button variant="outline" size="icon" onClick={navigatePrevious}>
-            <ChevronLeft className="h-4 w-4" />
-          </Button>
-          <Button variant="outline" size="icon" onClick={navigateNext}>
-            <ChevronRight className="h-4 w-4" />
-          </Button>
-          <Button variant="outline" size="sm" onClick={goToToday}>
-            Today
-          </Button>
-          <h2 className="font-heading font-bold text-lg sm:text-xl text-optavia-dark ml-2">
-            {viewMode === "month" 
-              ? currentDate.toLocaleDateString(undefined, { month: 'long', year: 'numeric' })
-              : `Week of ${getWeekDays[0].toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}`
-            }
-          </h2>
-        </div>
-        
-        <div className="flex items-center gap-2">
+      <div className="flex flex-col gap-3">
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-1 sm:gap-2">
+            <Button variant="outline" size="icon" onClick={navigatePrevious} className="h-8 w-8 sm:h-9 sm:w-9">
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+            <Button variant="outline" size="icon" onClick={navigateNext} className="h-8 w-8 sm:h-9 sm:w-9">
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+            <Button variant="outline" size="sm" onClick={goToToday} className="text-xs sm:text-sm h-8 sm:h-9 px-2 sm:px-3">
+              Today
+            </Button>
+          </div>
+          
           <div className="flex rounded-lg border border-gray-300 overflow-hidden">
             <Button
               variant={viewMode === "month" ? "default" : "ghost"}
               size="sm"
               onClick={() => setViewMode("month")}
-              className={`rounded-none ${viewMode === "month" ? "bg-[hsl(var(--optavia-green))] hover:bg-[hsl(var(--optavia-green-dark))]" : ""}`}
+              className={`rounded-none text-xs sm:text-sm h-8 sm:h-9 px-2 sm:px-3 ${viewMode === "month" ? "bg-[hsl(var(--optavia-green))] hover:bg-[hsl(var(--optavia-green-dark))]" : ""}`}
             >
-              <Grid3X3 className="h-4 w-4 mr-1" />
-              Month
+              <Grid3X3 className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-1" />
+              <span className="hidden sm:inline">Month</span>
             </Button>
             <Button
               variant={viewMode === "week" ? "default" : "ghost"}
               size="sm"
               onClick={() => setViewMode("week")}
-              className={`rounded-none ${viewMode === "week" ? "bg-[hsl(var(--optavia-green))] hover:bg-[hsl(var(--optavia-green-dark))]" : ""}`}
+              className={`rounded-none text-xs sm:text-sm h-8 sm:h-9 px-2 sm:px-3 ${viewMode === "week" ? "bg-[hsl(var(--optavia-green))] hover:bg-[hsl(var(--optavia-green-dark))]" : ""}`}
             >
-              <List className="h-4 w-4 mr-1" />
-              Week
+              <List className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-1" />
+              <span className="hidden sm:inline">Week</span>
             </Button>
           </div>
         </div>
+        
+        <h2 className="font-heading font-bold text-base sm:text-xl text-optavia-dark text-center sm:text-left">
+          {viewMode === "month" 
+            ? currentDate.toLocaleDateString(undefined, { month: 'long', year: 'numeric' })
+            : `Week of ${getWeekDays[0].toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}`
+          }
+        </h2>
       </div>
 
       {/* Legend */}
@@ -251,53 +254,67 @@ export function CalendarView() {
 
       {/* Month View */}
       {viewMode === "month" && (
-        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden overflow-x-auto">
           {/* Day Headers */}
-          <div className="grid grid-cols-7 border-b border-gray-200 bg-gray-50">
-            {dayNames.map(day => (
-              <div key={day} className="py-2 text-center text-sm font-semibold text-optavia-gray">
-                {day}
+          <div className="grid grid-cols-7 border-b border-gray-200 bg-gray-50 min-w-[350px]">
+            {dayNames.map((day, idx) => (
+              <div key={day} className="py-1 sm:py-2 text-center text-xs sm:text-sm font-semibold text-optavia-gray">
+                <span className="hidden sm:inline">{day}</span>
+                <span className="sm:hidden">{day.charAt(0)}</span>
               </div>
             ))}
           </div>
           
           {/* Calendar Grid */}
-          <div className="grid grid-cols-7">
+          <div className="grid grid-cols-7 min-w-[350px]">
             {getMonthDays.map((dayInfo, index) => {
               const events = getEventsForDate(dayInfo.date)
               const dayIsToday = isToday(dayInfo.date)
+              const maxEventsToShow = isMobile ? 2 : 3
               
               return (
                 <div
                   key={index}
-                  className={`min-h-[100px] sm:min-h-[120px] border-b border-r border-gray-100 p-1 sm:p-2 ${
+                  onClick={() => {
+                    // On mobile, if there are events, show the first one
+                    if (isMobile && events.length > 0) {
+                      setSelectedEvent(events[0])
+                    }
+                  }}
+                  className={`min-h-[70px] sm:min-h-[120px] border-b border-r border-gray-100 p-0.5 sm:p-2 ${
                     !dayInfo.isCurrentMonth ? "bg-gray-50" : "bg-white"
-                  } ${dayIsToday ? "ring-2 ring-inset ring-[hsl(var(--optavia-green))]" : ""}`}
+                  } ${dayIsToday ? "ring-2 ring-inset ring-[hsl(var(--optavia-green))]" : ""} ${
+                    isMobile && events.length > 0 ? "cursor-pointer" : ""
+                  }`}
                 >
-                  <div className={`text-sm font-medium mb-1 ${
+                  <div className={`text-xs sm:text-sm font-medium mb-0.5 sm:mb-1 ${
                     dayIsToday 
-                      ? "text-white bg-[hsl(var(--optavia-green))] w-6 h-6 rounded-full flex items-center justify-center"
+                      ? "text-white bg-[hsl(var(--optavia-green))] w-5 h-5 sm:w-6 sm:h-6 rounded-full flex items-center justify-center text-[10px] sm:text-sm"
                       : dayInfo.isCurrentMonth 
                         ? "text-optavia-dark" 
                         : "text-gray-400"
                   }`}>
                     {dayInfo.date.getDate()}
                   </div>
-                  <div className="space-y-1">
-                    {events.slice(0, 3).map(event => (
+                  <div className="space-y-0.5 sm:space-y-1">
+                    {events.slice(0, maxEventsToShow).map(event => (
                       <button
                         key={event.id}
-                        onClick={() => setSelectedEvent(event)}
-                        className={`w-full text-left text-xs text-white rounded px-1 py-0.5 truncate relative ${getCallTypeColor(event.call_type)}`}
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          setSelectedEvent(event)
+                        }}
+                        className={`w-full text-left text-[10px] sm:text-xs text-white rounded px-0.5 sm:px-1 py-0 sm:py-0.5 truncate relative ${getCallTypeColor(event.call_type)}`}
                       >
                         {getStatusIndicator(event.status)}
                         <span className="hidden sm:inline">{formatTime(event.scheduled_at)} </span>
-                        {event.title}
+                        <span className="hidden sm:inline">{event.title}</span>
+                        <span className="sm:hidden">{event.title.substring(0, 8)}{event.title.length > 8 ? "…" : ""}</span>
                       </button>
                     ))}
-                    {events.length > 3 && (
-                      <div className="text-xs text-optavia-gray">
-                        +{events.length - 3} more
+                    {events.length > maxEventsToShow && (
+                      <div className="text-[10px] sm:text-xs text-optavia-gray">
+                        +{events.length - maxEventsToShow}
                       </div>
                     )}
                   </div>
@@ -318,33 +335,35 @@ export function CalendarView() {
             return (
               <div
                 key={index}
-                className={`bg-white rounded-lg border p-4 ${
+                className={`bg-white rounded-lg border p-3 sm:p-4 ${
                   dayIsToday ? "border-[hsl(var(--optavia-green))] border-2" : "border-gray-200"
                 }`}
               >
-                <div className="flex items-center gap-3 mb-3">
-                  <div className={`text-center ${dayIsToday ? "text-[hsl(var(--optavia-green))]" : "text-optavia-dark"}`}>
-                    <div className="text-sm font-medium">{dayNames[date.getDay()]}</div>
-                    <div className={`text-2xl font-bold ${
+                <div className="flex items-center gap-2 sm:gap-3 mb-2 sm:mb-3">
+                  <div className={`text-center min-w-[40px] sm:min-w-[50px] ${dayIsToday ? "text-[hsl(var(--optavia-green))]" : "text-optavia-dark"}`}>
+                    <div className="text-xs sm:text-sm font-medium">{dayNames[date.getDay()]}</div>
+                    <div className={`text-lg sm:text-2xl font-bold ${
                       dayIsToday 
-                        ? "bg-[hsl(var(--optavia-green))] text-white w-10 h-10 rounded-full flex items-center justify-center"
+                        ? "bg-[hsl(var(--optavia-green))] text-white w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center mx-auto"
                         : ""
                     }`}>
                       {date.getDate()}
                     </div>
                   </div>
-                  <div className="text-sm text-optavia-gray">
-                    {date.toLocaleDateString(undefined, { month: 'long', year: 'numeric' })}
+                  <div className="flex-1">
+                    <div className="text-xs sm:text-sm text-optavia-gray">
+                      {date.toLocaleDateString(undefined, { month: 'long', year: 'numeric' })}
+                    </div>
+                    {dayIsToday && (
+                      <Badge className="bg-[hsl(var(--optavia-green))] text-xs mt-0.5">Today</Badge>
+                    )}
                   </div>
-                  {dayIsToday && (
-                    <Badge className="bg-[hsl(var(--optavia-green))]">Today</Badge>
-                  )}
                 </div>
                 
                 {events.length === 0 ? (
-                  <div className="text-sm text-gray-400 italic pl-12">No calls scheduled</div>
+                  <div className="text-xs sm:text-sm text-gray-400 italic ml-[48px] sm:ml-[62px]">No calls scheduled</div>
                 ) : (
-                  <div className="space-y-2 pl-12">
+                  <div className="space-y-2 ml-[48px] sm:ml-[62px]">
                     {events.map(event => (
                       <Card 
                         key={event.id}
@@ -353,37 +372,39 @@ export function CalendarView() {
                         }`}
                         onClick={() => setSelectedEvent(event)}
                       >
-                        <CardContent className="p-3">
-                          <div className="flex items-start justify-between gap-2">
-                            <div className="flex-1">
-                              <div className="flex flex-wrap items-center gap-2 mb-1">
-                                <span className="font-medium text-optavia-dark">{event.title}</span>
+                        <CardContent className="p-2 sm:p-3">
+                          <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2">
+                            <div className="flex-1 min-w-0">
+                              <div className="flex flex-wrap items-center gap-1 sm:gap-2 mb-1">
+                                <span className="font-medium text-sm sm:text-base text-optavia-dark truncate">{event.title}</span>
                                 {event.status === "live" && (
-                                  <Badge className="bg-red-500 animate-pulse">Live</Badge>
+                                  <Badge className="bg-red-500 animate-pulse text-xs">Live</Badge>
                                 )}
+                              </div>
+                              <div className="flex flex-wrap items-center gap-1 sm:gap-2 mb-1">
                                 <Badge 
                                   variant="secondary" 
-                                  className={event.call_type === "coach_only" 
+                                  className={`text-xs ${event.call_type === "coach_only" 
                                     ? "bg-purple-100 text-purple-700" 
                                     : "bg-teal-100 text-teal-700"
-                                  }
+                                  }`}
                                 >
                                   {event.call_type === "coach_only" ? (
-                                    <><UserCircle className="h-3 w-3 mr-1" />Coach Only</>
+                                    <><UserCircle className="h-3 w-3 mr-0.5" /><span className="hidden sm:inline">Coach Only</span><span className="sm:hidden">Coach</span></>
                                   ) : (
-                                    <><Users className="h-3 w-3 mr-1" />With Clients</>
+                                    <><Users className="h-3 w-3 mr-0.5" /><span className="hidden sm:inline">With Clients</span><span className="sm:hidden">Clients</span></>
                                   )}
                                 </Badge>
                               </div>
-                              <div className="flex items-center gap-2 text-sm text-optavia-gray">
-                                <Clock className="h-3 w-3" />
-                                {formatTime(event.scheduled_at)} ({event.duration_minutes} min)
+                              <div className="flex items-center gap-2 text-xs sm:text-sm text-optavia-gray">
+                                <Clock className="h-3 w-3 flex-shrink-0" />
+                                <span>{formatTime(event.scheduled_at)} ({event.duration_minutes} min)</span>
                               </div>
                             </div>
                             {event.zoom_link && (
                               <Button
                                 size="sm"
-                                className={`text-white ${event.status === "live" 
+                                className={`text-white text-xs sm:text-sm w-full sm:w-auto ${event.status === "live" 
                                   ? "bg-red-500 hover:bg-red-600" 
                                   : "bg-blue-600 hover:bg-blue-700"
                                 }`}
@@ -393,7 +414,7 @@ export function CalendarView() {
                                 }}
                               >
                                 <Video className="h-4 w-4 mr-1 text-white" />
-                                Join
+                                {event.status === "live" ? "Join Now" : "Join"}
                               </Button>
                             )}
                           </div>
@@ -411,72 +432,72 @@ export function CalendarView() {
       {/* Event Detail Modal */}
       {selectedEvent && (
         <div 
-          className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50"
+          className="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center p-0 sm:p-4 z-50"
           onClick={() => setSelectedEvent(null)}
         >
           <Card 
-            className="w-full max-w-lg bg-white"
+            className="w-full sm:max-w-lg bg-white rounded-t-xl sm:rounded-xl max-h-[90vh] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
-            <CardContent className="p-6">
-              <div className="flex items-start justify-between mb-4">
-                <div>
-                  <h3 className="text-xl font-bold text-optavia-dark">{selectedEvent.title}</h3>
-                  <div className="flex flex-wrap items-center gap-2 mt-2">
+            <CardContent className="p-4 sm:p-6">
+              <div className="flex items-start justify-between mb-3 sm:mb-4">
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-lg sm:text-xl font-bold text-optavia-dark break-words">{selectedEvent.title}</h3>
+                  <div className="flex flex-wrap items-center gap-1 sm:gap-2 mt-2">
                     {selectedEvent.status === "live" && (
-                      <Badge className="bg-red-500 animate-pulse">Live Now</Badge>
+                      <Badge className="bg-red-500 animate-pulse text-xs">Live Now</Badge>
                     )}
                     {selectedEvent.status === "upcoming" && (
-                      <Badge className="bg-blue-500">Upcoming</Badge>
+                      <Badge className="bg-blue-500 text-xs">Upcoming</Badge>
                     )}
                     {selectedEvent.status === "completed" && (
-                      <Badge className="bg-green-500">Completed</Badge>
+                      <Badge className="bg-green-500 text-xs">Completed</Badge>
                     )}
                     <Badge 
                       variant="secondary" 
-                      className={selectedEvent.call_type === "coach_only" 
+                      className={`text-xs ${selectedEvent.call_type === "coach_only" 
                         ? "bg-purple-100 text-purple-700" 
                         : "bg-teal-100 text-teal-700"
-                      }
+                      }`}
                     >
                       {selectedEvent.call_type === "coach_only" ? "Coach Only" : "With Clients"}
                     </Badge>
                   </div>
                 </div>
-                <Button variant="ghost" size="sm" onClick={() => setSelectedEvent(null)}>
+                <Button variant="ghost" size="sm" onClick={() => setSelectedEvent(null)} className="h-8 w-8 p-0 flex-shrink-0">
                   ✕
                 </Button>
               </div>
 
-              <div className="space-y-4">
-                <div className="flex items-center gap-3 text-optavia-gray">
-                  <CalendarIcon className="h-5 w-5" />
+              <div className="space-y-3 sm:space-y-4">
+                <div className="flex items-center gap-2 sm:gap-3 text-optavia-gray text-sm sm:text-base">
+                  <CalendarIcon className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0" />
                   <span>
                     {new Date(selectedEvent.scheduled_at).toLocaleDateString(undefined, {
-                      weekday: 'long',
-                      month: 'long',
+                      weekday: 'short',
+                      month: 'short',
                       day: 'numeric',
                       year: 'numeric'
                     })}
                   </span>
                 </div>
                 
-                <div className="flex items-center gap-3 text-optavia-gray">
-                  <Clock className="h-5 w-5" />
+                <div className="flex items-center gap-2 sm:gap-3 text-optavia-gray text-sm sm:text-base">
+                  <Clock className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0" />
                   <span>
-                    {formatTime(selectedEvent.scheduled_at)} ({selectedEvent.duration_minutes} minutes)
+                    {formatTime(selectedEvent.scheduled_at)} ({selectedEvent.duration_minutes} min)
                   </span>
                 </div>
 
                 {selectedEvent.description && (
-                  <p className="text-optavia-gray">{selectedEvent.description}</p>
+                  <p className="text-optavia-gray text-sm sm:text-base">{selectedEvent.description}</p>
                 )}
 
                 {selectedEvent.zoom_link && (
                   <div className="space-y-2">
-                    <div className="flex gap-2">
+                    <div className="flex flex-col sm:flex-row gap-2">
                       <Button
-                        className={`flex-1 text-white ${
+                        className={`flex-1 text-white text-sm ${
                           selectedEvent.status === "live" 
                             ? "bg-red-500 hover:bg-red-600" 
                             : "bg-blue-600 hover:bg-blue-700"
@@ -488,20 +509,21 @@ export function CalendarView() {
                       </Button>
                       <Button
                         variant="outline"
+                        className="sm:w-auto"
                         onClick={() => handleCopyLink(selectedEvent.zoom_link!, selectedEvent.id)}
                       >
                         {copiedId === selectedEvent.id ? (
-                          <Check className="h-4 w-4" />
+                          <><Check className="h-4 w-4 sm:mr-0 mr-2" /><span className="sm:hidden">Copied</span></>
                         ) : (
-                          <Copy className="h-4 w-4" />
+                          <><Copy className="h-4 w-4 sm:mr-0 mr-2" /><span className="sm:hidden">Copy Link</span></>
                         )}
                       </Button>
                     </div>
                     
                     {(selectedEvent.zoom_meeting_id || selectedEvent.zoom_passcode) && (
-                      <div className="bg-gray-50 rounded p-3 text-sm space-y-1">
+                      <div className="bg-gray-50 rounded p-2 sm:p-3 text-xs sm:text-sm space-y-1">
                         {selectedEvent.zoom_meeting_id && (
-                          <div>Meeting ID: <strong>{selectedEvent.zoom_meeting_id}</strong></div>
+                          <div className="break-all">Meeting ID: <strong>{selectedEvent.zoom_meeting_id}</strong></div>
                         )}
                         {selectedEvent.zoom_passcode && (
                           <div>Passcode: <strong>{selectedEvent.zoom_passcode}</strong></div>
@@ -514,7 +536,7 @@ export function CalendarView() {
                 {selectedEvent.recording_url && selectedEvent.status === "completed" && (
                   <Button
                     variant="outline"
-                    className="w-full border-green-500 text-green-600 hover:bg-green-50"
+                    className="w-full border-green-500 text-green-600 hover:bg-green-50 text-sm"
                     onClick={() => window.open(selectedEvent.recording_url!, '_blank')}
                   >
                     <ExternalLink className="h-4 w-4 mr-2" />

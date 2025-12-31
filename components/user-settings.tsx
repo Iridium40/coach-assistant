@@ -258,11 +258,11 @@ export function UserSettings({ onClose }: UserSettingsProps) {
             <CardDescription className="text-optavia-gray">Update your profile information</CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
-            <div className="flex items-start gap-6">
+            <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-6">
               <div className="flex flex-col items-center gap-3">
-                <Avatar className="h-24 w-24">
+                <Avatar className="h-20 w-20 sm:h-24 sm:w-24">
                   <AvatarImage src={profile?.avatar_url || undefined} alt={profile?.full_name || "User"} />
-                  <AvatarFallback className="bg-[hsl(var(--optavia-green))] text-white text-2xl">
+                  <AvatarFallback className="bg-[hsl(var(--optavia-green))] text-white text-xl sm:text-2xl">
                     {getInitials()}
                   </AvatarFallback>
                 </Avatar>
@@ -274,8 +274,8 @@ export function UserSettings({ onClose }: UserSettingsProps) {
                   </span>
                 </div>
               </div>
-              <div className="flex flex-col gap-2 flex-1">
-                <div className="flex gap-2">
+              <div className="flex flex-col gap-2 flex-1 w-full sm:w-auto items-center sm:items-start">
+                <div className="flex flex-wrap gap-2 justify-center sm:justify-start">
                   <Button
                     type="button"
                     variant="outline"
@@ -307,7 +307,7 @@ export function UserSettings({ onClose }: UserSettingsProps) {
                   onChange={handleAvatarUpload}
                   className="hidden"
                 />
-                <p className="text-xs text-optavia-gray">JPG, PNG or GIF. Max size 5MB</p>
+                <p className="text-xs text-optavia-gray text-center sm:text-left">JPG, PNG or GIF. Max size 5MB</p>
               </div>
             </div>
 

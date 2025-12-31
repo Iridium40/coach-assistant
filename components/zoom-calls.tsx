@@ -184,38 +184,40 @@ export function ZoomCalls() {
                 
                 {/* Join Button & Details */}
                 {call.zoom_link && (
-                  <div className="flex flex-col sm:flex-row gap-2">
-                    <Button
-                      asChild
-                      className={`flex-1 ${
-                        call.status === "live" 
-                          ? "bg-red-500 hover:bg-red-600" 
-                          : "bg-blue-600 hover:bg-blue-700"
-                      }`}
-                    >
-                      <a href={call.zoom_link} target="_blank" rel="noopener noreferrer">
-                        <Video className="h-4 w-4 mr-2" />
-                        {call.status === "live" ? "Join Now" : "Join Meeting"}
-                      </a>
-                    </Button>
-                    <Button
-                      variant="outline"
-                      onClick={() => handleCopyLink(call.zoom_link!, call.id)}
-                      className="border-gray-300"
-                    >
-                      {copiedId === call.id ? (
-                        <>
-                          <Check className="h-4 w-4 mr-2" />
-                          Copied!
-                        </>
-                      ) : (
-                        <>
-                          <Copy className="h-4 w-4 mr-2" />
-                          Copy Link
-                        </>
-                      )}
-                    </Button>
-                    <AddToCalendar event={call} />
+                  <div className="flex flex-col gap-2">
+                    <div className="flex flex-col sm:flex-row gap-2">
+                      <Button
+                        asChild
+                        className={`flex-1 text-white ${
+                          call.status === "live" 
+                            ? "bg-red-500 hover:bg-red-600" 
+                            : "bg-blue-600 hover:bg-blue-700"
+                        }`}
+                      >
+                        <a href={call.zoom_link} target="_blank" rel="noopener noreferrer" className="text-white">
+                          <Video className="h-4 w-4 mr-2 text-white" />
+                          {call.status === "live" ? "Join Now" : "Join Meeting"}
+                        </a>
+                      </Button>
+                      <Button
+                        variant="outline"
+                        onClick={() => handleCopyLink(call.zoom_link!, call.id)}
+                        className="border-gray-300"
+                      >
+                        {copiedId === call.id ? (
+                          <>
+                            <Check className="h-4 w-4 mr-2" />
+                            Copied!
+                          </>
+                        ) : (
+                          <>
+                            <Copy className="h-4 w-4 mr-2" />
+                            Copy Link
+                          </>
+                        )}
+                      </Button>
+                    </div>
+                    <AddToCalendar event={call} className="w-full sm:w-auto" />
                   </div>
                 )}
 
