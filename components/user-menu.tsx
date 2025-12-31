@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -24,19 +24,8 @@ interface UserMenuProps {
 
 export function UserMenu({ onSettingsClick, onAnnouncementsClick, onReportsClick, onInviteClick }: UserMenuProps) {
   const { user, signOut } = useAuth()
-  const { profile, refreshData } = useSupabaseData(user)
+  const { profile } = useSupabaseData(user)
   const [loading, setLoading] = useState(false)
-
-  // Debug: Log profile to check user_role
-  useEffect(() => {
-    if (profile) {
-      console.log("User profile:", { 
-        user_role: profile.user_role, 
-        email: profile.email,
-        full_profile: profile 
-      })
-    }
-  }, [profile])
 
   const handleSignOut = async () => {
     setLoading(true)
