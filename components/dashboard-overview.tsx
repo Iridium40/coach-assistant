@@ -244,7 +244,7 @@ export function DashboardOverview() {
         </Card>
 
         {/* Quick Links Card */}
-        <Card className="bg-white border border-gray-200 shadow-sm hover:shadow-md transition-shadow md:col-span-1 lg:col-span-2">
+        <Card className="bg-white border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
           <CardHeader className="pb-3">
             <CardTitle className="text-lg flex items-center gap-2 text-optavia-dark">
               <Link2 className="h-5 w-5 text-[hsl(var(--optavia-green))]" />
@@ -252,15 +252,15 @@ export function DashboardOverview() {
             </CardTitle>
           </CardHeader>
           <CardContent className="pt-0">
-            <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-1 gap-3">
+            <div className="space-y-2">
               <a 
                 href="https://www.facebook.com/groups/optaviastrong" 
                 target="_blank" 
                 rel="noopener noreferrer"
-                className="flex items-center gap-3 p-3 rounded-lg border-2 border-[hsl(var(--optavia-green))] hover:bg-[hsl(var(--optavia-green-light))] transition-colors cursor-pointer group"
+                className="flex items-center gap-2 p-2.5 rounded-lg border-2 border-[hsl(var(--optavia-green))] hover:bg-[hsl(var(--optavia-green-light))] transition-colors cursor-pointer group"
               >
                 <ExternalLink className="h-4 w-4 text-[hsl(var(--optavia-green))] flex-shrink-0" />
-                <span className="font-medium text-sm text-optavia-dark group-hover:text-[hsl(var(--optavia-green))] flex-1">
+                <span className="font-medium text-sm text-optavia-dark group-hover:text-[hsl(var(--optavia-green))] flex-1 truncate">
                   Optavia Strong Facebook Group
                 </span>
                 <ExternalLink className="h-3 w-3 text-optavia-gray flex-shrink-0" />
@@ -270,7 +270,7 @@ export function DashboardOverview() {
                 href="https://connect.optavia.com" 
                 target="_blank" 
                 rel="noopener noreferrer"
-                className="flex items-center gap-3 p-3 rounded-lg border-2 border-[hsl(var(--optavia-green))] hover:bg-[hsl(var(--optavia-green-light))] transition-colors cursor-pointer group"
+                className="flex items-center gap-2 p-2.5 rounded-lg border-2 border-[hsl(var(--optavia-green))] hover:bg-[hsl(var(--optavia-green-light))] transition-colors cursor-pointer group"
               >
                 <ExternalLink className="h-4 w-4 text-[hsl(var(--optavia-green))] flex-shrink-0" />
                 <span className="font-medium text-sm text-optavia-dark group-hover:text-[hsl(var(--optavia-green))] flex-1">
@@ -283,7 +283,7 @@ export function DashboardOverview() {
                 href="https://profile.optavia.com" 
                 target="_blank" 
                 rel="noopener noreferrer"
-                className="flex items-center gap-3 p-3 rounded-lg border-2 border-[hsl(var(--optavia-green))] hover:bg-[hsl(var(--optavia-green-light))] transition-colors cursor-pointer group"
+                className="flex items-center gap-2 p-2.5 rounded-lg border-2 border-[hsl(var(--optavia-green))] hover:bg-[hsl(var(--optavia-green-light))] transition-colors cursor-pointer group"
               >
                 <ExternalLink className="h-4 w-4 text-[hsl(var(--optavia-green))] flex-shrink-0" />
                 <span className="font-medium text-sm text-optavia-dark group-hover:text-[hsl(var(--optavia-green))] flex-1">
