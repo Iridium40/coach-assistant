@@ -1,8 +1,10 @@
 "use client"
 
+import { useState } from "react"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
+import { useToast } from "@/hooks/use-toast"
 import { 
   ExternalLink, 
   AlertTriangle, 
@@ -14,7 +16,9 @@ import {
   Scale,
   CheckCircle2,
   ArrowRight,
-  Lightbulb
+  Lightbulb,
+  Share2,
+  Copy
 } from "lucide-react"
 
 const METABOLIC_MARKERS = [
@@ -74,7 +78,76 @@ const OPTAVIA_APPROACH = [
   },
 ]
 
+const OPTAVIA_ACTIVE_URL = "https://www.optavia.com/us/en/products-programs/motion-active"
+
 export function MetabolicHealthInfo() {
+  const { toast } = useToast()
+  const [copied, setCopied] = useState(false)
+
+  // Generate shareable text for metabolic health info
+  const getMetabolicInfoText = () => {
+    return `Understanding Metabolic Health with OPTAVIA
+
+Did you know that even modest weight loss of 5-10% can significantly improve metabolic health markers?
+
+Key Statistics:
+• 1 in 3 U.S. adults are affected by metabolic syndrome
+• We lose 3-8% of muscle mass per decade after age 30
+• Lifestyle changes can significantly improve metabolic markers
+
+How OPTAVIA Helps:
+✓ Balanced nutrition in every Fueling
+✓ Adequate protein to preserve lean muscle
+✓ Controlled portions for sustainable weight loss
+✓ Habits of Health system for lasting transformation
+✓ Coach support for accountability
+
+Learn more about OPTAVIA ACTIVE for muscle support: ${OPTAVIA_ACTIVE_URL}
+
+Always consult with your healthcare provider before starting any weight loss program.`
+  }
+
+  // Copy info to clipboard
+  const handleCopyInfo = async () => {
+    try {
+      await navigator.clipboard.writeText(getMetabolicInfoText())
+      setCopied(true)
+      toast({
+        title: "Copied!",
+        description: "Metabolic health info copied to clipboard",
+      })
+      setTimeout(() => setCopied(false), 2000)
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to copy to clipboard",
+        variant: "destructive",
+      })
+    }
+  }
+
+  // Share info
+  const handleShareInfo = async () => {
+    if (typeof navigator !== "undefined" && "share" in navigator) {
+      try {
+        await navigator.share({
+          title: "Metabolic Health with OPTAVIA",
+          text: getMetabolicInfoText(),
+        })
+        toast({
+          title: "Shared!",
+          description: "Metabolic health info shared successfully",
+        })
+      } catch (error: any) {
+        if (error.name !== "AbortError") {
+          handleCopyInfo()
+        }
+      }
+    } else {
+      handleCopyInfo()
+    }
+  }
+
   return (
     <div className="space-y-6">
       {/* Understanding Metabolic Dysfunction */}
@@ -172,6 +245,16 @@ export function MetabolicHealthInfo() {
         </div>
       </div>
 
+      {/* Share with Client */}
+      <Button
+        variant="default"
+        className="w-full gap-2 bg-[hsl(var(--optavia-green))] hover:bg-[hsl(var(--optavia-green-dark))]"
+        onClick={handleShareInfo}
+      >
+        <Share2 className="h-4 w-4" />
+        Share Info with Client
+      </Button>
+
       {/* Learn More Links */}
       <div className="flex flex-col sm:flex-row gap-2">
         <Button
@@ -184,8 +267,8 @@ export function MetabolicHealthInfo() {
         </Button>
         <Button
           variant="outline"
-          className="flex-1 gap-2 border-gray-300 text-optavia-dark hover:bg-gray-50"
-          onClick={() => window.open("https://www.optavia.com/us/en/products-programs/motion-active", "_blank")}
+          className="flex-1 gap-2 border-[hsl(var(--optavia-green))] text-[hsl(var(--optavia-green))] hover:bg-[hsl(var(--optavia-green-light))]"
+          onClick={() => window.open(OPTAVIA_ACTIVE_URL, "_blank")}
         >
           OPTAVIA ACTIVE
           <ExternalLink className="h-4 w-4" />

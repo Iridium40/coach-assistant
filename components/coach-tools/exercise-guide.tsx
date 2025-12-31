@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { useToast } from "@/hooks/use-toast"
 import { 
   ExternalLink, 
   Dumbbell, 
@@ -12,7 +13,10 @@ import {
   Zap, 
   Timer,
   CheckCircle2,
-  ArrowRight
+  ArrowRight,
+  Share2,
+  Copy,
+  Check
 } from "lucide-react"
 
 const WORKOUT_PLANS = {
@@ -82,8 +86,91 @@ const OPTAVIA_ACTIVE_PRODUCTS = [
   },
 ]
 
+const OPTAVIA_ACTIVE_URL = "https://www.optavia.com/us/en/shop/optavia-active/c/active"
+const OPTAVIA_MOTION_URL = "https://www.optavia.com/us/en/products-programs/motion-active"
+
 export function ExerciseGuide() {
+  const { toast } = useToast()
   const [selectedPlan, setSelectedPlan] = useState<"beginner" | "intermediate" | "advanced">("beginner")
+  const [copied, setCopied] = useState(false)
+
+  // Generate shareable text for OPTAVIA ACTIVE
+  const getOptaviaActiveShareText = () => {
+    return `Check out OPTAVIA ACTIVE - Sports nutrition products designed to support your fitness journey!
+
+🏋️ Essential Amino Acid Blend
+• 10g of EAAs per serving including 5.3g BCAAs
+• Supports healthy muscle & post-exercise recovery
+• Available in Strawberry Lemonade & Orange Mango
+
+💪 OPTAVIA ACTIVE Whey Protein
+• 24g of high-quality whey protein per serving
+• Helps build muscle mass and strength
+• Available in Chocolate & Vanilla
+
+Learn more: ${OPTAVIA_ACTIVE_URL}
+
+These products are designed to work with OPTAVIA's nutrition plans to help protect muscle mass during weight loss and aging.`
+  }
+
+  // Copy OPTAVIA ACTIVE info to clipboard
+  const handleCopyActiveInfo = async () => {
+    try {
+      await navigator.clipboard.writeText(getOptaviaActiveShareText())
+      setCopied(true)
+      toast({
+        title: "Copied!",
+        description: "OPTAVIA ACTIVE info copied to clipboard",
+      })
+      setTimeout(() => setCopied(false), 2000)
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to copy to clipboard",
+        variant: "destructive",
+      })
+    }
+  }
+
+  // Share OPTAVIA ACTIVE info
+  const handleShareActiveInfo = async () => {
+    if (typeof navigator !== "undefined" && "share" in navigator) {
+      try {
+        await navigator.share({
+          title: "OPTAVIA ACTIVE Products",
+          text: getOptaviaActiveShareText(),
+          url: OPTAVIA_ACTIVE_URL,
+        })
+        toast({
+          title: "Shared!",
+          description: "OPTAVIA ACTIVE info shared successfully",
+        })
+      } catch (error: any) {
+        if (error.name !== "AbortError") {
+          handleCopyActiveInfo()
+        }
+      }
+    } else {
+      handleCopyActiveInfo()
+    }
+  }
+
+  // Copy just the link
+  const handleCopyLink = async () => {
+    try {
+      await navigator.clipboard.writeText(OPTAVIA_ACTIVE_URL)
+      toast({
+        title: "Link Copied!",
+        description: "OPTAVIA ACTIVE shop link copied to clipboard",
+      })
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to copy link",
+        variant: "destructive",
+      })
+    }
+  }
 
   const getTypeColor = (type: string) => {
     switch (type) {
@@ -239,14 +326,39 @@ export function ExerciseGuide() {
         {/* OPTAVIA ACTIVE Tab */}
         <TabsContent value="optavia-active" className="space-y-4 mt-4">
           <div className="bg-gradient-to-r from-[hsl(var(--optavia-green-light))] to-blue-50 rounded-lg p-4">
-            <h4 className="font-semibold text-optavia-dark mb-2 flex items-center gap-2">
-              <Dumbbell className="h-5 w-5 text-[hsl(var(--optavia-green))]" />
-              OPTAVIA ACTIVE Product Line
-            </h4>
-            <p className="text-sm text-optavia-gray">
-              Sports nutrition products designed to help people of all fitness levels optimize their 
-              motion habits and protect muscle mass during weight loss and aging.
-            </p>
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <h4 className="font-semibold text-optavia-dark mb-2 flex items-center gap-2">
+                  <Dumbbell className="h-5 w-5 text-[hsl(var(--optavia-green))]" />
+                  OPTAVIA ACTIVE Product Line
+                </h4>
+                <p className="text-sm text-optavia-gray">
+                  Sports nutrition products designed to help people of all fitness levels optimize their 
+                  motion habits and protect muscle mass during weight loss and aging.
+                </p>
+              </div>
+              {/* Share buttons */}
+              <div className="flex gap-1 flex-shrink-0">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={handleCopyActiveInfo}
+                  className="h-8 w-8 text-[hsl(var(--optavia-green))] hover:bg-white"
+                  title="Copy info to share with client"
+                >
+                  {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={handleShareActiveInfo}
+                  className="h-8 w-8 text-[hsl(var(--optavia-green))] hover:bg-white"
+                  title="Share with client"
+                >
+                  <Share2 className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
           </div>
 
           <div className="grid gap-4">
@@ -289,13 +401,33 @@ export function ExerciseGuide() {
             ))}
           </div>
 
+          {/* Action Buttons */}
+          <div className="grid sm:grid-cols-2 gap-2">
+            <Button
+              variant="outline"
+              className="gap-2 border-[hsl(var(--optavia-green))] text-[hsl(var(--optavia-green))] hover:bg-[hsl(var(--optavia-green-light))]"
+              onClick={() => window.open(OPTAVIA_ACTIVE_URL, "_blank")}
+            >
+              Shop OPTAVIA ACTIVE
+              <ExternalLink className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="outline"
+              className="gap-2 border-gray-300 text-optavia-dark hover:bg-gray-50"
+              onClick={handleCopyLink}
+            >
+              Copy Link for Client
+              <Copy className="h-4 w-4" />
+            </Button>
+          </div>
+
           <Button
-            variant="outline"
-            className="w-full gap-2 border-[hsl(var(--optavia-green))] text-[hsl(var(--optavia-green))] hover:bg-[hsl(var(--optavia-green-light))]"
-            onClick={() => window.open("https://www.optavia.com/us/en/shop/optavia-active/c/active", "_blank")}
+            variant="default"
+            className="w-full gap-2 bg-[hsl(var(--optavia-green))] hover:bg-[hsl(var(--optavia-green-dark))]"
+            onClick={handleShareActiveInfo}
           >
-            Shop OPTAVIA ACTIVE Products
-            <ExternalLink className="h-4 w-4" />
+            <Share2 className="h-4 w-4" />
+            Share Product Info with Client
           </Button>
 
           <p className="text-xs text-optavia-gray">
