@@ -45,7 +45,7 @@ export default function Home() {
     )
   }
 
-  // If user is authenticated, show redirecting message
+  // If user is authenticated, show redirecting message and redirect to training
   if (user) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-white">
@@ -57,7 +57,7 @@ export default function Home() {
     )
   }
 
-  // Show public landing page for unauthenticated users
+  // Show public landing page for unauthenticated users (logged out or never logged in)
   return (
     <div className="min-h-screen flex flex-col bg-white">
       <HomeLanding />
