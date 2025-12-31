@@ -277,7 +277,7 @@ export function DashboardOverview() {
 
             {/* Next Module */}
             {trainingProgress.nextModule && (
-              <Link href="/training">
+              <Link href={`/training/${trainingProgress.nextModule.id}`}>
                 <div className="p-3 rounded-lg bg-green-50 border border-green-200 hover:bg-green-100 transition-colors cursor-pointer">
                   <p className="text-xs text-green-600 font-medium mb-1">Continue with:</p>
                   <p className="font-medium text-sm text-optavia-dark flex items-center gap-2">
