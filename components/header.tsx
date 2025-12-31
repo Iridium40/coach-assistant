@@ -72,9 +72,9 @@ export function Header({ onSettingsClick, onHomeClick, onAnnouncementsClick, onR
               }}
             >
                 <img
-                    src="/branding/ca_icon_large.svg"
+                    src="/branding/ca_logo_large.svg"
                     alt="Coaching Amplifier"
-                    className="h-8 sm:h-10 md:h-12 w-auto"
+                    className="h-10 sm:h-12 md:h-14 w-auto"
                 />
             </Link>
           </div>
