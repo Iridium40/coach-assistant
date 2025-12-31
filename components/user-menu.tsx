@@ -12,7 +12,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Settings, LogOut, Bell, BarChart3, BellRing, UtensilsCrossed } from "lucide-react"
+import { Settings, LogOut, Bell, BarChart3, BellRing, UtensilsCrossed, Star } from "lucide-react"
 import { useUserData } from "@/contexts/user-data-context"
 
 interface UserMenuProps {
@@ -129,6 +129,13 @@ export function UserMenu({ onSettingsClick, onAnnouncementsClick, onReportsClick
             <DropdownMenuSeparator className="bg-gray-200" />
           </>
         )}
+        <DropdownMenuItem 
+          onClick={() => router.push("/favorites")}
+          className="text-optavia-dark hover:bg-gray-100 cursor-pointer"
+        >
+          <Star className="mr-2 h-4 w-4" />
+          <span>My Favorites</span>
+        </DropdownMenuItem>
         <DropdownMenuItem 
           onClick={handleSettingsClick}
           className="text-optavia-dark hover:bg-gray-100 cursor-pointer"
