@@ -187,20 +187,78 @@ function ClientRecipesContent() {
       </header>
 
       {/* Hero Section */}
-      <div className="bg-gradient-to-r from-[#2d5016] to-[#3d6b1e] text-white py-12">
-        <div className="container mx-auto px-4 text-center">
-          <div className="flex justify-center mb-4">
-            <div className="p-4 bg-white/20 rounded-full">
-              <UtensilsCrossed className="h-10 w-10" />
+      <div className="bg-gradient-to-r from-[#2d5016] to-[#3d6b1e] text-white py-10">
+        <div className="container mx-auto px-4">
+          <div className="flex flex-col lg:flex-row items-center justify-between gap-8">
+            {/* Left side - Title and description */}
+            <div className="text-center lg:text-left flex-1">
+              <div className="flex justify-center lg:justify-start mb-4">
+                <div className="p-3 bg-white/20 rounded-full">
+                  <UtensilsCrossed className="h-8 w-8" />
+                </div>
+              </div>
+              <h1 className="text-3xl md:text-4xl font-bold mb-2">
+                Lean & Green Recipes
+              </h1>
+              <p className="text-green-100 max-w-lg text-base">
+                Delicious, healthy meals to support your wellness journey.
+              </p>
+            </div>
+
+            {/* Right side - Newsletter signup */}
+            <div className="w-full lg:w-auto lg:max-w-md">
+              {subscribed ? (
+                <div className="bg-white/10 rounded-xl p-4 text-center backdrop-blur-sm border border-white/20">
+                  <CheckCircle className="h-8 w-8 mx-auto mb-2 text-green-300" />
+                  <p className="font-semibold text-sm">You&apos;re Subscribed!</p>
+                  <p className="text-green-200 text-xs mt-1">
+                    We&apos;ll notify you of new recipes.
+                  </p>
+                </div>
+              ) : (
+                <div className="bg-white/10 rounded-xl p-4 backdrop-blur-sm border border-white/20">
+                  <div className="flex items-center gap-2 mb-3">
+                    <Bell className="h-5 w-5 text-green-200" />
+                    <span className="font-semibold text-sm">Get notified of new recipes</span>
+                  </div>
+                  <form onSubmit={handleSubscribe} className="space-y-2">
+                    <div className="flex flex-col sm:flex-row gap-2">
+                      <Input
+                        type="text"
+                        placeholder="Name (optional)"
+                        value={subscriberName}
+                        onChange={(e) => setSubscriberName(e.target.value)}
+                        className="bg-white/10 border-white/30 text-white placeholder:text-green-200/70 focus:border-white h-9 text-sm"
+                      />
+                      <Input
+                        type="email"
+                        placeholder="Email address"
+                        value={subscriberEmail}
+                        onChange={(e) => setSubscriberEmail(e.target.value)}
+                        required
+                        className="bg-white/10 border-white/30 text-white placeholder:text-green-200/70 focus:border-white h-9 text-sm"
+                      />
+                      <Button
+                        type="submit"
+                        disabled={subscribing}
+                        size="sm"
+                        className="bg-white text-[#2d5016] hover:bg-green-50 font-semibold px-4 h-9 whitespace-nowrap"
+                      >
+                        {subscribing ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          "Notify Me"
+                        )}
+                      </Button>
+                    </div>
+                    <p className="text-[10px] text-green-200/70 text-center sm:text-left">
+                      We respect your privacy. Unsubscribe anytime.
+                    </p>
+                  </form>
+                </div>
+              )}
             </div>
           </div>
-          <h1 className="text-3xl md:text-4xl font-bold mb-3">
-            Lean & Green Recipes
-          </h1>
-          <p className="text-green-100 max-w-2xl mx-auto text-lg">
-            Delicious, healthy meals to support your wellness journey. 
-            Each recipe is designed to help you achieve your health goals.
-          </p>
         </div>
       </div>
 
@@ -318,69 +376,8 @@ function ClientRecipesContent() {
         )}
       </main>
 
-      {/* Recipe Notification Sign-up */}
-      <section className="bg-gradient-to-r from-[#2d5016] to-[#3d6b1e] py-12 mt-16">
-        <div className="container mx-auto px-4">
-          <div className="max-w-2xl mx-auto text-center">
-            {subscribed ? (
-              <div className="text-white">
-                <CheckCircle className="h-16 w-16 mx-auto mb-4 text-green-300" />
-                <h3 className="text-2xl font-bold mb-2">You&apos;re Subscribed!</h3>
-                <p className="text-green-100">
-                  We&apos;ll send you an email when new Lean & Green recipes are added.
-                </p>
-              </div>
-            ) : (
-              <>
-                <Bell className="h-12 w-12 mx-auto mb-4 text-green-200" />
-                <h3 className="text-2xl font-bold text-white mb-2">
-                  Get New Recipe Notifications
-                </h3>
-                <p className="text-green-100 mb-6">
-                  Be the first to know when we add delicious new Lean & Green recipes!
-                </p>
-                <form onSubmit={handleSubscribe} className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
-                  <Input
-                    type="text"
-                    placeholder="Your name (optional)"
-                    value={subscriberName}
-                    onChange={(e) => setSubscriberName(e.target.value)}
-                    className="bg-white/10 border-white/30 text-white placeholder:text-green-200 focus:border-white"
-                  />
-                  <Input
-                    type="email"
-                    placeholder="Your email address"
-                    value={subscriberEmail}
-                    onChange={(e) => setSubscriberEmail(e.target.value)}
-                    required
-                    className="bg-white/10 border-white/30 text-white placeholder:text-green-200 focus:border-white"
-                  />
-                  <Button
-                    type="submit"
-                    disabled={subscribing}
-                    className="bg-white text-[#2d5016] hover:bg-green-50 font-semibold px-6 whitespace-nowrap"
-                  >
-                    {subscribing ? (
-                      <>
-                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                        Subscribing...
-                      </>
-                    ) : (
-                      "Notify Me"
-                    )}
-                  </Button>
-                </form>
-                <p className="text-xs text-green-200 mt-4">
-                  We respect your privacy. Unsubscribe anytime.
-                </p>
-              </>
-            )}
-          </div>
-        </div>
-      </section>
-
       {/* Footer */}
-      <footer className="bg-gray-800 text-white py-8">
+      <footer className="bg-gray-800 text-white py-8 mt-16">
         <div className="container mx-auto px-4 text-center">
           <div className="flex justify-center mb-4">
             <picture>
