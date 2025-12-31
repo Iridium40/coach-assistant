@@ -71,7 +71,7 @@ export function AdminZoomCalls({ onClose }: { onClose?: () => void }) {
     if (error) {
       toast({
         title: "Error",
-        description: "Failed to load zoom calls",
+        description: "Failed to load meetings",
         variant: "destructive",
       })
     } else {
@@ -125,20 +125,20 @@ export function AdminZoomCalls({ onClose }: { onClose?: () => void }) {
     e?.stopPropagation()
     e?.preventDefault()
     
-    if (!confirm("Are you sure you want to delete this zoom call?")) return
+    if (!confirm("Are you sure you want to delete this meeting/event?")) return
 
     const { error } = await supabase.from("zoom_calls").delete().eq("id", id)
 
     if (error) {
       toast({
         title: "Error",
-        description: "Failed to delete zoom call",
+        description: "Failed to delete meeting",
         variant: "destructive",
       })
     } else {
       toast({
         title: "Success",
-        description: "Zoom call deleted",
+        description: "Meeting deleted",
       })
       loadZoomCalls()
     }
@@ -194,13 +194,13 @@ export function AdminZoomCalls({ onClose }: { onClose?: () => void }) {
       console.error("Zoom call save error:", error)
       toast({
         title: "Error",
-        description: error.message || "Failed to save zoom call",
+        description: error.message || "Failed to save meeting",
         variant: "destructive",
       })
     } else {
       toast({
         title: "Success",
-        description: editingId ? "Zoom call updated" : "Zoom call created",
+        description: editingId ? "Meeting updated" : "Meeting created",
       })
       resetForm()
       loadZoomCalls()
@@ -251,7 +251,7 @@ export function AdminZoomCalls({ onClose }: { onClose?: () => void }) {
   return (
     <div className="container mx-auto px-4 py-8 max-w-6xl">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="font-heading font-bold text-2xl sm:text-3xl text-optavia-dark">Manage Zoom Calls</h1>
+        <h1 className="font-heading font-bold text-2xl sm:text-3xl text-optavia-dark">Manage Meetings & Events</h1>
         {onClose && (
           <Button variant="ghost" onClick={onClose} className="text-optavia-gray hover:bg-gray-100">
             <X className="h-4 w-4" />
@@ -267,16 +267,16 @@ export function AdminZoomCalls({ onClose }: { onClose?: () => void }) {
             className="bg-[hsl(var(--optavia-green))] hover:bg-[hsl(var(--optavia-green-dark))]"
           >
             <Plus className="h-4 w-4 mr-2" />
-            New Zoom Call
+            New Meeting / Event
           </Button>
         ) : (
           <Card className="bg-white border border-gray-200 shadow-sm">
             <CardHeader>
               <CardTitle className="text-optavia-dark">
-                {editingId ? "Edit Zoom Call" : "Schedule New Zoom Call"}
+                {editingId ? "Edit Meeting / Event" : "Schedule New Meeting / Event"}
               </CardTitle>
               <CardDescription className="text-optavia-gray">
-                Schedule a weekly coaching call for coaches or coaches with clients
+                Schedule a meeting or event for coaches or coaches with clients
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -499,7 +499,7 @@ export function AdminZoomCalls({ onClose }: { onClose?: () => void }) {
                     type="submit"
                     className="bg-[hsl(var(--optavia-green))] hover:bg-[hsl(var(--optavia-green-dark))]"
                   >
-                    {editingId ? "Update" : "Create"} Zoom Call
+                    {editingId ? "Update" : "Create"} Meeting / Event
                   </Button>
                   <Button type="button" variant="outline" onClick={resetForm}>
                     Cancel
@@ -514,13 +514,13 @@ export function AdminZoomCalls({ onClose }: { onClose?: () => void }) {
       {/* List of Zoom Calls */}
       <div className="space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <h2 className="font-heading font-bold text-xl text-optavia-dark">All Zoom Calls</h2>
+          <h2 className="font-heading font-bold text-xl text-optavia-dark">All Meetings & Events</h2>
           {zoomCalls.length > 0 && (
             <div className="relative w-full sm:w-64">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
               <Input
                 type="text"
-                placeholder="Search calls..."
+                placeholder="Search meetings..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-9 border-gray-300"
@@ -542,7 +542,7 @@ export function AdminZoomCalls({ onClose }: { onClose?: () => void }) {
         {zoomCalls.length === 0 ? (
           <Card className="bg-white border border-gray-200">
             <CardContent className="pt-6">
-              <p className="text-center text-optavia-gray">No zoom calls scheduled yet. Create one to get started.</p>
+              <p className="text-center text-optavia-gray">No meetings or events scheduled yet. Create one to get started.</p>
             </CardContent>
           </Card>
         ) : (() => {
@@ -560,7 +560,7 @@ export function AdminZoomCalls({ onClose }: { onClose?: () => void }) {
               <Card className="bg-white border border-gray-200">
                 <CardContent className="pt-6">
                   <p className="text-center text-optavia-gray">
-                    No zoom calls found matching "{searchQuery}"
+                    No meetings found matching "{searchQuery}"
                   </p>
                 </CardContent>
               </Card>

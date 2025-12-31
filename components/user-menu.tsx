@@ -131,7 +131,7 @@ export function UserMenu({ onSettingsClick, onAnnouncementsClick, onReportsClick
               className="text-optavia-dark hover:bg-gray-100 cursor-pointer"
             >
               <Video className="mr-2 h-4 w-4" />
-              <span>Manage Zoom Calls</span>
+              <span>Manage Meetings & Events</span>
             </DropdownMenuItem>
             <DropdownMenuSeparator className="bg-gray-200" />
           </>
