@@ -4,6 +4,7 @@ import { useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
+import { Hero } from "@/components/hero"
 import { CalendarView } from "@/components/calendar-view"
 import { useUserData } from "@/contexts/user-data-context"
 
@@ -45,15 +46,16 @@ export default function CalendarPage() {
   return (
     <div className="min-h-screen flex flex-col bg-white">
       <Header activeTab="calendar" />
+      <Hero />
       <main className="flex-1 bg-white">
-        <div className="container mx-auto px-4 py-6 sm:py-8">
+        <div className="container mx-auto px-4 py-4 sm:py-8">
           {/* Page Header */}
-          <div className="text-center mb-8">
-            <h1 className="font-heading font-bold text-2xl sm:text-3xl text-optavia-dark mb-3">
+          <div className="text-center py-4 sm:py-8 mb-6">
+            <h2 className="font-heading font-bold text-2xl sm:text-3xl text-optavia-dark mb-3 sm:mb-4">
               Calendar
-            </h1>
-            <p className="text-optavia-gray text-base sm:text-lg max-w-2xl mx-auto">
-              View upcoming Zoom calls, training sessions, and team events.
+            </h2>
+            <p className="text-optavia-gray text-base sm:text-lg max-w-2xl mx-auto px-4">
+              View upcoming meetings, training sessions, and team events.
             </p>
           </div>
           
