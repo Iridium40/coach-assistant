@@ -14,8 +14,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { Search, Clock, Users, ChefHat, UtensilsCrossed, ArrowLeft } from "lucide-react"
+import { Search, Clock, Users, ChefHat, UtensilsCrossed, ArrowLeft, Bell, CheckCircle, Loader2 } from "lucide-react"
 import { getRecipes } from "@/lib/supabase/data"
+import { createClient } from "@/lib/supabase/client"
+import { useToast } from "@/hooks/use-toast"
 import type { Recipe } from "@/lib/types"
 import { recipes as staticRecipes } from "@/lib/data"
 
@@ -45,10 +47,19 @@ export default function ClientRecipesPage() {
 function ClientRecipesContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
+  const { toast } = useToast()
+  const supabase = createClient()
+  
   const [recipes, setRecipes] = useState<Recipe[]>(staticRecipes)
   const [loading, setLoading] = useState(true)
   const [selectedCategory, setSelectedCategory] = useState<string>("All")
   const [searchQuery, setSearchQuery] = useState("")
+  
+  // Newsletter signup state
+  const [subscriberEmail, setSubscriberEmail] = useState("")
+  const [subscriberName, setSubscriberName] = useState("")
+  const [subscribing, setSubscribing] = useState(false)
+  const [subscribed, setSubscribed] = useState(false)
   
   // Get coach name from URL if present (from email link)
   const coachName = searchParams.get("coach")
@@ -81,6 +92,63 @@ function ClientRecipesContent() {
     }),
     [recipes, selectedCategory, searchQuery]
   )
+
+  const handleSubscribe = async (e: React.FormEvent) => {
+    e.preventDefault()
+    
+    if (!subscriberEmail.trim()) {
+      toast({
+        title: "Email required",
+        description: "Please enter your email address",
+        variant: "destructive",
+      })
+      return
+    }
+
+    // Basic email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailRegex.test(subscriberEmail)) {
+      toast({
+        title: "Invalid email",
+        description: "Please enter a valid email address",
+        variant: "destructive",
+      })
+      return
+    }
+
+    setSubscribing(true)
+
+    try {
+      const { error } = await supabase
+        .from("recipe_subscribers")
+        .upsert({
+          email: subscriberEmail.trim().toLowerCase(),
+          name: subscriberName.trim() || null,
+          subscribed: true,
+          subscribed_at: new Date().toISOString(),
+        }, {
+          onConflict: "email",
+          ignoreDuplicates: false,
+        })
+
+      if (error) throw error
+
+      setSubscribed(true)
+      toast({
+        title: "Subscribed!",
+        description: "You'll receive email notifications when new recipes are added.",
+      })
+    } catch (error: any) {
+      console.error("Error subscribing:", error)
+      toast({
+        title: "Error",
+        description: "Failed to subscribe. Please try again.",
+        variant: "destructive",
+      })
+    } finally {
+      setSubscribing(false)
+    }
+  }
 
   if (loading) {
     return (
@@ -250,8 +318,69 @@ function ClientRecipesContent() {
         )}
       </main>
 
+      {/* Recipe Notification Sign-up */}
+      <section className="bg-gradient-to-r from-[#2d5016] to-[#3d6b1e] py-12 mt-16">
+        <div className="container mx-auto px-4">
+          <div className="max-w-2xl mx-auto text-center">
+            {subscribed ? (
+              <div className="text-white">
+                <CheckCircle className="h-16 w-16 mx-auto mb-4 text-green-300" />
+                <h3 className="text-2xl font-bold mb-2">You&apos;re Subscribed!</h3>
+                <p className="text-green-100">
+                  We&apos;ll send you an email when new Lean & Green recipes are added.
+                </p>
+              </div>
+            ) : (
+              <>
+                <Bell className="h-12 w-12 mx-auto mb-4 text-green-200" />
+                <h3 className="text-2xl font-bold text-white mb-2">
+                  Get New Recipe Notifications
+                </h3>
+                <p className="text-green-100 mb-6">
+                  Be the first to know when we add delicious new Lean & Green recipes!
+                </p>
+                <form onSubmit={handleSubscribe} className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
+                  <Input
+                    type="text"
+                    placeholder="Your name (optional)"
+                    value={subscriberName}
+                    onChange={(e) => setSubscriberName(e.target.value)}
+                    className="bg-white/10 border-white/30 text-white placeholder:text-green-200 focus:border-white"
+                  />
+                  <Input
+                    type="email"
+                    placeholder="Your email address"
+                    value={subscriberEmail}
+                    onChange={(e) => setSubscriberEmail(e.target.value)}
+                    required
+                    className="bg-white/10 border-white/30 text-white placeholder:text-green-200 focus:border-white"
+                  />
+                  <Button
+                    type="submit"
+                    disabled={subscribing}
+                    className="bg-white text-[#2d5016] hover:bg-green-50 font-semibold px-6 whitespace-nowrap"
+                  >
+                    {subscribing ? (
+                      <>
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        Subscribing...
+                      </>
+                    ) : (
+                      "Notify Me"
+                    )}
+                  </Button>
+                </form>
+                <p className="text-xs text-green-200 mt-4">
+                  We respect your privacy. Unsubscribe anytime.
+                </p>
+              </>
+            )}
+          </div>
+        </div>
+      </section>
+
       {/* Footer */}
-      <footer className="bg-gray-800 text-white py-8 mt-16">
+      <footer className="bg-gray-800 text-white py-8">
         <div className="container mx-auto px-4 text-center">
           <div className="flex justify-center mb-4">
             <picture>

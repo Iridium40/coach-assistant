@@ -99,6 +99,22 @@ This will create policies that allow:
 - Public read access to recipe images
 - Admin users can upload, update, and delete recipe images
 
+### Recipe Subscribers Table
+
+For client email notifications when new recipes are added:
+
+1. In your Supabase project dashboard, go to **SQL Editor**
+2. Open the file `supabase/migrations/008_recipe_subscribers.sql` from this project
+3. Copy the entire contents
+4. Paste it into the SQL Editor in Supabase
+5. Click **Run** to execute
+
+This will create:
+- `recipe_subscribers` table for storing email notification subscriptions
+- RLS policies allowing:
+  - Anyone (including anonymous) to subscribe
+  - Admins to view and manage all subscribers
+
 ### Option B: Disable RLS on Storage (Alternative)
 
 If you prefer to disable RLS on storage entirely (not recommended for production):
