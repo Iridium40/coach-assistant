@@ -379,7 +379,7 @@ export function DashboardOverview() {
         </Card>
 
         {/* Quick Actions Card */}
-        <Card className="bg-white border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
+        <Card className="bg-white border border-gray-200 shadow-sm hover:shadow-md transition-shadow md:col-span-2 lg:col-span-3">
           <CardHeader className="pb-3">
             <CardTitle className="text-lg flex items-center gap-2 text-optavia-dark">
               <Sparkles className="h-5 w-5 text-amber-500" />
@@ -387,7 +387,7 @@ export function DashboardOverview() {
             </CardTitle>
           </CardHeader>
           <CardContent className="pt-0">
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
               <Link href="/meal-planner">
                 <div className="p-4 rounded-lg bg-gradient-to-br from-orange-50 to-amber-50 border border-orange-200 hover:from-orange-100 hover:to-amber-100 transition-colors text-center cursor-pointer">
                   <UtensilsCrossed className="h-6 w-6 mx-auto mb-2 text-orange-600" />
