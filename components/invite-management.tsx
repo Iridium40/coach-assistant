@@ -19,7 +19,9 @@ import { generateInviteKey, createInviteLink } from "@/lib/invites"
 import { sendInviteEmail } from "@/lib/email"
 import { Switch } from "@/components/ui/switch"
 import { Badge } from "@/components/ui/badge"
-import { X, Copy, Check, UserPlus, History, Clock, UserCheck, UserX } from "lucide-react"
+import { X, Copy, Check, UserPlus, History, Clock, UserCheck, UserX, AlertTriangle } from "lucide-react"
+import Link from "next/link"
+import { Checkbox } from "@/components/ui/checkbox"
 
 interface InviteManagementProps {
   onClose?: () => void
@@ -61,6 +63,7 @@ export function InviteManagement({ onClose }: InviteManagementProps) {
   const [coachRank, setCoachRank] = useState("")
   const [optaviaId, setOptaviaId] = useState("")
   const [sendEmail, setSendEmail] = useState(true) // Default to sending email
+  const [certifyCoach, setCertifyCoach] = useState(false) // Certification checkbox
   const [loading, setLoading] = useState(false)
   const [generatedInvites, setGeneratedInvites] = useState<GeneratedInvite[]>([])
   const [inviteHistory, setInviteHistory] = useState<InviteHistory[]>([])
@@ -265,6 +268,7 @@ export function InviteManagement({ onClose }: InviteManagementProps) {
       setEmail("")
       setCoachRank("")
       setOptaviaId("")
+      setCertifyCoach(false)
 
       // Reload history to show the new invite
       await loadInviteHistory()
@@ -332,6 +336,29 @@ export function InviteManagement({ onClose }: InviteManagementProps) {
       </div>
 
       <div className="space-y-6">
+        {/* Important Disclaimer */}
+        <Card className="bg-amber-50 border border-amber-200 shadow-lg">
+          <CardContent className="pt-6">
+            <div className="flex gap-3">
+              <AlertTriangle className="h-5 w-5 text-amber-600 flex-shrink-0 mt-0.5" />
+              <div className="space-y-2">
+                <p className="text-sm font-semibold text-amber-800">Important Notice</p>
+                <p className="text-sm text-amber-700">
+                  Only active <strong>OPTAVIA Health Coaches</strong> should be invited to become users of Coaching Amplifier. 
+                  By sending an invite, you certify that the person you are inviting is an active OPTAVIA Coach in good standing.
+                </p>
+                <p className="text-sm text-amber-700">
+                  Please review our{" "}
+                  <Link href="/terms" className="text-amber-800 underline hover:text-amber-900 font-medium">
+                    Terms and Conditions
+                  </Link>{" "}
+                  for more information.
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
         {/* Create Invite Form */}
         <Card className="bg-white border border-gray-200 shadow-lg">
           <CardHeader>
@@ -422,9 +449,25 @@ export function InviteManagement({ onClose }: InviteManagementProps) {
               </p>
             )}
 
+            <div className="flex items-start space-x-3 pt-4 border-t border-gray-100">
+              <Checkbox
+                id="certifyCoach"
+                checked={certifyCoach}
+                onCheckedChange={(checked) => setCertifyCoach(checked === true)}
+                className="mt-0.5"
+              />
+              <Label htmlFor="certifyCoach" className="cursor-pointer text-sm text-optavia-dark leading-relaxed">
+                I certify that the person I am inviting is an <strong>active OPTAVIA Health Coach</strong> and 
+                I have reviewed the{" "}
+                <Link href="/terms" className="text-[hsl(var(--optavia-green))] underline hover:text-[hsl(var(--optavia-green-dark))]">
+                  Terms and Conditions
+                </Link>.
+              </Label>
+            </div>
+
             <Button
               onClick={handleGenerateInvite}
-              disabled={loading || !fullName || !email || !coachRank}
+              disabled={loading || !fullName || !email || !coachRank || !optaviaId || !certifyCoach}
               className="w-full bg-[hsl(var(--optavia-green))] hover:bg-[hsl(var(--optavia-green-dark))] text-white"
             >
               {loading ? "Generating..." : "Generate Invite Link"}

@@ -6,8 +6,9 @@ import { usePathname } from "next/navigation"
 import { UserMenu } from "@/components/user-menu"
 import { useAuth } from "@/hooks/use-auth"
 import { useSupabaseData } from "@/hooks/use-supabase-data"
-import { Menu, X } from "lucide-react"
+import { Menu, X, UserPlus } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { useRouter } from "next/navigation"
 
 interface HeaderProps {
   onSettingsClick?: () => void
@@ -23,7 +24,18 @@ export function Header({ onSettingsClick, onHomeClick, onAnnouncementsClick, onR
   const { user, loading } = useAuth()
   const { profile } = useSupabaseData(user)
   const pathname = usePathname()
+  const router = useRouter()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+
+  const isAdmin = profile?.user_role?.toLowerCase() === "admin"
+
+  const handleInviteClick = () => {
+    if (onInviteClick) {
+      onInviteClick()
+    } else {
+      router.push("/admin/invite")
+    }
+  }
 
   // Determine active tab from pathname if not provided
   const getActiveTab = (): "training" | "resources" | "recipes" => {
@@ -84,7 +96,31 @@ export function Header({ onSettingsClick, onHomeClick, onAnnouncementsClick, onR
                 )}
               </Button>
             )}
-            {!loading && user && <UserMenu onSettingsClick={onSettingsClick} onAnnouncementsClick={onAnnouncementsClick} onReportsClick={onReportsClick} onInviteClick={onInviteClick} />}
+            {/* Invite Coach Button (Admin Only) */}
+            {!loading && user && isAdmin && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleInviteClick}
+                className="hidden sm:flex items-center gap-2 border-[hsl(var(--optavia-green))] text-[hsl(var(--optavia-green))] hover:bg-[hsl(var(--optavia-green))] hover:text-white transition-colors"
+              >
+                <UserPlus className="h-4 w-4" />
+                <span className="hidden md:inline">Invite Coach</span>
+              </Button>
+            )}
+            {/* Mobile Invite Button (Admin Only) */}
+            {!loading && user && isAdmin && (
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleInviteClick}
+                className="sm:hidden text-[hsl(var(--optavia-green))] hover:bg-green-50"
+                aria-label="Invite Coach"
+              >
+                <UserPlus className="h-5 w-5" />
+              </Button>
+            )}
+            {!loading && user && <UserMenu onSettingsClick={onSettingsClick} onAnnouncementsClick={onAnnouncementsClick} onReportsClick={onReportsClick} />}
           </div>
         </div>
 

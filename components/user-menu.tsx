@@ -12,17 +12,16 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Settings, LogOut, Bell, BarChart3, UserPlus, BellRing } from "lucide-react"
+import { Settings, LogOut, Bell, BarChart3, BellRing } from "lucide-react"
 import { useUserData } from "@/contexts/user-data-context"
 
 interface UserMenuProps {
   onSettingsClick?: () => void
   onAnnouncementsClick?: () => void
   onReportsClick?: () => void
-  onInviteClick?: () => void
 }
 
-export function UserMenu({ onSettingsClick, onAnnouncementsClick, onReportsClick, onInviteClick }: UserMenuProps) {
+export function UserMenu({ onSettingsClick, onAnnouncementsClick, onReportsClick }: UserMenuProps) {
   const router = useRouter()
   const { user, profile, signOut } = useUserData()
   const [loading, setLoading] = useState(false)
@@ -50,14 +49,6 @@ export function UserMenu({ onSettingsClick, onAnnouncementsClick, onReportsClick
       onReportsClick()
     } else {
       router.push("/admin/reports")
-    }
-  }
-
-  const handleInviteClick = () => {
-    if (onInviteClick) {
-      onInviteClick()
-    } else {
-      router.push("/admin/invite")
     }
   }
 
@@ -127,13 +118,6 @@ export function UserMenu({ onSettingsClick, onAnnouncementsClick, onReportsClick
             >
               <BarChart3 className="mr-2 h-4 w-4" />
               <span>Reports</span>
-            </DropdownMenuItem>
-            <DropdownMenuItem 
-              onClick={handleInviteClick}
-              className="text-optavia-dark hover:bg-gray-100 cursor-pointer"
-            >
-              <UserPlus className="mr-2 h-4 w-4" />
-              <span>Invite Coach</span>
             </DropdownMenuItem>
             <DropdownMenuSeparator className="bg-gray-200" />
           </>
