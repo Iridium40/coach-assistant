@@ -5,9 +5,10 @@ import { useRouter, useParams, useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card } from "@/components/ui/card"
-import { ArrowLeft, Clock, Users, ChefHat, Share2, Copy, Check, UtensilsCrossed } from "lucide-react"
+import { ArrowLeft, Clock, Users, ChefHat, Share2, Copy, Check, UtensilsCrossed, Flame } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { getRecipes } from "@/lib/supabase/data"
+import { estimateCaloriesPerServing } from "@/lib/calorie-utils"
 import { recipes as staticRecipes } from "@/lib/data"
 import type { Recipe } from "@/lib/types"
 
@@ -207,7 +208,7 @@ function ClientRecipeDetailContent() {
         </div>
 
         {/* Quick Stats */}
-        <div className="grid grid-cols-4 gap-4 mb-6 sm:mb-8">
+        <div className="grid grid-cols-3 sm:grid-cols-5 gap-3 sm:gap-4 mb-6 sm:mb-8">
           <Card className="p-3 sm:p-4 text-center bg-white">
             <Clock className="h-5 w-5 text-[#2d5016] mx-auto mb-1" />
             <div className="text-xs text-gray-500">Prep</div>
@@ -222,6 +223,11 @@ function ClientRecipeDetailContent() {
             <Users className="h-5 w-5 text-[#2d5016] mx-auto mb-1" />
             <div className="text-xs text-gray-500">Serves</div>
             <div className="font-bold text-gray-800">{recipe.servings}</div>
+          </Card>
+          <Card className="p-3 sm:p-4 text-center bg-white">
+            <Flame className="h-5 w-5 text-orange-500 mx-auto mb-1" />
+            <div className="text-xs text-gray-500">Calories</div>
+            <div className="font-bold text-gray-800">~{estimateCaloriesPerServing(recipe.counts, recipe.servings)}</div>
           </Card>
           <Card className="p-3 sm:p-4 text-center bg-white">
             <ChefHat className="h-5 w-5 text-[#2d5016] mx-auto mb-1" />

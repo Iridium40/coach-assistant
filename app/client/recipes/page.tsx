@@ -14,10 +14,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { Search, Clock, Users, ChefHat, UtensilsCrossed, ArrowLeft, Bell, CheckCircle, Loader2 } from "lucide-react"
+import { Search, Clock, Users, ChefHat, UtensilsCrossed, ArrowLeft, Bell, CheckCircle, Loader2, Flame } from "lucide-react"
 import { getRecipes } from "@/lib/supabase/data"
 import { createClient } from "@/lib/supabase/client"
 import { useToast } from "@/hooks/use-toast"
+import { estimateCaloriesPerServing } from "@/lib/calorie-utils"
 import type { Recipe } from "@/lib/types"
 import { recipes as staticRecipes } from "@/lib/data"
 
@@ -359,7 +360,7 @@ function ClientRecipesContent() {
                   <p className="text-sm text-gray-600 mt-1 line-clamp-2">
                     {recipe.description}
                   </p>
-                  <div className="flex items-center gap-4 mt-3 text-sm text-gray-500">
+                  <div className="flex items-center flex-wrap gap-x-4 gap-y-1 mt-3 text-sm text-gray-500">
                     <span className="flex items-center gap-1">
                       <Clock className="h-4 w-4" />
                       {recipe.prepTime + recipe.cookTime}m
@@ -367,6 +368,10 @@ function ClientRecipesContent() {
                     <span className="flex items-center gap-1">
                       <Users className="h-4 w-4" />
                       {recipe.servings}
+                    </span>
+                    <span className="flex items-center gap-1 text-orange-600">
+                      <Flame className="h-4 w-4" />
+                      ~{estimateCaloriesPerServing(recipe.counts, recipe.servings)} cal
                     </span>
                   </div>
                 </CardContent>

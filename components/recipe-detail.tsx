@@ -4,8 +4,9 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card } from "@/components/ui/card"
-import { ArrowLeft, Clock, Users, Heart, ChefHat, Share2, Copy, Check } from "lucide-react"
+import { ArrowLeft, Clock, Users, Heart, ChefHat, Share2, Copy, Check, Flame } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
+import { estimateCaloriesPerServing } from "@/lib/calorie-utils"
 import type { Recipe, UserData } from "@/lib/types"
 
 interface RecipeDetailProps {
@@ -122,7 +123,7 @@ export function RecipeDetail({ recipe, userData, setUserData, toggleFavoriteReci
 
         <p className="text-optavia-gray text-base sm:text-lg mb-4 sm:mb-6">{recipe.description}</p>
 
-        <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-4 sm:gap-6 text-optavia-gray mb-4 sm:mb-6">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:flex lg:flex-wrap gap-4 sm:gap-6 text-optavia-gray mb-4 sm:mb-6">
           <div className="flex items-center gap-2">
             <Clock className="h-5 w-5" />
             <div>
@@ -142,6 +143,13 @@ export function RecipeDetail({ recipe, userData, setUserData, toggleFavoriteReci
             <div>
               <div className="text-sm font-medium">Servings</div>
               <div className="font-bold text-optavia-dark">{recipe.servings}</div>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <Flame className="h-5 w-5 text-orange-500" />
+            <div>
+              <div className="text-sm font-medium">Est. Calories</div>
+              <div className="font-bold text-optavia-dark">~{estimateCaloriesPerServing(recipe.counts, recipe.servings)}</div>
             </div>
           </div>
           <div className="flex items-center gap-2">
