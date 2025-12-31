@@ -16,8 +16,8 @@ interface HeaderProps {
   onAnnouncementsClick?: () => void
   onReportsClick?: () => void
   onInviteClick?: () => void
-  activeTab?: "training" | "resources" | "recipes"
-  onTabChange?: (tab: "training" | "resources" | "recipes") => void
+  activeTab?: "training" | "resources" | "recipes" | "calendar"
+  onTabChange?: (tab: "training" | "resources" | "recipes" | "calendar") => void
 }
 
 export function Header({ onSettingsClick, onHomeClick, onAnnouncementsClick, onReportsClick, onInviteClick, activeTab, onTabChange }: HeaderProps) {
@@ -38,11 +38,12 @@ export function Header({ onSettingsClick, onHomeClick, onAnnouncementsClick, onR
   }
 
   // Determine active tab from pathname if not provided
-  const getActiveTab = (): "training" | "resources" | "recipes" => {
+  const getActiveTab = (): "training" | "resources" | "recipes" | "calendar" => {
     if (activeTab) return activeTab
     if (pathname?.startsWith("/training")) return "training"
     if (pathname?.startsWith("/resources")) return "resources"
     if (pathname?.startsWith("/recipes")) return "recipes"
+    if (pathname?.startsWith("/calendar")) return "calendar"
     return "training" // default
   }
 
@@ -50,6 +51,7 @@ export function Header({ onSettingsClick, onHomeClick, onAnnouncementsClick, onR
 
   const navItems = [
     { id: "training" as const, label: "Training", href: "/training" },
+    { id: "calendar" as const, label: "Calendar", href: "/calendar" },
     { id: "resources" as const, label: "Resources", href: "/resources" },
     { id: "recipes" as const, label: "Recipes", href: "/recipes" },
   ]
