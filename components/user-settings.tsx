@@ -45,6 +45,7 @@ export function UserSettings({ onClose }: UserSettingsProps) {
   const [fullName, setFullName] = useState(profile?.full_name || "")
   const [coachRank, setCoachRank] = useState<string>(profile?.coach_rank || "")
   const [optaviaId, setOptaviaId] = useState(profile?.optavia_id || "")
+  const [phoneNumber, setPhoneNumber] = useState(profile?.phone_number || "")
 
   // Update local state when profile changes
   useEffect(() => {
@@ -52,11 +53,13 @@ export function UserSettings({ onClose }: UserSettingsProps) {
       setFullName(profile.full_name || "")
       setCoachRank(profile.coach_rank || "")
       setOptaviaId(profile.optavia_id || "")
+      setPhoneNumber(profile.phone_number || "")
     } else {
       // Reset to defaults if profile is null
       setFullName("")
       setCoachRank("")
       setOptaviaId("")
+      setPhoneNumber("")
     }
   }, [profile])
 
@@ -171,10 +174,11 @@ export function UserSettings({ onClose }: UserSettingsProps) {
     // Check if user is a coach (not admin)
     const userIsCoach = profile?.user_role?.toLowerCase() !== "admin"
 
-    // Coaches can only update their name; admins can update all fields
+    // Coaches can only update their name and phone; admins can update all fields
     if (userIsCoach) {
       const { error } = await updateProfile({
         full_name: fullName,
+        phone_number: phoneNumber || null,
       })
 
       if (error) {
@@ -197,6 +201,7 @@ export function UserSettings({ onClose }: UserSettingsProps) {
 
       const { error } = await updateProfile({
         full_name: fullName,
+        phone_number: phoneNumber || null,
         is_new_coach: isNewCoach,
         coach_rank: coachRank || null,
         optavia_id: optaviaId || null,
@@ -326,6 +331,18 @@ export function UserSettings({ onClose }: UserSettingsProps) {
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
                 placeholder="Your full name"
+                className="bg-white border-gray-300 text-optavia-dark"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="phoneNumber" className="text-optavia-dark">Phone Number</Label>
+              <Input
+                id="phoneNumber"
+                type="tel"
+                value={phoneNumber}
+                onChange={(e) => setPhoneNumber(e.target.value)}
+                placeholder="(555) 555-5555"
                 className="bg-white border-gray-300 text-optavia-dark"
               />
             </div>
