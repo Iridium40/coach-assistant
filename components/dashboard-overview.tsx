@@ -12,7 +12,7 @@ import { createClient } from "@/lib/supabase/client"
 import { 
   Video, Calendar, Clock, Users, UserCircle, ChevronRight,
   BookOpen, UtensilsCrossed, Wrench, ExternalLink, Award,
-  CheckCircle, PlayCircle, Sparkles, Star, Rocket, Building2, GraduationCap
+  CheckCircle, PlayCircle, Sparkles, Star, Rocket, Building2, GraduationCap, Link2
 } from "lucide-react"
 import { badgeConfig } from "@/lib/badge-config"
 import type { ZoomCall } from "@/lib/types"
@@ -361,6 +361,58 @@ export function DashboardOverview() {
                   <p className="text-sm font-medium text-optavia-dark">View Calendar</p>
                 </div>
               </Link>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Quick Links Card */}
+        <Card className="bg-white border border-gray-200 shadow-sm hover:shadow-md transition-shadow md:col-span-2 lg:col-span-3">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-lg flex items-center gap-2 text-optavia-dark">
+              <Link2 className="h-5 w-5 text-[hsl(var(--optavia-green))]" />
+              Quick Links
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="pt-0">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <a 
+                href="https://www.facebook.com/groups/optaviastrong" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="flex items-center justify-center gap-3 p-4 rounded-lg border-2 border-[hsl(var(--optavia-green))] hover:bg-[hsl(var(--optavia-green-light))] transition-colors cursor-pointer group"
+              >
+                <ExternalLink className="h-5 w-5 text-[hsl(var(--optavia-green))] flex-shrink-0" />
+                <span className="font-medium text-optavia-dark group-hover:text-[hsl(var(--optavia-green))]">
+                  Optavia Strong Facebook Group
+                </span>
+                <ExternalLink className="h-4 w-4 text-optavia-gray flex-shrink-0" />
+              </a>
+              
+              <a 
+                href="https://connect.optavia.com" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="flex items-center justify-center gap-3 p-4 rounded-lg border-2 border-[hsl(var(--optavia-green))] hover:bg-[hsl(var(--optavia-green-light))] transition-colors cursor-pointer group"
+              >
+                <ExternalLink className="h-5 w-5 text-[hsl(var(--optavia-green))] flex-shrink-0" />
+                <span className="font-medium text-optavia-dark group-hover:text-[hsl(var(--optavia-green))]">
+                  OPTAVIA Connect
+                </span>
+                <ExternalLink className="h-4 w-4 text-optavia-gray flex-shrink-0" />
+              </a>
+              
+              <a 
+                href="https://profile.optavia.com" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="flex items-center justify-center gap-3 p-4 rounded-lg border-2 border-[hsl(var(--optavia-green))] hover:bg-[hsl(var(--optavia-green-light))] transition-colors cursor-pointer group"
+              >
+                <ExternalLink className="h-5 w-5 text-[hsl(var(--optavia-green))] flex-shrink-0" />
+                <span className="font-medium text-optavia-dark group-hover:text-[hsl(var(--optavia-green))]">
+                  OPTAVIA Profile
+                </span>
+                <ExternalLink className="h-4 w-4 text-optavia-gray flex-shrink-0" />
+              </a>
             </div>
           </CardContent>
         </Card>
