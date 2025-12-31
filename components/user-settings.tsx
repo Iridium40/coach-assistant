@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Switch } from "@/components/ui/switch"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import {
   Select,
@@ -18,7 +17,6 @@ import { useUserData } from "@/contexts/user-data-context"
 import { useToast } from "@/hooks/use-toast"
 import { createClient } from "@/lib/supabase/client"
 import { Upload, X, Trophy } from "lucide-react"
-import { ProgressBar } from "@/components/progress-bar"
 import { BadgeDisplay } from "@/components/badge-display"
 
 interface UserSettingsProps {
@@ -29,13 +27,11 @@ export function UserSettings({ onClose }: UserSettingsProps) {
   const {
     user,
     profile,
-    notificationSettings,
     completedResources,
     bookmarks,
     favoriteRecipes,
     badges,
     updateProfile,
-    updateNotificationSettings,
     refreshData,
   } = useUserData()
   const { toast } = useToast()
@@ -221,15 +217,6 @@ export function UserSettings({ onClose }: UserSettingsProps) {
         })
       }
     }
-  }
-
-  const handleNotificationSettingChange = async (
-    key: "push_enabled" | "announcements_enabled" | "progress_updates_enabled" | "email_notifications",
-    value: boolean
-  ) => {
-    if (!notificationSettings) return
-
-    await updateNotificationSettings({ [key]: value })
   }
 
   const getInitials = () => {
@@ -426,56 +413,6 @@ export function UserSettings({ onClose }: UserSettingsProps) {
             </Button>
           </CardContent>
         </Card>
-
-        {/* Notification Settings */}
-        {notificationSettings && (
-          <Card className="bg-white border border-gray-200 shadow-lg">
-            <CardHeader>
-              <CardTitle className="text-optavia-dark">Notification Settings</CardTitle>
-              <CardDescription className="text-optavia-gray">Manage your notification preferences</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label className="text-optavia-dark">Push Notifications</Label>
-                  <p className="text-sm text-optavia-gray">Receive push notifications on your device</p>
-                </div>
-                <Switch
-                  checked={notificationSettings.push_enabled}
-                  onCheckedChange={(checked) =>
-                    handleNotificationSettingChange("push_enabled", checked)
-                  }
-                />
-              </div>
-
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label className="text-optavia-dark">Announcements</Label>
-                  <p className="text-sm text-optavia-gray">Get notified about new announcements</p>
-                </div>
-                <Switch
-                  checked={notificationSettings.announcements_enabled}
-                  onCheckedChange={(checked) =>
-                    handleNotificationSettingChange("announcements_enabled", checked)
-                  }
-                />
-              </div>
-
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label className="text-optavia-dark">Email Notifications</Label>
-                  <p className="text-sm text-optavia-gray">Receive notifications via email</p>
-                </div>
-                <Switch
-                  checked={notificationSettings.email_notifications}
-                  onCheckedChange={(checked) =>
-                    handleNotificationSettingChange("email_notifications", checked)
-                  }
-                />
-              </div>
-            </CardContent>
-          </Card>
-        )}
 
         {/* Progress Summary */}
         <Card className="bg-white border border-gray-200 shadow-lg">

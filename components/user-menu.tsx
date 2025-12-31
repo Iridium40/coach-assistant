@@ -12,7 +12,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Settings, LogOut, Bell, BarChart3, UserPlus } from "lucide-react"
+import { Settings, LogOut, Bell, BarChart3, UserPlus, BellRing } from "lucide-react"
 import { useUserData } from "@/contexts/user-data-context"
 
 interface UserMenuProps {
@@ -67,6 +67,10 @@ export function UserMenu({ onSettingsClick, onAnnouncementsClick, onReportsClick
     } else {
       router.push("/settings")
     }
+  }
+
+  const handleNotificationsClick = () => {
+    router.push("/notifications")
   }
 
   const getInitials = () => {
@@ -139,7 +143,14 @@ export function UserMenu({ onSettingsClick, onAnnouncementsClick, onReportsClick
           className="text-optavia-dark hover:bg-gray-100 cursor-pointer"
         >
           <Settings className="mr-2 h-4 w-4" />
-          <span>Settings</span>
+          <span>Profile</span>
+        </DropdownMenuItem>
+        <DropdownMenuItem 
+          onClick={handleNotificationsClick}
+          className="text-optavia-dark hover:bg-gray-100 cursor-pointer"
+        >
+          <BellRing className="mr-2 h-4 w-4" />
+          <span>Notifications</span>
         </DropdownMenuItem>
         <DropdownMenuSeparator className="bg-gray-200" />
         <DropdownMenuItem 
