@@ -71,9 +71,15 @@ export default function ClientMealPlanPage() {
     }
   }, [planData])
 
+  // Determine plan type based on meal entries
+  const planType = useMemo(() => {
+    const hasMealSlot = mealPlanEntries.some(entry => entry.meal === "meal")
+    return hasMealSlot ? "5&1" : "4&2"
+  }, [mealPlanEntries])
+
   // Map meal plan entries to recipes
   const mealsByDay = useMemo(() => {
-    const grouped: Record<string, { lunch?: Recipe; dinner?: Recipe }> = {}
+    const grouped: Record<string, { meal?: Recipe; lunch?: Recipe; dinner?: Recipe }> = {}
     
     DAYS.forEach(day => {
       grouped[day] = {}
@@ -83,9 +89,11 @@ export default function ClientMealPlanPage() {
       const dayKey = entry.day.charAt(0).toUpperCase() + entry.day.slice(1).toLowerCase()
       const recipe = recipes.find(r => r.id === entry.recipeId)
       if (recipe && grouped[dayKey]) {
-        if (entry.meal === "lunch") {
+        if (entry.meal === "meal") {
+          grouped[dayKey].meal = recipe
+        } else if (entry.meal === "lunch") {
           grouped[dayKey].lunch = recipe
-        } else {
+        } else if (entry.meal === "dinner") {
           grouped[dayKey].dinner = recipe
         }
       }
@@ -99,7 +107,7 @@ export default function ClientMealPlanPage() {
     const ingredientMap = new Map<string, number>()
     
     Object.values(mealsByDay).forEach(meals => {
-      [meals.lunch, meals.dinner].forEach(recipe => {
+      [meals.meal, meals.lunch, meals.dinner].forEach(recipe => {
         if (recipe) {
           recipe.ingredients.forEach(ingredient => {
             const normalized = ingredient.toLowerCase().trim()
@@ -238,10 +246,11 @@ export default function ClientMealPlanPage() {
           <div className="grid gap-4">
             {DAYS.map(day => {
               const meals = mealsByDay[day]
+              const hasMeal = !!meals?.meal
               const hasLunch = !!meals?.lunch
               const hasDinner = !!meals?.dinner
               
-              if (!hasLunch && !hasDinner) return null
+              if (!hasMeal && !hasLunch && !hasDinner) return null
               
               return (
                 <Card key={day} className="overflow-hidden bg-white">
@@ -249,22 +258,47 @@ export default function ClientMealPlanPage() {
                     <h3 className="font-semibold text-gray-800">{day}</h3>
                   </div>
                   <CardContent className="p-4">
-                    <div className="grid sm:grid-cols-2 gap-4">
-                      {/* Lunch */}
-                      <div className={`${hasLunch ? '' : 'opacity-50'}`}>
-                        <div className="text-xs font-medium text-gray-500 uppercase mb-2">Lunch</div>
-                        {hasLunch && meals.lunch ? (
-                          <div
-                            className="flex items-center gap-3 p-3 rounded-lg bg-green-50 border border-green-200 cursor-pointer hover:bg-green-100 transition-colors"
-                            onClick={() => router.push(`/client/recipes/${meals.lunch!.id}?coach=${encodeURIComponent(coachName)}`)}
-                          >
-                            <img
-                              src={meals.lunch.image}
-                              alt={meals.lunch.title}
-                              className="w-14 h-14 rounded-lg object-cover flex-shrink-0"
-                              onError={(e) => {
-                                (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=100&h=100&fit=crop'
-                              }}
+                    {/* 5&1 Plan - Single Meal */}
+                    {planType === "5&1" && hasMeal && meals.meal && (
+                      <div
+                        className="flex items-center gap-3 p-3 rounded-lg bg-green-50 border border-green-200 cursor-pointer hover:bg-green-100 transition-colors"
+                        onClick={() => router.push(`/client/recipes/${meals.meal!.id}?coach=${encodeURIComponent(coachName)}`)}
+                      >
+                        <img
+                          src={meals.meal.image}
+                          alt={meals.meal.title}
+                          className="w-14 h-14 rounded-lg object-cover flex-shrink-0"
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=100&h=100&fit=crop'
+                          }}
+                        />
+                        <div className="flex-1 min-w-0">
+                          <div className="text-xs font-medium text-[#2d5016] mb-1">Lean & Green</div>
+                          <h4 className="font-medium text-gray-800 truncate">{meals.meal.title}</h4>
+                          <p className="text-xs text-gray-500">{meals.meal.prepTime + meals.meal.cookTime}min • {meals.meal.servings} servings</p>
+                        </div>
+                        <ArrowRight className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                      </div>
+                    )}
+
+                    {/* 4&2 Plan - Two Meals */}
+                    {planType === "4&2" && (
+                      <div className="grid sm:grid-cols-2 gap-4">
+                        {/* L&G #1 (Lunch) */}
+                        <div className={`${hasLunch ? '' : 'opacity-50'}`}>
+                          <div className="text-xs font-medium text-gray-500 uppercase mb-2">L&G #1</div>
+                          {hasLunch && meals.lunch ? (
+                            <div
+                              className="flex items-center gap-3 p-3 rounded-lg bg-green-50 border border-green-200 cursor-pointer hover:bg-green-100 transition-colors"
+                              onClick={() => router.push(`/client/recipes/${meals.lunch!.id}?coach=${encodeURIComponent(coachName)}`)}
+                            >
+                              <img
+                                src={meals.lunch.image}
+                                alt={meals.lunch.title}
+                                className="w-14 h-14 rounded-lg object-cover flex-shrink-0"
+                                onError={(e) => {
+                                  (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=100&h=100&fit=crop'
+                                }}
                             />
                             <div className="flex-1 min-w-0">
                               <h4 className="font-medium text-gray-800 truncate">{meals.lunch.title}</h4>
@@ -279,35 +313,36 @@ export default function ClientMealPlanPage() {
                         )}
                       </div>
                       
-                      {/* Dinner */}
-                      <div className={`${hasDinner ? '' : 'opacity-50'}`}>
-                        <div className="text-xs font-medium text-gray-500 uppercase mb-2">Dinner</div>
-                        {hasDinner && meals.dinner ? (
-                          <div
-                            className="flex items-center gap-3 p-3 rounded-lg bg-amber-50 border border-amber-200 cursor-pointer hover:bg-amber-100 transition-colors"
-                            onClick={() => router.push(`/client/recipes/${meals.dinner!.id}?coach=${encodeURIComponent(coachName)}`)}
-                          >
-                            <img
-                              src={meals.dinner.image}
-                              alt={meals.dinner.title}
-                              className="w-14 h-14 rounded-lg object-cover flex-shrink-0"
-                              onError={(e) => {
-                                (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=100&h=100&fit=crop'
-                              }}
-                            />
-                            <div className="flex-1 min-w-0">
-                              <h4 className="font-medium text-gray-800 truncate">{meals.dinner.title}</h4>
-                              <p className="text-xs text-gray-500">{meals.dinner.prepTime + meals.dinner.cookTime}min • {meals.dinner.servings} servings</p>
+                        {/* L&G #2 (Dinner) */}
+                        <div className={`${hasDinner ? '' : 'opacity-50'}`}>
+                          <div className="text-xs font-medium text-gray-500 uppercase mb-2">L&G #2</div>
+                          {hasDinner && meals.dinner ? (
+                            <div
+                              className="flex items-center gap-3 p-3 rounded-lg bg-amber-50 border border-amber-200 cursor-pointer hover:bg-amber-100 transition-colors"
+                              onClick={() => router.push(`/client/recipes/${meals.dinner!.id}?coach=${encodeURIComponent(coachName)}`)}
+                            >
+                              <img
+                                src={meals.dinner.image}
+                                alt={meals.dinner.title}
+                                className="w-14 h-14 rounded-lg object-cover flex-shrink-0"
+                                onError={(e) => {
+                                  (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=100&h=100&fit=crop'
+                                }}
+                              />
+                              <div className="flex-1 min-w-0">
+                                <h4 className="font-medium text-gray-800 truncate">{meals.dinner.title}</h4>
+                                <p className="text-xs text-gray-500">{meals.dinner.prepTime + meals.dinner.cookTime}min • {meals.dinner.servings} servings</p>
+                              </div>
+                              <ArrowRight className="h-4 w-4 text-gray-400 flex-shrink-0" />
                             </div>
-                            <ArrowRight className="h-4 w-4 text-gray-400 flex-shrink-0" />
-                          </div>
-                        ) : (
-                          <div className="p-3 rounded-lg bg-gray-100 text-gray-400 text-sm text-center">
-                            No meal planned
-                          </div>
-                        )}
+                          ) : (
+                            <div className="p-3 rounded-lg bg-gray-100 text-gray-400 text-sm text-center">
+                              No meal planned
+                            </div>
+                          )}
+                        </div>
                       </div>
-                    </div>
+                    )}
                   </CardContent>
                 </Card>
               )

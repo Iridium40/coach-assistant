@@ -16,7 +16,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Card } from "@/components/ui/card"
 import { Send, Mail, User, Loader2, CheckCircle, Eye } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
-import type { MealPlan } from "./meal-planner"
+import type { MealPlan, PlanType } from "./meal-planner"
 import type { Recipe } from "@/lib/types"
 
 interface SendPlanDialogProps {
@@ -24,12 +24,14 @@ interface SendPlanDialogProps {
   onOpenChange: (open: boolean) => void
   mealPlan: MealPlan
   coachName: string
+  planType: PlanType
 }
 
 const DAYS = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"]
-const MEALS = ["lunch", "dinner"]
+const MEALS_5_1 = ["meal"]
+const MEALS_4_2 = ["lunch", "dinner"]
 
-export function SendPlanDialog({ open, onOpenChange, mealPlan, coachName }: SendPlanDialogProps) {
+export function SendPlanDialog({ open, onOpenChange, mealPlan, coachName, planType }: SendPlanDialogProps) {
   const { toast } = useToast()
   const [clientName, setClientName] = useState("")
   const [clientEmail, setClientEmail] = useState("")
@@ -41,9 +43,10 @@ export function SendPlanDialog({ open, onOpenChange, mealPlan, coachName }: Send
   // Get selected recipes from meal plan
   const mealPlanEntries = useMemo(() => {
     const entries: { day: string; meal: string; recipeId: string; recipeTitle: string; recipeImage: string }[] = []
+    const meals = planType === "5&1" ? MEALS_5_1 : MEALS_4_2
     
     DAYS.forEach((day) => {
-      MEALS.forEach((meal) => {
+      meals.forEach((meal) => {
         const slotKey = `${day}-${meal}`
         const recipe = mealPlan[slotKey] as Recipe | null
         if (recipe) {
@@ -59,7 +62,7 @@ export function SendPlanDialog({ open, onOpenChange, mealPlan, coachName }: Send
     })
     
     return entries
-  }, [mealPlan])
+  }, [mealPlan, planType])
 
   // Aggregate shopping list
   const shoppingList = useMemo(() => {
@@ -118,6 +121,7 @@ export function SendPlanDialog({ open, onOpenChange, mealPlan, coachName }: Send
           personalMessage: personalMessage.trim() || undefined,
           mealPlanEntries,
           shoppingList,
+          planType,
         }),
       })
 

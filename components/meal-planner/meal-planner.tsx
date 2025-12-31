@@ -2,7 +2,8 @@
 
 import { useState, useMemo, useCallback } from "react"
 import { Button } from "@/components/ui/button"
-import { ArrowLeft, Wand2, Send, Trash2 } from "lucide-react"
+import { Badge } from "@/components/ui/badge"
+import { ArrowLeft, Wand2, Send, Trash2, Info } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { WeeklyGrid } from "./weekly-grid"
 import { DietaryFilterBar } from "./dietary-filter-bar"
@@ -15,14 +16,16 @@ interface MealPlannerProps {
   coachName: string
 }
 
+export type PlanType = "5&1" | "4&2"
+
 export type MealSlotKey = 
-  | "monday-lunch" | "monday-dinner"
-  | "tuesday-lunch" | "tuesday-dinner"
-  | "wednesday-lunch" | "wednesday-dinner"
-  | "thursday-lunch" | "thursday-dinner"
-  | "friday-lunch" | "friday-dinner"
-  | "saturday-lunch" | "saturday-dinner"
-  | "sunday-lunch" | "sunday-dinner"
+  | "monday-lunch" | "monday-dinner" | "monday-meal"
+  | "tuesday-lunch" | "tuesday-dinner" | "tuesday-meal"
+  | "wednesday-lunch" | "wednesday-dinner" | "wednesday-meal"
+  | "thursday-lunch" | "thursday-dinner" | "thursday-meal"
+  | "friday-lunch" | "friday-dinner" | "friday-meal"
+  | "saturday-lunch" | "saturday-dinner" | "saturday-meal"
+  | "sunday-lunch" | "sunday-dinner" | "sunday-meal"
 
 export interface MealPlan {
   [key: string]: Recipe | null
@@ -40,10 +43,12 @@ export interface DietaryFilters {
 }
 
 const DAYS = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"] as const
-const MEALS = ["lunch", "dinner"] as const
+const MEALS_5_1 = ["meal"] as const  // Single meal for 5&1 plan
+const MEALS_4_2 = ["lunch", "dinner"] as const  // Two meals for 4&2 plan
 
 export function MealPlanner({ recipes, coachName }: MealPlannerProps) {
   const router = useRouter()
+  const [planType, setPlanType] = useState<PlanType>("5&1")
   const [mealPlan, setMealPlan] = useState<MealPlan>({})
   const [dietaryFilters, setDietaryFilters] = useState<DietaryFilters>({
     vegetarianOnly: false,
@@ -56,6 +61,9 @@ export function MealPlanner({ recipes, coachName }: MealPlannerProps) {
     },
   })
   const [showSendDialog, setShowSendDialog] = useState(false)
+
+  // Get current meal slots based on plan type
+  const currentMeals = planType === "5&1" ? MEALS_5_1 : MEALS_4_2
 
   // Filter recipes based on dietary preferences
   const filteredRecipes = useMemo(() => {
@@ -104,6 +112,14 @@ export function MealPlanner({ recipes, coachName }: MealPlannerProps) {
     setMealPlan({})
   }, [])
 
+  // Handle plan type change - clear meal plan when switching
+  const handlePlanTypeChange = useCallback((newType: PlanType) => {
+    if (newType !== planType) {
+      setPlanType(newType)
+      setMealPlan({}) // Clear plan when switching types
+    }
+  }, [planType])
+
   // Auto-fill with smart generation
   const autoFillMeals = useCallback(() => {
     const newPlan: MealPlan = {}
@@ -124,9 +140,11 @@ export function MealPlanner({ recipes, coachName }: MealPlannerProps) {
     let lastCategory = ""
     let categoryIndex = 0
 
-    // Fill each slot
+    // Fill each slot based on current plan type
+    const mealsToFill = planType === "5&1" ? MEALS_5_1 : MEALS_4_2
+    
     DAYS.forEach((day) => {
-      MEALS.forEach((meal) => {
+      mealsToFill.forEach((meal) => {
         const slotKey = `${day}-${meal}`
         
         // Try to pick from a different category than the last meal
@@ -151,7 +169,7 @@ export function MealPlanner({ recipes, coachName }: MealPlannerProps) {
     })
 
     setMealPlan(newPlan)
-  }, [filteredRecipes])
+  }, [filteredRecipes, planType])
 
   return (
     <div className="max-w-7xl mx-auto">
@@ -205,6 +223,48 @@ export function MealPlanner({ recipes, coachName }: MealPlannerProps) {
         </div>
       </div>
 
+      {/* Plan Type Selector */}
+      <div className="bg-white rounded-lg border border-gray-200 p-4 mb-4">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-medium text-optavia-dark">OPTAVIA Plan:</span>
+            <div className="flex rounded-lg border border-gray-300 overflow-hidden">
+              <button
+                onClick={() => handlePlanTypeChange("5&1")}
+                className={`px-4 py-2 text-sm font-medium transition-colors ${
+                  planType === "5&1"
+                    ? "bg-[hsl(var(--optavia-green))] text-white"
+                    : "bg-white text-optavia-gray hover:bg-gray-50"
+                }`}
+              >
+                5 & 1
+              </button>
+              <button
+                onClick={() => handlePlanTypeChange("4&2")}
+                className={`px-4 py-2 text-sm font-medium border-l border-gray-300 transition-colors ${
+                  planType === "4&2"
+                    ? "bg-[hsl(var(--optavia-green))] text-white"
+                    : "bg-white text-optavia-gray hover:bg-gray-50"
+                }`}
+              >
+                4 & 2
+              </button>
+            </div>
+          </div>
+          
+          <div className="flex items-start gap-2 text-xs text-optavia-gray bg-gray-50 rounded-md px-3 py-2 flex-1">
+            <Info className="h-4 w-4 flex-shrink-0 mt-0.5" />
+            <div>
+              {planType === "5&1" ? (
+                <span><strong>5 & 1 Plan:</strong> 5 OPTAVIA Fuelings + 1 Lean & Green meal per day</span>
+              ) : (
+                <span><strong>4 & 2 Plan:</strong> 4 OPTAVIA Fuelings + 2 Lean & Green meals per day</span>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* Dietary Filters */}
       <DietaryFilterBar
         filters={dietaryFilters}
@@ -218,6 +278,7 @@ export function MealPlanner({ recipes, coachName }: MealPlannerProps) {
           mealPlan={mealPlan}
           recipes={filteredRecipes}
           onSetMeal={setMeal}
+          planType={planType}
         />
 
         {/* Shopping List */}
@@ -232,6 +293,7 @@ export function MealPlanner({ recipes, coachName }: MealPlannerProps) {
         onOpenChange={setShowSendDialog}
         mealPlan={mealPlan}
         coachName={coachName}
+        planType={planType}
       />
     </div>
   )

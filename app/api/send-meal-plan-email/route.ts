@@ -25,7 +25,8 @@ export async function POST(request: NextRequest) {
       coachName, 
       personalMessage,
       mealPlanEntries, 
-      shoppingList 
+      shoppingList,
+      planType = "5&1" // Default to 5&1 for backwards compatibility
     } = await request.json() as {
       to: string
       clientName: string
@@ -33,6 +34,7 @@ export async function POST(request: NextRequest) {
       personalMessage?: string
       mealPlanEntries: MealPlanEntry[]
       shoppingList: ShoppingItem[]
+      planType?: "5&1" | "4&2"
     }
 
     if (!to || !clientName || !coachName || !mealPlanEntries) {
@@ -41,6 +43,8 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       )
     }
+    
+    const is5and1 = planType === "5&1"
 
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://www.coachingamplifier.com"
 
@@ -57,17 +61,19 @@ export async function POST(request: NextRequest) {
     const clientRecipesUrl = `${appUrl}/client/recipes?coach=${encodeURIComponent(coachName)}`
 
     // Group meals by day
-    const mealsByDay: Record<string, { lunch?: string; dinner?: string }> = {}
+    const mealsByDay: Record<string, { meal?: string; lunch?: string; dinner?: string }> = {}
     const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
     
     days.forEach(day => {
-      mealsByDay[day] = { lunch: undefined, dinner: undefined }
+      mealsByDay[day] = { meal: undefined, lunch: undefined, dinner: undefined }
     })
     
     mealPlanEntries.forEach(entry => {
       const dayCapitalized = entry.day.charAt(0).toUpperCase() + entry.day.slice(1)
       if (mealsByDay[dayCapitalized]) {
-        if (entry.meal === "lunch") {
+        if (entry.meal === "meal") {
+          mealsByDay[dayCapitalized].meal = entry.recipeTitle
+        } else if (entry.meal === "lunch") {
           mealsByDay[dayCapitalized].lunch = entry.recipeTitle
         } else if (entry.meal === "dinner") {
           mealsByDay[dayCapitalized].dinner = entry.recipeTitle
@@ -75,23 +81,57 @@ export async function POST(request: NextRequest) {
       }
     })
 
-    // Build meal plan table
-    const mealPlanRows = days.map(day => {
-      const meals = mealsByDay[day]
-      return `
+    // Build meal plan table based on plan type
+    let mealPlanRows: string
+    let tableHeaders: string
+    
+    if (is5and1) {
+      // 5&1 plan: single Lean & Green column
+      tableHeaders = `
         <tr>
-          <td style="padding: 12px; border: 1px solid #e5e7eb; font-weight: bold; background-color: #f9fafb; color: #374151;">
-            ${day}
-          </td>
-          <td style="padding: 12px; border: 1px solid #e5e7eb; color: #4b5563;">
-            ${meals.lunch || '<span style="color: #9ca3af;">-</span>'}
-          </td>
-          <td style="padding: 12px; border: 1px solid #e5e7eb; color: #4b5563;">
-            ${meals.dinner || '<span style="color: #9ca3af;">-</span>'}
-          </td>
+          <th style="padding: 12px; border: 1px solid #e5e7eb; background-color: #2d5016; color: white; text-align: left;">Day</th>
+          <th style="padding: 12px; border: 1px solid #e5e7eb; background-color: #2d5016; color: white; text-align: left;">Lean & Green</th>
         </tr>
       `
-    }).join("")
+      mealPlanRows = days.map(day => {
+        const meals = mealsByDay[day]
+        return `
+          <tr>
+            <td style="padding: 12px; border: 1px solid #e5e7eb; font-weight: bold; background-color: #f9fafb; color: #374151;">
+              ${day}
+            </td>
+            <td style="padding: 12px; border: 1px solid #e5e7eb; color: #4b5563;">
+              ${meals.meal || '<span style="color: #9ca3af;">-</span>'}
+            </td>
+          </tr>
+        `
+      }).join("")
+    } else {
+      // 4&2 plan: two columns for lunch and dinner
+      tableHeaders = `
+        <tr>
+          <th style="padding: 12px; border: 1px solid #e5e7eb; background-color: #2d5016; color: white; text-align: left;">Day</th>
+          <th style="padding: 12px; border: 1px solid #e5e7eb; background-color: #2d5016; color: white; text-align: left;">L&G #1</th>
+          <th style="padding: 12px; border: 1px solid #e5e7eb; background-color: #2d5016; color: white; text-align: left;">L&G #2</th>
+        </tr>
+      `
+      mealPlanRows = days.map(day => {
+        const meals = mealsByDay[day]
+        return `
+          <tr>
+            <td style="padding: 12px; border: 1px solid #e5e7eb; font-weight: bold; background-color: #f9fafb; color: #374151;">
+              ${day}
+            </td>
+            <td style="padding: 12px; border: 1px solid #e5e7eb; color: #4b5563;">
+              ${meals.lunch || '<span style="color: #9ca3af;">-</span>'}
+            </td>
+            <td style="padding: 12px; border: 1px solid #e5e7eb; color: #4b5563;">
+              ${meals.dinner || '<span style="color: #9ca3af;">-</span>'}
+            </td>
+          </tr>
+        `
+      }).join("")
+    }
 
     // Build shopping list
     const shoppingListHtml = shoppingList.length > 0 
@@ -147,11 +187,7 @@ export async function POST(request: NextRequest) {
           
           <table style="width: 100%; border-collapse: collapse; margin: 0;">
             <thead>
-              <tr>
-                <th style="padding: 12px; border: 1px solid #e5e7eb; background-color: #2d5016; color: white; text-align: left;">Day</th>
-                <th style="padding: 12px; border: 1px solid #e5e7eb; background-color: #2d5016; color: white; text-align: left;">Lunch</th>
-                <th style="padding: 12px; border: 1px solid #e5e7eb; background-color: #2d5016; color: white; text-align: left;">Dinner</th>
-              </tr>
+              ${tableHeaders}
             </thead>
             <tbody>
               ${mealPlanRows}
@@ -197,10 +233,15 @@ export async function POST(request: NextRequest) {
       ? `\n\nSHOPPING LIST\n${"-".repeat(20)}\n${shoppingList.map(item => `- ${item.ingredient}${item.count > 1 ? ` (x${item.count})` : ""}`).join("\n")}`
       : ""
 
-    const mealPlanText = days.map(day => {
-      const meals = mealsByDay[day]
-      return `${day}:\n  Lunch: ${meals.lunch || "-"}\n  Dinner: ${meals.dinner || "-"}`
-    }).join("\n")
+    const mealPlanText = is5and1
+      ? days.map(day => {
+          const meals = mealsByDay[day]
+          return `${day}: ${meals.meal || "-"}`
+        }).join("\n")
+      : days.map(day => {
+          const meals = mealsByDay[day]
+          return `${day}:\n  L&G #1: ${meals.lunch || "-"}\n  L&G #2: ${meals.dinner || "-"}`
+        }).join("\n")
 
     const textContent = `
 Your Weekly Meal Plan from ${coachName}
