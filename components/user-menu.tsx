@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -23,9 +24,12 @@ interface UserMenuProps {
 }
 
 export function UserMenu({ onSettingsClick, onAnnouncementsClick, onReportsClick, onInviteClick }: UserMenuProps) {
+  const router = useRouter()
   const { user, signOut } = useAuth()
   const { profile } = useSupabaseData(user)
   const [loading, setLoading] = useState(false)
+
+  const isAdmin = profile?.user_role?.toLowerCase() === "admin"
 
   const handleSignOut = async () => {
     setLoading(true)
@@ -33,6 +37,38 @@ export function UserMenu({ onSettingsClick, onAnnouncementsClick, onReportsClick
     // Reload page to reset state
     window.location.href = "/"
     setLoading(false)
+  }
+
+  const handleAnnouncementsClick = () => {
+    if (onAnnouncementsClick) {
+      onAnnouncementsClick()
+    } else {
+      router.push("/admin/announcements")
+    }
+  }
+
+  const handleReportsClick = () => {
+    if (onReportsClick) {
+      onReportsClick()
+    } else {
+      router.push("/admin/reports")
+    }
+  }
+
+  const handleInviteClick = () => {
+    if (onInviteClick) {
+      onInviteClick()
+    } else {
+      router.push("/admin/invite")
+    }
+  }
+
+  const handleSettingsClick = () => {
+    if (onSettingsClick) {
+      onSettingsClick()
+    } else {
+      router.push("/settings")
+    }
   }
 
   const getInitials = () => {
@@ -74,42 +110,34 @@ export function UserMenu({ onSettingsClick, onAnnouncementsClick, onReportsClick
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator className="bg-gray-200" />
-        {profile?.user_role?.toLowerCase() === "admin" && (
+        {isAdmin && (
           <>
-            {onAnnouncementsClick && (
-              <DropdownMenuItem 
-                onClick={onAnnouncementsClick}
-                className="text-optavia-dark hover:bg-gray-100 cursor-pointer"
-              >
-                <Bell className="mr-2 h-4 w-4" />
-                <span>Announcements</span>
-              </DropdownMenuItem>
-            )}
-            {onReportsClick && (
-              <DropdownMenuItem 
-                onClick={onReportsClick}
-                className="text-optavia-dark hover:bg-gray-100 cursor-pointer"
-              >
-                <BarChart3 className="mr-2 h-4 w-4" />
-                <span>Reports</span>
-              </DropdownMenuItem>
-            )}
-            {onInviteClick && (
-              <DropdownMenuItem 
-                onClick={onInviteClick}
-                className="text-optavia-dark hover:bg-gray-100 cursor-pointer"
-              >
-                <UserPlus className="mr-2 h-4 w-4" />
-                <span>Invite Coach</span>
-              </DropdownMenuItem>
-            )}
-            {(onAnnouncementsClick || onReportsClick || onInviteClick) && (
-              <DropdownMenuSeparator className="bg-gray-200" />
-            )}
+            <DropdownMenuItem 
+              onClick={handleAnnouncementsClick}
+              className="text-optavia-dark hover:bg-gray-100 cursor-pointer"
+            >
+              <Bell className="mr-2 h-4 w-4" />
+              <span>Announcements</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem 
+              onClick={handleReportsClick}
+              className="text-optavia-dark hover:bg-gray-100 cursor-pointer"
+            >
+              <BarChart3 className="mr-2 h-4 w-4" />
+              <span>Reports</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem 
+              onClick={handleInviteClick}
+              className="text-optavia-dark hover:bg-gray-100 cursor-pointer"
+            >
+              <UserPlus className="mr-2 h-4 w-4" />
+              <span>Invite Coach</span>
+            </DropdownMenuItem>
+            <DropdownMenuSeparator className="bg-gray-200" />
           </>
         )}
         <DropdownMenuItem 
-          onClick={onSettingsClick}
+          onClick={handleSettingsClick}
           className="text-optavia-dark hover:bg-gray-100 cursor-pointer"
         >
           <Settings className="mr-2 h-4 w-4" />
