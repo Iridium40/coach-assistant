@@ -14,6 +14,7 @@ import type { Recipe } from "@/lib/types"
 interface MealPlannerProps {
   recipes: Recipe[]
   coachName: string
+  coachId: string
 }
 
 export type PlanType = "5&1" | "4&2"
@@ -46,7 +47,7 @@ const DAYS = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday"
 const MEALS_5_1 = ["meal"] as const  // Single meal for 5&1 plan
 const MEALS_4_2 = ["lunch", "dinner"] as const  // Two meals for 4&2 plan
 
-export function MealPlanner({ recipes, coachName }: MealPlannerProps) {
+export function MealPlanner({ recipes, coachName, coachId }: MealPlannerProps) {
   const router = useRouter()
   const [planType, setPlanType] = useState<PlanType>("5&1")
   const [mealPlan, setMealPlan] = useState<MealPlan>({})
@@ -293,6 +294,7 @@ export function MealPlanner({ recipes, coachName }: MealPlannerProps) {
         onOpenChange={setShowSendDialog}
         mealPlan={mealPlan}
         coachName={coachName}
+        coachId={coachId}
         planType={planType}
       />
     </div>

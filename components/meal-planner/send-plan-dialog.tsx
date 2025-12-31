@@ -16,6 +16,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Card } from "@/components/ui/card"
 import { Send, Mail, User, Loader2, CheckCircle, Eye } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
+import { createClient } from "@/lib/supabase/client"
 import type { MealPlan, PlanType } from "./meal-planner"
 import type { Recipe } from "@/lib/types"
 
@@ -24,6 +25,7 @@ interface SendPlanDialogProps {
   onOpenChange: (open: boolean) => void
   mealPlan: MealPlan
   coachName: string
+  coachId: string
   planType: PlanType
 }
 
@@ -31,8 +33,9 @@ const DAYS = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday"
 const MEALS_5_1 = ["meal"]
 const MEALS_4_2 = ["lunch", "dinner"]
 
-export function SendPlanDialog({ open, onOpenChange, mealPlan, coachName, planType }: SendPlanDialogProps) {
+export function SendPlanDialog({ open, onOpenChange, mealPlan, coachName, coachId, planType }: SendPlanDialogProps) {
   const { toast } = useToast()
+  const supabase = createClient()
   const [clientName, setClientName] = useState("")
   const [clientEmail, setClientEmail] = useState("")
   const [personalMessage, setPersonalMessage] = useState("")
@@ -129,6 +132,29 @@ export function SendPlanDialog({ open, onOpenChange, mealPlan, coachName, planTy
 
       if (!response.ok) {
         throw new Error(data.error || "Failed to send email")
+      }
+
+      // Save or update client in database
+      try {
+        const { error: clientError } = await supabase
+          .from("clients")
+          .upsert({
+            coach_id: coachId,
+            name: clientName.trim(),
+            email: clientEmail.trim().toLowerCase(),
+            last_plan_sent_at: new Date().toISOString(),
+            last_plan_type: planType,
+          }, {
+            onConflict: "coach_id,email",
+            ignoreDuplicates: false,
+          })
+
+        if (clientError) {
+          console.error("Error saving client:", clientError)
+          // Don't throw - email was sent successfully, just log the error
+        }
+      } catch (saveError) {
+        console.error("Error saving client:", saveError)
       }
 
       setSent(true)
