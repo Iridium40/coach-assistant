@@ -383,16 +383,16 @@ export function CalendarView() {
                             {event.zoom_link && (
                               <Button
                                 size="sm"
-                                className={event.status === "live" 
+                                className={`text-white ${event.status === "live" 
                                   ? "bg-red-500 hover:bg-red-600" 
                                   : "bg-blue-600 hover:bg-blue-700"
-                                }
+                                }`}
                                 onClick={(e) => {
                                   e.stopPropagation()
                                   window.open(event.zoom_link!, '_blank')
                                 }}
                               >
-                                <Video className="h-4 w-4 mr-1" />
+                                <Video className="h-4 w-4 mr-1 text-white" />
                                 Join
                               </Button>
                             )}
@@ -476,14 +476,14 @@ export function CalendarView() {
                   <div className="space-y-2">
                     <div className="flex gap-2">
                       <Button
-                        className={`flex-1 ${
+                        className={`flex-1 text-white ${
                           selectedEvent.status === "live" 
                             ? "bg-red-500 hover:bg-red-600" 
                             : "bg-blue-600 hover:bg-blue-700"
                         }`}
                         onClick={() => window.open(selectedEvent.zoom_link!, '_blank')}
                       >
-                        <Video className="h-4 w-4 mr-2" />
+                        <Video className="h-4 w-4 mr-2 text-white" />
                         {selectedEvent.status === "live" ? "Join Now" : "Join Meeting"}
                       </Button>
                       <Button
