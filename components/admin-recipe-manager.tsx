@@ -1,10 +1,12 @@
 "use client"
 
-import { useState, useEffect, useMemo } from "react"
+import { useState, useMemo, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Textarea } from "@/components/ui/textarea"
+import { Card, CardContent } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
 import {
   Select,
   SelectContent,
@@ -18,28 +20,87 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
+  DialogFooter,
 } from "@/components/ui/dialog"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useUserData } from "@/contexts/user-data-context"
 import { createClient } from "@/lib/supabase/client"
 import { useToast } from "@/hooks/use-toast"
-import { X, Search, Image, Check, ExternalLink, RefreshCw } from "lucide-react"
+import { 
+  X, 
+  Search, 
+  Image as ImageIcon, 
+  Check, 
+  RefreshCw, 
+  Plus, 
+  Upload, 
+  Trash2, 
+  Edit,
+  Clock,
+  Users,
+  ChefHat
+} from "lucide-react"
 import type { Recipe } from "@/lib/types"
 
 interface AdminRecipeManagerProps {
   onClose?: () => void
 }
 
+const CATEGORIES = ["Chicken", "Seafood", "Beef", "Turkey", "Pork", "Vegetarian", "Breakfast"] as const
+const DIFFICULTIES = ["Easy", "Medium", "Hard"] as const
+
+type RecipeCategory = typeof CATEGORIES[number]
+type RecipeDifficulty = typeof DIFFICULTIES[number]
+
+interface RecipeFormData {
+  id: string
+  title: string
+  description: string
+  image: string
+  category: RecipeCategory
+  prepTime: number
+  cookTime: number
+  servings: number
+  difficulty: RecipeDifficulty
+  counts: {
+    lean: number
+    green: number
+    fat: number
+    condiment: number
+  }
+  ingredients: string[]
+  instructions: string[]
+}
+
+const emptyRecipeForm: RecipeFormData = {
+  id: "",
+  title: "",
+  description: "",
+  image: "",
+  category: "Chicken",
+  prepTime: 10,
+  cookTime: 20,
+  servings: 2,
+  difficulty: "Easy",
+  counts: { lean: 1, green: 3, fat: 0, condiment: 0 },
+  ingredients: [""],
+  instructions: [""],
+}
+
 export function AdminRecipeManager({ onClose }: AdminRecipeManagerProps) {
   const { profile, recipes, refreshContent } = useUserData()
   const { toast } = useToast()
   const supabase = createClient()
+  const fileInputRef = useRef<HTMLInputElement>(null)
   
   const [searchQuery, setSearchQuery] = useState("")
   const [categoryFilter, setCategoryFilter] = useState<string>("All")
-  const [editingRecipe, setEditingRecipe] = useState<Recipe | null>(null)
-  const [newImageUrl, setNewImageUrl] = useState("")
+  const [editingRecipe, setEditingRecipe] = useState<RecipeFormData | null>(null)
+  const [isCreating, setIsCreating] = useState(false)
   const [saving, setSaving] = useState(false)
-  const [previewError, setPreviewError] = useState(false)
+  const [uploading, setUploading] = useState(false)
+  const [deleteConfirm, setDeleteConfirm] = useState<Recipe | null>(null)
+  const [activeTab, setActiveTab] = useState<"list" | "create">("list")
 
   const isAdmin = profile?.user_role?.toLowerCase() === "admin"
 
@@ -59,41 +120,200 @@ export function AdminRecipeManager({ onClose }: AdminRecipeManagerProps) {
     })
   }, [recipes, searchQuery, categoryFilter])
 
-  const handleEditImage = (recipe: Recipe) => {
-    setEditingRecipe(recipe)
-    setNewImageUrl(recipe.image || "")
-    setPreviewError(false)
+  const handleEditRecipe = (recipe: Recipe) => {
+    setEditingRecipe({
+      id: recipe.id,
+      title: recipe.title,
+      description: recipe.description,
+      image: recipe.image || "",
+      category: recipe.category as RecipeCategory,
+      prepTime: recipe.prepTime,
+      cookTime: recipe.cookTime,
+      servings: recipe.servings,
+      difficulty: recipe.difficulty as RecipeDifficulty,
+      counts: { ...recipe.counts },
+      ingredients: [...recipe.ingredients],
+      instructions: [...recipe.instructions],
+    })
+    setIsCreating(false)
   }
 
-  const handleSaveImage = async () => {
-    if (!editingRecipe || !newImageUrl.trim()) return
+  const handleCreateNew = () => {
+    const newId = `recipe-${Date.now()}`
+    setEditingRecipe({ ...emptyRecipeForm, id: newId })
+    setIsCreating(true)
+  }
 
-    setSaving(true)
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file || !editingRecipe) return
+
+    // Validate file type
+    if (!file.type.startsWith("image/")) {
+      toast({
+        title: "Invalid file type",
+        description: "Please upload an image file (JPG, PNG, WebP)",
+        variant: "destructive",
+      })
+      return
+    }
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast({
+        title: "File too large",
+        description: "Please upload an image smaller than 5MB",
+        variant: "destructive",
+      })
+      return
+    }
+
+    setUploading(true)
+
     try {
-      const { error } = await supabase
-        .from("recipes")
-        .update({ 
-          image: newImageUrl.trim(),
-          updated_at: new Date().toISOString()
-        })
-        .eq("id", editingRecipe.id)
+      const fileExt = file.name.split(".").pop()?.toLowerCase() || "jpg"
+      const fileName = `${editingRecipe.id}-${Date.now()}.${fileExt}`
 
-      if (error) throw error
+      // Upload to recipes bucket
+      const { error: uploadError } = await supabase.storage
+        .from("recipes")
+        .upload(fileName, file, {
+          cacheControl: "3600",
+          upsert: true,
+        })
+
+      if (uploadError) throw uploadError
+
+      // Get public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from("recipes")
+        .getPublicUrl(fileName)
+
+      // Update form with new image URL
+      setEditingRecipe(prev => prev ? { ...prev, image: publicUrl } : null)
 
       toast({
         title: "Success",
-        description: `Image updated for "${editingRecipe.title}"`,
+        description: "Image uploaded successfully",
       })
+    } catch (error: any) {
+      console.error("Error uploading image:", error)
+      toast({
+        title: "Upload failed",
+        description: error.message || "Failed to upload image",
+        variant: "destructive",
+      })
+    } finally {
+      setUploading(false)
+      if (fileInputRef.current) {
+        fileInputRef.current.value = ""
+      }
+    }
+  }
 
-      // Refresh content to get updated recipes
+  const handleSaveRecipe = async () => {
+    if (!editingRecipe) return
+
+    // Validate required fields
+    if (!editingRecipe.title.trim()) {
+      toast({
+        title: "Missing title",
+        description: "Please enter a recipe title",
+        variant: "destructive",
+      })
+      return
+    }
+
+    if (!editingRecipe.description.trim()) {
+      toast({
+        title: "Missing description",
+        description: "Please enter a recipe description",
+        variant: "destructive",
+      })
+      return
+    }
+
+    const validIngredients = editingRecipe.ingredients.filter(i => i.trim())
+    const validInstructions = editingRecipe.instructions.filter(i => i.trim())
+
+    if (validIngredients.length === 0) {
+      toast({
+        title: "Missing ingredients",
+        description: "Please add at least one ingredient",
+        variant: "destructive",
+      })
+      return
+    }
+
+    if (validInstructions.length === 0) {
+      toast({
+        title: "Missing instructions",
+        description: "Please add at least one instruction",
+        variant: "destructive",
+      })
+      return
+    }
+
+    setSaving(true)
+
+    try {
+      const recipeData = {
+        id: editingRecipe.id,
+        title: editingRecipe.title.trim(),
+        description: editingRecipe.description.trim(),
+        image: editingRecipe.image || null,
+        category: editingRecipe.category,
+        prep_time: editingRecipe.prepTime,
+        cook_time: editingRecipe.cookTime,
+        servings: editingRecipe.servings,
+        difficulty: editingRecipe.difficulty,
+        lean_count: editingRecipe.counts.lean,
+        green_count: editingRecipe.counts.green,
+        fat_count: editingRecipe.counts.fat,
+        condiment_count: editingRecipe.counts.condiment,
+        ingredients: validIngredients,
+        instructions: validInstructions,
+        updated_at: new Date().toISOString(),
+      }
+
+      if (isCreating) {
+        // Insert new recipe
+        const { error } = await supabase
+          .from("recipes")
+          .insert({
+            ...recipeData,
+            created_at: new Date().toISOString(),
+          })
+
+        if (error) throw error
+
+        toast({
+          title: "Recipe created",
+          description: `"${editingRecipe.title}" has been added`,
+        })
+      } else {
+        // Update existing recipe
+        const { error } = await supabase
+          .from("recipes")
+          .update(recipeData)
+          .eq("id", editingRecipe.id)
+
+        if (error) throw error
+
+        toast({
+          title: "Recipe updated",
+          description: `"${editingRecipe.title}" has been saved`,
+        })
+      }
+
       await refreshContent()
       setEditingRecipe(null)
-      setNewImageUrl("")
+      setIsCreating(false)
     } catch (error: any) {
-      console.error("Error updating recipe image:", error)
+      console.error("Error saving recipe:", error)
       toast({
         title: "Error",
-        description: error.message || "Failed to update recipe image",
+        description: error.message || "Failed to save recipe",
         variant: "destructive",
       })
     } finally {
@@ -101,8 +321,84 @@ export function AdminRecipeManager({ onClose }: AdminRecipeManagerProps) {
     }
   }
 
-  const handlePreviewImage = () => {
-    setPreviewError(false)
+  const handleDeleteRecipe = async () => {
+    if (!deleteConfirm) return
+
+    try {
+      const { error } = await supabase
+        .from("recipes")
+        .delete()
+        .eq("id", deleteConfirm.id)
+
+      if (error) throw error
+
+      toast({
+        title: "Recipe deleted",
+        description: `"${deleteConfirm.title}" has been removed`,
+      })
+
+      await refreshContent()
+      setDeleteConfirm(null)
+    } catch (error: any) {
+      console.error("Error deleting recipe:", error)
+      toast({
+        title: "Error",
+        description: error.message || "Failed to delete recipe",
+        variant: "destructive",
+      })
+    }
+  }
+
+  const addIngredient = () => {
+    if (editingRecipe) {
+      setEditingRecipe({
+        ...editingRecipe,
+        ingredients: [...editingRecipe.ingredients, ""],
+      })
+    }
+  }
+
+  const updateIngredient = (index: number, value: string) => {
+    if (editingRecipe) {
+      const newIngredients = [...editingRecipe.ingredients]
+      newIngredients[index] = value
+      setEditingRecipe({ ...editingRecipe, ingredients: newIngredients })
+    }
+  }
+
+  const removeIngredient = (index: number) => {
+    if (editingRecipe && editingRecipe.ingredients.length > 1) {
+      setEditingRecipe({
+        ...editingRecipe,
+        ingredients: editingRecipe.ingredients.filter((_, i) => i !== index),
+      })
+    }
+  }
+
+  const addInstruction = () => {
+    if (editingRecipe) {
+      setEditingRecipe({
+        ...editingRecipe,
+        instructions: [...editingRecipe.instructions, ""],
+      })
+    }
+  }
+
+  const updateInstruction = (index: number, value: string) => {
+    if (editingRecipe) {
+      const newInstructions = [...editingRecipe.instructions]
+      newInstructions[index] = value
+      setEditingRecipe({ ...editingRecipe, instructions: newInstructions })
+    }
+  }
+
+  const removeInstruction = (index: number) => {
+    if (editingRecipe && editingRecipe.instructions.length > 1) {
+      setEditingRecipe({
+        ...editingRecipe,
+        instructions: editingRecipe.instructions.filter((_, i) => i !== index),
+      })
+    }
   }
 
   if (!isAdmin) {
@@ -111,7 +407,7 @@ export function AdminRecipeManager({ onClose }: AdminRecipeManagerProps) {
         <Card className="bg-white border border-gray-200">
           <CardContent className="pt-6">
             <p className="text-center text-optavia-gray">
-              You don't have permission to access this page.
+              You don&apos;t have permission to access this page.
             </p>
           </CardContent>
         </Card>
@@ -124,17 +420,26 @@ export function AdminRecipeManager({ onClose }: AdminRecipeManagerProps) {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="font-heading font-bold text-2xl sm:text-3xl text-optavia-dark">
-            Recipe Image Manager
+            Recipe Manager
           </h1>
           <p className="text-optavia-gray mt-1">
-            Update recipe images to ensure accurate visual representation
+            Create, edit, and manage recipes with image uploads
           </p>
         </div>
-        {onClose && (
-          <Button variant="ghost" size="icon" onClick={onClose}>
-            <X className="h-4 w-4" />
+        <div className="flex items-center gap-2">
+          <Button 
+            onClick={handleCreateNew}
+            className="bg-[hsl(var(--optavia-green))] hover:bg-[hsl(var(--optavia-green-dark))] gap-2"
+          >
+            <Plus className="h-4 w-4" />
+            <span className="hidden sm:inline">New Recipe</span>
           </Button>
-        )}
+          {onClose && (
+            <Button variant="ghost" size="icon" onClick={onClose}>
+              <X className="h-4 w-4" />
+            </Button>
+          )}
+        </div>
       </div>
 
       {/* Filters */}
@@ -161,13 +466,32 @@ export function AdminRecipeManager({ onClose }: AdminRecipeManagerProps) {
         </Select>
       </div>
 
+      {/* Stats */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
+        <Card className="bg-white">
+          <CardContent className="p-4 text-center">
+            <div className="text-2xl font-bold text-[hsl(var(--optavia-green))]">{recipes.length}</div>
+            <div className="text-xs text-optavia-gray">Total Recipes</div>
+          </CardContent>
+        </Card>
+        {CATEGORIES.slice(0, 3).map(cat => (
+          <Card key={cat} className="bg-white">
+            <CardContent className="p-4 text-center">
+              <div className="text-2xl font-bold text-optavia-dark">
+                {recipes.filter(r => r.category === cat).length}
+              </div>
+              <div className="text-xs text-optavia-gray">{cat}</div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
       {/* Recipe Grid */}
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {filteredRecipes.map(recipe => (
           <Card 
             key={recipe.id} 
-            className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer"
-            onClick={() => handleEditImage(recipe)}
+            className="overflow-hidden hover:shadow-lg transition-shadow group"
           >
             <div className="relative aspect-video bg-gray-100">
               {recipe.image ? (
@@ -181,34 +505,53 @@ export function AdminRecipeManager({ onClose }: AdminRecipeManagerProps) {
                 />
               ) : (
                 <div className="w-full h-full flex items-center justify-center text-gray-400">
-                  <Image className="h-12 w-12" />
+                  <ImageIcon className="h-12 w-12" />
                 </div>
               )}
-              <div className="absolute top-2 right-2">
-                <span className="bg-white/90 text-xs px-2 py-1 rounded font-medium text-optavia-dark">
-                  {recipe.category}
-                </span>
-              </div>
+              <Badge className="absolute top-2 right-2 bg-white/90 text-optavia-dark text-xs">
+                {recipe.category}
+              </Badge>
             </div>
             <CardContent className="p-4">
-              <h3 className="font-semibold text-optavia-dark line-clamp-1">
+              <h3 className="font-semibold text-optavia-dark line-clamp-1 mb-1">
                 {recipe.title}
               </h3>
-              <p className="text-xs text-optavia-gray mt-1 line-clamp-2">
+              <p className="text-xs text-optavia-gray line-clamp-2 mb-3">
                 {recipe.description}
               </p>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="mt-3 w-full gap-2"
-                onClick={(e) => {
-                  e.stopPropagation()
-                  handleEditImage(recipe)
-                }}
-              >
-                <Image className="h-3 w-3" />
-                Update Image
-              </Button>
+              <div className="flex items-center gap-3 text-xs text-optavia-gray mb-3">
+                <span className="flex items-center gap-1">
+                  <Clock className="h-3 w-3" />
+                  {recipe.prepTime + recipe.cookTime}m
+                </span>
+                <span className="flex items-center gap-1">
+                  <Users className="h-3 w-3" />
+                  {recipe.servings}
+                </span>
+                <span className="flex items-center gap-1">
+                  <ChefHat className="h-3 w-3" />
+                  {recipe.difficulty}
+                </span>
+              </div>
+              <div className="flex gap-2">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="flex-1 gap-1"
+                  onClick={() => handleEditRecipe(recipe)}
+                >
+                  <Edit className="h-3 w-3" />
+                  Edit
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                  onClick={() => setDeleteConfirm(recipe)}
+                >
+                  <Trash2 className="h-3 w-3" />
+                </Button>
+              </div>
             </CardContent>
           </Card>
         ))}
@@ -220,149 +563,350 @@ export function AdminRecipeManager({ onClose }: AdminRecipeManagerProps) {
         </div>
       )}
 
-      {/* Edit Image Dialog */}
-      <Dialog open={!!editingRecipe} onOpenChange={() => setEditingRecipe(null)}>
-        <DialogContent className="bg-white max-w-2xl">
+      {/* Edit/Create Recipe Dialog */}
+      <Dialog open={!!editingRecipe} onOpenChange={() => { setEditingRecipe(null); setIsCreating(false) }}>
+        <DialogContent className="bg-white max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="text-optavia-dark">
-              Update Image: {editingRecipe?.title}
+              {isCreating ? "Create New Recipe" : `Edit: ${editingRecipe?.title}`}
             </DialogTitle>
             <DialogDescription className="text-optavia-gray">
-              Paste an image URL that accurately represents this recipe
+              {isCreating ? "Add a new recipe to the collection" : "Update recipe details and image"}
             </DialogDescription>
           </DialogHeader>
 
-          <div className="space-y-4">
-            {/* Current Image */}
-            <div>
-              <Label className="text-sm text-optavia-gray">Current Image</Label>
-              <div className="mt-2 aspect-video bg-gray-100 rounded-lg overflow-hidden">
-                {editingRecipe?.image ? (
-                  <img
-                    src={editingRecipe.image}
-                    alt="Current"
-                    className="w-full h-full object-cover"
-                    onError={(e) => {
-                      (e.target as HTMLImageElement).style.display = 'none'
-                    }}
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center text-gray-400">
-                    <Image className="h-12 w-12" />
-                    <span className="ml-2">No image</span>
-                  </div>
-                )}
-              </div>
-            </div>
+          {editingRecipe && (
+            <Tabs defaultValue="details" className="mt-4">
+              <TabsList className="grid w-full grid-cols-3">
+                <TabsTrigger value="details">Details</TabsTrigger>
+                <TabsTrigger value="ingredients">Ingredients</TabsTrigger>
+                <TabsTrigger value="instructions">Instructions</TabsTrigger>
+              </TabsList>
 
-            {/* New Image URL */}
-            <div className="space-y-2">
-              <Label htmlFor="newImageUrl">New Image URL</Label>
-              <Input
-                id="newImageUrl"
-                type="url"
-                placeholder="https://images.unsplash.com/photo-..."
-                value={newImageUrl}
-                onChange={(e) => {
-                  setNewImageUrl(e.target.value)
-                  setPreviewError(false)
-                }}
-                className="border-gray-300"
-              />
-              <p className="text-xs text-optavia-gray">
-                Tip: Use Unsplash for high-quality food images. Add ?w=800&h=600&fit=crop to resize.
-              </p>
-            </div>
-
-            {/* Preview */}
-            {newImageUrl && newImageUrl !== editingRecipe?.image && (
-              <div>
-                <Label className="text-sm text-optavia-gray">Preview</Label>
-                <div className="mt-2 aspect-video bg-gray-100 rounded-lg overflow-hidden">
-                  {previewError ? (
-                    <div className="w-full h-full flex items-center justify-center text-red-500">
-                      <X className="h-8 w-8" />
-                      <span className="ml-2">Failed to load image</span>
+              {/* Details Tab */}
+              <TabsContent value="details" className="space-y-4 mt-4">
+                {/* Image Upload */}
+                <div className="space-y-2">
+                  <Label>Recipe Image</Label>
+                  <div className="flex gap-4">
+                    <div className="w-40 h-28 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
+                      {editingRecipe.image ? (
+                        <img
+                          src={editingRecipe.image}
+                          alt="Recipe"
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&h=300&fit=crop'
+                          }}
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-gray-400">
+                          <ImageIcon className="h-8 w-8" />
+                        </div>
+                      )}
                     </div>
-                  ) : (
-                    <img
-                      src={newImageUrl}
-                      alt="Preview"
-                      className="w-full h-full object-cover"
-                      onLoad={handlePreviewImage}
-                      onError={() => setPreviewError(true)}
-                    />
-                  )}
+                    <div className="flex-1 space-y-2">
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept="image/*"
+                        onChange={handleImageUpload}
+                        className="hidden"
+                      />
+                      <Button
+                        variant="outline"
+                        onClick={() => fileInputRef.current?.click()}
+                        disabled={uploading}
+                        className="w-full gap-2"
+                      >
+                        {uploading ? (
+                          <>
+                            <RefreshCw className="h-4 w-4 animate-spin" />
+                            Uploading...
+                          </>
+                        ) : (
+                          <>
+                            <Upload className="h-4 w-4" />
+                            Upload Image
+                          </>
+                        )}
+                      </Button>
+                      <p className="text-xs text-optavia-gray">
+                        JPG, PNG, or WebP • Max 5MB
+                      </p>
+                      <div className="flex gap-2">
+                        <Input
+                          type="url"
+                          placeholder="Or paste image URL..."
+                          value={editingRecipe.image}
+                          onChange={(e) => setEditingRecipe({ ...editingRecipe, image: e.target.value })}
+                          className="text-xs"
+                        />
+                      </div>
+                    </div>
+                  </div>
                 </div>
-              </div>
-            )}
 
-            {/* Suggested Image Sources */}
-            <div className="bg-gray-50 rounded-lg p-4">
-              <h4 className="font-medium text-optavia-dark text-sm mb-2">
-                Find Images
-              </h4>
-              <div className="flex flex-wrap gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="gap-1 text-xs"
-                  onClick={() => window.open(`https://unsplash.com/s/photos/${encodeURIComponent(editingRecipe?.title || '')}`, '_blank')}
-                >
-                  <ExternalLink className="h-3 w-3" />
-                  Unsplash
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="gap-1 text-xs"
-                  onClick={() => window.open(`https://www.pexels.com/search/${encodeURIComponent(editingRecipe?.title || '')}`, '_blank')}
-                >
-                  <ExternalLink className="h-3 w-3" />
-                  Pexels
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="gap-1 text-xs"
-                  onClick={() => window.open(`https://pixabay.com/images/search/${encodeURIComponent(editingRecipe?.title || '')}`, '_blank')}
-                >
-                  <ExternalLink className="h-3 w-3" />
-                  Pixabay
-                </Button>
-              </div>
-            </div>
+                {/* Title & Description */}
+                <div className="grid sm:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="title">Title *</Label>
+                    <Input
+                      id="title"
+                      value={editingRecipe.title}
+                      onChange={(e) => setEditingRecipe({ ...editingRecipe, title: e.target.value })}
+                      placeholder="Recipe title"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="category">Category</Label>
+                    <Select
+                      value={editingRecipe.category}
+                      onValueChange={(value) => setEditingRecipe({ ...editingRecipe, category: value as RecipeCategory })}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent className="bg-white">
+                        {CATEGORIES.map(cat => (
+                          <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
 
-            {/* Actions */}
-            <div className="flex gap-2 justify-end pt-4">
-              <Button
-                variant="outline"
-                onClick={() => setEditingRecipe(null)}
-              >
-                Cancel
-              </Button>
-              <Button
-                onClick={handleSaveImage}
-                disabled={saving || !newImageUrl.trim() || previewError || newImageUrl === editingRecipe?.image}
-                className="bg-[hsl(var(--optavia-green))] hover:bg-[hsl(var(--optavia-green-dark))] gap-2"
-              >
-                {saving ? (
-                  <>
-                    <RefreshCw className="h-4 w-4 animate-spin" />
-                    Saving...
-                  </>
-                ) : (
-                  <>
-                    <Check className="h-4 w-4" />
-                    Save Image
-                  </>
-                )}
-              </Button>
-            </div>
-          </div>
+                <div className="space-y-2">
+                  <Label htmlFor="description">Description *</Label>
+                  <Textarea
+                    id="description"
+                    value={editingRecipe.description}
+                    onChange={(e) => setEditingRecipe({ ...editingRecipe, description: e.target.value })}
+                    placeholder="Brief description of the recipe"
+                    rows={2}
+                  />
+                </div>
+
+                {/* Time, Servings, Difficulty */}
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                  <div className="space-y-2">
+                    <Label>Prep Time (min)</Label>
+                    <Input
+                      type="number"
+                      min="0"
+                      value={editingRecipe.prepTime}
+                      onChange={(e) => setEditingRecipe({ ...editingRecipe, prepTime: parseInt(e.target.value) || 0 })}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Cook Time (min)</Label>
+                    <Input
+                      type="number"
+                      min="0"
+                      value={editingRecipe.cookTime}
+                      onChange={(e) => setEditingRecipe({ ...editingRecipe, cookTime: parseInt(e.target.value) || 0 })}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Servings</Label>
+                    <Input
+                      type="number"
+                      min="1"
+                      value={editingRecipe.servings}
+                      onChange={(e) => setEditingRecipe({ ...editingRecipe, servings: parseInt(e.target.value) || 1 })}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Difficulty</Label>
+                    <Select
+                      value={editingRecipe.difficulty}
+                      onValueChange={(value) => setEditingRecipe({ ...editingRecipe, difficulty: value as RecipeDifficulty })}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent className="bg-white">
+                        {DIFFICULTIES.map(diff => (
+                          <SelectItem key={diff} value={diff}>{diff}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                {/* OPTAVIA Counts */}
+                <div className="space-y-2">
+                  <Label>OPTAVIA Counts</Label>
+                  <div className="grid grid-cols-4 gap-4">
+                    <div className="space-y-1">
+                      <Label className="text-xs text-optavia-gray">Lean</Label>
+                      <Input
+                        type="number"
+                        min="0"
+                        value={editingRecipe.counts.lean}
+                        onChange={(e) => setEditingRecipe({
+                          ...editingRecipe,
+                          counts: { ...editingRecipe.counts, lean: parseInt(e.target.value) || 0 }
+                        })}
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-xs text-optavia-gray">Green</Label>
+                      <Input
+                        type="number"
+                        min="0"
+                        value={editingRecipe.counts.green}
+                        onChange={(e) => setEditingRecipe({
+                          ...editingRecipe,
+                          counts: { ...editingRecipe.counts, green: parseInt(e.target.value) || 0 }
+                        })}
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-xs text-optavia-gray">Fat</Label>
+                      <Input
+                        type="number"
+                        min="0"
+                        value={editingRecipe.counts.fat}
+                        onChange={(e) => setEditingRecipe({
+                          ...editingRecipe,
+                          counts: { ...editingRecipe.counts, fat: parseInt(e.target.value) || 0 }
+                        })}
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-xs text-optavia-gray">Condiment</Label>
+                      <Input
+                        type="number"
+                        min="0"
+                        value={editingRecipe.counts.condiment}
+                        onChange={(e) => setEditingRecipe({
+                          ...editingRecipe,
+                          counts: { ...editingRecipe.counts, condiment: parseInt(e.target.value) || 0 }
+                        })}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </TabsContent>
+
+              {/* Ingredients Tab */}
+              <TabsContent value="ingredients" className="space-y-4 mt-4">
+                <div className="flex items-center justify-between">
+                  <Label>Ingredients *</Label>
+                  <Button variant="outline" size="sm" onClick={addIngredient} className="gap-1">
+                    <Plus className="h-3 w-3" />
+                    Add
+                  </Button>
+                </div>
+                <div className="space-y-2 max-h-[400px] overflow-y-auto">
+                  {editingRecipe.ingredients.map((ingredient, index) => (
+                    <div key={index} className="flex gap-2">
+                      <Input
+                        value={ingredient}
+                        onChange={(e) => updateIngredient(index, e.target.value)}
+                        placeholder={`Ingredient ${index + 1}`}
+                      />
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => removeIngredient(index)}
+                        disabled={editingRecipe.ingredients.length === 1}
+                        className="text-red-500 hover:text-red-600 flex-shrink-0"
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              </TabsContent>
+
+              {/* Instructions Tab */}
+              <TabsContent value="instructions" className="space-y-4 mt-4">
+                <div className="flex items-center justify-between">
+                  <Label>Instructions *</Label>
+                  <Button variant="outline" size="sm" onClick={addInstruction} className="gap-1">
+                    <Plus className="h-3 w-3" />
+                    Add Step
+                  </Button>
+                </div>
+                <div className="space-y-3 max-h-[400px] overflow-y-auto">
+                  {editingRecipe.instructions.map((instruction, index) => (
+                    <div key={index} className="flex gap-2">
+                      <div className="flex-shrink-0 w-6 h-6 rounded-full bg-[hsl(var(--optavia-green))] text-white flex items-center justify-center text-xs font-bold mt-2">
+                        {index + 1}
+                      </div>
+                      <Textarea
+                        value={instruction}
+                        onChange={(e) => updateInstruction(index, e.target.value)}
+                        placeholder={`Step ${index + 1}`}
+                        rows={2}
+                        className="flex-1"
+                      />
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => removeInstruction(index)}
+                        disabled={editingRecipe.instructions.length === 1}
+                        className="text-red-500 hover:text-red-600 flex-shrink-0"
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              </TabsContent>
+            </Tabs>
+          )}
+
+          <DialogFooter className="mt-6">
+            <Button variant="outline" onClick={() => { setEditingRecipe(null); setIsCreating(false) }}>
+              Cancel
+            </Button>
+            <Button
+              onClick={handleSaveRecipe}
+              disabled={saving}
+              className="bg-[hsl(var(--optavia-green))] hover:bg-[hsl(var(--optavia-green-dark))] gap-2"
+            >
+              {saving ? (
+                <>
+                  <RefreshCw className="h-4 w-4 animate-spin" />
+                  Saving...
+                </>
+              ) : (
+                <>
+                  <Check className="h-4 w-4" />
+                  {isCreating ? "Create Recipe" : "Save Changes"}
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={!!deleteConfirm} onOpenChange={() => setDeleteConfirm(null)}>
+        <DialogContent className="bg-white max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-red-600">Delete Recipe</DialogTitle>
+            <DialogDescription className="text-optavia-gray">
+              Are you sure you want to delete &quot;{deleteConfirm?.title}&quot;? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDeleteConfirm(null)}>
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleDeleteRecipe}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              Delete Recipe
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>
   )
 }
-

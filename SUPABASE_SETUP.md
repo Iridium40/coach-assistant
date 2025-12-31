@@ -51,12 +51,22 @@ This will create:
 - All necessary indexes and RLS policies
 - Triggers for automatic profile creation
 
-## 5. Set Up Storage Bucket for Avatars
+## 5. Set Up Storage Buckets
+
+### 5a. User Avatars Bucket
 
 1. In your Supabase project dashboard, go to **Storage**
 2. Click **New bucket**
 3. Name it: `user_avatars`
 4. Make it **Public** (so avatars can be accessed)
+5. Click **Create bucket**
+
+### 5b. Recipe Images Bucket
+
+1. In your Supabase project dashboard, go to **Storage**
+2. Click **New bucket**
+3. Name it: `recipes`
+4. Make it **Public** (so recipe images can be accessed)
 5. Click **Create bucket**
 
 ## 6. Configure Storage Policies
@@ -76,6 +86,18 @@ This will create policies that allow:
 - Public read access to avatars
 - Authenticated users to delete avatars
 - Authenticated users to update avatars
+
+### Recipe Storage Policies
+
+1. In your Supabase project dashboard, go to **SQL Editor**
+2. Open the file `supabase/migrations/006_recipes_storage_policies.sql` from this project
+3. Copy the entire contents
+4. Paste it into the SQL Editor in Supabase
+5. Click **Run** to execute the policies
+
+This will create policies that allow:
+- Public read access to recipe images
+- Admin users can upload, update, and delete recipe images
 
 ### Option B: Disable RLS on Storage (Alternative)
 
