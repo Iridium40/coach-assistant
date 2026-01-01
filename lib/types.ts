@@ -72,3 +72,21 @@ export interface ZoomCall {
   location?: string | null
   is_virtual?: boolean
 }
+
+export interface ExternalResource {
+  id: string
+  title: string
+  description: string
+  url: string
+  button_text: string
+  category: string
+  features: string[]
+  sort_order: number
+  is_active: boolean
+  is_dynamic: boolean
+  show_condition: string | null
+  icon: string | null
+  created_by: string | null
+  created_at: string
+  updated_at: string
+}

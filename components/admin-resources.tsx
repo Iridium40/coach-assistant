@@ -1,0 +1,747 @@
+"use client"
+
+import { useState, useEffect } from "react"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Switch } from "@/components/ui/switch"
+import { Textarea } from "@/components/ui/textarea"
+import { useUserData } from "@/contexts/user-data-context"
+import { createClient } from "@/lib/supabase/client"
+import { useToast } from "@/hooks/use-toast"
+import { 
+  X, Plus, Edit, Trash2, Search, ExternalLink, Link as LinkIcon,
+  ChevronUp, ChevronDown, Eye, EyeOff, Loader2, GripVertical
+} from "lucide-react"
+import { Badge } from "@/components/ui/badge"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import type { ExternalResource } from "@/lib/types"
+
+// Predefined categories
+const CATEGORIES = [
+  "Community",
+  "OPTAVIA Resources",
+  "Habits of Health",
+  "Social Media",
+  "Training",
+  "Other",
+]
+
+export function AdminResources({ onClose }: { onClose?: () => void }) {
+  const { user, profile } = useUserData()
+  const { toast } = useToast()
+  const supabase = createClient()
+  const [resources, setResources] = useState<ExternalResource[]>([])
+  const [loading, setLoading] = useState(true)
+  const [editingId, setEditingId] = useState<string | null>(null)
+  const [showForm, setShowForm] = useState(false)
+  const [searchQuery, setSearchQuery] = useState("")
+  const [filterCategory, setFilterCategory] = useState<string>("All")
+  const [savingOrder, setSavingOrder] = useState(false)
+
+  // Form state
+  const [title, setTitle] = useState("")
+  const [description, setDescription] = useState("")
+  const [url, setUrl] = useState("")
+  const [buttonText, setButtonText] = useState("Visit Resource")
+  const [category, setCategory] = useState("OPTAVIA Resources")
+  const [features, setFeatures] = useState<string[]>([])
+  const [featureInput, setFeatureInput] = useState("")
+  const [isActive, setIsActive] = useState(true)
+  const [isDynamic, setIsDynamic] = useState(false)
+  const [showCondition, setShowCondition] = useState("")
+  const [submitting, setSubmitting] = useState(false)
+
+  // Check if user is admin (case-insensitive)
+  const isAdmin = profile?.user_role?.toLowerCase() === "admin"
+
+  useEffect(() => {
+    if (!user || !isAdmin) {
+      setLoading(false)
+      return
+    }
+    loadResources()
+  }, [user, isAdmin])
+
+  const loadResources = async () => {
+    const { data, error } = await supabase
+      .from("external_resources")
+      .select("*")
+      .order("category", { ascending: true })
+      .order("sort_order", { ascending: true })
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to load resources",
+        variant: "destructive",
+      })
+    } else {
+      setResources(data || [])
+    }
+    setLoading(false)
+  }
+
+  const resetForm = () => {
+    setTitle("")
+    setDescription("")
+    setUrl("")
+    setButtonText("Visit Resource")
+    setCategory("OPTAVIA Resources")
+    setFeatures([])
+    setFeatureInput("")
+    setIsActive(true)
+    setIsDynamic(false)
+    setShowCondition("")
+    setEditingId(null)
+    setShowForm(false)
+  }
+
+  const handleEdit = (resource: ExternalResource, e?: React.MouseEvent) => {
+    e?.stopPropagation()
+    e?.preventDefault()
+    
+    setTitle(resource.title)
+    setDescription(resource.description)
+    setUrl(resource.url)
+    setButtonText(resource.button_text)
+    setCategory(resource.category)
+    setFeatures(resource.features || [])
+    setIsActive(resource.is_active)
+    setIsDynamic(resource.is_dynamic)
+    setShowCondition(resource.show_condition || "")
+    setEditingId(resource.id)
+    setShowForm(true)
+  }
+
+  const handleDelete = async (id: string, e?: React.MouseEvent) => {
+    e?.stopPropagation()
+    e?.preventDefault()
+    
+    if (!confirm("Are you sure you want to delete this resource?")) return
+
+    const { error } = await supabase.from("external_resources").delete().eq("id", id)
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to delete resource",
+        variant: "destructive",
+      })
+    } else {
+      toast({
+        title: "Success",
+        description: "Resource deleted",
+      })
+      loadResources()
+    }
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+
+    if (!user) return
+
+    setSubmitting(true)
+
+    // Get the max sort_order for this category
+    const categoryResources = resources.filter(r => r.category === category)
+    const maxOrder = categoryResources.length > 0 
+      ? Math.max(...categoryResources.map(r => r.sort_order)) 
+      : 0
+
+    const resourceData = {
+      title,
+      description,
+      url,
+      button_text: buttonText,
+      category,
+      features,
+      is_active: isActive,
+      is_dynamic: isDynamic,
+      show_condition: showCondition || null,
+      sort_order: editingId 
+        ? resources.find(r => r.id === editingId)?.sort_order || maxOrder + 1
+        : maxOrder + 1,
+      created_by: user.id,
+    }
+
+    let error
+    if (editingId) {
+      const { error: updateError } = await supabase
+        .from("external_resources")
+        .update(resourceData)
+        .eq("id", editingId)
+      error = updateError
+    } else {
+      const { error: insertError } = await supabase.from("external_resources").insert(resourceData)
+      error = insertError
+    }
+
+    if (error) {
+      console.error("Resource save error:", error)
+      toast({
+        title: "Error",
+        description: error.message || "Failed to save resource",
+        variant: "destructive",
+      })
+      setSubmitting(false)
+      return
+    }
+    
+    toast({
+      title: "Success",
+      description: `Resource ${editingId ? "updated" : "created"} successfully`,
+    })
+    
+    resetForm()
+    loadResources()
+    setSubmitting(false)
+  }
+
+  const addFeature = () => {
+    if (featureInput.trim() && !features.includes(featureInput.trim())) {
+      setFeatures([...features, featureInput.trim()])
+      setFeatureInput("")
+    }
+  }
+
+  const removeFeature = (index: number) => {
+    setFeatures(features.filter((_, i) => i !== index))
+  }
+
+  const toggleActive = async (resource: ExternalResource) => {
+    const { error } = await supabase
+      .from("external_resources")
+      .update({ is_active: !resource.is_active })
+      .eq("id", resource.id)
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update resource",
+        variant: "destructive",
+      })
+    } else {
+      loadResources()
+    }
+  }
+
+  const reorderResource = async (resourceId: string, direction: "up" | "down") => {
+    setSavingOrder(true)
+    const resourceToMove = resources.find(r => r.id === resourceId)
+    if (!resourceToMove) {
+      setSavingOrder(false)
+      return
+    }
+
+    const categoryResources = resources
+      .filter(r => r.category === resourceToMove.category)
+      .sort((a, b) => a.sort_order - b.sort_order)
+
+    const currentIndex = categoryResources.findIndex(r => r.id === resourceId)
+    const newIndex = direction === "up" ? currentIndex - 1 : currentIndex + 1
+
+    if (newIndex < 0 || newIndex >= categoryResources.length) {
+      setSavingOrder(false)
+      return
+    }
+
+    const updatedResources = Array.from(categoryResources)
+    const [removed] = updatedResources.splice(currentIndex, 1)
+    updatedResources.splice(newIndex, 0, removed)
+
+    // Update sort_order for affected resources
+    const updates = updatedResources.map((r, idx) => ({
+      id: r.id,
+      sort_order: idx + 1,
+    }))
+
+    for (const update of updates) {
+      await supabase
+        .from("external_resources")
+        .update({ sort_order: update.sort_order })
+        .eq("id", update.id)
+    }
+
+    toast({ title: "Success", description: "Resource order updated" })
+    loadResources()
+    setSavingOrder(false)
+  }
+
+  // Get unique categories from resources
+  const availableCategories = ["All", ...Array.from(new Set(resources.map(r => r.category))).sort()]
+
+  // Filter resources
+  const filteredResources = resources.filter(resource => {
+    const matchesSearch = 
+      resource.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      resource.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      resource.url.toLowerCase().includes(searchQuery.toLowerCase())
+    const matchesCategory = filterCategory === "All" || resource.category === filterCategory
+    return matchesSearch && matchesCategory
+  })
+
+  // Group by category
+  const groupedResources = filteredResources.reduce((acc, resource) => {
+    if (!acc[resource.category]) {
+      acc[resource.category] = []
+    }
+    acc[resource.category].push(resource)
+    return acc
+  }, {} as Record<string, ExternalResource[]>)
+
+  if (!isAdmin) {
+    return (
+      <div className="container mx-auto px-4 py-8 text-center">
+        <p className="text-optavia-gray">You do not have permission to access this page.</p>
+      </div>
+    )
+  }
+
+  if (loading) {
+    return (
+      <div className="container mx-auto px-4 py-8 text-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[hsl(var(--optavia-green))] mx-auto"></div>
+        <p className="text-optavia-gray mt-4">Loading resources...</p>
+      </div>
+    )
+  }
+
+  return (
+    <div className="container mx-auto px-4 py-8">
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="font-heading font-bold text-2xl sm:text-3xl text-optavia-dark">Manage Resources</h1>
+        {onClose && (
+          <Button variant="ghost" onClick={onClose} className="text-optavia-gray hover:bg-gray-100">
+            <X className="h-4 w-4" />
+          </Button>
+        )}
+      </div>
+
+      {/* Create New Resource Section */}
+      <div className="mb-8">
+        {!showForm ? (
+          <Button
+            onClick={() => setShowForm(true)}
+            className="bg-[hsl(var(--optavia-green))] hover:bg-[hsl(var(--optavia-green-dark))]"
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            New Resource
+          </Button>
+        ) : (
+          <Card className="bg-white border border-gray-200 shadow-sm">
+            <CardHeader>
+              <CardTitle className="text-optavia-dark">
+                {editingId ? "Edit Resource" : "Add New Resource"}
+              </CardTitle>
+              <CardDescription className="text-optavia-gray">
+                Add an external resource link for coaches to access
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handleSubmit} className="space-y-6">
+                {/* Basic Info */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="title" className="text-optavia-dark">Title *</Label>
+                    <Input
+                      id="title"
+                      value={title}
+                      onChange={(e) => setTitle(e.target.value)}
+                      placeholder="e.g., OPTAVIA Connect"
+                      required
+                      className="border-gray-300"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="category" className="text-optavia-dark">Category *</Label>
+                    <Select value={category} onValueChange={setCategory}>
+                      <SelectTrigger className="border-gray-300">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent className="bg-white border border-gray-200 shadow-lg">
+                        {CATEGORIES.map(cat => (
+                          <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="description" className="text-optavia-dark">Description *</Label>
+                  <Textarea
+                    id="description"
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                    placeholder="Brief description of what this resource provides..."
+                    rows={3}
+                    required
+                    className="border-gray-300"
+                  />
+                </div>
+
+                {/* URL and Button */}
+                <div className="bg-blue-50 rounded-lg p-4 space-y-4">
+                  <h4 className="font-medium text-optavia-dark text-sm flex items-center gap-2">
+                    <LinkIcon className="h-4 w-4 text-blue-600" />
+                    Link Details
+                  </h4>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="url" className="text-optavia-dark">URL *</Label>
+                      <Input
+                        id="url"
+                        value={url}
+                        onChange={(e) => setUrl(e.target.value)}
+                        placeholder="https://..."
+                        required
+                        className="border-gray-300"
+                      />
+                      {isDynamic && (
+                        <p className="text-xs text-blue-600">
+                          Use {"{optavia_id}"} as a placeholder for the user&apos;s OPTAVIA ID
+                        </p>
+                      )}
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="buttonText" className="text-optavia-dark">Button Text</Label>
+                      <Input
+                        id="buttonText"
+                        value={buttonText}
+                        onChange={(e) => setButtonText(e.target.value)}
+                        placeholder="Visit Resource"
+                        className="border-gray-300"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Dynamic URL Toggle */}
+                  <div className="flex items-center gap-3 p-3 bg-white rounded-md border border-gray-200">
+                    <Switch
+                      id="isDynamic"
+                      checked={isDynamic}
+                      onCheckedChange={setIsDynamic}
+                    />
+                    <div>
+                      <Label htmlFor="isDynamic" className="cursor-pointer text-optavia-dark text-sm">
+                        Dynamic URL
+                      </Label>
+                      <p className="text-xs text-optavia-gray">
+                        URL contains placeholders that are replaced with user data
+                      </p>
+                    </div>
+                  </div>
+
+                  {isDynamic && (
+                    <div className="space-y-2">
+                      <Label htmlFor="showCondition" className="text-optavia-dark">Show Condition</Label>
+                      <Select value={showCondition} onValueChange={setShowCondition}>
+                        <SelectTrigger className="border-gray-300">
+                          <SelectValue placeholder="Select condition..." />
+                        </SelectTrigger>
+                        <SelectContent className="bg-white border border-gray-200 shadow-lg">
+                          <SelectItem value="optavia_id">User has OPTAVIA ID</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <p className="text-xs text-optavia-gray">
+                        Only show this resource when the user meets this condition
+                      </p>
+                    </div>
+                  )}
+                </div>
+
+                {/* Features */}
+                <div className="bg-gray-50 rounded-lg p-4 space-y-4">
+                  <h4 className="font-medium text-optavia-dark text-sm">Features / Highlights</h4>
+                  <p className="text-xs text-optavia-gray">
+                    Add bullet points that describe what users can do with this resource
+                  </p>
+                  
+                  <div className="flex gap-2">
+                    <Input
+                      value={featureInput}
+                      onChange={(e) => setFeatureInput(e.target.value)}
+                      placeholder="Add a feature..."
+                      className="border-gray-300"
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault()
+                          addFeature()
+                        }
+                      }}
+                    />
+                    <Button type="button" onClick={addFeature} variant="outline" className="border-gray-300">
+                      <Plus className="h-4 w-4" />
+                    </Button>
+                  </div>
+
+                  {features.length > 0 && (
+                    <div className="flex flex-wrap gap-2">
+                      {features.map((feature, index) => (
+                        <Badge
+                          key={index}
+                          variant="secondary"
+                          className="bg-white border border-gray-200 text-optavia-dark py-1 px-2 flex items-center gap-1"
+                        >
+                          {feature}
+                          <button
+                            type="button"
+                            onClick={() => removeFeature(index)}
+                            className="ml-1 hover:text-red-500"
+                          >
+                            <X className="h-3 w-3" />
+                          </button>
+                        </Badge>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Active Toggle */}
+                <div className="flex items-center gap-3 p-3 bg-green-50 rounded-md border border-green-200">
+                  <Switch
+                    id="isActive"
+                    checked={isActive}
+                    onCheckedChange={setIsActive}
+                  />
+                  <div>
+                    <Label htmlFor="isActive" className="cursor-pointer text-optavia-dark text-sm">
+                      Active
+                    </Label>
+                    <p className="text-xs text-optavia-gray">
+                      {isActive ? "Resource is visible to coaches" : "Resource is hidden from coaches"}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex gap-2">
+                  <Button
+                    type="submit"
+                    disabled={submitting}
+                    className="bg-[hsl(var(--optavia-green))] hover:bg-[hsl(var(--optavia-green-dark))]"
+                  >
+                    {submitting ? (
+                      <>
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        Saving...
+                      </>
+                    ) : (
+                      <>{editingId ? "Update" : "Create"} Resource</>
+                    )}
+                  </Button>
+                  <Button type="button" variant="outline" onClick={resetForm} disabled={submitting}>
+                    Cancel
+                  </Button>
+                </div>
+              </form>
+            </CardContent>
+          </Card>
+        )}
+      </div>
+
+      {/* List of Resources */}
+      <div className="space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <h2 className="font-heading font-bold text-xl text-optavia-dark">All Resources</h2>
+          <div className="flex flex-col sm:flex-row gap-2">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-optavia-gray" />
+              <Input
+                placeholder="Search resources..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-9 border-gray-300 w-full sm:w-64"
+              />
+            </div>
+            <Select value={filterCategory} onValueChange={setFilterCategory}>
+              <SelectTrigger className="w-full sm:w-40 border-gray-300">
+                <SelectValue placeholder="Category" />
+              </SelectTrigger>
+              <SelectContent className="bg-white border border-gray-200 shadow-lg">
+                {availableCategories.map(cat => (
+                  <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+
+        {Object.keys(groupedResources).length === 0 ? (
+          <Card className="bg-gray-50 border border-gray-200">
+            <CardContent className="py-8 text-center">
+              <ExternalLink className="h-12 w-12 text-optavia-gray mx-auto mb-4" />
+              <p className="text-optavia-gray">
+                {searchQuery || filterCategory !== "All" 
+                  ? "No resources match your search" 
+                  : "No resources found. Create your first resource!"}
+              </p>
+            </CardContent>
+          </Card>
+        ) : (
+          <div className="space-y-6">
+            {Object.entries(groupedResources)
+              .sort(([a], [b]) => a.localeCompare(b))
+              .map(([categoryName, categoryResources]) => (
+                <div key={categoryName} className="space-y-2">
+                  <h3 className="font-semibold text-optavia-dark flex items-center gap-2">
+                    <Badge variant="outline" className="text-xs">
+                      {categoryName}
+                    </Badge>
+                    <span className="text-sm text-optavia-gray font-normal">
+                      ({categoryResources.length} resource{categoryResources.length !== 1 ? "s" : ""})
+                    </span>
+                  </h3>
+                  
+                  <div className="space-y-2">
+                    {categoryResources
+                      .sort((a, b) => a.sort_order - b.sort_order)
+                      .map((resource, index) => (
+                        <Card 
+                          key={resource.id} 
+                          className={`border transition-colors ${
+                            resource.is_active 
+                              ? "bg-white border-gray-200 hover:border-[hsl(var(--optavia-green))]" 
+                              : "bg-gray-50 border-gray-200 opacity-60"
+                          }`}
+                        >
+                          <CardContent className="py-3 px-4">
+                            <div className="flex items-start gap-3">
+                              {/* Reorder buttons */}
+                              <div className="flex flex-col gap-0.5 pt-1">
+                                <Button
+                                  size="icon"
+                                  variant="ghost"
+                                  className="h-5 w-5 p-0"
+                                  onClick={() => reorderResource(resource.id, "up")}
+                                  disabled={index === 0 || savingOrder}
+                                >
+                                  <ChevronUp className="h-3 w-3" />
+                                </Button>
+                                <Button
+                                  size="icon"
+                                  variant="ghost"
+                                  className="h-5 w-5 p-0"
+                                  onClick={() => reorderResource(resource.id, "down")}
+                                  disabled={index === categoryResources.length - 1 || savingOrder}
+                                >
+                                  <ChevronDown className="h-3 w-3" />
+                                </Button>
+                              </div>
+
+                              {/* Content */}
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-start justify-between gap-2">
+                                  <div className="min-w-0">
+                                    <div className="flex items-center gap-2 flex-wrap">
+                                      <h4 className="font-medium text-optavia-dark truncate">
+                                        {resource.title}
+                                      </h4>
+                                      {!resource.is_active && (
+                                        <Badge variant="secondary" className="text-xs bg-gray-200">
+                                          Hidden
+                                        </Badge>
+                                      )}
+                                      {resource.is_dynamic && (
+                                        <Badge variant="outline" className="text-xs border-blue-300 text-blue-600">
+                                          Dynamic
+                                        </Badge>
+                                      )}
+                                    </div>
+                                    <p className="text-sm text-optavia-gray line-clamp-1 mt-0.5">
+                                      {resource.description}
+                                    </p>
+                                    <a 
+                                      href={resource.url}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="text-xs text-blue-500 hover:underline flex items-center gap-1 mt-1"
+                                    >
+                                      {resource.url.length > 50 
+                                        ? resource.url.substring(0, 50) + "..." 
+                                        : resource.url}
+                                      <ExternalLink className="h-3 w-3" />
+                                    </a>
+                                  </div>
+
+                                  {/* Actions */}
+                                  <div className="flex items-center gap-1 flex-shrink-0">
+                                    <Button
+                                      size="icon"
+                                      variant="ghost"
+                                      onClick={() => toggleActive(resource)}
+                                      className="h-8 w-8"
+                                      title={resource.is_active ? "Hide resource" : "Show resource"}
+                                    >
+                                      {resource.is_active ? (
+                                        <Eye className="h-4 w-4 text-green-600" />
+                                      ) : (
+                                        <EyeOff className="h-4 w-4 text-gray-400" />
+                                      )}
+                                    </Button>
+                                    <Button
+                                      size="icon"
+                                      variant="ghost"
+                                      onClick={(e) => handleEdit(resource, e)}
+                                      className="h-8 w-8"
+                                    >
+                                      <Edit className="h-4 w-4 text-blue-600" />
+                                    </Button>
+                                    <Button
+                                      size="icon"
+                                      variant="ghost"
+                                      onClick={(e) => handleDelete(resource.id, e)}
+                                      className="h-8 w-8 text-red-500 hover:text-red-700 hover:bg-red-50"
+                                    >
+                                      <Trash2 className="h-4 w-4" />
+                                    </Button>
+                                  </div>
+                                </div>
+
+                                {/* Features */}
+                                {resource.features && resource.features.length > 0 && (
+                                  <div className="flex flex-wrap gap-1 mt-2">
+                                    {resource.features.slice(0, 3).map((feature, i) => (
+                                      <Badge 
+                                        key={i} 
+                                        variant="secondary" 
+                                        className="text-xs bg-gray-100 text-optavia-gray font-normal"
+                                      >
+                                        {feature}
+                                      </Badge>
+                                    ))}
+                                    {resource.features.length > 3 && (
+                                      <Badge 
+                                        variant="secondary" 
+                                        className="text-xs bg-gray-100 text-optavia-gray font-normal"
+                                      >
+                                        +{resource.features.length - 3} more
+                                      </Badge>
+                                    )}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                  </div>
+                </div>
+              ))}
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}

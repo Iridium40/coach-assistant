@@ -12,7 +12,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { User, LogOut, Bell, BarChart3, BellRing, UtensilsCrossed, Star, CalendarDays, BookOpen } from "lucide-react"
+import { User, LogOut, Bell, BarChart3, BellRing, UtensilsCrossed, Star, CalendarDays, BookOpen, Link2 } from "lucide-react"
 import { useUserData } from "@/contexts/user-data-context"
 
 interface UserMenuProps {
@@ -144,6 +144,13 @@ export function UserMenu({ onSettingsClick, onAnnouncementsClick, onReportsClick
             >
               <BookOpen className="mr-2 h-4 w-4" />
               <span>Training</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem 
+              onClick={() => router.push("/admin/resources")}
+              className="text-optavia-dark hover:bg-gray-100 cursor-pointer"
+            >
+              <Link2 className="mr-2 h-4 w-4" />
+              <span>Resources</span>
             </DropdownMenuItem>
             <DropdownMenuSeparator className="bg-gray-200" />
           </>
