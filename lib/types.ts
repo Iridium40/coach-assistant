@@ -17,11 +17,12 @@ export interface Module {
   id: string
   title: string
   description: string
-  category: "Getting Started" | "Client Support" | "Business Building" | "Training"
+  category: "Getting Started" | "Client Support" | "Business Building" | "Training" | "Academy Course"
   order: number
   forNewCoach: boolean
   icon: string
   resources: Resource[]
+  required_rank?: string | null
 }
 
 export interface Recipe {

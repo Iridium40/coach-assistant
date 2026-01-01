@@ -47,6 +47,11 @@ export function ModuleDetail({ module, userData, setUserData, onBack }: ModuleDe
       return url
     }
     
+    // For academy pages, don't use iframe (they'll be routed)
+    if (url.startsWith("/academy/")) {
+      return url
+    }
+    
     // For Google Docs, convert to embeddable format
     if (url.includes("docs.google.com/document/d/")) {
       const docId = url.match(/\/document\/d\/([a-zA-Z0-9-_]+)/)?.[1]
@@ -165,8 +170,8 @@ export function ModuleDetail({ module, userData, setUserData, onBack }: ModuleDe
       }
     }
 
-    // If URL starts with /onboarding/, route to the page instead of opening in iframe
-    if (resource.url.startsWith("/onboarding/")) {
+    // If URL starts with /onboarding/ or /academy/, route to the page instead of opening in iframe
+    if (resource.url.startsWith("/onboarding/") || resource.url.startsWith("/academy/")) {
       router.push(resource.url)
       return
     }
@@ -297,7 +302,7 @@ export function ModuleDetail({ module, userData, setUserData, onBack }: ModuleDe
             </div>
           </DialogHeader>
           <div className="flex-1 overflow-hidden relative bg-gray-50">
-            {openResource && !openResource.url.startsWith("/onboarding/") && (
+            {openResource && !openResource.url.startsWith("/onboarding/") && !openResource.url.startsWith("/academy/") && (
               <>
                 <iframe
                   src={getEmbedUrl(openResource.url)}

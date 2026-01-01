@@ -12,6 +12,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { canAccessModule, isAcademyModule } from "@/lib/academy-utils"
+import { useUserData } from "@/contexts/user-data-context"
 
 interface TrainingTabProps {
   userData: UserData
@@ -23,15 +25,28 @@ interface TrainingTabProps {
 export const TrainingTab = memo(function TrainingTab({ userData, setUserData, onSelectModule, modules }: TrainingTabProps) {
   const [selectedCategory, setSelectedCategory] = useState<string>("All")
   const [searchQuery, setSearchQuery] = useState("")
+  const { profile } = useUserData()
+  const userRank = profile?.coach_rank || null
 
-  // Memoize available modules for this user
+  // Memoize available modules for this user (filter by new coach status, but show locked academy modules)
   const availableModules = useMemo(() => 
     modules.filter((module) => {
+      // Filter by new coach status
       if (userData.isNewCoach && !module.forNewCoach) return false
+      
+      // Don't filter out academy modules - show them even if locked
       return true
     }),
     [modules, userData.isNewCoach]
   )
+  
+  // Helper to check if a module is locked
+  const isModuleLocked = useCallback((module: Module): boolean => {
+    if (isAcademyModule(module.id)) {
+      return !canAccessModule(userRank, module.required_rank || null)
+    }
+    return false
+  }, [userRank])
 
   // Memoize categories list
   const categories = useMemo(() => {
@@ -41,7 +56,7 @@ export const TrainingTab = memo(function TrainingTab({ userData, setUserData, on
     )
 
     // Define the desired order for categories
-    const categoryOrder: string[] = ["Getting Started", "Client Support", "Business Building"]
+    const categoryOrder: string[] = ["Getting Started", "Client Support", "Business Building", "Academy Course"]
     
     // Sort categories according to the desired order, then add any remaining categories
     const orderedCategories = categoryOrder.filter((cat: string) => availableCategories.includes(cat))
@@ -151,9 +166,19 @@ export const TrainingTab = memo(function TrainingTab({ userData, setUserData, on
 
       {/* Module Cards */}
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredModules.map((module) => (
-          <ModuleCard key={module.id} module={module} userData={userData} onClick={() => onSelectModule(module)} />
-        ))}
+        {filteredModules.map((module) => {
+          const locked = isModuleLocked(module)
+          return (
+            <ModuleCard 
+              key={module.id} 
+              module={module} 
+              userData={userData} 
+              onClick={() => !locked && onSelectModule(module)}
+              isLocked={locked}
+              requiredRank={module.required_rank || null}
+            />
+          )
+        })}
       </div>
 
       {filteredModules.length === 0 && (

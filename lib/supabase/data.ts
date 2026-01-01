@@ -116,6 +116,7 @@ async function loadModulesFromSupabase(): Promise<Module[]> {
     forNewCoach: m.for_new_coach,
     icon: m.icon,
     resources: resourcesByModule.get(m.id) || [],
+    required_rank: (m as any).required_rank || null,
   }))
 
   return modules

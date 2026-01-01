@@ -4,6 +4,7 @@ import { useState } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { UserMenu } from "@/components/user-menu"
+import { ShareProfile } from "@/components/share-profile"
 import { useAuth } from "@/hooks/use-auth"
 import { useSupabaseData } from "@/hooks/use-supabase-data"
 import { Menu, X, UserPlus } from "lucide-react"
@@ -63,7 +64,7 @@ export function Header({ onSettingsClick, onHomeClick, onAnnouncementsClick, onR
       <div className="container mx-auto px-4">
         {/* Top row: Logo, Hamburger Menu, and User Menu */}
         <div className="flex items-center justify-between gap-2 py-3 sm:py-4">
-          <div className="flex items-center gap-2 min-w-0 flex-shrink">
+          <div className="flex items-center gap-3 min-w-0 flex-shrink">
             <Link 
               href="/dashboard" 
               className="hover:opacity-80 transition-opacity"
@@ -84,6 +85,8 @@ export function Header({ onSettingsClick, onHomeClick, onAnnouncementsClick, onR
                   />
                 </picture>
             </Link>
+            {/* Share Profile Button - positioned to the right of logo */}
+            {!loading && user && profile?.optavia_id && <ShareProfile />}
           </div>
 
           <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
