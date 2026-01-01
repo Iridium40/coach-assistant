@@ -1,6 +1,7 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -11,6 +12,9 @@ import { ArrowLeft, Bookmark, ExternalLink, FileText, Video, X } from "lucide-re
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { useAuth } from "@/hooks/use-auth"
 import { useSupabaseData } from "@/hooks/use-supabase-data"
+import { useUserData } from "@/contexts/user-data-context"
+import { useToast } from "@/hooks/use-toast"
+import { isOnboardingResource, checkOnboardingComplete, markOnboardingComplete } from "@/lib/onboarding-utils"
 import type { Module, UserData } from "@/lib/types"
 
 interface ModuleDetailProps {
@@ -22,8 +26,11 @@ interface ModuleDetailProps {
 
 export function ModuleDetail({ module, userData, setUserData, onBack }: ModuleDetailProps) {
   const { user } = useAuth()
+  const router = useRouter()
+  const { toast } = useToast()
+  const { profile, refreshData } = useUserData()
   const { completedResources, bookmarks, toggleCompletedResource, toggleBookmark, loading } = useSupabaseData(user)
-  const [openResource, setOpenResource] = useState<{ url: string; title: string } | null>(null)
+  const [openResource, setOpenResource] = useState<{ url: string; title: string; id: string } | null>(null)
   
   // Always use Supabase data when user is authenticated (it's the source of truth)
   // Only fall back to userData if not authenticated or data is still loading
@@ -35,6 +42,11 @@ export function ModuleDetail({ module, userData, setUserData, onBack }: ModuleDe
 
   // Convert URLs to embeddable format
   const getEmbedUrl = (url: string) => {
+    // For onboarding pages, don't use iframe (they'll be routed)
+    if (url.startsWith("/onboarding/")) {
+      return url
+    }
+    
     // For Google Docs, convert to embeddable format
     if (url.includes("docs.google.com/document/d/")) {
       const docId = url.match(/\/document\/d\/([a-zA-Z0-9-_]+)/)?.[1]
@@ -94,9 +106,26 @@ export function ModuleDetail({ module, userData, setUserData, onBack }: ModuleDe
     return url
   }
 
+  // Check onboarding completion after marking a resource complete
   const handleToggleComplete = async (resourceId: string) => {
     if (user && toggleCompletedResource) {
       await toggleCompletedResource(resourceId)
+      
+      // Check if this is an onboarding resource and user is a new coach
+      if (isOnboardingResource(resourceId) && profile?.is_new_coach) {
+        // Check if all onboarding modules are now complete
+        const allComplete = await checkOnboardingComplete(user.id)
+        if (allComplete) {
+          // Mark user as no longer a new coach
+          await markOnboardingComplete(user.id)
+          // Refresh user data to reflect the change
+          await refreshData(true)
+          toast({
+            title: "🎉 Onboarding Complete!",
+            description: "Congratulations! You've completed your new coach training. You now have access to all training modules.",
+          })
+        }
+      }
     } else {
       // Fallback to local state if not authenticated
       const newCompleted = userData.completedResources.includes(resourceId)
@@ -124,6 +153,25 @@ export function ModuleDetail({ module, userData, setUserData, onBack }: ModuleDe
         bookmarks: newBookmarks,
       })
     }
+  }
+
+  // Auto-complete onboarding resources when opened
+  const handleOpenResource = async (resource: { url: string; title: string; id: string }) => {
+    // Check if this is an onboarding resource
+    if (isOnboardingResource(resource.id)) {
+      // If not already completed, mark it as complete
+      if (user && !effectiveCompletedResources.includes(resource.id)) {
+        await handleToggleComplete(resource.id)
+      }
+    }
+
+    // If URL starts with /onboarding/, route to the page instead of opening in iframe
+    if (resource.url.startsWith("/onboarding/")) {
+      router.push(resource.url)
+      return
+    }
+
+    setOpenResource(resource)
   }
 
   return (
@@ -214,7 +262,7 @@ export function ModuleDetail({ module, userData, setUserData, onBack }: ModuleDe
                       <Button
                         size="sm"
                         className="gap-1 sm:gap-2 bg-[hsl(var(--optavia-green))] hover:bg-[hsl(var(--optavia-green-dark))] text-xs sm:text-sm px-2 sm:px-3"
-                        onClick={() => setOpenResource({ url: resource.url, title: resource.title })}
+                        onClick={() => handleOpenResource({ url: resource.url, title: resource.title, id: resource.id })}
                       >
                         <span className="hidden sm:inline">Open</span>
                         <span className="sm:hidden">Open</span>
@@ -249,7 +297,7 @@ export function ModuleDetail({ module, userData, setUserData, onBack }: ModuleDe
             </div>
           </DialogHeader>
           <div className="flex-1 overflow-hidden relative bg-gray-50">
-            {openResource && (
+            {openResource && !openResource.url.startsWith("/onboarding/") && (
               <>
                 <iframe
                   src={getEmbedUrl(openResource.url)}
