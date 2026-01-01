@@ -5,15 +5,16 @@ const resend = new Resend(process.env.RESEND_API_KEY)
 
 export async function POST(request: NextRequest) {
   try {
-    const { to, fullName } = await request.json()
+    const { to, fullName, coachRank, inviteLink, invitedBy } = await request.json()
 
-    if (!to || !fullName) {
+    if (!to || !fullName || !inviteLink) {
       return NextResponse.json(
-        { error: "Missing required fields: to, fullName" },
+        { error: "Missing required fields: to, fullName, inviteLink" },
         { status: 400 }
       )
     }
 
+    const invitedByName = invitedBy || "your mentor"
     const subject = `Welcome, New Coach! | Your OPTAVIA Coaching Journey Starts Here`
     
     const htmlContent = `
@@ -380,6 +381,48 @@ export async function POST(request: NextRequest) {
             <p>Your journey to helping others transform their lives starts here</p>
         </div>
 
+        <!-- Account Setup Card -->
+        <div class="card" style="border: 2px solid #00A651; background: linear-gradient(135deg, #f8faf8 0%, #e8f5e9 100%);">
+            <div class="card-header">
+                <div class="card-icon">🔐</div>
+                <div>
+                    <h2 class="card-title">Set Up Your Account</h2>
+                    <p class="card-subtitle">First, create your Coaching Amplifier account</p>
+                </div>
+            </div>
+            
+            <p style="color: #555; margin-bottom: 16px;">
+                You've been invited by <strong>${invitedByName}</strong> to join <strong>Coaching Amplifier</strong>, your hub for coaching resources, training, and support.
+            </p>
+            
+            ${coachRank ? `
+            <div style="background-color: #e8f5e9; padding: 12px 16px; border-radius: 8px; margin-bottom: 16px; border-left: 4px solid #00A651;">
+                <p style="margin: 0; font-size: 14px; color: #333;">
+                    <strong style="color: #00A651;">Your Coach Rank:</strong> ${coachRank}
+                </p>
+            </div>
+            ` : ""}
+            
+            <p style="color: #555; margin-bottom: 20px;">Click the button below to set your password and create your account:</p>
+            
+            <div style="text-align: center; margin: 24px 0;">
+                <a href="${inviteLink}" style="display: inline-block; background: linear-gradient(135deg, #00A651 0%, #00c760 100%); color: white; padding: 16px 32px; border-radius: 12px; text-decoration: none; font-weight: 700; font-size: 1.1rem; box-shadow: 0 4px 12px rgba(0, 166, 81, 0.3);">
+                    Set Password & Create Account
+                </a>
+            </div>
+            
+            <div style="background-color: #f5f5f5; padding: 12px 16px; border-radius: 8px; margin-top: 16px;">
+                <p style="margin: 0 0 8px 0; font-size: 12px; color: #666; font-weight: 600;">Or copy this link:</p>
+                <p style="word-break: break-all; color: #00A651; font-size: 12px; margin: 0; font-family: monospace;">${inviteLink}</p>
+            </div>
+            
+            <div style="background-color: #fff8e1; padding: 12px 16px; border-radius: 8px; margin-top: 16px; border-left: 4px solid #ffc107;">
+                <p style="margin: 0; font-size: 13px; color: #856404;">
+                    <strong>⏰ Note:</strong> This invitation link will expire in 48 hours.
+                </p>
+            </div>
+        </div>
+
         <!-- The Secret -->
         <div class="card">
             <div class="secret-box">
@@ -546,6 +589,22 @@ export async function POST(request: NextRequest) {
 Welcome, ${fullName}!
 
 Your journey to helping others transform their lives starts here.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🔐 SET UP YOUR ACCOUNT FIRST
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+You've been invited by ${invitedByName} to join Coaching Amplifier, your hub for coaching resources, training, and support.
+
+${coachRank ? `Your Coach Rank: ${coachRank}\n\n` : ""}Click the link below to set your password and create your account:
+
+${inviteLink}
+
+⏰ Note: This invitation link will expire in 48 hours.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📚 NEW COACH ONBOARDING
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 🔑 THE SECRET TO NEW COACH GROWTH: SIMPLE, CONSISTENT ACTION
 

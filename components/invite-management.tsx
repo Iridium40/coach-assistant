@@ -255,6 +255,9 @@ export function InviteManagement({ onClose }: InviteManagementProps) {
         const welcomeResult = await sendNewCoachWelcomeEmail({
           to: email,
           fullName: fullName,
+          coachRank: coachRank,
+          inviteLink: link,
+          invitedBy: profile?.full_name || user.email || "an admin",
         })
         welcomeEmailSent = welcomeResult.success
       }

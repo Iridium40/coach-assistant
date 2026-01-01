@@ -51,6 +51,9 @@ export interface MeetingEmailData {
 export interface NewCoachWelcomeEmailData {
   to: string
   fullName: string
+  coachRank?: string
+  inviteLink: string
+  invitedBy: string
 }
 
 /**
