@@ -167,6 +167,7 @@ async function loadRecipesFromSupabase(): Promise<Recipe[]> {
     },
     ingredients: r.ingredients || [],
     instructions: r.instructions || [],
+    favoriteCount: r.favorite_count || 0,
   }))
 
   return recipes

@@ -42,6 +42,7 @@ export interface Recipe {
   }
   ingredients: string[]
   instructions: string[]
+  favoriteCount?: number
 }
 
 export interface ZoomCall {

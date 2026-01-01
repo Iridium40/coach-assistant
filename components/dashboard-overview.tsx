@@ -53,7 +53,7 @@ const coachTips = [
 ]
 
 export function DashboardOverview() {
-  const { user, profile, badges, completedResources, modules, recipes } = useUserData()
+  const { user, profile, badges, completedResources, modules, recipes, favoriteRecipes } = useUserData()
   const supabase = createClient()
   
   const [upcomingMeetings, setUpcomingMeetings] = useState<ZoomCall[]>([])
@@ -112,6 +112,20 @@ export function DashboardOverview() {
       .sort((a, b) => new Date(b.earnedAt).getTime() - new Date(a.earnedAt).getTime())
       .slice(0, 3)
   }, [badges])
+
+  // Get popular recipes the user hasn't favorited yet
+  const popularRecipes = useMemo(() => {
+    // Filter out recipes the user has already favorited
+    const unfavoritedRecipes = recipes.filter(r => !favoriteRecipes.includes(r.id))
+    
+    // Sort by favorite count (popularity) descending
+    const sortedByPopularity = [...unfavoritedRecipes].sort((a, b) => 
+      (b.favoriteCount || 0) - (a.favoriteCount || 0)
+    )
+    
+    // Return top 4 popular recipes
+    return sortedByPopularity.slice(0, 4)
+  }, [recipes, favoriteRecipes])
 
   // Format time helper
   const formatDateTime = (dateString: string) => {
@@ -472,13 +486,13 @@ export function DashboardOverview() {
           </CardContent>
         </Card>
 
-        {/* Featured Recipes Card */}
+        {/* Popular Recipes Card - shows recipes the user hasn't favorited yet */}
         <Card className="bg-white border border-gray-200 shadow-sm hover:shadow-md transition-shadow md:col-span-2 lg:col-span-3">
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
               <CardTitle className="text-lg flex items-center gap-2 text-optavia-dark">
                 <UtensilsCrossed className="h-5 w-5 text-orange-500" />
-                Featured Recipes
+                Popular Recipes
               </CardTitle>
               <Link href="/recipes">
                 <Button variant="ghost" size="sm" className="text-[hsl(var(--optavia-green))] hover:bg-green-50 -mr-2">
@@ -489,7 +503,7 @@ export function DashboardOverview() {
           </CardHeader>
           <CardContent className="pt-0">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              {recipes.slice(0, 4).map((recipe) => (
+              {popularRecipes.map((recipe) => (
                 <Link key={recipe.id} href={`/recipes/${recipe.id}`}>
                   <div className="group rounded-lg overflow-hidden border border-gray-200 hover:shadow-md transition-shadow cursor-pointer">
                     <div className="aspect-video relative overflow-hidden bg-gray-100">
