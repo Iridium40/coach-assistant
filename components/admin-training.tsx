@@ -498,7 +498,7 @@ export function AdminTraining({ onClose }: { onClose?: () => void }) {
           <SelectTrigger className="w-[240px]">
             <SelectValue placeholder="Filter by category" />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent className="bg-white border border-gray-200 shadow-lg">
             <SelectItem value="all">All Categories</SelectItem>
             {CATEGORIES.map(cat => (
               <SelectItem key={cat.id} value={cat.id}>{cat.label}</SelectItem>
@@ -756,7 +756,7 @@ export function AdminTraining({ onClose }: { onClose?: () => void }) {
                   <SelectTrigger id="module-category">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="bg-white border border-gray-200 shadow-lg">
                     {CATEGORIES.map(cat => (
                       <SelectItem key={cat.id} value={cat.id}>{cat.label}</SelectItem>
                     ))}
@@ -773,7 +773,7 @@ export function AdminTraining({ onClose }: { onClose?: () => void }) {
                   <SelectTrigger id="module-icon">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="bg-white border border-gray-200 shadow-lg">
                     {MODULE_ICONS.map(icon => (
                       <SelectItem key={icon} value={icon}>
                         <span className="text-xl">{icon}</span>
@@ -848,7 +848,7 @@ export function AdminTraining({ onClose }: { onClose?: () => void }) {
                 <SelectTrigger id="resource-type">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-white border border-gray-200 shadow-lg">
                   <SelectItem value="doc">
                     <div className="flex items-center gap-2">
                       <FileText className="h-4 w-4 text-green-500" />
