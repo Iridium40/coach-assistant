@@ -3,12 +3,14 @@
 import { useEffect, useState } from "react"
 import { useRouter, useParams } from "next/navigation"
 import Link from "next/link"
-import { ArrowLeft, Lock } from "lucide-react"
+import { ArrowLeft, Lock, CheckCircle2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useUserData } from "@/contexts/user-data-context"
 import { canAccessModule, getAcademyModuleNav, getRankDisplayName } from "@/lib/academy-utils"
 import { createClient } from "@/lib/supabase/client"
 import type { Module } from "@/lib/types"
+import { ACADEMY_QUIZZES } from "@/lib/academy-quiz-questions"
+import { ModuleQuiz } from "@/components/academy/ModuleQuiz"
 
 // Import module content components (will be created)
 import { Module1Content } from "@/components/academy/module-1-content"
@@ -21,18 +23,23 @@ import { Module6Content } from "@/components/academy/module-6-content"
 export default function AcademyModulePage() {
   const params = useParams()
   const router = useRouter()
-  const { profile, authLoading } = useUserData()
+  const { user, profile, authLoading } = useUserData()
   const [module, setModule] = useState<Module | null>(null)
   const [loading, setLoading] = useState(true)
   const [moduleContent, setModuleContent] = useState<JSX.Element | null>(null)
+  const [quizPassed, setQuizPassed] = useState<boolean | null>(null)
+  const [quizLoading, setQuizLoading] = useState(true)
+  const [resourceId, setResourceId] = useState<string>("")
 
   const moduleId = params?.['module-id'] as string
+  const quizQuestions = moduleId ? ACADEMY_QUIZZES[moduleId] || [] : []
 
   useEffect(() => {
     if (!moduleId) return
 
     loadModule()
-  }, [moduleId])
+    loadQuizStatus()
+  }, [moduleId, user?.id])
 
   const loadModule = async () => {
     setLoading(true)
@@ -64,6 +71,7 @@ export default function AcademyModulePage() {
     }
 
     setModule(loadedModule)
+    setResourceId(`academy-resource-${moduleId.split('-')[1]}`)
     setLoading(false)
 
     // Set module content based on module ID
@@ -88,6 +96,43 @@ export default function AcademyModulePage() {
         break
       default:
         setModuleContent(null)
+    }
+  }
+
+  const loadQuizStatus = async () => {
+    if (!user?.id || !moduleId) {
+      setQuizLoading(false)
+      return
+    }
+
+    setQuizLoading(true)
+    const supabase = createClient()
+
+    const { data, error } = await supabase
+      .from("quiz_attempts")
+      .select("passed")
+      .eq("user_id", user.id)
+      .eq("module_id", `academy-${moduleId}`)
+      .single()
+
+    if (error && error.code !== "PGRST116") {
+      console.error("Error loading quiz status:", error)
+    }
+
+    setQuizPassed(data?.passed || false)
+    setQuizLoading(false)
+  }
+
+  const handleQuizComplete = (passed: boolean) => {
+    setQuizPassed(passed)
+    if (passed) {
+      // Refresh user data to reflect module completion
+      if (window.location.reload) {
+        // Small delay to ensure DB write completes
+        setTimeout(() => {
+          window.location.reload()
+        }, 1000)
+      }
     }
   }
 
@@ -201,6 +246,33 @@ export default function AcademyModulePage() {
       {/* Module Content */}
       <div className="container max-w-4xl mx-auto px-6 pb-16">
         {moduleContent}
+
+        {/* Quiz Section */}
+        {quizLoading ? (
+          <div className="my-8 text-center py-8">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[hsl(var(--optavia-green))] mx-auto mb-4"></div>
+            <p className="text-optavia-gray">Loading quiz...</p>
+          </div>
+        ) : quizPassed ? (
+          <div className="bg-green-50 border-2 border-green-500 rounded-2xl p-8 my-8 text-center">
+            <CheckCircle2 className="h-16 w-16 text-green-600 mx-auto mb-4" />
+            <h3 className="text-2xl font-bold text-green-800 mb-2">Module Complete!</h3>
+            <p className="text-green-700 mb-4">
+              You've successfully passed the quiz for this module. Great work!
+            </p>
+            <p className="text-sm text-green-600">
+              You can review the content anytime, but the quiz has been completed.
+            </p>
+          </div>
+        ) : quizQuestions.length > 0 && user?.id ? (
+          <ModuleQuiz
+            moduleId={`academy-${moduleId}`}
+            questions={quizQuestions}
+            userId={user.id}
+            resourceId={resourceId}
+            onComplete={handleQuizComplete}
+          />
+        ) : null}
       </div>
 
       {/* Navigation Footer */}
