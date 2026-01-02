@@ -18,8 +18,8 @@ import { WaterCalculator } from "@/components/coach-tools/water-calculator"
 import { ExerciseGuide } from "@/components/coach-tools/exercise-guide"
 import { MetabolicHealthInfo } from "@/components/coach-tools/metabolic-health-info"
 import { HealthAssessment } from "@/components/coach-tools/health-assessment"
-import { ClientOnboardingLink } from "@/components/coach-tools/client-onboarding-link"
-import { ClientTroubleshootingLink } from "@/components/coach-tools/client-troubleshooting-link"
+import { ClientOnboardingDialog } from "@/components/coach-tools/client-onboarding-dialog"
+import { ClientTroubleshootingDialog } from "@/components/coach-tools/client-troubleshooting-dialog"
 
 interface Resource {
   id: string
@@ -46,7 +46,7 @@ const COACH_TOOLS = [
     title: "Client Onboarding Tool",
     description: "Streamline new client onboarding with templates, checklists, and quick-copy messages.",
     icon: Users,
-    component: ClientOnboardingLink,
+    component: ClientOnboardingDialog,
     expandMode: "dialog" as const,
   },
   {
@@ -54,7 +54,7 @@ const COACH_TOOLS = [
     title: "Client Troubleshooting Guide",
     description: "Quick solutions and scripts for common client issues and challenges.",
     icon: Wrench,
-    component: ClientTroubleshootingLink,
+    component: ClientTroubleshootingDialog,
     expandMode: "dialog" as const,
   },
   {

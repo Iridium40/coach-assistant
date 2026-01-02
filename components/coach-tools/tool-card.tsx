@@ -115,7 +115,9 @@ export function ToolCard({
       {expandMode === "dialog" && (
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogContent className={`max-h-[90vh] overflow-y-auto ${
-            id === "health-assessment" ? "max-w-5xl" : "max-w-2xl"
+            id === "health-assessment" || id === "client-onboarding" || id === "client-troubleshooting" 
+              ? "max-w-5xl" 
+              : "max-w-2xl"
           }`}>
             <DialogHeader>
               <div className="flex items-center gap-3">
