@@ -534,7 +534,7 @@ export function HealthAssessment() {
               <SelectTrigger id="callOutcome" className="bg-white">
                 <SelectValue placeholder="Select outcome..." />
               </SelectTrigger>
-              <SelectContent className="bg-white">
+              <SelectContent className="bg-white border border-gray-200 shadow-lg">
                 <SelectItem value="enrolled">✅ Enrolled!</SelectItem>
                 <SelectItem value="followup">📅 Follow-up scheduled</SelectItem>
                 <SelectItem value="thinking">🤔 Thinking about it</SelectItem>

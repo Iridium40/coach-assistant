@@ -12,7 +12,7 @@ import { createClient } from "@/lib/supabase/client"
 import { 
   Video, Calendar, Clock, Users, UserCircle, ChevronRight,
   BookOpen, UtensilsCrossed, Wrench, ExternalLink, Award,
-  CheckCircle, PlayCircle, Sparkles, Star, Rocket, Building2, GraduationCap, Link2, Facebook, Lightbulb
+  CheckCircle, PlayCircle, Sparkles, Star, Rocket, Building2, GraduationCap, Link2, Facebook, Lightbulb, X
 } from "lucide-react"
 import { badgeConfig } from "@/lib/badge-config"
 import type { ZoomCall } from "@/lib/types"
@@ -60,6 +60,7 @@ export function DashboardOverview() {
   const [upcomingMeetings, setUpcomingMeetings] = useState<ZoomCall[]>([])
   const [loadingMeetings, setLoadingMeetings] = useState(true)
   const [onboardingProgress, setOnboardingProgress] = useState<{ completed: number; total: number; percentage: number }>({ completed: 0, total: 3, percentage: 0 })
+  const [coachTipDismissed, setCoachTipDismissed] = useState(false)
 
   // Load today's meetings only
   useEffect(() => {
@@ -103,6 +104,22 @@ export function DashboardOverview() {
 
     loadOnboardingProgress()
   }, [user, profile?.is_new_coach, completedResources])
+
+  // Check if coach tip was dismissed today
+  useEffect(() => {
+    const today = new Date().toDateString()
+    const dismissedDate = localStorage.getItem('coachTipDismissedDate')
+    if (dismissedDate === today) {
+      setCoachTipDismissed(true)
+    }
+  }, [])
+
+  // Handle coach tip dismissal
+  const handleDismissCoachTip = () => {
+    const today = new Date().toDateString()
+    localStorage.setItem('coachTipDismissedDate', today)
+    setCoachTipDismissed(true)
+  }
 
   // Calculate training progress
   const trainingProgress = useMemo(() => {
@@ -196,7 +213,7 @@ export function DashboardOverview() {
       <Announcements />
 
       {/* Coach Tip of the Day */}
-      {(() => {
+      {!coachTipDismissed && (() => {
         // Get tip based on day of year for daily rotation
         const now = new Date()
         const startOfYear = new Date(now.getFullYear(), 0, 0)
@@ -206,7 +223,7 @@ export function DashboardOverview() {
         const todaysTip = coachTips[tipIndex]
         
         return (
-          <div className="mt-6 bg-gradient-to-r from-amber-50 to-yellow-50 border border-amber-200 rounded-lg p-4 flex items-start gap-3">
+          <div className="mt-6 bg-gradient-to-r from-amber-50 to-yellow-50 border border-amber-200 rounded-lg p-4 flex items-start gap-3 relative">
             <div className="bg-amber-100 rounded-full p-2 shrink-0">
               <Lightbulb className="h-5 w-5 text-amber-600" />
             </div>
@@ -219,6 +236,15 @@ export function DashboardOverview() {
                 Learn More
               </Button>
             </Link>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleDismissCoachTip}
+              className="absolute top-2 right-2 h-6 w-6 text-amber-700 hover:bg-amber-100 hover:text-amber-800"
+              aria-label="Close coach tip"
+            >
+              <X className="h-4 w-4" />
+            </Button>
           </div>
         )
       })()}
