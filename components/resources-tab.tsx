@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import Link from "next/link"
 import { ModuleCard } from "@/components/module-card"
 import { modules } from "@/lib/data"
 import type { UserData, Module } from "@/lib/types"
@@ -12,6 +13,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Users, ArrowRight } from "lucide-react"
 
 interface ResourcesTabProps {
   userData: UserData
@@ -60,6 +63,59 @@ export function ResourcesTab({ userData, setUserData, onSelectModule }: Resource
         <p className="text-optavia-gray text-base sm:text-lg max-w-2xl mx-auto px-4">
           Access training modules, guides, and tools to support your coaching journey and help your clients succeed.
         </p>
+      </div>
+
+      {/* Coach Tools Section */}
+      <div className="mb-8">
+        <h3 className="font-heading font-bold text-xl text-optavia-dark mb-4">Coach Tools</h3>
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <Card className="border-2 border-[hsl(var(--optavia-green))] hover:shadow-lg transition-shadow">
+            <CardHeader>
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-green-100 rounded-lg">
+                  <Users className="h-6 w-6 text-[hsl(var(--optavia-green))]" />
+                </div>
+                <div className="flex-1">
+                  <CardTitle className="text-lg">Client Onboarding Tool</CardTitle>
+                  <CardDescription className="text-sm mt-1">
+                    Streamline new client onboarding with templates and checklists
+                  </CardDescription>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <Link href="/tools/client-onboarding">
+                <Button className="w-full bg-[hsl(var(--optavia-green))] hover:bg-[hsl(var(--optavia-green-dark))] text-white">
+                  Open Tool
+                  <ArrowRight className="h-4 w-4 ml-2" />
+                </Button>
+              </Link>
+            </CardContent>
+          </Card>
+          <Card className="border-2 border-red-600 hover:shadow-lg transition-shadow">
+            <CardHeader>
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-red-100 rounded-lg">
+                  <Users className="h-6 w-6 text-red-600" />
+                </div>
+                <div className="flex-1">
+                  <CardTitle className="text-lg">Client Troubleshooting Guide</CardTitle>
+                  <CardDescription className="text-sm mt-1">
+                    Quick solutions and scripts for common client issues
+                  </CardDescription>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <Link href="/tools/client-troubleshooting">
+                <Button className="w-full bg-red-600 hover:bg-red-700 text-white">
+                  Open Tool
+                  <ArrowRight className="h-4 w-4 ml-2" />
+                </Button>
+              </Link>
+            </CardContent>
+          </Card>
+        </div>
       </div>
 
       {/* Category Filter - Mobile Dropdown */}
