@@ -21,7 +21,6 @@ import { Switch } from "@/components/ui/switch"
 import { Badge } from "@/components/ui/badge"
 import { X, Copy, Check, UserPlus, History, Clock, UserCheck, UserX, AlertTriangle } from "lucide-react"
 import Link from "next/link"
-import { Checkbox } from "@/components/ui/checkbox"
 
 interface InviteManagementProps {
   onClose?: () => void
@@ -63,7 +62,6 @@ export function InviteManagement({ onClose }: InviteManagementProps) {
   const [coachRank, setCoachRank] = useState("")
   const [optaviaId, setOptaviaId] = useState("")
   const [isNewCoach, setIsNewCoach] = useState(false) // Default to false, existing coaches
-  const [certifyCoach, setCertifyCoach] = useState(false) // Certification checkbox
   const [loading, setLoading] = useState(false)
   const [generatedInvites, setGeneratedInvites] = useState<GeneratedInvite[]>([])
   const [inviteHistory, setInviteHistory] = useState<InviteHistory[]>([])
@@ -305,7 +303,6 @@ export function InviteManagement({ onClose }: InviteManagementProps) {
       setEmail("")
       setCoachRank("")
       setOptaviaId("")
-      setCertifyCoach(false)
 
       // Reload history to show the new invite
       await loadInviteHistory()
@@ -497,25 +494,19 @@ export function InviteManagement({ onClose }: InviteManagementProps) {
               />
             </div>
 
-            <div className="flex items-start space-x-3 pt-4 border-t border-gray-100">
-              <Checkbox
-                id="certifyCoach"
-                checked={certifyCoach}
-                onCheckedChange={(checked) => setCertifyCoach(checked === true)}
-                className="mt-0.5"
-              />
-              <Label htmlFor="certifyCoach" className="cursor-pointer text-sm text-optavia-dark leading-relaxed">
-                I certify that the person I am inviting is an <strong>active OPTAVIA Health Coach</strong> and 
-                I have reviewed the{" "}
+            <div className="pt-4 border-t border-gray-100">
+              <p className="text-sm text-optavia-gray leading-relaxed mb-4">
+                By clicking &quot;Generate Invite Link&quot;, you certify that the person you are inviting is an <strong>active OPTAVIA Health Coach</strong> and 
+                you have reviewed the{" "}
                 <Link href="/terms" className="text-[hsl(var(--optavia-green))] underline hover:text-[hsl(var(--optavia-green-dark))]">
                   Terms and Conditions
                 </Link>.
-              </Label>
+              </p>
             </div>
 
             <Button
               onClick={handleGenerateInvite}
-              disabled={loading || !fullName || !email || !coachRank || !optaviaId || !certifyCoach}
+              disabled={loading || !fullName || !email || !coachRank || !optaviaId}
               className="w-full bg-[hsl(var(--optavia-green))] hover:bg-[hsl(var(--optavia-green-dark))] text-white"
             >
               {loading ? "Generating..." : "Generate Invite Link"}
