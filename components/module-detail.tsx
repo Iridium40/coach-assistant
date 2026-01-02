@@ -7,7 +7,7 @@ import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Checkbox } from "@/components/ui/checkbox"
 import { ProgressBar } from "@/components/progress-bar"
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { ArrowLeft, Bookmark, ExternalLink, FileText, Video, X } from "lucide-react"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { useAuth } from "@/hooks/use-auth"
@@ -40,6 +40,17 @@ export function ModuleDetail({ module, userData, setUserData, onBack }: ModuleDe
 
   const progress = module.resources.length > 0 ? Math.round((completedCount / module.resources.length) * 100) : 0
 
+  // Check if URL can be embedded in iframe
+  const canEmbedInIframe = (url: string): boolean => {
+    // URLs that cannot be embedded (block iframe embedding)
+    const nonEmbeddableDomains = [
+      "loom.com",
+      "canva.com",
+    ]
+    
+    return !nonEmbeddableDomains.some(domain => url.includes(domain))
+  }
+
   // Convert URLs to embeddable format
   const getEmbedUrl = (url: string) => {
     // For onboarding pages, don't use iframe (they'll be routed)
@@ -69,12 +80,13 @@ export function ModuleDetail({ module, userData, setUserData, onBack }: ModuleDe
       // https://vimeo.com/manage/videos/123456789/hash
       let videoId: string | undefined
       
-      // Try to extract from manage URL format
+      // Try to extract from manage URL format first
       const manageMatch = url.match(/\/manage\/videos\/(\d+)/)
       if (manageMatch) {
         videoId = manageMatch[1]
       } else {
-        // Try to extract from standard format
+        // Try to extract from standard format (matches /123456789 or /123456789/hash)
+        // This regex captures the first number after vimeo.com/ and ignores trailing hash
         const standardMatch = url.match(/vimeo\.com\/(\d+)/)
         if (standardMatch) {
           videoId = standardMatch[1]
@@ -82,8 +94,13 @@ export function ModuleDetail({ module, userData, setUserData, onBack }: ModuleDe
       }
       
       if (videoId) {
-        return `https://player.vimeo.com/video/${videoId}`
+        // Return embed URL with parameters for better player experience
+        return `https://player.vimeo.com/video/${videoId}?autoplay=0&title=1&byline=0&portrait=0`
       }
+      
+      // If no video ID found, return original URL to show error or fallback
+      console.warn("Could not extract Vimeo video ID from URL:", url)
+      return url
     }
     
     // For YouTube videos, convert to embeddable format
@@ -170,9 +187,15 @@ export function ModuleDetail({ module, userData, setUserData, onBack }: ModuleDe
       }
     }
 
-    // If URL starts with /onboarding/ or /academy/, route to the page instead of opening in iframe
-    if (resource.url.startsWith("/onboarding/") || resource.url.startsWith("/academy/")) {
+    // If URL starts with /onboarding/, /academy/, or /training/, route to the page instead of opening in iframe
+    if (resource.url.startsWith("/onboarding/") || resource.url.startsWith("/academy/") || resource.url.startsWith("/training/health-assessment-mastery")) {
       router.push(resource.url)
+      return
+    }
+
+    // If URL cannot be embedded (Loom, Canva, etc.), open in new tab
+    if (!canEmbedInIframe(resource.url)) {
+      window.open(resource.url, "_blank", "noopener,noreferrer")
       return
     }
 
@@ -290,7 +313,12 @@ export function ModuleDetail({ module, userData, setUserData, onBack }: ModuleDe
         <DialogContent className="max-w-[98vw] md:max-w-[95vw] lg:max-w-[92vw] xl:max-w-[90vw] w-[98vw] md:w-[95vw] lg:w-[92vw] xl:w-[90vw] h-[95vh] md:h-[96vh] lg:h-[97vh] p-0 flex flex-col" showCloseButton={false}>
           <DialogHeader className="px-4 sm:px-6 py-3 sm:py-4 border-b flex-shrink-0">
             <div className="flex items-center justify-between gap-2">
-              <DialogTitle className="text-base sm:text-lg font-heading truncate flex-1">{openResource?.title}</DialogTitle>
+              <div className="flex-1 min-w-0">
+                <DialogTitle className="text-base sm:text-lg font-heading truncate">{openResource?.title}</DialogTitle>
+                <DialogDescription className="sr-only">
+                  Video or document viewer for {openResource?.title}
+                </DialogDescription>
+              </div>
               <Button
                 variant="ghost"
                 size="icon"
@@ -302,17 +330,14 @@ export function ModuleDetail({ module, userData, setUserData, onBack }: ModuleDe
             </div>
           </DialogHeader>
           <div className="flex-1 overflow-hidden relative bg-gray-50">
-            {openResource && !openResource.url.startsWith("/onboarding/") && !openResource.url.startsWith("/academy/") && (
-              <>
-                <iframe
-                  src={getEmbedUrl(openResource.url)}
-                  className="w-full h-full border-0"
-                  title={openResource.title}
-                  allow="clipboard-read; clipboard-write; autoplay; fullscreen; picture-in-picture"
-                  allowFullScreen
-                  frameBorder="0"
-                />
-              </>
+            {openResource && !openResource.url.startsWith("/onboarding/") && !openResource.url.startsWith("/academy/") && !openResource.url.startsWith("/training/health-assessment-mastery") && canEmbedInIframe(openResource.url) && (
+              <iframe
+                src={getEmbedUrl(openResource.url)}
+                className="w-full h-full border-0"
+                title={openResource.title}
+                allow="clipboard-read; clipboard-write; autoplay; fullscreen; picture-in-picture"
+                allowFullScreen
+              />
             )}
           </div>
         </DialogContent>
