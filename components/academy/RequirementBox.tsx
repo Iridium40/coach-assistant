@@ -13,12 +13,12 @@ export function RequirementBox({ title, children, highlight = false }: Requireme
     <div
       className={`border rounded-xl p-6 my-4 ${
         highlight
-          ? "bg-gradient-to-br from-[#00A651]/20 to-[#00A651]/10 border-[#00A651]"
-          : "bg-slate-800/30 border-slate-700"
+          ? "bg-[hsl(var(--optavia-green-light))] border-[hsl(var(--optavia-green))]"
+          : "bg-white border-[hsl(var(--optavia-border))]"
       }`}
     >
-      <h3 className="font-bold text-lg mb-3">{title}</h3>
-      <div className="text-slate-300">{children}</div>
+      <h3 className="font-bold text-lg mb-3 text-optavia-dark">{title}</h3>
+      <div className="text-optavia-dark">{children}</div>
     </div>
   )
 }

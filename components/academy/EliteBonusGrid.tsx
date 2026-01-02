@@ -16,11 +16,11 @@ export function EliteBonusGrid({ bonuses }: EliteBonusGridProps) {
       {bonuses.map((bonus, index) => (
         <div
           key={index}
-          className="bg-gradient-to-br from-amber-500/10 to-amber-500/5 border border-amber-500/30 rounded-2xl p-6 text-center"
+          className="bg-amber-50 border border-amber-200 rounded-2xl p-6 text-center"
         >
-          <div className="text-xs uppercase tracking-wider text-amber-400 font-bold mb-2">{bonus.rank}</div>
-          <div className="text-3xl font-bold text-amber-200 mb-2">{bonus.percent}</div>
-          <div className="text-sm text-amber-100">{bonus.desc}</div>
+          <div className="text-xs uppercase tracking-wider text-amber-700 font-bold mb-2">{bonus.rank}</div>
+          <div className="text-3xl font-bold text-amber-600 mb-2">{bonus.percent}</div>
+          <div className="text-sm text-optavia-gray">{bonus.desc}</div>
         </div>
       ))}
     </div>

@@ -14,15 +14,15 @@ interface ComparisonGridProps {
 
 export function ComparisonGrid({ items }: ComparisonGridProps) {
   const colorClasses = {
-    green: "border-[#00A651]/30 bg-[#00A651]/5",
-    blue: "border-blue-500/30 bg-blue-500/5",
-    purple: "border-purple-500/30 bg-purple-500/5",
+    green: "border-[hsl(var(--optavia-green))] bg-[hsl(var(--optavia-green-light))]",
+    blue: "border-blue-500 bg-blue-50",
+    purple: "border-purple-500 bg-purple-50",
   }
 
   const labelColors = {
-    green: "text-[#00c760]",
-    blue: "text-blue-400",
-    purple: "text-purple-400",
+    green: "text-[hsl(var(--optavia-green))]",
+    blue: "text-blue-600",
+    purple: "text-purple-600",
   }
 
   return (
@@ -32,7 +32,7 @@ export function ComparisonGrid({ items }: ComparisonGridProps) {
         return (
           <div key={index} className={`border rounded-xl p-5 ${colorClasses[color]}`}>
             <div className={`font-semibold mb-2 ${labelColors[color]}`}>{item.label}</div>
-            <div className="text-sm text-slate-300">{item.content}</div>
+            <div className="text-sm text-optavia-dark">{item.content}</div>
           </div>
         )
       })}

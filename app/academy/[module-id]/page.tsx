@@ -93,10 +93,10 @@ export default function AcademyModulePage() {
 
   if (authLoading || loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 to-slate-800 flex items-center justify-center">
+      <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#00c760] mx-auto mb-4"></div>
-          <p className="text-slate-400">Loading...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[hsl(var(--optavia-green))] mx-auto mb-4"></div>
+          <p className="text-optavia-gray">Loading...</p>
         </div>
       </div>
     )
@@ -104,12 +104,12 @@ export default function AcademyModulePage() {
 
   if (!module) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 to-slate-800 flex items-center justify-center">
-        <div className="text-center text-white">
-          <h1 className="text-2xl font-bold mb-4">Module Not Found</h1>
-          <p className="text-slate-400 mb-6">The requested module could not be found.</p>
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold mb-4 text-optavia-dark">Module Not Found</h1>
+          <p className="text-optavia-gray mb-6">The requested module could not be found.</p>
           <Link href="/training">
-            <Button className="bg-[#00A651] hover:bg-[#00c760]">Back to Training</Button>
+            <Button className="bg-[hsl(var(--optavia-green))] hover:bg-[hsl(var(--optavia-green-dark))]">Back to Training</Button>
           </Link>
         </div>
       </div>
@@ -125,11 +125,11 @@ export default function AcademyModulePage() {
     const requiredRankDisplay = getRankDisplayName(module.required_rank || "Unknown")
 
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 to-slate-800 text-white">
+      <div className="min-h-screen bg-white">
         {/* Navigation */}
-        <nav className="bg-slate-900/95 backdrop-blur-lg border-b border-slate-700 sticky top-0 z-50">
+        <nav className="bg-white border-b border-[hsl(var(--optavia-border))] sticky top-0 z-50">
           <div className="container max-w-4xl mx-auto px-6 py-4 flex items-center justify-between">
-            <Link href="/training" className="flex items-center gap-2 text-slate-400 hover:text-[#00c760] transition-colors">
+            <Link href="/training" className="flex items-center gap-2 text-optavia-gray hover:text-[hsl(var(--optavia-green))] transition-colors">
               <ArrowLeft className="h-4 w-4" />
               <span>Back to Training</span>
             </Link>
@@ -138,17 +138,17 @@ export default function AcademyModulePage() {
 
         {/* Locked Content */}
         <div className="container max-w-4xl mx-auto px-6 py-16">
-          <div className="bg-slate-800/50 border border-slate-700 rounded-2xl p-12 text-center">
-            <div className="w-20 h-20 bg-slate-700 rounded-full flex items-center justify-center mx-auto mb-6">
-              <Lock className="h-10 w-10 text-slate-400" />
+          <div className="bg-white border border-[hsl(var(--optavia-border))] rounded-2xl p-12 text-center shadow-lg">
+            <div className="w-20 h-20 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-6">
+              <Lock className="h-10 w-10 text-optavia-gray" />
             </div>
-            <h1 className="text-3xl font-bold mb-4">{module.title}</h1>
-            <p className="text-xl text-slate-400 mb-8">{module.description}</p>
-            <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-6 max-w-2xl mx-auto">
-              <p className="text-lg mb-2">
-                You must achieve <strong className="text-amber-400">{requiredRankDisplay}</strong> rank to access this module.
+            <h1 className="text-3xl font-bold mb-4 text-optavia-dark">{module.title}</h1>
+            <p className="text-xl text-optavia-gray mb-8">{module.description}</p>
+            <div className="bg-amber-50 border border-amber-200 rounded-xl p-6 max-w-2xl mx-auto">
+              <p className="text-lg mb-2 text-optavia-dark">
+                You must achieve <strong className="text-amber-600">{requiredRankDisplay}</strong> rank to access this module.
               </p>
-              <p className="text-slate-400">
+              <p className="text-optavia-gray">
                 {nav.prev ? (
                   <>Complete the previous module and achieve the required rank to unlock this content.</>
                 ) : (
@@ -158,7 +158,7 @@ export default function AcademyModulePage() {
             </div>
             <div className="mt-8">
               <Link href="/training">
-                <Button className="bg-[#00A651] hover:bg-[#00c760]">Back to Training</Button>
+                <Button className="bg-[hsl(var(--optavia-green))] hover:bg-[hsl(var(--optavia-green-dark))]">Back to Training</Button>
               </Link>
             </div>
           </div>
@@ -170,11 +170,11 @@ export default function AcademyModulePage() {
   const nav = getAcademyModuleNav(moduleId, userRank)
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 to-slate-800 text-white">
+    <div className="min-h-screen bg-white">
       {/* Navigation */}
-      <nav className="bg-slate-900/95 backdrop-blur-lg border-b border-slate-700 sticky top-0 z-50">
+      <nav className="bg-white border-b border-[hsl(var(--optavia-border))] sticky top-0 z-50">
         <div className="container max-w-4xl mx-auto px-6 py-4 flex items-center justify-between">
-          <Link href="/training" className="flex items-center gap-2 text-slate-400 hover:text-[#00c760] transition-colors">
+          <Link href="/training" className="flex items-center gap-2 text-optavia-gray hover:text-[hsl(var(--optavia-green))] transition-colors">
             <ArrowLeft className="h-4 w-4" />
             <span>All Modules</span>
           </Link>
@@ -183,7 +183,7 @@ export default function AcademyModulePage() {
 
       {/* Module Header */}
       <header className="container max-w-4xl mx-auto px-6 py-12">
-        <div className="inline-flex items-center gap-2 bg-[#00A651]/15 border border-[#00A651]/30 text-[#00c760] px-4 py-2 rounded-full text-sm font-semibold mb-4">
+        <div className="inline-flex items-center gap-2 bg-[hsl(var(--optavia-green-light))] border border-[hsl(var(--optavia-green))] text-[hsl(var(--optavia-green))] px-4 py-2 rounded-full text-sm font-semibold mb-4">
           <span>Module {moduleId.split('-')[1]}</span>
           {module.required_rank && (
             <>
@@ -192,10 +192,10 @@ export default function AcademyModulePage() {
             </>
           )}
         </div>
-        <h1 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-white to-slate-400 bg-clip-text text-transparent">
+        <h1 className="text-4xl md:text-5xl font-bold mb-4 text-optavia-dark">
           {module.title}
         </h1>
-        <p className="text-xl text-slate-400 max-w-3xl">{module.description}</p>
+        <p className="text-xl text-optavia-gray max-w-3xl">{module.description}</p>
       </header>
 
       {/* Module Content */}
@@ -205,10 +205,10 @@ export default function AcademyModulePage() {
 
       {/* Navigation Footer */}
       <div className="container max-w-4xl mx-auto px-6 pb-12">
-        <div className="flex justify-between gap-4 pt-8 border-t border-slate-700">
+        <div className="flex justify-between gap-4 pt-8 border-t border-[hsl(var(--optavia-border))]">
           {nav.prev ? (
             <Link href={nav.prev}>
-              <Button variant="outline" className="border-slate-600 text-slate-300 hover:bg-slate-800">
+              <Button variant="outline" className="border-[hsl(var(--optavia-border))] text-optavia-dark hover:bg-gray-50">
                 ← Previous Module
               </Button>
             </Link>
@@ -219,16 +219,16 @@ export default function AcademyModulePage() {
           {nav.next ? (
             nav.canAccessNext ? (
               <Link href={nav.next}>
-                <Button className="bg-[#00A651] hover:bg-[#00c760]">
+                <Button className="bg-[hsl(var(--optavia-green))] hover:bg-[hsl(var(--optavia-green-dark))]">
                   Next Module →
                 </Button>
               </Link>
             ) : (
               <div className="flex flex-col items-end">
-                <Button disabled className="bg-slate-700 text-slate-400 cursor-not-allowed">
+                <Button disabled className="bg-gray-200 text-gray-400 cursor-not-allowed">
                   Next Module →
                 </Button>
-                <p className="text-xs text-slate-500 mt-2">
+                <p className="text-xs text-optavia-light-gray mt-2">
                   Requires {getRankDisplayName(nav.nextRequiredRank || "")} rank
                 </p>
               </div>
@@ -236,7 +236,7 @@ export default function AcademyModulePage() {
           ) : (
             moduleId === "module-6" && (
               <Link href="/training">
-                <Button className="bg-[#00A651] hover:bg-[#00c760]">
+                <Button className="bg-[hsl(var(--optavia-green))] hover:bg-[hsl(var(--optavia-green-dark))]">
                   ✓ Complete Training Guide
                 </Button>
               </Link>

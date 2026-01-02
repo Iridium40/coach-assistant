@@ -19,24 +19,24 @@ export function RankLadder({ ranks }: RankLadderProps) {
           key={index}
           className={`flex items-center gap-4 p-4 rounded-xl border ${
             rank.highlight
-              ? "bg-[#00A651]/10 border-[#00A651]"
-              : "bg-slate-800/30 border-slate-700"
+              ? "bg-[hsl(var(--optavia-green-light))] border-[hsl(var(--optavia-green))]"
+              : "bg-white border-[hsl(var(--optavia-border))]"
           }`}
         >
           <div
             className={`w-12 h-12 rounded-lg flex items-center justify-center text-lg font-bold ${
               rank.highlight
-                ? "bg-gradient-to-br from-[#00A651] to-[#00c760]"
-                : "bg-slate-700"
+                ? "bg-gradient-to-br from-[hsl(var(--optavia-green))] to-[hsl(var(--optavia-green-dark))] text-optavia-dark"
+                : "bg-gray-200 text-optavia-dark"
             }`}
           >
             {rank.points}
           </div>
           <div className="flex-1">
-            <div className={`font-bold ${rank.highlight ? "text-white" : "text-slate-200"}`}>
+            <div className={`font-bold ${rank.highlight ? "text-[hsl(var(--optavia-green))]" : "text-optavia-dark"}`}>
               {rank.rankName}
             </div>
-            <div className="text-sm text-slate-400">{rank.rankReq}</div>
+            <div className="text-sm text-optavia-gray">{rank.rankReq}</div>
           </div>
         </div>
       ))}

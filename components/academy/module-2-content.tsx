@@ -95,10 +95,10 @@ export function Module2Content() {
             { percent: "10%", purpose: "Events", desc: "Convention, training, team events" },
             { percent: "10%", purpose: "Tools", desc: "Scholarships, resources, business tools" },
           ].map((item, i) => (
-            <div key={i} className="bg-slate-800/30 border border-slate-700 rounded-2xl p-6 text-center">
-              <div className="text-4xl font-bold text-[#00c760] mb-2">{item.percent}</div>
+            <div key={i} className="bg-white border border-[hsl(var(--optavia-border))] rounded-2xl p-6 text-center">
+              <div className="text-4xl font-bold text-[hsl(var(--optavia-green))] mb-2">{item.percent}</div>
               <div className="font-semibold mb-1">{item.purpose}</div>
-              <div className="text-sm text-slate-400">{item.desc}</div>
+              <div className="text-sm text-optavia-gray">{item.desc}</div>
             </div>
           ))}
         </div>

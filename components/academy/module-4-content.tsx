@@ -87,30 +87,30 @@ export function Module4Content() {
               key={i}
               className={`flex items-center gap-4 p-4 rounded-xl border ${
                 rank.highlight
-                  ? "bg-[#00A651]/10 border-[#00A651]"
-                  : "bg-slate-800/30 border-slate-700"
+                  ? "bg-[hsl(var(--optavia-green-light))] border-[hsl(var(--optavia-green))]"
+                  : "bg-white border-[hsl(var(--optavia-border))]"
               }`}
             >
               <div
                 className={`w-14 h-14 rounded-lg flex items-center justify-center text-lg font-bold ${
                   rank.highlight
-                    ? "bg-gradient-to-br from-[#00A651] to-[#00c760]"
-                    : "bg-slate-700"
+                    ? "bg-gradient-to-br from-[hsl(var(--optavia-green))] to-[hsl(var(--optavia-green))]"
+                    : "bg-gray-200"
                 }`}
               >
                 {rank.count}
               </div>
               <div className="flex-1">
-                <div className={`font-bold ${rank.highlight ? "text-white" : "text-slate-200"}`}>
+                <div className={`font-bold ${rank.highlight ? "text-[hsl(var(--optavia-green))]" : "text-optavia-dark"}`}>
                   {rank.name}
                 </div>
-                <div className="text-sm text-slate-400">{rank.req}</div>
+                <div className="text-sm text-optavia-gray">{rank.req}</div>
               </div>
             </div>
           ))}
         </div>
 
-        <p className="text-slate-400 text-sm">
+        <p className="text-optavia-gray text-sm">
           Remember: For &quot;Integrated&quot; titles (IND, IGD), you must also maintain FIBC status.
         </p>
       </LessonCard>

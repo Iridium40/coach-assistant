@@ -16,11 +16,11 @@ export function SystemsGrid({ systems }: SystemsGridProps) {
       {systems.map((system, index) => (
         <div
           key={index}
-          className="bg-slate-800/30 border border-slate-700 rounded-2xl p-6"
+          className="bg-white border border-[hsl(var(--optavia-border))] rounded-2xl p-6 shadow-sm"
         >
           <div className="text-3xl mb-3">{system.icon}</div>
-          <div className="font-bold text-white mb-2">{system.title}</div>
-          <div className="text-sm text-slate-400">{system.desc}</div>
+          <div className="font-bold text-optavia-dark mb-2">{system.title}</div>
+          <div className="text-sm text-optavia-gray">{system.desc}</div>
         </div>
       ))}
     </div>

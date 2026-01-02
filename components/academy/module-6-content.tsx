@@ -10,12 +10,12 @@ export function Module6Content() {
   return (
     <div className="space-y-6">
       {/* Hero Section */}
-      <div className="bg-gradient-to-br from-amber-500/20 via-amber-500/10 to-[#00A651]/10 border-2 border-amber-500/30 rounded-3xl p-8 md:p-12 text-center mb-8">
+      <div className="bg-gradient-to-br from-amber-500/20 via-amber-500/10 to-[hsl(var(--optavia-green))]/10 border-2 border-amber-500/30 rounded-3xl p-8 md:p-12 text-center mb-8">
         <div className="text-6xl md:text-7xl mb-4">✨</div>
-        <h1 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-amber-200 via-white to-[#00c760] bg-clip-text text-transparent">
+        <h1 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-amber-200 via-white to-[hsl(var(--optavia-green))] bg-clip-text text-transparent">
           Integrated Presidential Director
         </h1>
-        <p className="text-xl md:text-2xl text-slate-300 max-w-3xl mx-auto">
+        <p className="text-xl md:text-2xl text-optavia-dark max-w-3xl mx-auto">
           The highest rank in OPTAVIA. You&apos;ve built a legacy that transforms thousands of lives.
         </p>
       </div>
@@ -31,13 +31,13 @@ export function Module6Content() {
         </p>
 
         <div className="grid md:grid-cols-2 gap-4 my-6">
-          <div className="bg-gradient-to-br from-[#00A651]/20 to-[#00A651]/10 border-2 border-[#00A651] rounded-2xl p-6">
-            <div className="text-2xl font-bold text-[#00c760] mb-3">10 Executive Directors</div>
-            <p className="text-slate-300">Build 10 active Executive Director teams in your organization</p>
+          <div className="bg-gradient-to-br from-[hsl(var(--optavia-green))]/20 to-[hsl(var(--optavia-green))]/10 border-2 border-[hsl(var(--optavia-green))] rounded-2xl p-6">
+            <div className="text-2xl font-bold text-[hsl(var(--optavia-green))] mb-3">10 Executive Directors</div>
+            <p className="text-optavia-dark">Build 10 active Executive Director teams in your organization</p>
           </div>
           <div className="bg-gradient-to-br from-amber-500/20 to-amber-500/10 border-2 border-amber-500/50 rounded-2xl p-6">
             <div className="text-2xl font-bold text-amber-300 mb-3">5 FIBC Teams</div>
-            <p className="text-slate-300">At least 5 of those EDs must maintain FIBC status</p>
+            <p className="text-optavia-dark">At least 5 of those EDs must maintain FIBC status</p>
           </div>
         </div>
 
@@ -72,11 +72,11 @@ export function Module6Content() {
           ].map((item, i) => (
             <div
               key={i}
-              className="bg-slate-800/30 border border-slate-700 rounded-2xl p-6 text-center"
+              className="bg-white border border-[hsl(var(--optavia-border))] rounded-2xl p-6 text-center"
             >
               <div className="text-5xl mb-3">{item.icon}</div>
-              <div className="text-xl font-bold text-white mb-2">{item.title}</div>
-              <div className="text-sm text-slate-400">{item.desc}</div>
+              <div className="text-xl font-bold text-optavia-dark mb-2">{item.title}</div>
+              <div className="text-sm text-optavia-gray">{item.desc}</div>
             </div>
           ))}
         </div>
@@ -153,11 +153,11 @@ export function Module6Content() {
           ].map((item, i) => (
             <div
               key={i}
-              className="bg-gradient-to-br from-slate-800/50 to-slate-700/30 border border-slate-700 rounded-2xl p-6 text-center"
+              className="bg-gradient-to-br from-white to-gray-50 border border-[hsl(var(--optavia-border))] rounded-2xl p-6 text-center"
             >
-              <div className="text-5xl font-bold text-[#00c760] mb-2">{item.number}</div>
-              <div className="text-lg font-bold text-white mb-1">{item.label}</div>
-              <div className="text-sm text-slate-400">{item.desc}</div>
+              <div className="text-5xl font-bold text-[hsl(var(--optavia-green))] mb-2">{item.number}</div>
+              <div className="text-lg font-bold text-optavia-dark mb-1">{item.label}</div>
+              <div className="text-sm text-optavia-gray">{item.desc}</div>
             </div>
           ))}
         </div>
@@ -191,9 +191,9 @@ export function Module6Content() {
       </LessonCard>
 
       {/* Final Quote */}
-      <div className="bg-gradient-to-r from-[#00A651] via-[#00c760] to-[#00A651] rounded-2xl p-8 md:p-12 text-center my-8">
+      <div className="bg-gradient-to-r from-[hsl(var(--optavia-green))] via-[hsl(var(--optavia-green))] to-[hsl(var(--optavia-green))] rounded-2xl p-8 md:p-12 text-center my-8">
         <QuoteBox color="green">
-          <div className="text-xl md:text-2xl font-semibold text-white leading-relaxed">
+          <div className="text-xl md:text-2xl font-semibold text-optavia-dark leading-relaxed">
             &quot;You didn&apos;t just build a business. You built a movement that transforms thousands of lives. Your legacy isn&apos;t measured in dollars — it&apos;s measured in lives changed, families transformed, and leaders you&apos;ve developed who will continue changing the world long after you. This is what it means to be an Integrated Presidential Director.&quot;
           </div>
         </QuoteBox>

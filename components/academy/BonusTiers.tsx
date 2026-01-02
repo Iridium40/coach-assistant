@@ -16,11 +16,11 @@ export function BonusTiers({ tiers }: BonusTiersProps) {
       {tiers.map((tier, index) => (
         <div
           key={index}
-          className="bg-slate-800/30 border border-slate-700 rounded-xl p-5 text-center hover:border-[#00A651] transition-colors"
+          className="bg-white border border-[hsl(var(--optavia-border))] rounded-xl p-5 text-center hover:border-[hsl(var(--optavia-green))] transition-colors shadow-sm"
         >
-          <div className="text-2xl font-bold text-[#00c760]">{tier.amount}</div>
-          <div className="text-sm text-slate-400 mt-1">{tier.fqv}</div>
-          {tier.months && <div className="text-xs text-slate-500 mt-1">{tier.months}</div>}
+          <div className="text-2xl font-bold text-[hsl(var(--optavia-green))]">{tier.amount}</div>
+          <div className="text-sm text-optavia-gray mt-1">{tier.fqv}</div>
+          {tier.months && <div className="text-xs text-optavia-light-gray mt-1">{tier.months}</div>}
         </div>
       ))}
     </div>

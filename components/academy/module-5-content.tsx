@@ -11,11 +11,11 @@ export function Module5Content() {
   return (
     <div className="space-y-6">
       {/* Intro */}
-      <div className="bg-gradient-to-br from-slate-800/50 to-slate-700/50 border border-slate-700 rounded-2xl p-6 md:p-8 mb-6">
-        <h1 className="text-3xl md:text-4xl font-bold mb-4 bg-gradient-to-r from-white via-[#00c760] to-white bg-clip-text text-transparent">
+      <div className="bg-gradient-to-br from-white to-gray-50 border border-[hsl(var(--optavia-border))] rounded-2xl p-6 md:p-8 mb-6">
+        <h1 className="text-3xl md:text-4xl font-bold mb-4 bg-gradient-to-r from-white via-[hsl(var(--optavia-green))] to-white bg-clip-text text-transparent">
           Executive Leadership
         </h1>
-        <p className="text-slate-300 text-lg leading-relaxed">
+        <p className="text-optavia-dark text-lg leading-relaxed">
           At Global Director, you step into company-wide influence. You&apos;re not just building your business — you&apos;re shaping the culture and systems that support thousands of coaches.
         </p>
       </div>
@@ -115,10 +115,10 @@ export function Module5Content() {
             { icon: "👥", title: "Leaders", desc: "EDs who can develop their own EDs" },
             { icon: "🌱", title: "Legacy", desc: "Something that transforms lives for generations" },
           ].map((item, i) => (
-            <div key={i} className="bg-slate-800/30 border border-slate-700 rounded-2xl p-6">
+            <div key={i} className="bg-white border border-[hsl(var(--optavia-border))] rounded-2xl p-6">
               <div className="text-3xl mb-3">{item.icon}</div>
-              <div className="font-bold text-white mb-2">{item.title}</div>
-              <div className="text-sm text-slate-400">{item.desc}</div>
+              <div className="font-bold text-optavia-dark mb-2">{item.title}</div>
+              <div className="text-sm text-optavia-gray">{item.desc}</div>
             </div>
           ))}
         </div>

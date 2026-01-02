@@ -11,8 +11,8 @@ export function Module3Content() {
   return (
     <div className="space-y-6">
       {/* Intro */}
-      <div className="bg-gradient-to-br from-slate-800/50 to-slate-700/50 border border-slate-700 rounded-2xl p-6 md:p-8 mb-6">
-        <p className="text-slate-300 text-lg leading-relaxed">
+      <div className="bg-gradient-to-br from-white to-gray-50 border border-[hsl(var(--optavia-border))] rounded-2xl p-6 md:p-8 mb-6">
+        <p className="text-optavia-dark text-lg leading-relaxed">
           You&apos;ve reached Executive Director — congratulations! Now it&apos;s time to shift from building your business to developing leaders. This is where duplication begins.
         </p>
       </div>
