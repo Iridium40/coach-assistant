@@ -1,17 +1,19 @@
 import { createClient } from "@/lib/supabase/client"
 
-// Resource IDs for the 3 onboarding modules
+// Resource IDs for the 4 onboarding modules
 export const ONBOARDING_RESOURCE_IDS = [
   "welcome-content",
   "business-content",
-  "acronyms-content"
+  "acronyms-content",
+  "health-assessment-onboarding-content"
 ]
 
-// Module IDs for the 3 onboarding modules
+// Module IDs for the 4 onboarding modules
 export const ONBOARDING_MODULE_IDS = [
   "new-coach-welcome",
   "business-resources",
-  "acronyms-guide"
+  "acronyms-guide",
+  "health-assessment-onboarding"
 ]
 
 /**
@@ -46,7 +48,7 @@ export async function checkOnboardingComplete(userId: string): Promise<boolean> 
     return false
   }
 
-  // Check if all 3 onboarding resources are completed
+  // Check if all 4 onboarding resources are completed
   const completedIds = completedResources?.map(r => r.resource_id) || []
   const allCompleted = ONBOARDING_RESOURCE_IDS.every(id => completedIds.includes(id))
 
@@ -73,7 +75,7 @@ export async function markOnboardingComplete(userId: string): Promise<boolean> {
 }
 
 /**
- * Get onboarding progress (number of completed modules out of 3)
+ * Get onboarding progress (number of completed modules out of 4)
  */
 export async function getOnboardingProgress(userId: string): Promise<{ completed: number; total: number; percentage: number }> {
   const supabase = createClient()
@@ -86,7 +88,7 @@ export async function getOnboardingProgress(userId: string): Promise<{ completed
 
   if (error) {
     console.error("Error getting onboarding progress:", error)
-    return { completed: 0, total: 3, percentage: 0 }
+    return { completed: 0, total: 4, percentage: 0 }
   }
 
   const completed = completedResources?.length || 0

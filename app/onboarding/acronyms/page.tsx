@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useMemo } from "react"
-import { ArrowLeft } from "lucide-react"
+import { ArrowLeft, ArrowRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 
@@ -137,9 +137,10 @@ export default function OnboardingAcronymsPage() {
                 Previous: Business Resources
               </Button>
             </Link>
-            <Link href="/training">
+            <Link href="/onboarding/health-assessment">
               <Button size="sm" className="bg-[#00A651] hover:bg-[#00c760] text-white">
-                Back to Training
+                Next: Health Assessment
+                <ArrowRight className="h-4 w-4 ml-2" />
               </Button>
             </Link>
           </div>
@@ -240,9 +241,10 @@ export default function OnboardingAcronymsPage() {
               Previous: Business Resources
             </Button>
           </Link>
-          <Link href="/training">
+          <Link href="/onboarding/health-assessment">
             <Button className="bg-[#00A651] hover:bg-[#00c760] text-white">
-              Back to Training
+              Next: Health Assessment
+              <ArrowRight className="h-4 w-4 ml-2" />
             </Button>
           </Link>
         </div>
