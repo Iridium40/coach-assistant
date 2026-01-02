@@ -41,6 +41,7 @@ export function UserSettings({ onClose }: UserSettingsProps) {
   const [fullName, setFullName] = useState(profile?.full_name || "")
   const [coachRank, setCoachRank] = useState<string>(profile?.coach_rank || "")
   const [optaviaId, setOptaviaId] = useState(profile?.optavia_id || "")
+  const [parentOptaviaId, setParentOptaviaId] = useState(profile?.parent_optavia_id || "")
   const [phoneNumber, setPhoneNumber] = useState(profile?.phone_number || "")
 
   // Update local state when profile changes
@@ -49,12 +50,14 @@ export function UserSettings({ onClose }: UserSettingsProps) {
       setFullName(profile.full_name || "")
       setCoachRank(profile.coach_rank || "")
       setOptaviaId(profile.optavia_id || "")
+      setParentOptaviaId(profile.parent_optavia_id || "")
       setPhoneNumber(profile.phone_number || "")
     } else {
       // Reset to defaults if profile is null
       setFullName("")
       setCoachRank("")
       setOptaviaId("")
+      setParentOptaviaId("")
       setPhoneNumber("")
     }
   }, [profile])
@@ -201,6 +204,7 @@ export function UserSettings({ onClose }: UserSettingsProps) {
         is_new_coach: isNewCoach,
         coach_rank: coachRank || null,
         optavia_id: optaviaId || null,
+        parent_optavia_id: parentOptaviaId || null,
       })
 
       if (error) {
@@ -403,6 +407,18 @@ export function UserSettings({ onClose }: UserSettingsProps) {
               {isCoach && (
                 <p className="text-xs text-optavia-gray">Contact an admin to update your Optavia ID</p>
               )}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="parentOptaviaId" className="text-optavia-dark">Parent Coach Optavia ID</Label>
+              <Input
+                id="parentOptaviaId"
+                value={parentOptaviaId}
+                onChange={(e) => setParentOptaviaId(e.target.value)}
+                placeholder="Enter your parent coach's Optavia ID"
+                className="w-full border-2 bg-white border-gray-300 text-optavia-dark hover:border-[hsl(var(--optavia-green))] focus:border-[hsl(var(--optavia-green))]"
+              />
+              <p className="text-xs text-optavia-gray">The Optavia ID of the coach who sponsored you</p>
             </div>
 
             <Button 

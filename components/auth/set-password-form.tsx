@@ -222,6 +222,27 @@ export function SetPasswordForm({ onSuccess, inviteKey }: SetPasswordFormProps) 
 
     // Mark invite as used
     if (signUpData?.user) {
+      // Get the invite to find who sent it
+      const { data: inviteData_full } = await supabase
+        .from("invites")
+        .select("invited_by")
+        .eq("invite_key", inviteKey)
+        .single()
+
+      // Get the parent coach's optavia_id
+      let parentOptaviaId: string | null = null
+      if (inviteData_full?.invited_by) {
+        const { data: parentProfile } = await supabase
+          .from("profiles")
+          .select("optavia_id")
+          .eq("id", inviteData_full.invited_by)
+          .single()
+        
+        if (parentProfile?.optavia_id) {
+          parentOptaviaId = parentProfile.optavia_id
+        }
+      }
+
       await supabase
         .from("invites")
         .update({
@@ -230,13 +251,14 @@ export function SetPasswordForm({ onSuccess, inviteKey }: SetPasswordFormProps) 
         })
         .eq("invite_key", inviteKey)
 
-      // Update profile with coach rank and optavia ID
+      // Update profile with coach rank, optavia ID, and parent optavia ID
       await supabase
         .from("profiles")
         .update({
           coach_rank: inviteData.coachRank,
           is_new_coach: inviteData.coachRank === "Coach",
           optavia_id: inviteData.optaviaId,
+          parent_optavia_id: parentOptaviaId,
         })
         .eq("id", signUpData.user.id)
 
