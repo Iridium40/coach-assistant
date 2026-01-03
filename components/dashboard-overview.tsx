@@ -114,7 +114,7 @@ export function DashboardOverview() {
     }
 
     loadOnboardingProgress()
-  }, [user, profile?.is_new_coach, completedResources])
+  }, [user, profile?.is_new_coach])
 
   // Check if coach tip was dismissed today
   useEffect(() => {
