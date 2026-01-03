@@ -264,7 +264,7 @@ export default function HealthAssessmentPage({ params }: { params: Promise<{ key
             <div>
               <div className="mb-4 flex justify-center">
                 <div className="flex flex-col items-center">
-                  <div className="h-[200px] w-[200px] rounded-lg overflow-hidden border-4 border-gray-700 bg-white shadow-md">
+                  <div className="h-[200px] w-[200px] rounded-lg overflow-hidden border-4 border-[hsl(var(--optavia-green))] bg-white shadow-md">
                     {coachAvatar ? (
                       <img 
                         src={coachAvatar} 
