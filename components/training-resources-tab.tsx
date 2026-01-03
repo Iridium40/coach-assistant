@@ -2,10 +2,11 @@
 
 import { useState, useMemo } from "react"
 import { useTrainingResources, typeIcons } from "@/hooks/use-training-resources"
-import { Card, CardContent } from "@/components/ui/card"
+import { useUserData } from "@/contexts/user-data-context"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
+import { Progress } from "@/components/ui/progress"
 import {
   Select,
   SelectContent,
@@ -13,16 +14,21 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { Search, ExternalLink, FileText, Video, Palette, Link2, ChevronDown, ChevronRight } from "lucide-react"
+import { Search, ExternalLink, FileText, Video, Palette, Link2, ChevronDown, ChevronRight, CheckCircle, Circle } from "lucide-react"
 
 export function TrainingResourcesTab() {
+  const { user } = useUserData()
   const {
     resources,
     uniqueCategories,
     loading,
     filterResources,
     getCategoryIcon,
-  } = useTrainingResources()
+    isCompleted,
+    toggleCompletion,
+    progress,
+    getCategoryProgress,
+  } = useTrainingResources(user)
 
   const [selectedCategory, setSelectedCategory] = useState<string>("All")
   const [searchQuery, setSearchQuery] = useState("")
@@ -89,14 +95,22 @@ export function TrainingResourcesTab() {
 
   return (
     <div>
-      {/* Title and Description */}
-      <div className="text-center py-4 sm:py-8 mb-4 sm:mb-6">
-        <h2 className="font-heading font-bold text-xl sm:text-3xl text-optavia-dark mb-2 sm:mb-4">
+      {/* Title and Description with Progress */}
+      <div className="text-center py-4 sm:py-6 mb-4 sm:mb-6">
+        <h2 className="font-heading font-bold text-xl sm:text-3xl text-optavia-dark mb-2">
           Training Resources
         </h2>
-        <p className="text-optavia-gray text-sm sm:text-lg max-w-2xl mx-auto px-2">
-          Browse training materials, guides, and resources.
-        </p>
+        {user && (
+          <div className="max-w-md mx-auto mt-3 px-4">
+            <div className="flex items-center justify-between text-sm mb-1">
+              <span className="text-optavia-gray">Your Progress</span>
+              <span className="font-semibold text-[hsl(var(--optavia-green))]">
+                {progress.completed} / {progress.total} ({progress.percentage}%)
+              </span>
+            </div>
+            <Progress value={progress.percentage} className="h-2" />
+          </div>
+        )}
       </div>
 
       {/* Search and Filter */}
@@ -203,13 +217,15 @@ export function TrainingResourcesTab() {
 
           {Object.entries(groupedFiltered).map(([category, catResources]) => {
             const isExpanded = expandedCategories.has(category)
+            const catProgress = getCategoryProgress(category)
+            const isComplete = catProgress.completed === catProgress.total && catProgress.total > 0
             
             return (
               <div key={category} className="border rounded-lg overflow-hidden bg-white">
                 {/* Category Header - Clickable */}
                 <button
                   onClick={() => toggleCategory(category)}
-                  className="w-full flex items-center gap-2 p-3 sm:p-4 hover:bg-gray-50 transition-colors text-left"
+                  className="w-full flex items-center gap-2 p-3 hover:bg-gray-50 transition-colors text-left"
                 >
                   {/* Expand/Collapse Icon */}
                   <div className="flex-shrink-0 text-gray-400">
@@ -220,67 +236,95 @@ export function TrainingResourcesTab() {
                     )}
                   </div>
                   
-                  <span className="text-xl sm:text-2xl">{getCategoryIcon(category)}</span>
-                  <h3 className="font-heading font-bold text-sm sm:text-lg text-optavia-dark line-clamp-1 flex-1">
+                  <span className="text-lg sm:text-xl">{getCategoryIcon(category)}</span>
+                  <h3 className="font-heading font-bold text-sm sm:text-base text-optavia-dark line-clamp-1 flex-1">
                     {category}
                   </h3>
-                  <Badge variant="secondary" className="flex-shrink-0">
-                    {catResources.length}
-                  </Badge>
+                  
+                  {/* Category Progress */}
+                  {user && (
+                    <div className="flex items-center gap-2 flex-shrink-0">
+                      {isComplete ? (
+                        <Badge className="bg-green-100 text-green-700 text-xs">
+                          <CheckCircle className="h-3 w-3 mr-1" />
+                          Complete
+                        </Badge>
+                      ) : (
+                        <Badge variant="outline" className="text-xs">
+                          {catProgress.completed}/{catProgress.total}
+                        </Badge>
+                      )}
+                    </div>
+                  )}
+                  {!user && (
+                    <Badge variant="secondary" className="flex-shrink-0 text-xs">
+                      {catResources.length}
+                    </Badge>
+                  )}
                 </button>
 
                 {/* Resources List - Collapsible */}
                 {isExpanded && (
-                  <div className="border-t bg-gray-50/50 p-2 sm:p-3 space-y-2 sm:space-y-3">
-                    {catResources.map((resource) => (
-                      <a
-                        key={resource.id}
-                        href={resource.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="block active:scale-[0.99] transition-transform"
-                      >
-                        <Card className="hover:shadow-md transition-shadow cursor-pointer border-l-4 border-l-[hsl(var(--optavia-green))]">
-                          <CardContent className="p-3 sm:p-4">
-                            <div className="flex items-start gap-3">
-                              {/* Type Icon */}
-                              <div className="flex-shrink-0 w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-gray-100 flex items-center justify-center">
-                                {getTypeIcon(resource.type)}
-                              </div>
+                  <div className="border-t bg-gray-50/50 divide-y divide-gray-100">
+                    {catResources.map((resource) => {
+                      const completed = isCompleted(resource.id)
+                      return (
+                        <div
+                          key={resource.id}
+                          className={`flex items-center gap-2 px-3 py-2 hover:bg-gray-100 transition-colors group ${
+                            completed ? "bg-green-50/50" : ""
+                          }`}
+                        >
+                          {/* Checkbox */}
+                          {user && (
+                            <button
+                              onClick={(e) => {
+                                e.preventDefault()
+                                e.stopPropagation()
+                                toggleCompletion(resource.id)
+                              }}
+                              className="flex-shrink-0 p-0.5"
+                              title={completed ? "Mark as incomplete" : "Mark as complete"}
+                            >
+                              {completed ? (
+                                <CheckCircle className="h-5 w-5 text-green-600" />
+                              ) : (
+                                <Circle className="h-5 w-5 text-gray-300 hover:text-gray-400" />
+                              )}
+                            </button>
+                          )}
 
-                              {/* Content */}
-                              <div className="flex-1 min-w-0">
-                                <div className="flex items-start justify-between gap-2">
-                                  <div className="flex-1 min-w-0">
-                                    <h4 className="font-semibold text-sm sm:text-base text-optavia-dark leading-tight">
-                                      {resource.title}
-                                    </h4>
-                                    {/* Type badge */}
-                                    <div className="flex items-center gap-2 mt-1">
-                                      <Badge
-                                        variant="outline"
-                                        className="text-xs capitalize"
-                                      >
-                                        {resource.type}
-                                      </Badge>
-                                    </div>
-                                  </div>
-                                  {/* Open Icon */}
-                                  <div className="flex-shrink-0 p-1">
-                                    <ExternalLink className="h-4 w-4 sm:h-5 sm:w-5 text-[hsl(var(--optavia-green))]" />
-                                  </div>
-                                </div>
-                                {resource.description && (
-                                  <p className="text-xs sm:text-sm text-optavia-gray line-clamp-2 mt-1.5">
-                                    {resource.description}
-                                  </p>
-                                )}
-                              </div>
+                          {/* Type Icon */}
+                          <div className="flex-shrink-0 w-6 h-6 rounded bg-white border border-gray-200 flex items-center justify-center">
+                            {getTypeIcon(resource.type)}
+                          </div>
+
+                          {/* Content - Clickable Link */}
+                          <a
+                            href={resource.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex-1 min-w-0 flex items-center gap-2"
+                          >
+                            <div className="flex-1 min-w-0">
+                              <h4 className={`font-medium text-sm leading-snug group-hover:text-[hsl(var(--optavia-green))] transition-colors truncate ${
+                                completed ? "text-gray-500" : "text-optavia-dark"
+                              }`}>
+                                {resource.title}
+                              </h4>
                             </div>
-                          </CardContent>
-                        </Card>
-                      </a>
-                    ))}
+
+                            {/* Type badge + Open Icon */}
+                            <div className="flex items-center gap-2 flex-shrink-0">
+                              <Badge variant="outline" className="text-[10px] capitalize hidden sm:inline-flex">
+                                {resource.type}
+                              </Badge>
+                              <ExternalLink className="h-4 w-4 text-gray-400 group-hover:text-[hsl(var(--optavia-green))] transition-colors" />
+                            </div>
+                          </a>
+                        </div>
+                      )
+                    })}
                   </div>
                 )}
               </div>

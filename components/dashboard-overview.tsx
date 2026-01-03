@@ -18,6 +18,7 @@ import {
 import { badgeConfig } from "@/lib/badge-config"
 import { useProspects } from "@/hooks/use-prospects"
 import { useClients, getProgramDay, getDayPhase } from "@/hooks/use-clients"
+import { useTrainingResources } from "@/hooks/use-training-resources"
 import type { ZoomCall } from "@/lib/types"
 import { getOnboardingProgress } from "@/lib/onboarding-utils"
 
@@ -57,12 +58,15 @@ const coachTips = [
 ]
 
 export function DashboardOverview() {
-  const { user, profile, badges, completedResources, modules, recipes, favoriteRecipes } = useUserData()
+  const { user, profile, badges, recipes, favoriteRecipes } = useUserData()
   const supabase = createClient()
   
   // CRM hooks for Priority Actions
   const { prospects, stats: prospectStats } = useProspects()
   const { clients, stats: clientStats, toggleTouchpoint, needsAttention } = useClients()
+  
+  // Training resources progress
+  const { progress: trainingProgress, uniqueCategories } = useTrainingResources(user)
   
   const [upcomingMeetings, setUpcomingMeetings] = useState<ZoomCall[]>([])
   const [loadingMeetings, setLoadingMeetings] = useState(true)
@@ -127,25 +131,6 @@ export function DashboardOverview() {
     localStorage.setItem('coachTipDismissedDate', today)
     setCoachTipDismissed(true)
   }
-
-  // Calculate training progress
-  const trainingProgress = useMemo(() => {
-    const totalResources = modules.reduce((acc, m) => acc + m.resources.length, 0)
-    const completed = completedResources.length
-    const percentage = totalResources > 0 ? Math.round((completed / totalResources) * 100) : 0
-    
-    // Find next incomplete module
-    let nextModule = null
-    for (const module of modules) {
-      const hasIncomplete = module.resources.some(r => !completedResources.includes(r.id))
-      if (hasIncomplete) {
-        nextModule = module
-        break
-      }
-    }
-    
-    return { completed, total: totalResources, percentage, nextModule }
-  }, [modules, completedResources])
 
   // Get recent badges (last 3)
   const recentBadges = useMemo(() => {
@@ -759,20 +744,22 @@ export function DashboardOverview() {
               </div>
             )}
 
-            {/* Next Module */}
-            {trainingProgress.nextModule && (
-              <Link href={`/training/${trainingProgress.nextModule.id}`}>
+            {/* Continue Training or Complete */}
+            {trainingProgress.percentage < 100 && trainingProgress.total > 0 && (
+              <Link href="/training">
                 <div className="p-3 rounded-lg bg-green-50 border border-green-200 hover:bg-green-100 transition-colors cursor-pointer">
-                  <p className="text-xs text-green-600 font-medium mb-1">Continue with:</p>
+                  <p className="text-xs text-green-600 font-medium mb-1">
+                    {uniqueCategories.length} categories to explore
+                  </p>
                   <p className="font-medium text-sm text-optavia-dark flex items-center gap-2">
-                    <span>{trainingProgress.nextModule.icon}</span>
-                    {trainingProgress.nextModule.title}
+                    <BookOpen className="h-4 w-4" />
+                    Continue Training
                   </p>
                 </div>
               </Link>
             )}
 
-            {trainingProgress.percentage === 100 && (
+            {trainingProgress.percentage === 100 && trainingProgress.total > 0 && (
               <div className="p-3 rounded-lg bg-amber-50 border border-amber-200 text-center">
                 <Sparkles className="h-6 w-6 mx-auto mb-1 text-amber-500" />
                 <p className="text-sm font-medium text-amber-700">All Training Complete!</p>

@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useMemo } from "react"
 import { createClient } from "@/lib/supabase/client"
+import type { User } from "@supabase/supabase-js"
 
 export interface TrainingResource {
   id: string
@@ -25,6 +26,12 @@ export interface TrainingCategory {
   is_active: boolean
 }
 
+export interface TrainingProgress {
+  total: number
+  completed: number
+  percentage: number
+}
+
 // Type icons
 export const typeIcons: Record<string, string> = {
   document: "📄",
@@ -33,15 +40,16 @@ export const typeIcons: Record<string, string> = {
   other: "📎",
 }
 
-export function useTrainingResources() {
+export function useTrainingResources(user?: User | null) {
   const [resources, setResources] = useState<TrainingResource[]>([])
   const [categories, setCategories] = useState<TrainingCategory[]>([])
+  const [completedIds, setCompletedIds] = useState<Set<string>>(new Set())
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
   const supabase = createClient()
 
-  // Load resources and categories
+  // Load resources, categories, and completions
   const loadData = useCallback(async () => {
     setLoading(true)
     setError(null)
@@ -66,13 +74,25 @@ export function useTrainingResources() {
 
       if (resError) throw resError
       setResources(resData || [])
+
+      // Load completions if user is logged in
+      if (user) {
+        const { data: compData, error: compError } = await supabase
+          .from("training_resource_completions")
+          .select("resource_id")
+          .eq("user_id", user.id)
+
+        if (!compError && compData) {
+          setCompletedIds(new Set(compData.map(c => c.resource_id)))
+        }
+      }
     } catch (err: any) {
       console.error("Error loading training resources:", err)
       setError(err.message)
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [user])
 
   useEffect(() => {
     loadData()
@@ -125,6 +145,80 @@ export function useTrainingResources() {
     return grouped
   }, [resources, uniqueCategories])
 
+  // Calculate training progress
+  const progress: TrainingProgress = useMemo(() => {
+    const total = resources.length
+    const completed = completedIds.size
+    const percentage = total > 0 ? Math.round((completed / total) * 100) : 0
+    return { total, completed, percentage }
+  }, [resources, completedIds])
+
+  // Check if a resource is completed
+  const isCompleted = useCallback((resourceId: string) => {
+    return completedIds.has(resourceId)
+  }, [completedIds])
+
+  // Toggle completion status
+  const toggleCompletion = useCallback(async (resourceId: string) => {
+    if (!user) return
+
+    const isCurrentlyCompleted = completedIds.has(resourceId)
+
+    // Optimistic update
+    setCompletedIds(prev => {
+      const newSet = new Set(prev)
+      if (isCurrentlyCompleted) {
+        newSet.delete(resourceId)
+      } else {
+        newSet.add(resourceId)
+      }
+      return newSet
+    })
+
+    try {
+      if (isCurrentlyCompleted) {
+        // Remove completion
+        const { error } = await supabase
+          .from("training_resource_completions")
+          .delete()
+          .eq("user_id", user.id)
+          .eq("resource_id", resourceId)
+
+        if (error) throw error
+      } else {
+        // Add completion
+        const { error } = await supabase
+          .from("training_resource_completions")
+          .insert([{ user_id: user.id, resource_id: resourceId }])
+
+        if (error) throw error
+      }
+    } catch (err: any) {
+      // Revert on error
+      console.error("Error toggling completion:", err)
+      setCompletedIds(prev => {
+        const newSet = new Set(prev)
+        if (isCurrentlyCompleted) {
+          newSet.add(resourceId)
+        } else {
+          newSet.delete(resourceId)
+        }
+        return newSet
+      })
+    }
+  }, [user, completedIds])
+
+  // Get category progress
+  const getCategoryProgress = useCallback((categoryName: string) => {
+    const catResources = resources.filter(r => r.category === categoryName)
+    const catCompleted = catResources.filter(r => completedIds.has(r.id)).length
+    return {
+      total: catResources.length,
+      completed: catCompleted,
+      percentage: catResources.length > 0 ? Math.round((catCompleted / catResources.length) * 100) : 0
+    }
+  }, [resources, completedIds])
+
   return {
     resources,
     categories,
@@ -136,6 +230,12 @@ export function useTrainingResources() {
     getCategoryIcon,
     typeIcons,
     reload: loadData,
+    // Completion tracking
+    completedIds,
+    progress,
+    isCompleted,
+    toggleCompletion,
+    getCategoryProgress,
   }
 }
 
