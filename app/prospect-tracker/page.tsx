@@ -2,7 +2,9 @@
 
 import { useState } from "react"
 import Link from "next/link"
-import { useProspects, statusConfig, sourceOptions, actionTypeLabels, type ProspectStatus, type ProspectSource } from "@/hooks/use-prospects"
+import { useProspects, statusConfig, sourceOptions, actionTypeLabels, type ProspectStatus, type ProspectSource, type Prospect } from "@/hooks/use-prospects"
+import { useClients } from "@/hooks/use-clients"
+import { useToast } from "@/hooks/use-toast"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -33,11 +35,11 @@ import {
   AlertCircle,
   Trash2,
   Edit2,
-  X,
   ArrowRight,
-  Target,
   Sparkles,
   ChevronRight,
+  PartyPopper,
+  Heart,
 } from "lucide-react"
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
@@ -55,11 +57,17 @@ export default function ProspectTrackerPage() {
     getDaysUntil,
   } = useProspects()
 
+  const { addClient } = useClients()
+  const { toast } = useToast()
+
   const [showAddModal, setShowAddModal] = useState(false)
   const [showEditModal, setShowEditModal] = useState(false)
+  const [showConvertModal, setShowConvertModal] = useState(false)
   const [editingProspect, setEditingProspect] = useState<any>(null)
+  const [convertingProspect, setConvertingProspect] = useState<Prospect | null>(null)
   const [filterStatus, setFilterStatus] = useState<ProspectStatus | "all">("all")
   const [searchTerm, setSearchTerm] = useState("")
+  const [clientStartDate, setClientStartDate] = useState("")
 
   const [newProspect, setNewProspect] = useState({
     label: "",
@@ -77,7 +85,41 @@ export default function ProspectTrackerPage() {
   }
 
   const handleUpdateStatus = async (id: string, newStatus: ProspectStatus) => {
+    // If converting to client, show the convert modal
+    if (newStatus === "converted") {
+      const prospect = prospects.find(p => p.id === id)
+      if (prospect) {
+        setConvertingProspect(prospect)
+        setClientStartDate(today)
+        setShowConvertModal(true)
+      }
+      return
+    }
     await updateProspect(id, { status: newStatus })
+  }
+
+  const handleConvertToClient = async () => {
+    if (!convertingProspect || !clientStartDate) return
+
+    // Create the client record
+    const newClient = await addClient({
+      label: convertingProspect.label,
+      start_date: clientStartDate,
+    })
+
+    if (newClient) {
+      // Update the prospect status to converted
+      await updateProspect(convertingProspect.id, { status: "converted" })
+
+      toast({
+        title: "🎉 Client Created!",
+        description: `${convertingProspect.label} has been added to your client list.`,
+      })
+    }
+
+    setShowConvertModal(false)
+    setConvertingProspect(null)
+    setClientStartDate("")
   }
 
   const handleLogAction = async (id: string) => {
@@ -494,6 +536,70 @@ export default function ProspectTrackerPage() {
               className="bg-[hsl(var(--optavia-green))]"
             >
               Save Changes
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Convert to Client Modal */}
+      <Dialog open={showConvertModal} onOpenChange={setShowConvertModal}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <PartyPopper className="h-5 w-5 text-green-500" />
+              Convert to Client
+            </DialogTitle>
+          </DialogHeader>
+          {convertingProspect && (
+            <div className="space-y-4">
+              <div className="bg-green-50 border border-green-200 rounded-lg p-4 text-center">
+                <Heart className="h-8 w-8 text-green-500 mx-auto mb-2" />
+                <p className="font-semibold text-green-800">
+                  {convertingProspect.label} is becoming a client!
+                </p>
+                <p className="text-sm text-green-600 mt-1">
+                  They'll be added to your Client Tracker automatically.
+                </p>
+              </div>
+
+              <div>
+                <Label>Program Start Date *</Label>
+                <Input
+                  type="date"
+                  value={clientStartDate}
+                  onChange={(e) => setClientStartDate(e.target.value)}
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  When did/will they start the program?
+                </p>
+              </div>
+
+              <div className="bg-blue-50 rounded-lg p-3 text-sm text-blue-700 flex items-start gap-2">
+                <Sparkles className="h-4 w-4 flex-shrink-0 mt-0.5" />
+                <span>
+                  We'll calculate their program day and show daily touchpoint reminders!
+                </span>
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setShowConvertModal(false)
+                setConvertingProspect(null)
+                setClientStartDate("")
+              }}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleConvertToClient}
+              disabled={!clientStartDate}
+              className="bg-[hsl(var(--optavia-green))]"
+            >
+              <Heart className="h-4 w-4 mr-2" />
+              Create Client
             </Button>
           </DialogFooter>
         </DialogContent>

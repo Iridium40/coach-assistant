@@ -195,7 +195,7 @@ export function Header({ onSettingsClick, onHomeClick, onAnnouncementsClick, onR
                   )}
                 </button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="center" className="w-56">
+              <DropdownMenuContent align="center" className="w-56 bg-white border shadow-lg">
                 {businessItems.map((item) => (
                   <DropdownMenuItem key={item.href} asChild>
                     <Link href={item.href} className="flex flex-col items-start py-2">
