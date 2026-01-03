@@ -1,10 +1,10 @@
 "use client"
 
-import { useState, useMemo } from "react"
+import { useState, useMemo, useCallback } from "react"
 import { useTrainingResources, typeIcons } from "@/hooks/use-training-resources"
 import { useUserData } from "@/contexts/user-data-context"
+import { SearchWithHistory } from "@/components/search-with-history"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
 import {
@@ -33,6 +33,23 @@ export function TrainingResourcesTab() {
   const [selectedCategory, setSelectedCategory] = useState<string>("All")
   const [searchQuery, setSearchQuery] = useState("")
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set())
+
+  // Generate search suggestions from resource titles and categories
+  const searchSuggestions = useMemo(() => {
+    const suggestions: string[] = []
+    resources.forEach((resource) => {
+      suggestions.push(resource.title)
+      if (resource.category && !suggestions.includes(resource.category)) {
+        suggestions.push(resource.category)
+      }
+    })
+    return suggestions
+  }, [resources])
+
+  // Handle search change
+  const handleSearchChange = useCallback((value: string) => {
+    setSearchQuery(value)
+  }, [])
 
   // Toggle category expansion
   const toggleCategory = (category: string) => {
@@ -116,14 +133,14 @@ export function TrainingResourcesTab() {
       {/* Search and Filter */}
       <div className="mb-4 sm:mb-6 space-y-3 sm:space-y-4">
         <div className="flex flex-col gap-3">
-          {/* Search */}
-          <div className="relative w-full sm:max-w-md">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-            <Input
+          {/* Search with autocomplete suggestions */}
+          <div className="w-full sm:max-w-md">
+            <SearchWithHistory
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={handleSearchChange}
               placeholder="Search resources..."
-              className="pl-10 h-11"
+              suggestions={searchSuggestions}
+              storageKey="training-resources"
             />
           </div>
 
