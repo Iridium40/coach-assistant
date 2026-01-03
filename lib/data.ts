@@ -325,6 +325,40 @@ export const modules: Module[] = [
     ],
   },
   {
+    id: "scaling-your-business",
+    title: "Scaling Your Business",
+    description: "Build systems that work without you.",
+    category: "Leadership Development",
+    order: 19,
+    forNewCoach: false,
+    icon: "📈",
+    resources: [
+      {
+        id: "scaling-your-business-1",
+        title: "Scaling Your Business Module",
+        type: "doc",
+        url: "/training/scaling-your-business",
+      },
+    ],
+  },
+  {
+    id: "legacy-building",
+    title: "Legacy Building",
+    description: "Create lasting impact and income through multiple FIBC teams.",
+    category: "Legacy Building",
+    order: 20,
+    forNewCoach: false,
+    icon: "💎",
+    resources: [
+      {
+        id: "legacy-building-1",
+        title: "Legacy Building Module",
+        type: "doc",
+        url: "/training/legacy-building",
+      },
+    ],
+  },
+  {
     id: "coach-launch",
     title: "Coach Launch Playbook",
     description: "Essential resources to kickstart your coaching journey and build a strong foundation.",
