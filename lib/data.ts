@@ -19,6 +19,23 @@ export const modules: Module[] = [
     ],
   },
   {
+    id: "business-setup",
+    title: "Business Setup",
+    description: "Get your coaching business officially set up with payment, website, and professional branding.",
+    category: "Business Setup",
+    order: 1,
+    forNewCoach: true,
+    icon: "💼",
+    resources: [
+      {
+        id: "business-setup-1",
+        title: "Business Setup Module",
+        type: "doc",
+        url: "/training/business-setup",
+      },
+    ],
+  },
+  {
     id: "coach-launch",
     title: "Coach Launch Playbook",
     description: "Essential resources to kickstart your coaching journey and build a strong foundation.",

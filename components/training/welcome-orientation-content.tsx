@@ -619,6 +619,7 @@ export function WelcomeOrientationContent() {
               </Button>
             ) : (
               <Button
+                onClick={() => window.location.href = "/training/business-setup"}
                 className="flex items-center gap-2 bg-[hsl(var(--optavia-green))] hover:bg-[hsl(var(--optavia-green-dark))]"
               >
                 Continue to Module 1.2: Business Setup
