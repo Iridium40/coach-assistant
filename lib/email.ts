@@ -48,6 +48,15 @@ export interface MeetingEmailData {
   recurrencePattern?: string
 }
 
+export interface HealthAssessmentEmailData {
+  to: string
+  coachName: string
+  clientFirstName: string
+  clientLastName: string
+  clientEmail: string
+  assessmentData: Record<string, any>
+}
+
 export interface NewCoachWelcomeEmailData {
   to: string
   fullName: string
