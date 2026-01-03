@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { CheckCircle, Circle, ChevronRight, Play, FileText, ExternalLink, Clock, Star, ArrowLeft, ArrowRight, DollarSign, Palette, Globe, ShoppingCart, AlertCircle, BookOpen } from "lucide-react"
+import { CheckCircle, Circle, ChevronRight, Play, FileText, ExternalLink, Clock, Star, ArrowLeft, ArrowRight, DollarSign, Palette, Globe, ShoppingCart, AlertCircle, BookOpen, Users } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
@@ -271,15 +271,10 @@ const lessons: Lesson[] = [
         },
         {
           title: "Understanding How You Get Paid",
-          videoEmbed: {
-            title: "Understanding How Coaches Get Paid",
-            url: "https://youtu.be/wdeuzMaFc6A",
-            description: "Watch this video to understand the OPTAVIA compensation structure",
-          },
-          additionalVideo: {
-            title: "5 and 1 Your Finances",
-            url: "https://youtu.be/zS5aNT-UjdA",
-            description: "Learn how to apply the 5&1 principle to your business finances",
+          contactCoach: {
+            title: "Compensation Training",
+            message: "For detailed training on how coaches get paid and the OPTAVIA compensation structure, please contact your Sponsoring Coach. They can provide personalized guidance based on your specific situation and goals.",
+            icon: "💬",
           },
         },
         {
@@ -719,6 +714,24 @@ export function BusinessSetupContent() {
                         </div>
                         <ChevronRight className="h-5 w-5 text-amber-600 flex-shrink-0" />
                       </a>
+                    )}
+
+                    {section.contactCoach && (
+                      <div className="ml-10 mt-4 p-5 bg-blue-50 rounded-lg border border-blue-200">
+                        <div className="flex items-start gap-4">
+                          <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
+                            <span className="text-2xl">{section.contactCoach.icon}</span>
+                          </div>
+                          <div>
+                            <div className="font-semibold text-blue-800 mb-2">{section.contactCoach.title}</div>
+                            <p className="text-sm text-blue-700 leading-relaxed">{section.contactCoach.message}</p>
+                            <div className="mt-3 inline-flex items-center gap-2 text-sm font-semibold text-blue-600">
+                              <Users className="h-4 w-4" />
+                              Contact Your Sponsoring Coach
+                            </div>
+                          </div>
+                        </div>
+                      </div>
                     )}
 
                     {section.subsections &&

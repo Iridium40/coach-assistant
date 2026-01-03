@@ -302,7 +302,7 @@ const lessons: Lesson[] = [
             { title: "How to Use OPTAVIA Connect App", description: "Show clients how to track their daily habits", whenToSend: "After Kickoff Call" },
             { title: "Fueling Hacks & Recipes", description: "Creative ways to enjoy Fuelings", whenToSend: "Week 2 or when they need variety" },
             { title: "Staying On Track While Traveling", description: "Tips for maintaining the program on-the-go", whenToSend: "When they have travel planned" },
-            { title: "Transition & Maintenance Overview", description: "What happens after reaching goal weight", whenToSend: "When approaching goal (last 10-20 lbs)" },
+            { title: "Transition & Maintenance Overview", description: "What happens after reaching goal weight", whenToSend: "When approaching goal (last 10-20 lbs)", comingSoon: true },
           ],
         },
         {
@@ -827,10 +827,13 @@ export function FirstClientContent() {
                     {section.additionalVideos && (
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                         {section.additionalVideos.map((video, i) => (
-                          <div key={i} className="p-4 bg-gray-50 rounded-lg border border-gray-200">
+                          <div key={i} className={`p-4 rounded-lg border ${video.comingSoon ? "bg-amber-50 border-amber-200" : "bg-gray-50 border-gray-200"}`}>
                             <div className="flex items-center gap-2 mb-2">
-                              <Video className="h-4 w-4 text-purple-600" />
+                              <Video className={`h-4 w-4 ${video.comingSoon ? "text-amber-600" : "text-purple-600"}`} />
                               <span className="font-semibold text-optavia-dark text-sm">{video.title}</span>
+                              {video.comingSoon && (
+                                <span className="text-xs bg-amber-200 text-amber-800 px-2 py-0.5 rounded-full font-semibold">Coming Soon</span>
+                              )}
                             </div>
                             <div className="text-sm text-optavia-gray mb-2">{video.description}</div>
                             <div className="text-xs font-semibold text-[hsl(var(--optavia-green))]">📅 {video.whenToSend}</div>

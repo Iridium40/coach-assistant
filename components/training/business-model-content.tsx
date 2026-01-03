@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useMemo } from "react"
-import { CheckCircle, Circle, ChevronRight, ChevronDown, Clock, Star, ArrowLeft, ArrowRight, Play, DollarSign, Calculator, BookOpen, HelpCircle, Lightbulb, Check, Search } from "lucide-react"
+import { CheckCircle, Circle, ChevronRight, ChevronDown, Clock, Star, ArrowLeft, ArrowRight, Play, DollarSign, Calculator, BookOpen, HelpCircle, Lightbulb, Check, Search, Users } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
@@ -157,13 +157,11 @@ const lessons: Lesson[] = [
       intro: "Understanding how you get paid is essential to building a sustainable business. This training breaks down the OPTAVIA compensation structure so you know exactly what drives your income and how to maximize it.",
       sections: [
         {
-          title: "Training Video",
-          videoSection: true,
-          videoDetails: {
-            title: "How OPTAVIA Coaches Get Paid",
-            duration: "~15 minutes",
-            vimeoId: "805182089",
-            covers: ["Overview of the compensation plan", "Client commissions explained", "Front-end vs back-end income", "Volume requirements", "Rank advancement bonuses", "Building residual income"],
+          title: "Compensation Training",
+          contactCoach: {
+            icon: "💬",
+            title: "Contact Your Sponsoring Coach",
+            message: "For detailed training on the OPTAVIA compensation structure and how coaches get paid, please contact your Sponsoring Coach. They can provide personalized guidance based on your specific situation, answer questions about income potential, and share their personal experience with the compensation plan.",
           },
         },
         {
@@ -618,6 +616,25 @@ export function BusinessModelContent() {
                               {item}
                             </div>
                           ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Contact Coach Section */}
+                    {section.contactCoach && (
+                      <div className="p-6 bg-blue-50 rounded-xl border border-blue-200 mb-5">
+                        <div className="flex items-start gap-4">
+                          <div className="w-14 h-14 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
+                            <span className="text-3xl">{section.contactCoach.icon}</span>
+                          </div>
+                          <div>
+                            <div className="font-bold text-blue-800 text-lg mb-2">{section.contactCoach.title}</div>
+                            <p className="text-sm text-blue-700 leading-relaxed mb-3">{section.contactCoach.message}</p>
+                            <div className="inline-flex items-center gap-2 text-sm font-semibold text-blue-600 bg-blue-100 px-3 py-1.5 rounded-full">
+                              <Users className="h-4 w-4" />
+                              Reach Out to Your Sponsoring Coach
+                            </div>
+                          </div>
                         </div>
                       </div>
                     )}
