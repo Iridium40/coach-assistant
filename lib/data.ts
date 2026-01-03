@@ -53,6 +53,23 @@ export const modules: Module[] = [
     ],
   },
   {
+    id: "understanding-health-assessment",
+    title: "Understanding the Health Assessment",
+    description: "Learn before you observe - understand what you'll see your mentors doing so you can learn effectively.",
+    category: "Understanding the Health Assessment",
+    order: 3,
+    forNewCoach: true,
+    icon: "🎯",
+    resources: [
+      {
+        id: "health-assessment-1",
+        title: "Understanding the Health Assessment Module",
+        type: "doc",
+        url: "/training/understanding-health-assessment",
+      },
+    ],
+  },
+  {
     id: "coach-launch",
     title: "Coach Launch Playbook",
     description: "Essential resources to kickstart your coaching journey and build a strong foundation.",
