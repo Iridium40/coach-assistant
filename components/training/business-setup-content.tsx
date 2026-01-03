@@ -267,6 +267,14 @@ const lessons: Lesson[] = [
                 content: "You don't get paid until all business expenses are paid. This mindset keeps your business healthy and growing.",
               },
             },
+            {
+              subtitle: "",
+              callout: {
+                type: "info",
+                title: "Disclaimer",
+                content: "Coaching Amplifier is not a tax, legal, or financial advisory service. The information provided here is for general guidance only and is based on common practices within the health coaching industry. This is not professional tax advice. As an independent contractor, your tax situation is unique, and we strongly recommend consulting with a qualified tax professional or accountant to ensure compliance and optimize your financial strategy.",
+              },
+            },
           ],
         },
         {
