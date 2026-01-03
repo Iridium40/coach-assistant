@@ -31,6 +31,8 @@ export const TrainingTab = memo(function TrainingTab({ userData, setUserData, on
   const [searchQuery, setSearchQuery] = useState("")
   const { profile } = useUserData()
   const userRank = profile?.coach_rank || null
+  const orgId = profile?.org_id ?? 1
+  const isTrainingOnly = orgId === 2
 
   // Separate academy modules from regular training modules
   const { academyModules, regularModules } = useMemo(() => {
@@ -134,8 +136,8 @@ export const TrainingTab = memo(function TrainingTab({ userData, setUserData, on
         </p>
       </div>
 
-      {/* Coaching Amplifier Academy - Prominent Section */}
-      {academyModules.length > 0 && (
+      {/* Coaching Amplifier Academy - Prominent Section (Hidden for training-only orgs) */}
+      {academyModules.length > 0 && !isTrainingOnly && (
         <div className="mb-8 sm:mb-12">
           <Card className="bg-gradient-to-br from-[hsl(var(--optavia-green))] to-[hsl(var(--optavia-green-dark))] border-0 shadow-xl">
             <CardHeader className="pb-4">
