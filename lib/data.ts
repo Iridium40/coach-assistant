@@ -257,6 +257,23 @@ export const modules: Module[] = [
     ],
   },
   {
+    id: "team-building",
+    title: "Team Building Fundamentals",
+    description: "Learn to sponsor and develop new coaches as you build toward FIBC.",
+    category: "ED to FIBC",
+    order: 15,
+    forNewCoach: false,
+    icon: "👑",
+    resources: [
+      {
+        id: "team-building-1",
+        title: "Team Building Fundamentals Module",
+        type: "doc",
+        url: "/training/team-building",
+      },
+    ],
+  },
+  {
     id: "coach-launch",
     title: "Coach Launch Playbook",
     description: "Essential resources to kickstart your coaching journey and build a strong foundation.",
