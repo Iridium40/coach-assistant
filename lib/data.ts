@@ -138,6 +138,40 @@ export const modules: Module[] = [
     ],
   },
   {
+    id: "thirty-day-evaluation",
+    title: "Your 30-Day Evaluation",
+    description: "Assess your first month, celebrate wins, and set goals for your path to Senior Coach.",
+    category: "First 30 Days",
+    order: 8,
+    forNewCoach: true,
+    icon: "🏆",
+    resources: [
+      {
+        id: "thirty-day-evaluation-1",
+        title: "30-Day Evaluation Module",
+        type: "doc",
+        url: "/training/thirty-day-evaluation",
+      },
+    ],
+  },
+  {
+    id: "social-media-business",
+    title: "Social Media for Business Growth",
+    description: "Use social media consistently to attract clients and grow your coaching business.",
+    category: "Growing to Senior Coach",
+    order: 9,
+    forNewCoach: false,
+    icon: "📈",
+    resources: [
+      {
+        id: "social-media-business-1",
+        title: "Social Media for Business Growth Module",
+        type: "doc",
+        url: "/training/social-media-business",
+      },
+    ],
+  },
+  {
     id: "coach-launch",
     title: "Coach Launch Playbook",
     description: "Essential resources to kickstart your coaching journey and build a strong foundation.",

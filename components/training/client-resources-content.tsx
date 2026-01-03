@@ -892,8 +892,8 @@ export function ClientResourcesContent() {
                     <ArrowRight className="h-4 w-4 ml-2" />
                   </Button>
                 ) : (
-                  <Button className="bg-[hsl(var(--optavia-green))] hover:bg-[hsl(var(--optavia-green-dark))] text-white" onClick={() => window.history.back()}>
-                    🎉 Complete Phase 3 - Continue to Phase 4
+                  <Button className="bg-[hsl(var(--optavia-green))] hover:bg-[hsl(var(--optavia-green-dark))] text-white" onClick={() => (window.location.href = "/training/thirty-day-evaluation")}>
+                    Continue to Module 3.4: 30-Day Evaluation
                     <ArrowRight className="h-4 w-4 ml-2" />
                   </Button>
                 )}
