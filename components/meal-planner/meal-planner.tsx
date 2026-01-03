@@ -3,7 +3,7 @@
 import { useState, useMemo, useCallback } from "react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { ArrowLeft, Wand2, Send, Trash2, Info } from "lucide-react"
+import { ArrowLeft, Wand2, Send, Trash2, Info, ExternalLink } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { WeeklyGrid } from "./weekly-grid"
 import { DietaryFilterBar } from "./dietary-filter-bar"
@@ -100,6 +100,39 @@ export function MealPlanner({ recipes, coachName, coachId, coachOptaviaId }: Mea
 
   // Check if any meals are planned
   const hasMeals = selectedRecipes.length > 0
+
+  // Generate preview URL for viewing the meal plan
+  const generatePreviewUrl = useCallback(() => {
+    const currentMeals = planType === "5&1" ? MEALS_5_1 : MEALS_4_2
+    const planDataForUrl = DAYS.flatMap((day) => 
+      currentMeals.map((meal) => {
+        const slotKey = `${day}-${meal}`
+        const recipe = mealPlan[slotKey]
+        if (recipe) {
+          return {
+            day,
+            meal,
+            recipeId: recipe.id,
+          }
+        }
+        return null
+      }).filter(Boolean)
+    )
+    
+    if (planDataForUrl.length === 0) return null
+    
+    const encodedPlan = Buffer.from(JSON.stringify(planDataForUrl)).toString('base64')
+    const appUrl = typeof window !== 'undefined' ? window.location.origin : ''
+    return `${appUrl}/client/meal-plan?client=${encodeURIComponent(coachName)}&coach=${encodeURIComponent(coachName)}&plan=${encodedPlan}`
+  }, [mealPlan, planType, coachName])
+
+  // Open meal plan preview
+  const openPreview = useCallback(() => {
+    const url = generatePreviewUrl()
+    if (url) {
+      window.open(url, '_blank')
+    }
+  }, [generatePreviewUrl])
 
   // Set a meal in the plan
   const setMeal = useCallback((slotKey: string, recipe: Recipe | null) => {
@@ -212,6 +245,14 @@ export function MealPlanner({ recipes, coachName, coachId, coachOptaviaId }: Mea
               >
                 <Trash2 className="h-4 w-4" />
                 Clear
+              </Button>
+              <Button
+                variant="outline"
+                onClick={openPreview}
+                className="gap-2 border-gray-300"
+              >
+                <ExternalLink className="h-4 w-4" />
+                View Plan
               </Button>
               <Button
                 onClick={() => setShowSendDialog(true)}
