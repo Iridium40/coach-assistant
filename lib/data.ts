@@ -291,6 +291,23 @@ export const modules: Module[] = [
     ],
   },
   {
+    id: "moving-beyond-ed",
+    title: "Moving Beyond ED",
+    description: "Understand what it takes to advance to FIBC and beyond.",
+    category: "ED to FIBC",
+    order: 17,
+    forNewCoach: false,
+    icon: "📈",
+    resources: [
+      {
+        id: "moving-beyond-ed-1",
+        title: "Moving Beyond ED Module",
+        type: "doc",
+        url: "/training/moving-beyond-ed",
+      },
+    ],
+  },
+  {
     id: "coach-launch",
     title: "Coach Launch Playbook",
     description: "Essential resources to kickstart your coaching journey and build a strong foundation.",

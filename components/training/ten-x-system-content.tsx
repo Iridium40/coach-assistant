@@ -609,7 +609,7 @@ export function TenXSystemContent() {
                 {nextLesson ? (
                   <Button onClick={() => setExpandedLesson(nextLesson.id)} className="bg-[hsl(var(--optavia-green))]">Next<ArrowRight className="h-4 w-4 ml-2" /></Button>
                 ) : (
-                  <Button className="bg-[hsl(var(--optavia-green))]" onClick={() => window.history.back()}>🎉 Complete Phase 6!<ArrowRight className="h-4 w-4 ml-2" /></Button>
+                  <Button className="bg-[hsl(var(--optavia-green))]" onClick={() => (window.location.href = "/training/moving-beyond-ed")}>Continue to Module 6.3<ArrowRight className="h-4 w-4 ml-2" /></Button>
                 )}
               </div>
             </Card>
