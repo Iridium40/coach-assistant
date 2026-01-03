@@ -359,6 +359,23 @@ export const modules: Module[] = [
     ],
   },
   {
+    id: "advanced-tools",
+    title: "Advanced Tools",
+    description: "Leverage technology and AI systems to scale your impact.",
+    category: "Legacy Building",
+    order: 21,
+    forNewCoach: false,
+    icon: "🤖",
+    resources: [
+      {
+        id: "advanced-tools-1",
+        title: "Advanced Tools Module",
+        type: "doc",
+        url: "/training/advanced-tools",
+      },
+    ],
+  },
+  {
     id: "coach-launch",
     title: "Coach Launch Playbook",
     description: "Essential resources to kickstart your coaching journey and build a strong foundation.",
