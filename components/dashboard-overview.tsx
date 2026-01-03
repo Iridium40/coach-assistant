@@ -444,6 +444,75 @@ export function DashboardOverview() {
         </Card>
       )}
 
+      {/* My Business Summary */}
+      <Card className="mt-6 bg-gradient-to-br from-green-50 to-emerald-50 border border-green-200">
+        <CardHeader className="pb-3">
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-lg flex items-center gap-2 text-optavia-dark">
+              <Users className="h-5 w-5 text-[hsl(var(--optavia-green))]" />
+              My Business
+            </CardTitle>
+            <Link href="/daily-actions">
+              <Button variant="ghost" size="sm" className="text-[hsl(var(--optavia-green))] hover:bg-green-100 -mr-2">
+                Weekly Actions <ChevronRight className="h-4 w-4 ml-1" />
+              </Button>
+            </Link>
+          </div>
+        </CardHeader>
+        <CardContent className="pt-0">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            {/* Active Clients */}
+            <Link href="/client-tracker" className="block">
+              <div className="p-4 rounded-lg bg-white border border-green-200 hover:shadow-md transition-shadow cursor-pointer text-center">
+                <div className="text-2xl font-bold text-[hsl(var(--optavia-green))]">{clientStats.active}</div>
+                <div className="text-xs text-gray-600 mt-1">Active Clients</div>
+                {clientStats.needsAttention > 0 && (
+                  <Badge variant="secondary" className="mt-2 bg-orange-100 text-orange-700 text-xs">
+                    {clientStats.needsAttention} need touchpoint
+                  </Badge>
+                )}
+              </div>
+            </Link>
+
+            {/* Prospects */}
+            <Link href="/prospect-tracker" className="block">
+              <div className="p-4 rounded-lg bg-white border border-blue-200 hover:shadow-md transition-shadow cursor-pointer text-center">
+                <div className="text-2xl font-bold text-blue-600">{prospectStats.total}</div>
+                <div className="text-xs text-gray-600 mt-1">Prospects</div>
+                {prospectStats.warm > 0 && (
+                  <Badge variant="secondary" className="mt-2 bg-orange-100 text-orange-700 text-xs">
+                    {prospectStats.warm} warm leads
+                  </Badge>
+                )}
+              </div>
+            </Link>
+
+            {/* Converted */}
+            <div className="p-4 rounded-lg bg-white border border-purple-200 text-center">
+              <div className="text-2xl font-bold text-purple-600">{prospectStats.converted}</div>
+              <div className="text-xs text-gray-600 mt-1">Converted to Client</div>
+              {clientStats.coachProspects > 0 && (
+                <Badge variant="secondary" className="mt-2 bg-purple-100 text-purple-700 text-xs">
+                  {clientStats.coachProspects} future coaches
+                </Badge>
+              )}
+            </div>
+
+            {/* Milestones */}
+            <div className="p-4 rounded-lg bg-white border border-yellow-200 text-center">
+              <div className="text-2xl font-bold text-yellow-600">{clientStats.milestonesToday}</div>
+              <div className="text-xs text-gray-600 mt-1">Milestones Today</div>
+              {clientStats.milestonesToday > 0 && (
+                <Badge variant="secondary" className="mt-2 bg-yellow-100 text-yellow-700 text-xs">
+                  <Trophy className="h-3 w-3 mr-1" />
+                  Celebrate!
+                </Badge>
+              )}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Main Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
         

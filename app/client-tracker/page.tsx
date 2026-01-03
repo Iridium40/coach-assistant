@@ -3,6 +3,7 @@
 import { useState } from "react"
 import Link from "next/link"
 import { useClients, getDayPhase, getProgramDay, type ClientStatus } from "@/hooks/use-clients"
+import { useToast } from "@/hooks/use-toast"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -31,10 +32,29 @@ import {
   Flame,
   Sparkles,
   X,
+  CalendarPlus,
+  ExternalLink,
 } from "lucide-react"
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
 import { ClientTextTemplates } from "@/components/client-text-templates"
+
+// Days of the week
+const DAYS_OF_WEEK = [
+  { short: "Sun", full: "Sunday", value: 0 },
+  { short: "Mon", full: "Monday", value: 1 },
+  { short: "Tue", full: "Tuesday", value: 2 },
+  { short: "Wed", full: "Wednesday", value: 3 },
+  { short: "Thu", full: "Thursday", value: 4 },
+  { short: "Fri", full: "Friday", value: 5 },
+  { short: "Sat", full: "Saturday", value: 6 },
+]
+
+// Time slots
+const TIME_SLOTS = [
+  { label: "AM (9:00)", value: "am", hour: 9 },
+  { label: "PM (6:00)", value: "pm", hour: 18 },
+]
 
 export default function ClientTrackerPage() {
   const {
@@ -48,11 +68,17 @@ export default function ClientTrackerPage() {
     needsAttention,
     getFilteredClients,
   } = useClients()
+  const { toast } = useToast()
 
   const [showAddModal, setShowAddModal] = useState(false)
   const [showTextModal, setShowTextModal] = useState(false)
+  const [showScheduleModal, setShowScheduleModal] = useState(false)
   const [selectedClient, setSelectedClient] = useState<any>(null)
   const [filterStatus, setFilterStatus] = useState<ClientStatus | "all">("active")
+  
+  // Schedule state
+  const [scheduleDay, setScheduleDay] = useState<number>(new Date().getDay())
+  const [scheduleTime, setScheduleTime] = useState<"am" | "pm">("am")
 
   const today = new Date().toISOString().split("T")[0]
 
@@ -60,6 +86,75 @@ export default function ClientTrackerPage() {
     label: "",
     startDate: today,
   })
+
+  // Get the next occurrence of a day of the week
+  const getNextDayDate = (dayOfWeek: number): Date => {
+    const now = new Date()
+    const currentDay = now.getDay()
+    let daysUntil = dayOfWeek - currentDay
+    if (daysUntil <= 0) daysUntil += 7 // Next week if today or past
+    const targetDate = new Date(now)
+    targetDate.setDate(now.getDate() + daysUntil)
+    return targetDate
+  }
+
+  // Generate Google Calendar URL
+  const generateCalendarUrl = (client: any, day: number, timeSlot: "am" | "pm"): string => {
+    const targetDate = getNextDayDate(day)
+    const hour = timeSlot === "am" ? 9 : 18
+    targetDate.setHours(hour, 0, 0, 0)
+    
+    const endDate = new Date(targetDate)
+    endDate.setMinutes(endDate.getMinutes() + 30) // 30 min duration
+    
+    const programDay = getProgramDay(client.start_date)
+    const phase = getDayPhase(programDay)
+    
+    const title = `Check-in: ${client.label} (Day ${programDay})`
+    const details = `Client: ${client.label}
+Program Day: ${programDay}
+Phase: ${phase.label}
+
+Suggested talking points:
+- How are you feeling today?
+- Any challenges with meals?
+- Celebrate wins!
+${phase.milestone ? `\n🎉 MILESTONE: ${phase.label} - Celebrate this achievement!` : ""}`
+
+    // Format dates for Google Calendar (YYYYMMDDTHHmmss)
+    const formatDate = (d: Date) => {
+      return d.toISOString().replace(/[-:]/g, "").split(".")[0] + "Z"
+    }
+    
+    const params = new URLSearchParams({
+      action: "TEMPLATE",
+      text: title,
+      dates: `${formatDate(targetDate)}/${formatDate(endDate)}`,
+      details: details,
+    })
+    
+    return `https://calendar.google.com/calendar/render?${params.toString()}`
+  }
+
+  // Open schedule modal
+  const openScheduleModal = (client: any) => {
+    setSelectedClient(client)
+    setScheduleDay(new Date().getDay())
+    setScheduleTime("am")
+    setShowScheduleModal(true)
+  }
+
+  // Handle adding to calendar
+  const handleAddToCalendar = () => {
+    if (!selectedClient) return
+    const url = generateCalendarUrl(selectedClient, scheduleDay, scheduleTime)
+    window.open(url, "_blank")
+    setShowScheduleModal(false)
+    toast({
+      title: "📅 Opening Calendar",
+      description: `Scheduling ${scheduleTime.toUpperCase()} check-in for ${selectedClient.label}`,
+    })
+  }
 
   const handleAddClient = async () => {
     if (!newClient.label.trim() || !newClient.startDate) return
@@ -260,7 +355,7 @@ export default function ClientTrackerPage() {
 
                     {/* Touchpoint Buttons */}
                     {client.status === "active" && (
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 flex-wrap">
                         <Button
                           variant={client.am_done ? "default" : "outline"}
                           size="sm"
@@ -294,7 +389,16 @@ export default function ClientTrackerPage() {
                           className="text-blue-600 border-blue-200 hover:bg-blue-50"
                         >
                           <MessageSquare className="h-4 w-4 mr-1" />
-                          Get Text
+                          Text
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => openScheduleModal(client)}
+                          className="text-purple-600 border-purple-200 hover:bg-purple-50"
+                        >
+                          <CalendarPlus className="h-4 w-4 mr-1" />
+                          Schedule
                         </Button>
                       </div>
                     )}
@@ -413,6 +517,94 @@ export default function ClientTrackerPage() {
           programDay={getProgramDay(selectedClient.start_date)}
         />
       )}
+
+      {/* Schedule Check-in Modal */}
+      <Dialog open={showScheduleModal} onOpenChange={setShowScheduleModal}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <CalendarPlus className="h-5 w-5 text-purple-600" />
+              Schedule Check-in
+            </DialogTitle>
+          </DialogHeader>
+          {selectedClient && (
+            <div className="space-y-6">
+              {/* Client Info */}
+              <div className="bg-gray-50 rounded-lg p-3">
+                <div className="font-medium text-gray-900">{selectedClient.label}</div>
+                <div className="text-sm text-gray-500">
+                  Day {getProgramDay(selectedClient.start_date)} • {getDayPhase(getProgramDay(selectedClient.start_date)).label}
+                </div>
+              </div>
+
+              {/* Day Picker */}
+              <div>
+                <Label className="text-sm font-medium mb-3 block">Select Day</Label>
+                <div className="grid grid-cols-7 gap-1">
+                  {DAYS_OF_WEEK.map((day) => (
+                    <button
+                      key={day.value}
+                      onClick={() => setScheduleDay(day.value)}
+                      className={`p-2 rounded-lg text-center transition-colors ${
+                        scheduleDay === day.value
+                          ? "bg-purple-600 text-white"
+                          : "bg-gray-100 hover:bg-gray-200 text-gray-700"
+                      }`}
+                    >
+                      <div className="text-xs font-medium">{day.short}</div>
+                    </button>
+                  ))}
+                </div>
+                <p className="text-xs text-gray-500 mt-2">
+                  Next {DAYS_OF_WEEK[scheduleDay].full}: {getNextDayDate(scheduleDay).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+                </p>
+              </div>
+
+              {/* Time Picker */}
+              <div>
+                <Label className="text-sm font-medium mb-3 block">Select Time</Label>
+                <div className="grid grid-cols-2 gap-3">
+                  {TIME_SLOTS.map((slot) => (
+                    <button
+                      key={slot.value}
+                      onClick={() => setScheduleTime(slot.value as "am" | "pm")}
+                      className={`p-4 rounded-lg text-center transition-colors border-2 ${
+                        scheduleTime === slot.value
+                          ? "border-purple-600 bg-purple-50 text-purple-700"
+                          : "border-gray-200 hover:border-gray-300 text-gray-700"
+                      }`}
+                    >
+                      <Clock className="h-5 w-5 mx-auto mb-1" />
+                      <div className="font-medium">{slot.label}</div>
+                      <div className="text-xs text-gray-500">30 min check-in</div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Info */}
+              <div className="bg-purple-50 rounded-lg p-3 text-sm text-purple-700 flex items-start gap-2">
+                <Sparkles className="h-4 w-4 flex-shrink-0 mt-0.5" />
+                <span>
+                  This will open Google Calendar with a 30-minute event pre-filled with client details.
+                </span>
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowScheduleModal(false)}>
+              Cancel
+            </Button>
+            <Button
+              onClick={handleAddToCalendar}
+              className="bg-purple-600 hover:bg-purple-700"
+            >
+              <ExternalLink className="h-4 w-4 mr-2" />
+              Add to Calendar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <Footer />
     </div>
