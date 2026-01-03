@@ -36,6 +36,23 @@ export const modules: Module[] = [
     ],
   },
   {
+    id: "social-media-preparation",
+    title: "Social Media Preparation",
+    description: "Prepare everything you need for a successful, compliant social media launch announcement.",
+    category: "Social Media Preparation",
+    order: 2,
+    forNewCoach: true,
+    icon: "📱",
+    resources: [
+      {
+        id: "social-media-prep-1",
+        title: "Social Media Preparation Module",
+        type: "doc",
+        url: "/training/social-media-preparation",
+      },
+    ],
+  },
+  {
     id: "coach-launch",
     title: "Coach Launch Playbook",
     description: "Essential resources to kickstart your coaching journey and build a strong foundation.",
