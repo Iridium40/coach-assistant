@@ -12,9 +12,12 @@ import { createClient } from "@/lib/supabase/client"
 import { 
   Video, Calendar, Clock, Users, UserCircle, ChevronRight,
   BookOpen, UtensilsCrossed, Wrench, ExternalLink, Award,
-  CheckCircle, CheckCircle2, PlayCircle, Sparkles, Star, Rocket, Building2, GraduationCap, Link2, Facebook, Lightbulb, X, ClipboardList
+  CheckCircle, CheckCircle2, PlayCircle, Sparkles, Star, Rocket, Building2, GraduationCap, Link2, Facebook, Lightbulb, X, ClipboardList,
+  AlertCircle, Circle, MessageSquare, Trophy
 } from "lucide-react"
 import { badgeConfig } from "@/lib/badge-config"
+import { useProspects } from "@/hooks/use-prospects"
+import { useClients, getProgramDay, getDayPhase } from "@/hooks/use-clients"
 import type { ZoomCall } from "@/lib/types"
 import { getOnboardingProgress } from "@/lib/onboarding-utils"
 
@@ -56,6 +59,10 @@ const coachTips = [
 export function DashboardOverview() {
   const { user, profile, badges, completedResources, modules, recipes, favoriteRecipes } = useUserData()
   const supabase = createClient()
+  
+  // CRM hooks for Priority Actions
+  const { prospects, stats: prospectStats } = useProspects()
+  const { clients, stats: clientStats, toggleTouchpoint, needsAttention } = useClients()
   
   const [upcomingMeetings, setUpcomingMeetings] = useState<ZoomCall[]>([])
   const [loadingMeetings, setLoadingMeetings] = useState(true)
@@ -248,6 +255,154 @@ export function DashboardOverview() {
           </div>
         )
       })()}
+
+      {/* Priority Actions Section */}
+      {(clientStats.needsAttention > 0 || prospectStats.overdue > 0 || clientStats.milestonesToday > 0) && (
+        <Card className="mt-6 border-2 border-orange-200 bg-gradient-to-br from-orange-50 to-amber-50">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-lg flex items-center gap-2 text-optavia-dark">
+              <AlertCircle className="h-5 w-5 text-orange-500" />
+              Priority Actions
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="pt-0">
+            <div className="space-y-3">
+              {/* Clients Needing Touchpoints */}
+              {clients
+                .filter(c => c.status === "active" && needsAttention(c))
+                .slice(0, 3)
+                .map(client => {
+                  const programDay = getProgramDay(client.start_date)
+                  const phase = getDayPhase(programDay)
+                  return (
+                    <div
+                      key={client.id}
+                      className="flex items-center justify-between p-3 bg-white rounded-lg border border-orange-200"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div
+                          className="w-10 h-10 rounded-lg flex flex-col items-center justify-center text-xs font-bold"
+                          style={{ backgroundColor: phase.bg, color: phase.color }}
+                        >
+                          <span className="text-[8px]">DAY</span>
+                          <span>{programDay}</span>
+                        </div>
+                        <div>
+                          <div className="font-medium text-sm text-gray-900">{client.label}</div>
+                          <div className="text-xs text-gray-500">Needs touchpoint today</div>
+                        </div>
+                      </div>
+                      <div className="flex gap-2">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => toggleTouchpoint(client.id, "am_done")}
+                          className={client.am_done ? "bg-green-100 text-green-700" : ""}
+                        >
+                          {client.am_done ? <CheckCircle className="h-3 w-3 mr-1" /> : <Circle className="h-3 w-3 mr-1" />}
+                          AM
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => toggleTouchpoint(client.id, "pm_done")}
+                          className={client.pm_done ? "bg-green-100 text-green-700" : ""}
+                        >
+                          {client.pm_done ? <CheckCircle className="h-3 w-3 mr-1" /> : <Circle className="h-3 w-3 mr-1" />}
+                          PM
+                        </Button>
+                      </div>
+                    </div>
+                  )
+                })}
+
+              {/* Milestone Celebrations */}
+              {clients
+                .filter(c => {
+                  if (c.status !== "active") return false
+                  const day = getProgramDay(c.start_date)
+                  return [7, 14, 21, 30].includes(day)
+                })
+                .slice(0, 2)
+                .map(client => {
+                  const programDay = getProgramDay(client.start_date)
+                  const phase = getDayPhase(programDay)
+                  return (
+                    <div
+                      key={`milestone-${client.id}`}
+                      className="flex items-center justify-between p-3 bg-white rounded-lg border border-green-200"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-lg bg-green-100 flex items-center justify-center">
+                          <Trophy className="h-5 w-5 text-green-600" />
+                        </div>
+                        <div>
+                          <div className="font-medium text-sm text-gray-900">{client.label}</div>
+                          <div className="text-xs text-green-600 font-medium">{phase.label}</div>
+                        </div>
+                      </div>
+                      <Link href="/client-tracker">
+                        <Button size="sm" className="bg-green-500 hover:bg-green-600">
+                          <MessageSquare className="h-3 w-3 mr-1" />
+                          Celebrate
+                        </Button>
+                      </Link>
+                    </div>
+                  )
+                })}
+
+              {/* Overdue Prospect Follow-ups */}
+              {prospects
+                .filter(p => {
+                  if (!p.next_action || ["converted", "coach", "not_interested"].includes(p.status)) return false
+                  return new Date(p.next_action) < new Date(new Date().toISOString().split("T")[0])
+                })
+                .slice(0, 2)
+                .map(prospect => (
+                  <div
+                    key={`prospect-${prospect.id}`}
+                    className="flex items-center justify-between p-3 bg-white rounded-lg border border-red-200"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-lg bg-red-100 flex items-center justify-center">
+                        <Clock className="h-5 w-5 text-red-500" />
+                      </div>
+                      <div>
+                        <div className="font-medium text-sm text-gray-900">{prospect.label}</div>
+                        <div className="text-xs text-red-500">Overdue follow-up</div>
+                      </div>
+                    </div>
+                    <Link href="/prospect-tracker">
+                      <Button size="sm" variant="outline" className="text-red-600 border-red-200 hover:bg-red-50">
+                        Follow Up
+                      </Button>
+                    </Link>
+                  </div>
+                ))}
+
+              {/* View All Link */}
+              <div className="flex gap-2 pt-2">
+                {clientStats.needsAttention > 0 && (
+                  <Link href="/client-tracker" className="flex-1">
+                    <Button variant="outline" size="sm" className="w-full">
+                      <Users className="h-4 w-4 mr-2" />
+                      All Clients ({clientStats.active})
+                    </Button>
+                  </Link>
+                )}
+                {prospectStats.overdue > 0 && (
+                  <Link href="/prospect-tracker" className="flex-1">
+                    <Button variant="outline" size="sm" className="w-full">
+                      <Users className="h-4 w-4 mr-2" />
+                      All Prospects ({prospectStats.total})
+                    </Button>
+                  </Link>
+                )}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* New Coach Onboarding Card */}
       {profile?.is_new_coach && (
