@@ -66,9 +66,9 @@ export function Header({ onSettingsClick, onHomeClick, onAnnouncementsClick, onR
   ]
 
   const businessItems = [
-    { label: "Prospect Tracker", href: "/prospect-tracker", description: "Track your 100s list" },
-    { label: "Client Tracker", href: "/client-tracker", description: "Daily touchpoints & milestones" },
-    { label: "Daily Actions", href: "/daily-actions", description: "Your daily dashboard" },
+    { label: "Weekly Actions", href: "/daily-actions", description: "Your weekly overview" },
+    { label: "Client Tracker", href: "/client-tracker", description: "Touchpoints & milestones" },
+    { label: "Prospect Tracker", href: "/prospect-tracker", description: "Track your pipeline" },
   ]
 
   const isBusinessPage = pathname?.startsWith("/prospect-tracker") || 
