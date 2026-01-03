@@ -121,6 +121,23 @@ export const modules: Module[] = [
     ],
   },
   {
+    id: "client-resources",
+    title: "Client Resources to Share",
+    description: "Know what resources to send clients and when. Your complete guide library with sharing scripts.",
+    category: "First 30 Days",
+    order: 7,
+    forNewCoach: true,
+    icon: "📚",
+    resources: [
+      {
+        id: "client-resources-1",
+        title: "Client Resources Module",
+        type: "doc",
+        url: "/training/client-resources",
+      },
+    ],
+  },
+  {
     id: "coach-launch",
     title: "Coach Launch Playbook",
     description: "Essential resources to kickstart your coaching journey and build a strong foundation.",

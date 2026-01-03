@@ -375,12 +375,19 @@ export function InviteManagement({ onClose }: InviteManagementProps) {
           <CardContent className="pt-6">
             <div className="flex gap-3">
               <AlertTriangle className="h-5 w-5 text-amber-600 flex-shrink-0 mt-0.5" />
-              <div className="space-y-2">
+              <div className="space-y-3">
                 <p className="text-sm font-semibold text-amber-800">Important Notice</p>
                 <p className="text-sm text-amber-700">
                   Only active <strong>OPTAVIA Health Coaches</strong> should be invited to become users of Coaching Amplifier. 
                   By sending an invite, you certify that the person you are inviting is an active OPTAVIA Coach in good standing.
                 </p>
+                <div className="p-3 bg-amber-100 rounded-lg border border-amber-300">
+                  <p className="text-sm font-semibold text-amber-900 mb-1">⚠️ Front-Line Coaches Only</p>
+                  <p className="text-sm text-amber-800">
+                    You should only invite coaches who are on your <strong>front line</strong> or coaches that you are the <strong>direct sponsor</strong> of. 
+                    This ensures proper team structure and allows you to track their progress.
+                  </p>
+                </div>
                 <p className="text-sm text-amber-700">
                   Please review our{" "}
                   <Link href="/terms" className="text-amber-800 underline hover:text-amber-900 font-medium">

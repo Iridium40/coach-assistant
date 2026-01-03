@@ -969,8 +969,8 @@ export function FirstClientContent() {
                     <ArrowRight className="h-4 w-4 ml-2" />
                   </Button>
                 ) : (
-                  <Button className="bg-[hsl(var(--optavia-green))] hover:bg-[hsl(var(--optavia-green-dark))] text-white" onClick={() => window.history.back()}>
-                    Continue to Module 3.2
+                  <Button className="bg-[hsl(var(--optavia-green))] hover:bg-[hsl(var(--optavia-green-dark))] text-white" onClick={() => (window.location.href = "/training/client-resources")}>
+                    Continue to Module 3.3: Client Resources
                     <ArrowRight className="h-4 w-4 ml-2" />
                   </Button>
                 )}
