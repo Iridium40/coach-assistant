@@ -40,9 +40,15 @@ import {
   ChevronRight,
   PartyPopper,
   Heart,
+  CalendarPlus,
+  ExternalLink,
 } from "lucide-react"
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
+
+// Time options for HA scheduling
+const HOUR_OPTIONS = Array.from({ length: 12 }, (_, i) => i + 1)
+const MINUTE_OPTIONS = ["00", "15", "30", "45"]
 
 export default function ProspectTrackerPage() {
   const {
@@ -63,11 +69,19 @@ export default function ProspectTrackerPage() {
   const [showAddModal, setShowAddModal] = useState(false)
   const [showEditModal, setShowEditModal] = useState(false)
   const [showConvertModal, setShowConvertModal] = useState(false)
+  const [showHAScheduleModal, setShowHAScheduleModal] = useState(false)
   const [editingProspect, setEditingProspect] = useState<any>(null)
   const [convertingProspect, setConvertingProspect] = useState<Prospect | null>(null)
+  const [schedulingProspect, setSchedulingProspect] = useState<Prospect | null>(null)
   const [filterStatus, setFilterStatus] = useState<ProspectStatus | "all">("all")
   const [searchTerm, setSearchTerm] = useState("")
   const [clientStartDate, setClientStartDate] = useState("")
+
+  // HA Scheduling state
+  const [haDate, setHaDate] = useState("")
+  const [haHour, setHaHour] = useState(10)
+  const [haMinute, setHaMinute] = useState("00")
+  const [haAmPm, setHaAmPm] = useState<"AM" | "PM">("AM")
 
   const [newProspect, setNewProspect] = useState({
     label: "",
@@ -76,6 +90,75 @@ export default function ProspectTrackerPage() {
   })
 
   const today = new Date().toISOString().split("T")[0]
+
+  // Convert 12-hour to 24-hour format
+  const get24Hour = (hour: number, ampm: "AM" | "PM"): number => {
+    if (ampm === "AM") {
+      return hour === 12 ? 0 : hour
+    } else {
+      return hour === 12 ? 12 : hour + 12
+    }
+  }
+
+  // Generate Google Calendar URL for HA
+  const generateHACalendarUrl = (prospect: Prospect, date: string, hour: number, minute: string, ampm: "AM" | "PM"): string => {
+    const targetDate = new Date(date + "T00:00:00")
+    const hour24 = get24Hour(hour, ampm)
+    targetDate.setHours(hour24, parseInt(minute), 0, 0)
+    
+    const endDate = new Date(targetDate)
+    endDate.setMinutes(endDate.getMinutes() + 45) // 45 min duration for HA
+    
+    const title = `Health Assessment: ${prospect.label}`
+    const details = `Health Assessment Call with ${prospect.label}
+
+Source: ${sourceOptions.find(s => s.value === prospect.source)?.label || prospect.source}
+${prospect.notes ? `Notes: ${prospect.notes}` : ""}
+
+Talking Points:
+- Current health goals
+- Past weight loss attempts
+- Why now?
+- Lifestyle & schedule
+- Ready to commit?`
+
+    // Format dates for Google Calendar (YYYYMMDDTHHmmss)
+    const formatDate = (d: Date) => {
+      return d.toISOString().replace(/[-:]/g, "").split(".")[0] + "Z"
+    }
+    
+    const params = new URLSearchParams({
+      action: "TEMPLATE",
+      text: title,
+      dates: `${formatDate(targetDate)}/${formatDate(endDate)}`,
+      details: details,
+    })
+    
+    return `https://calendar.google.com/calendar/render?${params.toString()}`
+  }
+
+  // Handle scheduling HA
+  const handleScheduleHA = () => {
+    if (!schedulingProspect || !haDate) return
+    
+    // Update prospect with HA scheduled status and next_action date
+    updateProspect(schedulingProspect.id, {
+      status: "ha_scheduled",
+      next_action: haDate,
+    })
+    
+    // Open Google Calendar
+    const url = generateHACalendarUrl(schedulingProspect, haDate, haHour, haMinute, haAmPm)
+    window.open(url, "_blank")
+    
+    toast({
+      title: "📅 HA Scheduled!",
+      description: `Health Assessment with ${schedulingProspect.label} scheduled for ${new Date(haDate).toLocaleDateString()}`,
+    })
+    
+    setShowHAScheduleModal(false)
+    setSchedulingProspect(null)
+  }
 
   const handleAddProspect = async () => {
     if (!newProspect.label.trim()) return
@@ -95,6 +178,21 @@ export default function ProspectTrackerPage() {
       }
       return
     }
+    
+    // If scheduling HA, show the schedule modal
+    if (newStatus === "ha_scheduled") {
+      const prospect = prospects.find(p => p.id === id)
+      if (prospect) {
+        setSchedulingProspect(prospect)
+        setHaDate(today)
+        setHaHour(10)
+        setHaMinute("00")
+        setHaAmPm("AM")
+        setShowHAScheduleModal(true)
+      }
+      return
+    }
+    
     await updateProspect(id, { status: newStatus })
   }
 
@@ -327,7 +425,7 @@ export default function ProspectTrackerPage() {
                     )}
 
                     {/* Actions */}
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 flex-wrap">
                       <Select
                         value={prospect.status}
                         onValueChange={(value) => handleUpdateStatus(prospect.id, value as ProspectStatus)}
@@ -343,6 +441,27 @@ export default function ProspectTrackerPage() {
                           ))}
                         </SelectContent>
                       </Select>
+
+                      {/* Show Schedule button for ha_scheduled prospects */}
+                      {prospect.status === "ha_scheduled" && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            setSchedulingProspect(prospect)
+                            setHaDate(prospect.next_action || today)
+                            setHaHour(10)
+                            setHaMinute("00")
+                            setHaAmPm("AM")
+                            setShowHAScheduleModal(true)
+                          }}
+                          className="text-blue-600 border-blue-200 hover:bg-blue-50"
+                          title="Schedule HA"
+                        >
+                          <CalendarPlus className="h-4 w-4 mr-1" />
+                          Schedule
+                        </Button>
+                      )}
 
                       <Button
                         variant="outline"
@@ -600,6 +719,120 @@ export default function ProspectTrackerPage() {
             >
               <Heart className="h-4 w-4 mr-2" />
               Create Client
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Schedule HA Modal */}
+      <Dialog open={showHAScheduleModal} onOpenChange={setShowHAScheduleModal}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <CalendarPlus className="h-5 w-5 text-blue-600" />
+              Schedule Health Assessment
+            </DialogTitle>
+          </DialogHeader>
+          {schedulingProspect && (
+            <div className="space-y-6">
+              {/* Prospect Info */}
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <div className="font-semibold text-blue-900">{schedulingProspect.label}</div>
+                <div className="text-sm text-blue-700 mt-1">
+                  {sourceOptions.find(s => s.value === schedulingProspect.source)?.label}
+                </div>
+              </div>
+
+              {/* Date Picker */}
+              <div>
+                <Label className="text-sm font-medium mb-2 block">Select Date *</Label>
+                <Input
+                  type="date"
+                  value={haDate}
+                  onChange={(e) => setHaDate(e.target.value)}
+                  min={today}
+                  className="w-full"
+                />
+              </div>
+
+              {/* Time Picker */}
+              <div>
+                <Label className="text-sm font-medium mb-3 block">Select Time</Label>
+                <div className="flex items-center gap-2 justify-center">
+                  {/* Hour */}
+                  <select
+                    value={haHour}
+                    onChange={(e) => setHaHour(parseInt(e.target.value))}
+                    className="w-16 h-12 text-center text-lg font-medium border rounded-lg bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  >
+                    {HOUR_OPTIONS.map((h) => (
+                      <option key={h} value={h}>{h}</option>
+                    ))}
+                  </select>
+                  <span className="text-2xl font-bold text-gray-400">:</span>
+                  {/* Minute */}
+                  <select
+                    value={haMinute}
+                    onChange={(e) => setHaMinute(e.target.value)}
+                    className="w-16 h-12 text-center text-lg font-medium border rounded-lg bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  >
+                    {MINUTE_OPTIONS.map((m) => (
+                      <option key={m} value={m}>{m}</option>
+                    ))}
+                  </select>
+                  {/* AM/PM */}
+                  <div className="flex rounded-lg border overflow-hidden">
+                    <button
+                      onClick={() => setHaAmPm("AM")}
+                      className={`px-4 h-12 font-medium transition-colors ${
+                        haAmPm === "AM"
+                          ? "bg-blue-600 text-white"
+                          : "bg-white text-gray-700 hover:bg-gray-100"
+                      }`}
+                    >
+                      AM
+                    </button>
+                    <button
+                      onClick={() => setHaAmPm("PM")}
+                      className={`px-4 h-12 font-medium transition-colors ${
+                        haAmPm === "PM"
+                          ? "bg-blue-600 text-white"
+                          : "bg-white text-gray-700 hover:bg-gray-100"
+                      }`}
+                    >
+                      PM
+                    </button>
+                  </div>
+                </div>
+                <p className="text-xs text-gray-500 text-center mt-2">45 minute health assessment</p>
+              </div>
+
+              {/* Info */}
+              <div className="bg-blue-50 rounded-lg p-3 text-sm text-blue-700 flex items-start gap-2">
+                <Sparkles className="h-4 w-4 flex-shrink-0 mt-0.5" />
+                <span>
+                  This will open Google Calendar with a 45-minute event and talking points for your Health Assessment.
+                </span>
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setShowHAScheduleModal(false)
+                setSchedulingProspect(null)
+              }}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleScheduleHA}
+              disabled={!haDate}
+              className="bg-blue-600 hover:bg-blue-700"
+            >
+              <ExternalLink className="h-4 w-4 mr-2" />
+              Add to Calendar
             </Button>
           </DialogFooter>
         </DialogContent>

@@ -50,11 +50,9 @@ const DAYS_OF_WEEK = [
   { short: "Sat", full: "Saturday", value: 6 },
 ]
 
-// Time slots
-const TIME_SLOTS = [
-  { label: "AM (9:00)", value: "am", hour: 9 },
-  { label: "PM (6:00)", value: "pm", hour: 18 },
-]
+// Time options for picker
+const HOUR_OPTIONS = Array.from({ length: 12 }, (_, i) => i + 1)
+const MINUTE_OPTIONS = ["00", "15", "30", "45"]
 
 export default function ClientTrackerPage() {
   const {
@@ -78,7 +76,9 @@ export default function ClientTrackerPage() {
   
   // Schedule state
   const [scheduleDay, setScheduleDay] = useState<number>(new Date().getDay())
-  const [scheduleTime, setScheduleTime] = useState<"am" | "pm">("am")
+  const [scheduleHour, setScheduleHour] = useState<number>(9)
+  const [scheduleMinute, setScheduleMinute] = useState<string>("00")
+  const [scheduleAmPm, setScheduleAmPm] = useState<"AM" | "PM">("AM")
 
   const today = new Date().toISOString().split("T")[0]
 
@@ -98,11 +98,20 @@ export default function ClientTrackerPage() {
     return targetDate
   }
 
+  // Convert 12-hour to 24-hour format
+  const get24Hour = (hour: number, ampm: "AM" | "PM"): number => {
+    if (ampm === "AM") {
+      return hour === 12 ? 0 : hour
+    } else {
+      return hour === 12 ? 12 : hour + 12
+    }
+  }
+
   // Generate Google Calendar URL
-  const generateCalendarUrl = (client: any, day: number, timeSlot: "am" | "pm"): string => {
+  const generateCalendarUrl = (client: any, day: number, hour: number, minute: string, ampm: "AM" | "PM"): string => {
     const targetDate = getNextDayDate(day)
-    const hour = timeSlot === "am" ? 9 : 18
-    targetDate.setHours(hour, 0, 0, 0)
+    const hour24 = get24Hour(hour, ampm)
+    targetDate.setHours(hour24, parseInt(minute), 0, 0)
     
     const endDate = new Date(targetDate)
     endDate.setMinutes(endDate.getMinutes() + 30) // 30 min duration
@@ -140,19 +149,21 @@ ${phase.milestone ? `\n🎉 MILESTONE: ${phase.label} - Celebrate this achieveme
   const openScheduleModal = (client: any) => {
     setSelectedClient(client)
     setScheduleDay(new Date().getDay())
-    setScheduleTime("am")
+    setScheduleHour(9)
+    setScheduleMinute("00")
+    setScheduleAmPm("AM")
     setShowScheduleModal(true)
   }
 
   // Handle adding to calendar
   const handleAddToCalendar = () => {
     if (!selectedClient) return
-    const url = generateCalendarUrl(selectedClient, scheduleDay, scheduleTime)
+    const url = generateCalendarUrl(selectedClient, scheduleDay, scheduleHour, scheduleMinute, scheduleAmPm)
     window.open(url, "_blank")
     setShowScheduleModal(false)
     toast({
       title: "📅 Opening Calendar",
-      description: `Scheduling ${scheduleTime.toUpperCase()} check-in for ${selectedClient.label}`,
+      description: `Scheduling ${scheduleHour}:${scheduleMinute} ${scheduleAmPm} check-in for ${selectedClient.label}`,
     })
   }
 
@@ -563,23 +574,53 @@ ${phase.milestone ? `\n🎉 MILESTONE: ${phase.label} - Celebrate this achieveme
               {/* Time Picker */}
               <div>
                 <Label className="text-sm font-medium mb-3 block">Select Time</Label>
-                <div className="grid grid-cols-2 gap-3">
-                  {TIME_SLOTS.map((slot) => (
+                <div className="flex items-center gap-2 justify-center">
+                  {/* Hour */}
+                  <select
+                    value={scheduleHour}
+                    onChange={(e) => setScheduleHour(parseInt(e.target.value))}
+                    className="w-16 h-12 text-center text-lg font-medium border rounded-lg bg-white focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                  >
+                    {HOUR_OPTIONS.map((h) => (
+                      <option key={h} value={h}>{h}</option>
+                    ))}
+                  </select>
+                  <span className="text-2xl font-bold text-gray-400">:</span>
+                  {/* Minute */}
+                  <select
+                    value={scheduleMinute}
+                    onChange={(e) => setScheduleMinute(e.target.value)}
+                    className="w-16 h-12 text-center text-lg font-medium border rounded-lg bg-white focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                  >
+                    {MINUTE_OPTIONS.map((m) => (
+                      <option key={m} value={m}>{m}</option>
+                    ))}
+                  </select>
+                  {/* AM/PM */}
+                  <div className="flex rounded-lg border overflow-hidden">
                     <button
-                      key={slot.value}
-                      onClick={() => setScheduleTime(slot.value as "am" | "pm")}
-                      className={`p-4 rounded-lg text-center transition-colors border-2 ${
-                        scheduleTime === slot.value
-                          ? "border-purple-600 bg-purple-50 text-purple-700"
-                          : "border-gray-200 hover:border-gray-300 text-gray-700"
+                      onClick={() => setScheduleAmPm("AM")}
+                      className={`px-4 h-12 font-medium transition-colors ${
+                        scheduleAmPm === "AM"
+                          ? "bg-purple-600 text-white"
+                          : "bg-white text-gray-700 hover:bg-gray-100"
                       }`}
                     >
-                      <Clock className="h-5 w-5 mx-auto mb-1" />
-                      <div className="font-medium">{slot.label}</div>
-                      <div className="text-xs text-gray-500">30 min check-in</div>
+                      AM
                     </button>
-                  ))}
+                    <button
+                      onClick={() => setScheduleAmPm("PM")}
+                      className={`px-4 h-12 font-medium transition-colors ${
+                        scheduleAmPm === "PM"
+                          ? "bg-purple-600 text-white"
+                          : "bg-white text-gray-700 hover:bg-gray-100"
+                      }`}
+                    >
+                      PM
+                    </button>
+                  </div>
                 </div>
+                <p className="text-xs text-gray-500 text-center mt-2">30 minute check-in</p>
               </div>
 
               {/* Info */}
