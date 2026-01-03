@@ -67,9 +67,19 @@ export function Footer() {
 
           <p className="text-xs text-gray-400">© {new Date().getFullYear()} Coaching Amplifier. All rights reserved.</p>
           
-          <p className="text-xs text-gray-400 text-center max-w-2xl px-4 mt-2">
-            This website is independently operated by Coaching Amplifier and is not affiliated with, endorsed by, or operated by OPTAVIA LLC.
-          </p>
+          {/* Disclaimer Section */}
+          <div className="border-t border-gray-600 pt-4 mt-2 max-w-3xl">
+            <p className="text-xs text-gray-400 text-center px-4 leading-relaxed">
+              <strong className="text-gray-300">Disclaimer:</strong> Coaching Amplifier is an independent educational resource for health coaches. 
+              This is not a tax, legal, financial, or medical advisory service. Individual results vary. 
+              Income examples are illustrative only—see OPTAVIA's Income Disclosure Statement for typical results. 
+              Health coaches are not medical professionals. This website is not affiliated with, endorsed by, 
+              or operated by OPTAVIA LLC or Medifast.{" "}
+              <Link href="/terms" className="text-[hsl(var(--optavia-green))] hover:underline">
+                View full disclaimers →
+              </Link>
+            </p>
+          </div>
         </div>
       </div>
     </footer>

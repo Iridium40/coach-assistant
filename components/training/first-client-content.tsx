@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { CheckCircle, Circle, ChevronRight, FileText, Clock, Star, ArrowLeft, ArrowRight, MessageCircle, Copy, Check, Users, Calendar, Heart, Play, Gift, Send, Phone, CheckSquare, Lightbulb, ExternalLink, Package, Video, Award, Timer, Bell, Sparkles } from "lucide-react"
+import { CheckCircle, Circle, ChevronRight, FileText, Clock, Star, ArrowLeft, ArrowRight, MessageCircle, Copy, Check, Users, Calendar, Heart, Play, Gift, Send, Phone, CheckSquare, Lightbulb, ExternalLink, Package, Video, Award, Timer, Bell, Sparkles, AlertTriangle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
@@ -949,6 +949,20 @@ export function FirstClientContent() {
                     </ul>
                   </div>
                 )}
+
+                {/* Scope of Practice Reminder */}
+                <div className="mt-6 p-4 bg-red-50 border-l-4 border-red-400 rounded-r-lg">
+                  <div className="flex items-center gap-2 font-semibold text-red-900 mb-2">
+                    <AlertTriangle className="h-5 w-5 text-red-600" />
+                    Scope of Practice Reminder
+                  </div>
+                  <p className="text-sm text-red-900 leading-relaxed">
+                    Health coaches are not medical professionals. When clients mention symptoms like headaches, 
+                    fatigue, or other physical issues, provide general encouragement but never diagnose or give 
+                    medical advice. If symptoms persist or are concerning, always recommend they consult their 
+                    healthcare provider. When in doubt, refer to their doctor.
+                  </p>
+                </div>
               </CardContent>
 
               {/* Navigation Footer */}

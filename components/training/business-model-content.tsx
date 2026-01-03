@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useMemo } from "react"
-import { CheckCircle, Circle, ChevronRight, ChevronDown, Clock, Star, ArrowLeft, ArrowRight, Play, DollarSign, Calculator, BookOpen, HelpCircle, Lightbulb, Check, Search, Users } from "lucide-react"
+import { CheckCircle, Circle, ChevronRight, ChevronDown, Clock, Star, ArrowLeft, ArrowRight, Play, DollarSign, Calculator, BookOpen, HelpCircle, Lightbulb, Check, Search, Users, AlertTriangle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
@@ -911,6 +911,20 @@ export function BusinessModelContent() {
                     </ul>
                   </div>
                 )}
+
+                {/* Income Disclaimer */}
+                <div className="mt-6 p-4 bg-blue-50 border-l-4 border-blue-400 rounded-r-lg">
+                  <div className="flex items-center gap-2 font-semibold text-blue-900 mb-2">
+                    <AlertTriangle className="h-5 w-5 text-blue-600" />
+                    Income Disclaimer
+                  </div>
+                  <p className="text-sm text-blue-900 leading-relaxed">
+                    Income examples and potential earnings discussed are for illustrative purposes only and are 
+                    not guarantees. Individual results vary significantly based on effort, skill, market conditions, 
+                    and many other factors. For actual income statistics, please refer to OPTAVIA's official Income 
+                    Disclosure Statement. The majority of coaches do not earn significant income from coaching activities.
+                  </p>
+                </div>
               </CardContent>
 
               {/* Navigation Footer */}
