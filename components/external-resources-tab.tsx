@@ -88,6 +88,13 @@ export function ExternalResourcesTab() {
   const [selectedCategory, setSelectedCategory] = useState<string>(categoryParam || "All")
   const [pinnedIds, setPinnedIds] = useState<string[]>([])
 
+  // Sync selectedCategory with URL parameter when it changes
+  useEffect(() => {
+    if (categoryParam && categoryParam !== selectedCategory) {
+      setSelectedCategory(categoryParam)
+    }
+  }, [categoryParam])
+
   // Load pinned resources from localStorage on mount
   useEffect(() => {
     const saved = localStorage.getItem("pinnedResources")

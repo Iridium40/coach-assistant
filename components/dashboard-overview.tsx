@@ -581,7 +581,7 @@ export function DashboardOverview() {
                 </div>
               </Link>
               
-              <Link href="/resources">
+              <Link href="/resources?category=Coach%20Tools">
                 <div className="p-4 rounded-lg bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 hover:from-blue-100 hover:to-indigo-100 transition-colors text-center cursor-pointer">
                   <Wrench className="h-6 w-6 mx-auto mb-2 text-blue-600" />
                   <p className="text-sm font-medium text-optavia-dark">Coach Tools</p>
