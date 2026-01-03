@@ -17,6 +17,7 @@ export default function HealthAssessmentPage({ params }: { params: Promise<{ key
   const [result, setResult] = useState<"success" | "error" | null>(null)
   const [coachEmail, setCoachEmail] = useState<string | null>(null)
   const [coachName, setCoachName] = useState<string | null>(null)
+  const [coachAvatar, setCoachAvatar] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [assessmentKey, setAssessmentKey] = useState<string | null>(null)
   const today = useMemo(() => new Date().toISOString().slice(0, 10), [])
@@ -42,16 +43,17 @@ export default function HealthAssessmentPage({ params }: { params: Promise<{ key
 
     setCoachEmail(email)
 
-    // Fetch coach profile to get their name
+    // Fetch coach profile to get their name and avatar
     const supabase = createClient()
     supabase
       .from("profiles")
-      .select("full_name, email")
+      .select("full_name, email, avatar_url")
       .eq("email", email)
       .single()
       .then(({ data, error }) => {
         if (data) {
           setCoachName(data.full_name || email)
+          setCoachAvatar(data.avatar_url)
         } else {
           setCoachName(email)
         }
@@ -258,9 +260,23 @@ export default function HealthAssessmentPage({ params }: { params: Promise<{ key
             </div>
             <div>
               <div className="mb-4 flex justify-center">
-                <div className="h-[300px] w-[300px] rounded-xl border bg-white p-1 shadow-sm flex items-center justify-center">
-                  <div className="text-center">
-                    <div className="text-6xl mb-4">👋</div>
+                <div className="flex flex-col items-center">
+                  <div className="h-[200px] w-[200px] rounded-lg overflow-hidden border-2 border-gray-200 bg-white shadow-md">
+                    {coachAvatar ? (
+                      <img 
+                        src={coachAvatar} 
+                        alt={coachName || "Your Health Coach"}
+                        className="h-full w-full object-cover"
+                      />
+                    ) : (
+                      <div className="h-full w-full bg-gradient-to-br from-[hsl(var(--optavia-green))] to-[#008542] flex items-center justify-center">
+                        <span className="text-6xl font-bold text-white">
+                          {coachName?.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2) || "HC"}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                  <div className="mt-4 text-center">
                     <p className="text-lg font-semibold text-optavia-dark">{coachName}</p>
                     <p className="text-sm text-optavia-gray">Your Health Coach</p>
                   </div>

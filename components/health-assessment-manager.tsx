@@ -268,69 +268,6 @@ export function HealthAssessmentManager() {
                   Preview Link
                 </Button>
               </div>
-              
-              {/* Quick Share Buttons */}
-              <div className="pt-2 border-t">
-                <p className="text-xs text-optavia-gray mb-3">Quick share:</p>
-                <div className="flex flex-wrap gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={handleShareEmail}
-                    className="hover:bg-blue-50 hover:border-blue-300 hover:text-blue-700"
-                  >
-                    <Mail className="h-4 w-4 mr-2" />
-                    Email
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={handleShareSMS}
-                    className="hover:bg-green-50 hover:border-green-300 hover:text-green-700"
-                  >
-                    <MessageSquare className="h-4 w-4 mr-2" />
-                    SMS
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={handleShareFacebook}
-                    className="hover:bg-blue-50 hover:border-blue-500 hover:text-blue-600"
-                  >
-                    <Facebook className="h-4 w-4 mr-2" />
-                    Facebook
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={handleShareTwitter}
-                    className="hover:bg-sky-50 hover:border-sky-400 hover:text-sky-600"
-                  >
-                    <Twitter className="h-4 w-4 mr-2" />
-                    Twitter
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={handleShareLinkedIn}
-                    className="hover:bg-blue-50 hover:border-blue-600 hover:text-blue-700"
-                  >
-                    <Linkedin className="h-4 w-4 mr-2" />
-                    LinkedIn
-                  </Button>
-                  {typeof navigator !== "undefined" && typeof navigator.share === "function" && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={handleNativeShare}
-                      className="hover:bg-purple-50 hover:border-purple-400 hover:text-purple-600"
-                    >
-                      <Share2 className="h-4 w-4 mr-2" />
-                      More...
-                    </Button>
-                  )}
-                </div>
-              </div>
             </>
           ) : (
             <p className="text-sm text-optavia-gray">

@@ -16,8 +16,16 @@ import {
 import { useUserData } from "@/contexts/user-data-context"
 import { useToast } from "@/hooks/use-toast"
 import { createClient } from "@/lib/supabase/client"
-import { Upload, X, Trophy } from "lucide-react"
+import { Upload, X, Trophy, UserCheck } from "lucide-react"
 import { BadgeDisplay } from "@/components/badge-display"
+
+interface SponsorInfo {
+  id: string
+  full_name: string | null
+  email: string | null
+  avatar_url: string | null
+  coach_rank: string | null
+}
 
 interface UserSettingsProps {
   onClose?: () => void
@@ -41,8 +49,9 @@ export function UserSettings({ onClose }: UserSettingsProps) {
   const [fullName, setFullName] = useState(profile?.full_name || "")
   const [coachRank, setCoachRank] = useState<string>(profile?.coach_rank || "")
   const [optaviaId, setOptaviaId] = useState(profile?.optavia_id || "")
-  const [parentOptaviaId, setParentOptaviaId] = useState(profile?.parent_optavia_id || "")
   const [phoneNumber, setPhoneNumber] = useState(profile?.phone_number || "")
+  const [sponsorInfo, setSponsorInfo] = useState<SponsorInfo | null>(null)
+  const [loadingSponsor, setLoadingSponsor] = useState(false)
 
   // Update local state when profile changes
   useEffect(() => {
@@ -50,17 +59,48 @@ export function UserSettings({ onClose }: UserSettingsProps) {
       setFullName(profile.full_name || "")
       setCoachRank(profile.coach_rank || "")
       setOptaviaId(profile.optavia_id || "")
-      setParentOptaviaId(profile.parent_optavia_id || "")
       setPhoneNumber(profile.phone_number || "")
     } else {
       // Reset to defaults if profile is null
       setFullName("")
       setCoachRank("")
       setOptaviaId("")
-      setParentOptaviaId("")
       setPhoneNumber("")
     }
   }, [profile])
+
+  // Load sponsor information
+  useEffect(() => {
+    const loadSponsorInfo = async () => {
+      if (!profile?.sponsor_id) {
+        setSponsorInfo(null)
+        return
+      }
+
+      setLoadingSponsor(true)
+      try {
+        const { data, error } = await supabase
+          .from("profiles")
+          .select("id, full_name, email, avatar_url, coach_rank")
+          .eq("id", profile.sponsor_id)
+          .single()
+
+        if (error) {
+          console.error("Error loading sponsor info:", error)
+          setSponsorInfo(null)
+        } else {
+          setSponsorInfo(data)
+        }
+      } catch (error) {
+        console.error("Error loading sponsor info:", error)
+        setSponsorInfo(null)
+      } finally {
+        setLoadingSponsor(false)
+      }
+    }
+
+    loadSponsorInfo()
+  }, [profile?.sponsor_id, supabase])
 
   const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -204,7 +244,6 @@ export function UserSettings({ onClose }: UserSettingsProps) {
         is_new_coach: isNewCoach,
         coach_rank: coachRank || null,
         optavia_id: optaviaId || null,
-        parent_optavia_id: parentOptaviaId || null,
       })
 
       if (error) {
@@ -409,16 +448,49 @@ export function UserSettings({ onClose }: UserSettingsProps) {
               )}
             </div>
 
+            {/* Sponsoring Coach Section */}
             <div className="space-y-2">
-              <Label htmlFor="parentOptaviaId" className="text-optavia-dark">Parent Coach Optavia ID</Label>
-              <Input
-                id="parentOptaviaId"
-                value={parentOptaviaId}
-                onChange={(e) => setParentOptaviaId(e.target.value)}
-                placeholder="Enter your parent coach's Optavia ID"
-                className="w-full border-2 bg-white border-gray-300 text-optavia-dark hover:border-[hsl(var(--optavia-green))] focus:border-[hsl(var(--optavia-green))]"
-              />
-              <p className="text-xs text-optavia-gray">The Optavia ID of the coach who sponsored you</p>
+              <Label className="text-optavia-dark flex items-center gap-2">
+                <UserCheck className="h-4 w-4 text-[hsl(var(--optavia-green))]" />
+                Sponsoring Coach
+              </Label>
+              {loadingSponsor ? (
+                <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
+                  <div className="animate-pulse flex items-center gap-3">
+                    <div className="w-10 h-10 bg-gray-200 rounded-full"></div>
+                    <div className="space-y-2">
+                      <div className="h-4 w-24 bg-gray-200 rounded"></div>
+                      <div className="h-3 w-32 bg-gray-200 rounded"></div>
+                    </div>
+                  </div>
+                </div>
+              ) : sponsorInfo ? (
+                <div className="p-4 bg-gradient-to-br from-green-50 to-emerald-50 rounded-lg border border-green-200">
+                  <div className="flex items-center gap-3">
+                    <Avatar className="h-10 w-10 border-2 border-[hsl(var(--optavia-green))]">
+                      <AvatarImage src={sponsorInfo.avatar_url || undefined} alt={sponsorInfo.full_name || "Sponsor"} />
+                      <AvatarFallback className="bg-[hsl(var(--optavia-green))] text-white text-sm">
+                        {sponsorInfo.full_name?.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2) || "SC"}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1">
+                      <div className="font-semibold text-optavia-dark">{sponsorInfo.full_name || "Unknown"}</div>
+                      <div className="text-sm text-optavia-gray">{sponsorInfo.email}</div>
+                      {sponsorInfo.coach_rank && (
+                        <div className="text-xs text-[hsl(var(--optavia-green))] font-medium mt-0.5">
+                          {sponsorInfo.coach_rank === "Coach" ? "Coach" : sponsorInfo.coach_rank}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
+                  <p className="text-sm text-optavia-gray">
+                    No sponsoring coach linked to your account.
+                  </p>
+                </div>
+              )}
             </div>
 
             <Button 
