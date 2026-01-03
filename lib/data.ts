@@ -274,6 +274,23 @@ export const modules: Module[] = [
     ],
   },
   {
+    id: "ten-x-system",
+    title: "The 10X System",
+    description: "Implement high-accountability coaching systems that multiply your results.",
+    category: "ED to FIBC",
+    order: 16,
+    forNewCoach: false,
+    icon: "🚀",
+    resources: [
+      {
+        id: "ten-x-system-1",
+        title: "The 10X System Module",
+        type: "doc",
+        url: "/training/ten-x-system",
+      },
+    ],
+  },
+  {
     id: "coach-launch",
     title: "Coach Launch Playbook",
     description: "Essential resources to kickstart your coaching journey and build a strong foundation.",

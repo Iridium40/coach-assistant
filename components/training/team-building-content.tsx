@@ -209,7 +209,7 @@ export function TeamBuildingContent() {
 
               <div className="border-t bg-gray-50 p-6 flex justify-between">
                 {prevLesson ? <Button variant="outline" onClick={() => setExpandedLesson(prevLesson.id)}><ArrowLeft className="h-4 w-4 mr-2" />Previous</Button> : <Button variant="outline" onClick={() => (window.location.href = "/training/advanced-client-support")}><ArrowLeft className="h-4 w-4 mr-2" />Back to Phase 5</Button>}
-                {nextLesson ? <Button onClick={() => setExpandedLesson(nextLesson.id)} className="bg-[hsl(var(--optavia-green))]">Next<ArrowRight className="h-4 w-4 ml-2" /></Button> : <Button className="bg-[hsl(var(--optavia-green))]" onClick={() => window.history.back()}>🎉 Complete Phase 6<ArrowRight className="h-4 w-4 ml-2" /></Button>}
+                {nextLesson ? <Button onClick={() => setExpandedLesson(nextLesson.id)} className="bg-[hsl(var(--optavia-green))]">Next<ArrowRight className="h-4 w-4 ml-2" /></Button> : <Button className="bg-[hsl(var(--optavia-green))]" onClick={() => (window.location.href = "/training/ten-x-system")}>Continue to Module 6.2<ArrowRight className="h-4 w-4 ml-2" /></Button>}
               </div>
             </Card>
           </main>
