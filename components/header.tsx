@@ -73,15 +73,18 @@ export function Header({ onSettingsClick, onHomeClick, onAnnouncementsClick, onR
     ? allNavItems.filter(item => !item.fullAccessOnly)
     : allNavItems
 
+  // Updated My Business items per Phase 5 UX redesign
   const businessItems = [
-    { label: "Weekly Actions", href: "/daily-actions", description: "Your weekly overview" },
-    { label: "Client Tracker", href: "/client-tracker", description: "Touchpoints & milestones" },
+    { label: "Pipeline", href: "/prospect-pipeline", description: "Overview of your journey" },
     { label: "Prospect Tracker", href: "/prospect-tracker", description: "Track your pipeline" },
+    { label: "Client Tracker", href: "/client-tracker", description: "Touchpoints & milestones" },
+    { label: "Rank Calculator", href: "/my-business", description: "Track rank progress" },
   ]
 
   const isBusinessPage = pathname?.startsWith("/prospect-tracker") || 
                          pathname?.startsWith("/client-tracker") || 
-                         pathname?.startsWith("/daily-actions")
+                         pathname?.startsWith("/prospect-pipeline") ||
+                         pathname?.startsWith("/my-business")
 
   return (
     <header className="border-b border-optavia-border bg-white sticky top-0 z-50">
@@ -158,34 +161,31 @@ export function Header({ onSettingsClick, onHomeClick, onAnnouncementsClick, onR
           </div>
         </div>
 
-        {/* Desktop Navigation Menu */}
+        {/* Desktop Navigation Menu - Updated order: Dashboard | My Business | Training | Calendar | Resources | Recipes */}
         {user && (
           <nav className="hidden md:flex items-center justify-center gap-6 lg:gap-8 xl:gap-10 border-t border-optavia-border py-2">
-            {navItems.map((item) => {
-              const isActive = currentActiveTab === item.id
-              return (
-                <Link
-                  key={item.id}
-                  href={item.href}
-                  onClick={() => {
-                    setMobileMenuOpen(false)
-                    onTabChange?.(item.id)
-                  }}
-                  className={`pb-3 lg:pb-4 px-4 lg:px-6 font-heading font-semibold text-sm lg:text-base transition-colors relative whitespace-nowrap flex-shrink-0 ${
-                    isActive
-                      ? "text-[hsl(var(--optavia-green))]"
-                      : "text-optavia-dark hover:text-[hsl(var(--optavia-green))]"
-                  }`}
-                >
-                  {item.label}
-                  {isActive && (
-                    <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[hsl(var(--optavia-green))]" />
-                  )}
-                </Link>
-              )
-            })}
+            {/* Dashboard */}
+            {navItems.find(item => item.id === "dashboard") && (
+              <Link
+                href="/dashboard"
+                onClick={() => {
+                  setMobileMenuOpen(false)
+                  onTabChange?.("dashboard")
+                }}
+                className={`pb-3 lg:pb-4 px-4 lg:px-6 font-heading font-semibold text-sm lg:text-base transition-colors relative whitespace-nowrap flex-shrink-0 ${
+                  currentActiveTab === "dashboard"
+                    ? "text-[hsl(var(--optavia-green))]"
+                    : "text-optavia-dark hover:text-[hsl(var(--optavia-green))]"
+                }`}
+              >
+                Dashboard
+                {currentActiveTab === "dashboard" && (
+                  <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[hsl(var(--optavia-green))]" />
+                )}
+              </Link>
+            )}
             
-            {/* My Business Dropdown - Hidden for training-only orgs */}
+            {/* My Business Dropdown - Positioned second, hidden for training-only orgs */}
             {!isTrainingOnly && (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -216,14 +216,83 @@ export function Header({ onSettingsClick, onHomeClick, onAnnouncementsClick, onR
                 </DropdownMenuContent>
               </DropdownMenu>
             )}
+            
+            {/* Training, Calendar, Resources, Recipes */}
+            {navItems.filter(item => item.id !== "dashboard").map((item) => {
+              const isActive = currentActiveTab === item.id
+              return (
+                <Link
+                  key={item.id}
+                  href={item.href}
+                  onClick={() => {
+                    setMobileMenuOpen(false)
+                    onTabChange?.(item.id)
+                  }}
+                  className={`pb-3 lg:pb-4 px-4 lg:px-6 font-heading font-semibold text-sm lg:text-base transition-colors relative whitespace-nowrap flex-shrink-0 ${
+                    isActive
+                      ? "text-[hsl(var(--optavia-green))]"
+                      : "text-optavia-dark hover:text-[hsl(var(--optavia-green))]"
+                  }`}
+                >
+                  {item.label}
+                  {isActive && (
+                    <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[hsl(var(--optavia-green))]" />
+                  )}
+                </Link>
+              )
+            })}
           </nav>
         )}
 
-        {/* Mobile Navigation Menu (Dropdown) */}
+        {/* Mobile Navigation Menu (Dropdown) - Updated order: Dashboard, My Business, Training, Calendar, Resources, Recipes */}
         {user && mobileMenuOpen && (
           <nav className="md:hidden border-t border-optavia-border bg-white">
             <div className="flex flex-col">
-              {navItems.map((item) => {
+              {/* Dashboard first */}
+              <Link
+                href="/dashboard"
+                onClick={() => {
+                  setMobileMenuOpen(false)
+                  onTabChange?.("dashboard")
+                }}
+                className={`px-4 py-3 text-left font-heading font-semibold text-base transition-colors border-b border-gray-100 ${
+                  currentActiveTab === "dashboard"
+                    ? "text-[hsl(var(--optavia-green))] bg-green-50"
+                    : "text-optavia-dark hover:text-[hsl(var(--optavia-green))] hover:bg-gray-50"
+                }`}
+              >
+                Dashboard
+              </Link>
+              
+              {/* My Business Section second - Hidden for training-only orgs */}
+              {!isTrainingOnly && (
+                <>
+                  <div className="px-4 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wide bg-gray-50 border-b border-gray-100">
+                    My Business
+                  </div>
+                  {businessItems.map((item) => {
+                    const isActive = pathname === item.href
+                    return (
+                      <Link
+                        key={item.href}
+                        href={item.href}
+                        onClick={() => setMobileMenuOpen(false)}
+                        className={`px-4 py-3 pl-6 text-left font-heading font-semibold text-base transition-colors border-b border-gray-100 flex items-center gap-2 ${
+                          isActive
+                            ? "text-[hsl(var(--optavia-green))] bg-green-50"
+                            : "text-optavia-dark hover:text-[hsl(var(--optavia-green))] hover:bg-gray-50"
+                        }`}
+                      >
+                        <Users className="h-4 w-4" />
+                        {item.label}
+                      </Link>
+                    )
+                  })}
+                </>
+              )}
+              
+              {/* Training, Calendar, Resources, Recipes */}
+              {navItems.filter(item => item.id !== "dashboard").map((item) => {
                 const isActive = currentActiveTab === item.id
                 return (
                   <Link
@@ -239,37 +308,10 @@ export function Header({ onSettingsClick, onHomeClick, onAnnouncementsClick, onR
                         : "text-optavia-dark hover:text-[hsl(var(--optavia-green))] hover:bg-gray-50"
                     }`}
                   >
-                    {item.mobileLabel || item.label}
+                    {item.label}
                   </Link>
                 )
               })}
-              
-              {/* My Business Section - Hidden for training-only orgs */}
-              {!isTrainingOnly && (
-                <>
-                  <div className="px-4 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wide bg-gray-50 border-b border-gray-100">
-                    My Business
-                  </div>
-                  {businessItems.map((item) => {
-                    const isActive = pathname === item.href
-                    return (
-                      <Link
-                        key={item.href}
-                        href={item.href}
-                        onClick={() => setMobileMenuOpen(false)}
-                        className={`px-4 py-3 text-left font-heading font-semibold text-base transition-colors border-b border-gray-100 flex items-center gap-2 ${
-                          isActive
-                            ? "text-[hsl(var(--optavia-green))] bg-green-50"
-                            : "text-optavia-dark hover:text-[hsl(var(--optavia-green))] hover:bg-gray-50"
-                        }`}
-                      >
-                        <Users className="h-4 w-4" />
-                        {item.label}
-                      </Link>
-                    )
-                  })}
-                </>
-              )}
             </div>
           </nav>
         )}

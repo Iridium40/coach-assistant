@@ -329,33 +329,21 @@ export function ExternalResourcesTab() {
     return COACH_TOOLS.filter((t) => pinnedToolIds.includes(t.id))
   }, [pinnedToolIds])
 
-  // Define the desired order for categories
-  const categoryOrder: string[] = ["Coach Tools", "Community", "OPTAVIA Resources", "Social Media"]
-  
-  // Memoize categories - always include Coach Tools
-  const categories = useMemo(() => {
-    // Get unique categories from resources
-    const availableCategories: string[] = Array.from(
-      new Set(resources.map((resource) => resource.category))
-    )
-    
-    // Sort categories according to the desired order, then add any remaining categories
-    const orderedCategories = categoryOrder.filter((cat: string) => 
-      availableCategories.includes(cat) || cat === "Coach Tools"
-    )
-    const remainingCategories = availableCategories
-      .filter((cat: string) => !categoryOrder.includes(cat))
-      .sort()
-    
-    // Build categories list: always include "All" first, then ordered categories
-    return ["All", ...orderedCategories, ...remainingCategories]
-  }, [resources])
+  // Simplified category order per Phase 4 of UX redesign
+  const categories = ["All", "Coach Tools", "OPTAVIA Portals", "Communities"]
 
-  // Memoize filtered resources to prevent unnecessary re-renders
+  // Memoize filtered resources with simplified category mapping
   const filteredResources = useMemo(() => {
     if (selectedCategory === "Coach Tools") return []
     return resources.filter((resource) => {
       if (selectedCategory === "All") return true
+      // Map simplified categories to original categories
+      if (selectedCategory === "OPTAVIA Portals") {
+        return resource.category === "OPTAVIA Resources" || resource.category === "Habits of Health" || resource.category === "Social Media"
+      }
+      if (selectedCategory === "Communities") {
+        return resource.category === "Community"
+      }
       return resource.category === selectedCategory
     })
   }, [resources, selectedCategory])
@@ -415,7 +403,13 @@ export function ExternalResourcesTab() {
         <div className="mb-8">
           {selectedCategory === "All" && (
             <h3 className="font-heading font-semibold text-lg text-optavia-dark mb-4 flex items-center gap-2">
-              <Dumbbell className="h-5 w-5 text-[hsl(var(--optavia-green))]" />
+              <Wrench className="h-5 w-5 text-[hsl(var(--optavia-green))]" />
+              Coach Tools
+            </h3>
+          )}
+          {selectedCategory === "Coach Tools" && (
+            <h3 className="font-heading font-semibold text-lg text-optavia-dark mb-4 flex items-center gap-2">
+              <Wrench className="h-5 w-5 text-[hsl(var(--optavia-green))]" />
               Coach Tools
             </h3>
           )}
@@ -438,13 +432,25 @@ export function ExternalResourcesTab() {
         </div>
       )}
 
-      {/* Resource Cards */}
+      {/* OPTAVIA & Community Resources */}
       {filteredResources.length > 0 && (
         <>
           {selectedCategory === "All" && (
             <h3 className="font-heading font-semibold text-lg text-optavia-dark mb-4 flex items-center gap-2">
               <ExternalLink className="h-5 w-5 text-[hsl(var(--optavia-green))]" />
-              External Resources
+              OPTAVIA & Community
+            </h3>
+          )}
+          {selectedCategory === "OPTAVIA Portals" && (
+            <h3 className="font-heading font-semibold text-lg text-optavia-dark mb-4 flex items-center gap-2">
+              <ExternalLink className="h-5 w-5 text-[hsl(var(--optavia-green))]" />
+              OPTAVIA Portals & Resources
+            </h3>
+          )}
+          {selectedCategory === "Communities" && (
+            <h3 className="font-heading font-semibold text-lg text-optavia-dark mb-4 flex items-center gap-2">
+              <Users className="h-5 w-5 text-[hsl(var(--optavia-green))]" />
+              Communities & Groups
             </h3>
           )}
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
