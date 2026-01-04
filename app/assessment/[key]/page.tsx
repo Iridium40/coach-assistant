@@ -174,21 +174,21 @@ export default function HealthAssessmentPage({ params }: { params: Promise<{ key
         return
       }
 
-      // Store only metadata in database
+      // Store only minimal metadata in database (name, timestamp, email status)
+      // The actual assessment data is sent via email only - not stored
       const { error: dbError } = await supabase
-        .from("health_assessments")
+        .from("health_assessment_submissions")
         .insert({
           coach_id: coachProfile.id,
-          coach_email: coachEmail,
-          client_email: clientEmail,
-          client_first_name: clientFirstName,
-          client_last_name: clientLastName,
+          client_name: `${clientFirstName} ${clientLastName}`.trim() || null,
+          client_email: clientEmail || null,
+          submitted_at: new Date().toISOString(),
           email_sent_at: new Date().toISOString(),
           email_sent_successfully: true,
         })
 
       if (dbError) {
-        console.error("Error storing metadata:", dbError)
+        console.error("Error storing submission metadata:", dbError)
         // Don't fail the submission if metadata storage fails - email was sent
       }
 

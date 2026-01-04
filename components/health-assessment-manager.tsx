@@ -10,27 +10,27 @@ import { Textarea } from "@/components/ui/textarea"
 import { createAssessmentLink } from "@/lib/assessment-links"
 import { useUserData } from "@/contexts/user-data-context"
 import { createClient } from "@/lib/supabase/client"
-import { Copy, Check, ExternalLink, Mail, Calendar, FileText, MessageSquare, Share2, X, Facebook, Twitter, Linkedin } from "lucide-react"
+import { Copy, Check, ExternalLink, Calendar, FileText, MessageSquare, Share2, X, Facebook, Twitter, Linkedin, Mail } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { format } from "date-fns"
 
-interface HealthAssessment {
+interface HealthAssessmentSubmission {
   id: string
-  client_first_name: string | null
-  client_last_name: string | null
-  client_email: string
+  coach_id: string
+  client_name: string | null
+  client_email: string | null
   submitted_at: string
-  read_at: string | null
+  email_sent_at: string | null
   email_sent_successfully: boolean
 }
 
 export function HealthAssessmentManager() {
   const { user, profile } = useUserData()
   const { toast } = useToast()
-  const [assessments, setAssessments] = useState<HealthAssessment[]>([])
+  const [submissions, setSubmissions] = useState<HealthAssessmentSubmission[]>([])
   const [loading, setLoading] = useState(true)
   const [copied, setCopied] = useState(false)
-  const [selectedAssessment, setSelectedAssessment] = useState<HealthAssessment | null>(null)
+  const [selectedSubmission, setSelectedSubmission] = useState<HealthAssessmentSubmission | null>(null)
   const [showShareModal, setShowShareModal] = useState(false)
   const [recipientEmail, setRecipientEmail] = useState("")
   const [recipientPhone, setRecipientPhone] = useState("")
@@ -43,24 +43,24 @@ export function HealthAssessmentManager() {
 
   useEffect(() => {
     if (user) {
-      loadAssessments()
+      loadSubmissions()
     }
   }, [user])
 
-  const loadAssessments = async () => {
+  const loadSubmissions = async () => {
     if (!user) return
 
     const supabase = createClient()
     const { data, error } = await supabase
-      .from("health_assessments")
+      .from("health_assessment_submissions")
       .select("*")
       .eq("coach_id", user.id)
       .order("submitted_at", { ascending: false })
 
     if (error) {
-      console.error("Error loading assessments:", error)
+      console.error("Error loading submissions:", error)
     } else {
-      setAssessments(data || [])
+      setSubmissions(data || [])
     }
     setLoading(false)
   }
@@ -178,31 +178,7 @@ export function HealthAssessmentManager() {
     setShowShareModal(true)
   }
 
-  const markAsRead = async (assessmentId: string) => {
-    if (!user) return
-
-    const supabase = createClient()
-    const { error } = await supabase
-      .from("health_assessments")
-      .update({ read_at: new Date().toISOString() })
-      .eq("id", assessmentId)
-      .eq("coach_id", user.id)
-
-    if (error) {
-      toast({
-        title: "Error",
-        description: "Failed to mark as read",
-        variant: "destructive",
-      })
-    } else {
-      loadAssessments()
-      if (selectedAssessment?.id === assessmentId) {
-        setSelectedAssessment({ ...selectedAssessment, read_at: new Date().toISOString() })
-      }
-    }
-  }
-
-  const unreadCount = assessments.filter((a) => !a.read_at).length
+  const successCount = submissions.filter((s) => s.email_sent_successfully).length
 
   if (loading) {
     return (
@@ -284,11 +260,11 @@ export function HealthAssessmentManager() {
             <div>
               <CardTitle className="text-optavia-dark">Health Assessments</CardTitle>
               <CardDescription className="text-optavia-gray">
-                {assessments.length} total {unreadCount > 0 && `• ${unreadCount} unread`}
+                {assessments.length} total {enrolledCount > 0 && `• ${enrolledCount} enrolled`}
               </CardDescription>
             </div>
-            {unreadCount > 0 && (
-              <Badge variant="destructive">{unreadCount} New</Badge>
+            {enrolledCount > 0 && (
+              <Badge className="bg-green-500">{enrolledCount} Enrolled</Badge>
             )}
           </div>
         </CardHeader>
@@ -305,7 +281,7 @@ export function HealthAssessmentManager() {
                 <div
                   key={assessment.id}
                   className={`p-4 border rounded-lg cursor-pointer hover:bg-gray-50 transition-colors ${
-                    !assessment.read_at ? "bg-blue-50 border-blue-200" : "bg-white"
+                    assessment.enrolled ? "bg-green-50 border-green-200" : "bg-white"
                   }`}
                   onClick={() => setSelectedAssessment(assessment)}
                 >
@@ -313,29 +289,31 @@ export function HealthAssessmentManager() {
                     <div className="flex-1">
                       <div className="flex items-center gap-2">
                         <h3 className="font-semibold text-optavia-dark">
-                          {assessment.client_first_name || ""} {assessment.client_last_name || ""}
-                          {!assessment.client_first_name && !assessment.client_last_name && "Unknown Client"}
+                          {assessment.client_name || "Unknown Client"}
                         </h3>
-                        {!assessment.read_at && (
-                          <Badge variant="default" className="bg-blue-500">New</Badge>
+                        {assessment.enrolled && (
+                          <Badge className="bg-green-500">Enrolled</Badge>
                         )}
-                        {!assessment.email_sent_successfully && (
-                          <Badge variant="destructive">Email Failed</Badge>
+                        {assessment.call_outcome && !assessment.enrolled && (
+                          <Badge variant="outline">{assessment.call_outcome}</Badge>
                         )}
                       </div>
                       <div className="mt-1 flex flex-wrap gap-4 text-sm text-optavia-gray">
-                        <span className="flex items-center gap-1">
-                          <Mail className="h-3 w-3" />
-                          {assessment.client_email}
-                        </span>
+                        {assessment.client_phone && (
+                          <span className="flex items-center gap-1">
+                            📞 {assessment.client_phone}
+                          </span>
+                        )}
                         <span className="flex items-center gap-1">
                           <Calendar className="h-3 w-3" />
-                          {format(new Date(assessment.submitted_at), "MMM d, yyyy")}
+                          {format(new Date(assessment.created_at), "MMM d, yyyy")}
                         </span>
                       </div>
-                      <p className="mt-2 text-xs text-optavia-gray">
-                        Assessment details were sent to your email
-                      </p>
+                      {assessment.client_why && (
+                        <p className="mt-2 text-xs text-optavia-gray line-clamp-2">
+                          "{assessment.client_why}"
+                        </p>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -348,39 +326,70 @@ export function HealthAssessmentManager() {
       {/* Assessment Detail Modal */}
       {selectedAssessment && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={() => setSelectedAssessment(null)}>
-          <Card className="max-w-4xl w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+          <Card className="max-w-lg w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div>
                   <CardTitle className="text-optavia-dark">
-                    {selectedAssessment.client_first_name} {selectedAssessment.client_last_name}
+                    {selectedAssessment.client_name || "Unknown Client"}
                   </CardTitle>
                   <CardDescription className="text-optavia-gray">
-                    Submitted {format(new Date(selectedAssessment.submitted_at), "MMMM d, yyyy 'at' h:mm a")}
+                    {format(new Date(selectedAssessment.created_at), "MMMM d, yyyy 'at' h:mm a")}
                   </CardDescription>
                 </div>
-                <div className="flex gap-2">
-                  {!selectedAssessment.read_at && (
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => markAsRead(selectedAssessment.id)}
-                    >
-                      Mark as Read
-                    </Button>
-                  )}
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    onClick={() => setSelectedAssessment(null)}
-                  >
-                    Close
-                  </Button>
-                </div>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => setSelectedAssessment(null)}
+                >
+                  Close
+                </Button>
               </div>
             </CardHeader>
-            <CardContent>
-              <AssessmentDetail assessmentId={selectedAssessment.id} />
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-xs text-optavia-gray">Phone</p>
+                  <p className="font-medium">{selectedAssessment.client_phone || "N/A"}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-optavia-gray">Call Outcome</p>
+                  <Badge className={selectedAssessment.enrolled ? "bg-green-500" : ""}>
+                    {selectedAssessment.call_outcome}
+                  </Badge>
+                </div>
+                <div>
+                  <p className="text-xs text-optavia-gray">Commitment Level</p>
+                  <p className="font-medium">{selectedAssessment.client_commitment || "N/A"}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-optavia-gray">Progress</p>
+                  <p className="font-medium">{selectedAssessment.progress || 0}%</p>
+                </div>
+              </div>
+
+              {selectedAssessment.client_why && (
+                <div>
+                  <p className="text-xs text-optavia-gray mb-1">Their Why</p>
+                  <p className="text-sm bg-gray-50 p-3 rounded-lg">{selectedAssessment.client_why}</p>
+                </div>
+              )}
+
+              {selectedAssessment.call_notes && (
+                <div>
+                  <p className="text-xs text-optavia-gray mb-1">Call Notes</p>
+                  <p className="text-sm bg-gray-50 p-3 rounded-lg whitespace-pre-wrap">{selectedAssessment.call_notes}</p>
+                </div>
+              )}
+
+              {selectedAssessment.timer_seconds && selectedAssessment.timer_seconds > 0 && (
+                <div>
+                  <p className="text-xs text-optavia-gray">Call Duration</p>
+                  <p className="font-medium">
+                    {Math.floor(selectedAssessment.timer_seconds / 60)}m {selectedAssessment.timer_seconds % 60}s
+                  </p>
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>
@@ -535,87 +544,3 @@ export function HealthAssessmentManager() {
   )
 }
 
-function AssessmentDetail({ assessmentId }: { assessmentId: string }) {
-  const { user } = useUserData()
-  const [assessment, setAssessment] = useState<any>(null)
-  const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    if (user) {
-      loadAssessment()
-    }
-  }, [user, assessmentId])
-
-  const loadAssessment = async () => {
-    if (!user) return
-
-    const supabase = createClient()
-    const { data, error } = await supabase
-      .from("health_assessments")
-      .select("*")
-      .eq("id", assessmentId)
-      .eq("coach_id", user.id)
-      .single()
-
-    if (error) {
-      console.error("Error loading assessment:", error)
-    } else {
-      setAssessment(data)
-    }
-    setLoading(false)
-  }
-
-  if (loading) {
-    return <div className="text-center py-8">Loading...</div>
-  }
-
-  if (!assessment) {
-    return <div className="text-center py-8">Assessment not found</div>
-  }
-
-  return (
-    <div className="space-y-6">
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-        <p className="text-sm text-blue-900">
-          <strong>Note:</strong> Assessment details are not stored in the database for privacy. 
-          The full assessment was sent to your email at <strong>{assessment.coach_email}</strong> on{" "}
-          {assessment.email_sent_at ? format(new Date(assessment.email_sent_at), "MMMM d, yyyy 'at' h:mm a") : "submission"}.
-          Please check your email inbox for the complete assessment details.
-        </p>
-      </div>
-
-      <div>
-        <h3 className="font-semibold text-optavia-dark mb-3">Client Information</h3>
-        <div className="grid grid-cols-2 gap-4 text-sm">
-          <div>
-            <span className="text-optavia-gray">Name:</span>
-            <p className="text-optavia-dark">
-              {assessment.client_first_name || ""} {assessment.client_last_name || ""}
-              {!assessment.client_first_name && !assessment.client_last_name && "Unknown"}
-            </p>
-          </div>
-          <div>
-            <span className="text-optavia-gray">Email:</span>
-            <p className="text-optavia-dark">{assessment.client_email}</p>
-          </div>
-          <div>
-            <span className="text-optavia-gray">Submitted:</span>
-            <p className="text-optavia-dark">
-              {format(new Date(assessment.submitted_at), "MMMM d, yyyy 'at' h:mm a")}
-            </p>
-          </div>
-          <div>
-            <span className="text-optavia-gray">Email Status:</span>
-            <p className="text-optavia-dark">
-              {assessment.email_sent_successfully ? (
-                <Badge className="bg-green-500">Sent Successfully</Badge>
-              ) : (
-                <Badge variant="destructive">Failed to Send</Badge>
-              )}
-            </p>
-          </div>
-        </div>
-      </div>
-    </div>
-  )
-}
