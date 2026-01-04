@@ -156,3 +156,41 @@ END $$;
 
 COMMENT ON COLUMN public.prospects.ha_scheduled_at IS 'Scheduled date/time for Health Assessment call';
 COMMENT ON COLUMN public.prospects.phone IS 'Prospect phone number for SMS reminders';
+
+-- ============================================
+-- PROFILES TABLE: Add user_id column for explicit auth.users relationship
+-- Note: profiles.id already references auth.users(id) as the primary key,
+-- but this adds an explicit user_id column for clarity and compatibility
+-- ============================================
+DO $$ 
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns 
+    WHERE table_schema = 'public' 
+    AND table_name = 'profiles' 
+    AND column_name = 'user_id'
+  ) THEN
+    -- Add user_id column
+    ALTER TABLE public.profiles 
+    ADD COLUMN user_id UUID NULL;
+    
+    -- Populate user_id with the existing id values (since id = auth.users.id)
+    UPDATE public.profiles
+    SET user_id = id
+    WHERE user_id IS NULL;
+    
+    -- Add foreign key constraint
+    ALTER TABLE public.profiles
+    ADD CONSTRAINT profiles_user_id_fkey
+    FOREIGN KEY (user_id) REFERENCES auth.users(id) ON DELETE CASCADE;
+    
+    -- Add index for user_id lookups
+    CREATE INDEX IF NOT EXISTS idx_profiles_user_id ON public.profiles(user_id);
+    
+    RAISE NOTICE 'Column user_id added to profiles table and populated from id';
+  ELSE
+    RAISE NOTICE 'Column user_id already exists in profiles table';
+  END IF;
+END $$;
+
+COMMENT ON COLUMN public.profiles.user_id IS 'Reference to auth.users.id for explicit relationship';
