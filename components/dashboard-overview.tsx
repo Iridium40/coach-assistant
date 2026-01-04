@@ -548,69 +548,37 @@ export function DashboardOverview() {
               </div>
             </Link>
 
-            {/* Today's Scheduled Meetings (HA + Client Check-ins + Zoom) */}
+            {/* HA Scheduled - Prospects with upcoming Health Assessments */}
             {(() => {
-              const todayStart = new Date()
-              todayStart.setHours(0, 0, 0, 0)
-              const todayEnd = new Date()
-              todayEnd.setHours(23, 59, 59, 999)
-              
-              const haToday = prospects.filter(p => 
+              const now = new Date()
+              const haScheduled = prospects.filter(p => 
                 p.status === 'ha_scheduled' && 
-                p.ha_scheduled_at && 
-                new Date(p.ha_scheduled_at) >= todayStart && 
-                new Date(p.ha_scheduled_at) <= todayEnd
-              ).length
-              const clientCheckinsToday = clients.filter(c => 
-                c.status === 'active' && 
-                c.next_scheduled_at && 
-                new Date(c.next_scheduled_at) >= todayStart && 
-                new Date(c.next_scheduled_at) <= todayEnd
-              ).length
-              const totalMeetings = upcomingMeetings.length + haToday + clientCheckinsToday
+                p.ha_scheduled_at
+              )
+              const upcomingHA = haScheduled.filter(p => new Date(p.ha_scheduled_at!) >= now)
+              const overdueHA = haScheduled.filter(p => new Date(p.ha_scheduled_at!) < now)
               
               return (
-                <Link href="/calendar" className="block">
-                  <div className="p-4 rounded-lg bg-white border border-blue-200 hover:shadow-md transition-shadow cursor-pointer h-full">
+                <Link href="/prospect-tracker" className="block">
+                  <div className="p-4 rounded-lg bg-white border border-purple-200 hover:shadow-md transition-shadow cursor-pointer h-full">
                     <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm font-medium text-gray-600">Today's Meetings</span>
-                      <Badge variant="secondary" className={totalMeetings > 0 ? "bg-blue-100 text-blue-700" : "bg-gray-100 text-gray-600"}>
-                        {totalMeetings} scheduled
+                      <span className="text-sm font-medium text-gray-600">HA Scheduled</span>
+                      <Badge variant="secondary" className={overdueHA.length > 0 ? "bg-orange-100 text-orange-700" : haScheduled.length > 0 ? "bg-purple-100 text-purple-700" : "bg-gray-100 text-gray-600"}>
+                        {overdueHA.length > 0 ? `${overdueHA.length} overdue` : haScheduled.length > 0 ? "All upcoming!" : "None scheduled"}
                       </Badge>
                     </div>
-                    <div className="space-y-1">
-                      {/* Client Check-ins scheduled for today */}
-                      {clientCheckinsToday > 0 && (
-                        <div className="flex items-center gap-2 text-sm">
-                          <Users className="h-4 w-4 text-green-500" />
-                          <span className="text-gray-700">
-                            {clientCheckinsToday} Client Check-in{clientCheckinsToday > 1 ? 's' : ''}
-                          </span>
-                        </div>
-                      )}
-                      {/* Health Assessments scheduled for today */}
-                      {haToday > 0 && (
-                        <div className="flex items-center gap-2 text-sm">
-                          <Calendar className="h-4 w-4 text-purple-500" />
-                          <span className="text-gray-700">
-                            {haToday} Health Assessment{haToday > 1 ? 's' : ''}
-                          </span>
-                        </div>
-                      )}
-                      {/* Zoom Meetings */}
-                      {upcomingMeetings.length > 0 && (
-                        <div className="flex items-center gap-2 text-sm">
-                          <Video className="h-4 w-4 text-blue-500" />
-                          <span className="text-gray-700">
-                            {upcomingMeetings.length} Zoom Meeting{upcomingMeetings.length > 1 ? 's' : ''}
-                          </span>
-                        </div>
-                      )}
-                      {/* No meetings */}
-                      {totalMeetings === 0 && (
-                        <div className="text-sm text-gray-500">No meetings scheduled for today</div>
-                      )}
+                    <div className="flex items-center gap-3">
+                      <div className="text-2xl font-bold text-purple-600">
+                        {upcomingHA.length}/{haScheduled.length}
+                      </div>
+                      <div className="text-xs text-gray-500">prospects with upcoming HAs</div>
                     </div>
+                    {overdueHA.length > 0 && (
+                      <div className="mt-2 flex items-center gap-1 text-xs text-red-600">
+                        <AlertCircle className="h-3 w-3" />
+                        {overdueHA.length} need{overdueHA.length === 1 ? 's' : ''} rescheduling
+                      </div>
+                    )}
                   </div>
                 </Link>
               )
