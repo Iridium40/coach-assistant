@@ -40,6 +40,8 @@ import {
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
 import { ClientTextTemplates } from "@/components/client-text-templates"
+import { ScheduleCalendarOptions } from "@/components/schedule-calendar-options"
+import type { CalendarEvent } from "@/lib/calendar-utils"
 
 // Days of the week
 const DAYS_OF_WEEK = [
@@ -84,6 +86,7 @@ export default function ClientTrackerPage() {
   const [scheduleMinute, setScheduleMinute] = useState<string>("00")
   const [scheduleAmPm, setScheduleAmPm] = useState<"AM" | "PM">("AM")
   const [recurringFrequency, setRecurringFrequency] = useState<RecurringFrequency>("none")
+  const [clientEmail, setClientEmail] = useState<string>("")
 
   // Recurring frequency options
   const RECURRING_OPTIONS: { value: RecurringFrequency; label: string }[] = [
@@ -201,11 +204,43 @@ ${phase.milestone ? `\n🎉 MILESTONE: ${phase.label} - Celebrate this achieveme
       setScheduleAmPm("AM")
     }
     setRecurringFrequency(client.recurring_frequency || "none")
+    setClientEmail(client.email || "")
     setShowScheduleModal(true)
   }
 
-  // Handle adding to calendar
-  const handleAddToCalendar = async () => {
+  // Generate calendar event from schedule settings
+  const generateCalendarEvent = (): CalendarEvent | null => {
+    if (!selectedClient) return null
+    
+    const targetDate = getNextDayDate(scheduleDay)
+    const hour24 = get24Hour(scheduleHour, scheduleAmPm)
+    targetDate.setHours(hour24, parseInt(scheduleMinute), 0, 0)
+    
+    const endDate = new Date(targetDate)
+    endDate.setMinutes(endDate.getMinutes() + 30) // 30 min duration
+    
+    const programDay = getProgramDay(selectedClient.start_date)
+    const phase = getDayPhase(programDay)
+    
+    return {
+      title: `Check-in: ${selectedClient.label} (Day ${programDay})`,
+      description: `Client: ${selectedClient.label}
+Program Day: ${programDay}
+Phase: ${phase.label}
+
+Suggested talking points:
+- How are you feeling today?
+- Any challenges with meals?
+- Celebrate wins!
+${phase.milestone ? `\n🎉 MILESTONE: ${phase.label} - Celebrate this achievement!` : ""}`,
+      startDate: targetDate,
+      endDate: endDate,
+      uid: `client-${selectedClient.id}-${Date.now()}@coachingamplifier.com`,
+    }
+  }
+
+  // Handle saving schedule settings (called before calendar actions)
+  const handleSaveSchedule = async () => {
     if (!selectedClient) return
     
     // Calculate the scheduled datetime
@@ -216,16 +251,15 @@ ${phase.milestone ? `\n🎉 MILESTONE: ${phase.label} - Celebrate this achieveme
     // Format time for storage (HH:MM in 24-hour format)
     const timeStr = `${hour24.toString().padStart(2, "0")}:${scheduleMinute}`
     
-    // Save the scheduled time and recurring settings to the client record
+    // Save the scheduled time, recurring settings, and email to the client record
     await updateClient(selectedClient.id, {
       next_scheduled_at: targetDate.toISOString(),
       recurring_frequency: recurringFrequency,
       recurring_day: recurringFrequency !== "none" ? scheduleDay : null,
       recurring_time: recurringFrequency !== "none" ? timeStr : null,
+      email: clientEmail || null,
     })
     
-    const url = generateCalendarUrl(selectedClient, scheduleDay, scheduleHour, scheduleMinute, scheduleAmPm)
-    window.open(url, "_blank")
     setShowScheduleModal(false)
     
     const recurringLabel = recurringFrequency !== "none" 
@@ -971,13 +1005,25 @@ ${phase.milestone ? `\n🎉 MILESTONE: ${phase.label} - Celebrate this achieveme
                 )}
               </div>
 
+              {/* Calendar Options with Email */}
+              {generateCalendarEvent() && (
+                <ScheduleCalendarOptions
+                  event={generateCalendarEvent()!}
+                  recipientName={selectedClient.label}
+                  recipientEmail={clientEmail}
+                  onEmailChange={setClientEmail}
+                  onScheduleComplete={handleSaveSchedule}
+                  showEmailOption={true}
+                />
+              )}
+
               {/* Info */}
               <div className="bg-purple-50 rounded-lg p-3 text-sm text-purple-700 flex items-start gap-2">
                 <Sparkles className="h-4 w-4 flex-shrink-0 mt-0.5" />
                 <span>
                   {recurringFrequency !== "none" 
-                    ? "This will open Google Calendar. We'll track your recurring schedule and auto-advance to the next check-in date."
-                    : "This will open Google Calendar with a 30-minute event pre-filled with client details."
+                    ? "We'll track your recurring schedule and auto-advance to the next check-in date."
+                    : "Choose your preferred calendar app. You can also send an invite to your client."
                   }
                 </span>
               </div>
@@ -986,13 +1032,6 @@ ${phase.milestone ? `\n🎉 MILESTONE: ${phase.label} - Celebrate this achieveme
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowScheduleModal(false)}>
               Cancel
-            </Button>
-            <Button
-              onClick={handleAddToCalendar}
-              className="bg-purple-600 hover:bg-purple-700"
-            >
-              <ExternalLink className="h-4 w-4 mr-2" />
-              Add to Calendar
             </Button>
           </DialogFooter>
         </DialogContent>

@@ -48,6 +48,8 @@ import {
 } from "lucide-react"
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
+import { ScheduleCalendarOptions } from "@/components/schedule-calendar-options"
+import type { CalendarEvent } from "@/lib/calendar-utils"
 
 // Time options for HA scheduling
 const HOUR_OPTIONS = Array.from({ length: 12 }, (_, i) => i + 1)
@@ -85,6 +87,7 @@ export default function ProspectTrackerPage() {
   const [haHour, setHaHour] = useState(10)
   const [haMinute, setHaMinute] = useState("00")
   const [haAmPm, setHaAmPm] = useState<"AM" | "PM">("AM")
+  const [prospectEmail, setProspectEmail] = useState("")
 
   const [newProspect, setNewProspect] = useState({
     label: "",
@@ -161,8 +164,38 @@ Talking Points:
     return `https://calendar.google.com/calendar/render?${params.toString()}`
   }
 
-  // Handle scheduling HA
-  const handleScheduleHA = async () => {
+  // Generate calendar event from HA schedule settings
+  const generateHACalendarEvent = (): CalendarEvent | null => {
+    if (!schedulingProspect || !haDate) return null
+    
+    const targetDate = new Date(haDate + "T00:00:00")
+    const hour24 = get24Hour(haHour, haAmPm)
+    targetDate.setHours(hour24, parseInt(haMinute), 0, 0)
+    
+    const endDate = new Date(targetDate)
+    endDate.setMinutes(endDate.getMinutes() + 45) // 45 min duration for HA
+    
+    return {
+      title: `Health Assessment: ${schedulingProspect.label}`,
+      description: `Health Assessment Call with ${schedulingProspect.label}
+
+Source: ${sourceOptions.find(s => s.value === schedulingProspect.source)?.label || schedulingProspect.source}
+${schedulingProspect.notes ? `Notes: ${schedulingProspect.notes}` : ""}
+
+Talking Points:
+- Current health goals
+- Past weight loss attempts
+- Why now?
+- Lifestyle & schedule
+- Ready to commit?`,
+      startDate: targetDate,
+      endDate: endDate,
+      uid: `prospect-ha-${schedulingProspect.id}-${Date.now()}@coachingamplifier.com`,
+    }
+  }
+
+  // Handle saving HA schedule (called before calendar actions)
+  const handleSaveHASchedule = async () => {
     if (!schedulingProspect || !haDate) return
     
     // Calculate the full scheduled datetime
@@ -170,16 +203,13 @@ Talking Points:
     const hour24 = get24Hour(haHour, haAmPm)
     targetDate.setHours(hour24, parseInt(haMinute), 0, 0)
     
-    // Update prospect with HA scheduled status and full datetime
+    // Update prospect with HA scheduled status, datetime, and email
     await updateProspect(schedulingProspect.id, {
       status: "ha_scheduled",
       next_action: haDate,
       ha_scheduled_at: targetDate.toISOString(),
+      email: prospectEmail || null,
     })
-    
-    // Open Google Calendar
-    const url = generateHACalendarUrl(schedulingProspect, haDate, haHour, haMinute, haAmPm)
-    window.open(url, "_blank")
     
     toast({
       title: "📅 HA Scheduled!",
@@ -223,6 +253,7 @@ Talking Points:
         setHaHour(10)
         setHaMinute("00")
         setHaAmPm("AM")
+        setProspectEmail((prospect as any).email || "")
         setShowHAScheduleModal(true)
       }
       return
@@ -900,11 +931,23 @@ Talking Points:
                 <p className="text-xs text-gray-500 text-center mt-2">45 minute health assessment</p>
               </div>
 
+              {/* Calendar Options with Email */}
+              {haDate && generateHACalendarEvent() && (
+                <ScheduleCalendarOptions
+                  event={generateHACalendarEvent()!}
+                  recipientName={schedulingProspect.label}
+                  recipientEmail={prospectEmail}
+                  onEmailChange={setProspectEmail}
+                  onScheduleComplete={handleSaveHASchedule}
+                  showEmailOption={true}
+                />
+              )}
+
               {/* Info */}
               <div className="bg-blue-50 rounded-lg p-3 text-sm text-blue-700 flex items-start gap-2">
                 <Sparkles className="h-4 w-4 flex-shrink-0 mt-0.5" />
                 <span>
-                  This will open Google Calendar with a 45-minute event and talking points for your Health Assessment.
+                  Choose your preferred calendar app. You can also send an invite to your prospect.
                 </span>
               </div>
             </div>
@@ -918,14 +961,6 @@ Talking Points:
               }}
             >
               Cancel
-            </Button>
-            <Button
-              onClick={handleScheduleHA}
-              disabled={!haDate}
-              className="bg-blue-600 hover:bg-blue-700 text-white"
-            >
-              <ExternalLink className="h-4 w-4 mr-2" />
-              Add to Calendar
             </Button>
           </DialogFooter>
         </DialogContent>

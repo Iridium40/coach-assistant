@@ -1,6 +1,176 @@
 import type { ZoomCall } from "@/lib/types"
 
 /**
+ * Generic calendar event type for scheduling
+ */
+export interface CalendarEvent {
+  title: string
+  description?: string
+  startDate: Date
+  endDate: Date
+  location?: string
+  uid?: string
+}
+
+/**
+ * Generate ICS content for a generic calendar event
+ */
+export function generateGenericICSContent(event: CalendarEvent): string {
+  // Format date to ICS format: YYYYMMDDTHHMMSSZ
+  const formatDate = (date: Date) => {
+    return date.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '')
+  }
+  
+  const uid = event.uid || `${Date.now()}-${Math.random().toString(36).substr(2, 9)}@coachingamplifier.com`
+  const now = formatDate(new Date())
+  
+  // Escape special characters for ICS
+  const escapeICS = (str: string) => {
+    return str
+      .replace(/\\/g, '\\\\')
+      .replace(/;/g, '\\;')
+      .replace(/,/g, '\\,')
+      .replace(/\n/g, '\\n')
+  }
+  
+  const icsContent = [
+    'BEGIN:VCALENDAR',
+    'VERSION:2.0',
+    'PRODID:-//Coaching Amplifier//Calendar//EN',
+    'CALSCALE:GREGORIAN',
+    'METHOD:REQUEST',
+    'BEGIN:VEVENT',
+    `UID:${uid}`,
+    `DTSTAMP:${now}`,
+    `DTSTART:${formatDate(event.startDate)}`,
+    `DTEND:${formatDate(event.endDate)}`,
+    `SUMMARY:${escapeICS(event.title)}`,
+    event.description ? `DESCRIPTION:${escapeICS(event.description)}` : '',
+    event.location ? `LOCATION:${escapeICS(event.location)}` : '',
+    'STATUS:CONFIRMED',
+    `ORGANIZER;CN=Coaching Amplifier:mailto:noreply@coachingamplifier.com`,
+    'END:VEVENT',
+    'END:VCALENDAR'
+  ].filter(Boolean).join('\r\n')
+  
+  return icsContent
+}
+
+/**
+ * Download an ICS file for a generic event
+ */
+export function downloadGenericICSFile(event: CalendarEvent): void {
+  const icsContent = generateGenericICSContent(event)
+  const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' })
+  const url = URL.createObjectURL(blob)
+  
+  const link = document.createElement('a')
+  link.href = url
+  link.download = `${event.title.replace(/[^a-z0-9]/gi, '_')}.ics`
+  document.body.appendChild(link)
+  link.click()
+  document.body.removeChild(link)
+  URL.revokeObjectURL(url)
+}
+
+/**
+ * Get Google Calendar URL for a generic event
+ */
+export function getGenericGoogleCalendarUrl(event: CalendarEvent): string {
+  const formatGoogleDate = (date: Date) => {
+    return date.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '')
+  }
+  
+  const params = new URLSearchParams({
+    action: 'TEMPLATE',
+    text: event.title,
+    dates: `${formatGoogleDate(event.startDate)}/${formatGoogleDate(event.endDate)}`,
+    details: event.description || '',
+  })
+  
+  if (event.location) {
+    params.append('location', event.location)
+  }
+  
+  return `https://calendar.google.com/calendar/render?${params.toString()}`
+}
+
+/**
+ * Get Outlook Calendar URL for a generic event
+ */
+export function getGenericOutlookCalendarUrl(event: CalendarEvent): string {
+  const params = new URLSearchParams({
+    path: '/calendar/action/compose',
+    rru: 'addevent',
+    subject: event.title,
+    startdt: event.startDate.toISOString(),
+    enddt: event.endDate.toISOString(),
+    body: event.description || '',
+  })
+  
+  if (event.location) {
+    params.append('location', event.location)
+  }
+  
+  return `https://outlook.office.com/calendar/0/deeplink/compose?${params.toString()}`
+}
+
+/**
+ * Get Yahoo Calendar URL for a generic event
+ */
+export function getGenericYahooCalendarUrl(event: CalendarEvent): string {
+  const formatYahooDate = (date: Date) => {
+    return date.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}Z/, '')
+  }
+  
+  const durationMs = event.endDate.getTime() - event.startDate.getTime()
+  const durationMins = Math.round(durationMs / 60000)
+  const hours = Math.floor(durationMins / 60)
+  const mins = durationMins % 60
+  
+  const params = new URLSearchParams({
+    v: '60',
+    title: event.title,
+    st: formatYahooDate(event.startDate),
+    dur: `${hours.toString().padStart(2, '0')}${mins.toString().padStart(2, '0')}`,
+    desc: event.description || '',
+  })
+  
+  if (event.location) {
+    params.append('in_loc', event.location)
+  }
+  
+  return `https://calendar.yahoo.com/?${params.toString()}`
+}
+
+/**
+ * Generate a mailto link with .ics attachment for sending calendar invite
+ */
+export function getEmailWithICSContent(event: CalendarEvent, recipientEmail: string, senderName?: string): string {
+  const subject = encodeURIComponent(`Calendar Invite: ${event.title}`)
+  const dateStr = event.startDate.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })
+  const timeStr = event.startDate.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })
+  
+  const body = encodeURIComponent(
+`Hi!
+
+You're invited to: ${event.title}
+
+📅 Date: ${dateStr}
+🕐 Time: ${timeStr}
+
+${event.description || ''}
+
+Looking forward to connecting!
+
+${senderName ? `- ${senderName}` : ''}
+
+Note: Download the attached .ics file to add this event to your calendar.`)
+  
+  return `mailto:${recipientEmail}?subject=${subject}&body=${body}`
+}
+
+/**
  * Generate an ICS (iCalendar) file content for a zoom call
  */
 export function generateICSContent(call: ZoomCall): string {
