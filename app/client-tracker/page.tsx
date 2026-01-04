@@ -30,6 +30,8 @@ import {
   X,
   CalendarPlus,
   ExternalLink,
+  Phone,
+  Send,
 } from "lucide-react"
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
@@ -80,8 +82,30 @@ export default function ClientTrackerPage() {
 
   const [newClient, setNewClient] = useState({
     label: "",
+    phone: "",
     startDate: today,
   })
+
+  // Generate SMS text for calendar invite
+  const generateSMSText = (client: any, scheduledAt: Date): string => {
+    const programDay = getProgramDay(client.start_date)
+    const dateStr = scheduledAt.toLocaleDateString("en-US", { weekday: "long", month: "short", day: "numeric" })
+    const timeStr = scheduledAt.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })
+    return `Hi! 🌟 Just a reminder about our check-in scheduled for ${dateStr} at ${timeStr}. Looking forward to connecting! Day ${programDay} - you're doing great! 💪`
+  }
+
+  // Send SMS with scheduled meeting info
+  const sendSMS = (client: any) => {
+    if (!client.phone || !client.next_scheduled_at) return
+    const scheduledAt = new Date(client.next_scheduled_at)
+    const message = generateSMSText(client, scheduledAt)
+    const smsUrl = `sms:${client.phone}?body=${encodeURIComponent(message)}`
+    window.open(smsUrl)
+    toast({
+      title: "📱 Opening Messages",
+      description: `Sending reminder to ${client.label}`,
+    })
+  }
 
   // Get the next occurrence of a day of the week
   const getNextDayDate = (dayOfWeek: number): Date => {
@@ -178,9 +202,10 @@ ${phase.milestone ? `\n🎉 MILESTONE: ${phase.label} - Celebrate this achieveme
     if (!newClient.label.trim() || !newClient.startDate) return
     await addClient({
       label: newClient.label,
+      phone: newClient.phone || undefined,
       start_date: newClient.startDate,
     })
-    setNewClient({ label: "", startDate: today })
+    setNewClient({ label: "", phone: "", startDate: today })
     setShowAddModal(false)
   }
 
@@ -376,7 +401,7 @@ ${phase.milestone ? `\n🎉 MILESTONE: ${phase.label} - Celebrate this achieveme
                       <div className="flex items-center gap-2 flex-wrap">
                         {/* Scheduled Time Display */}
                         {client.next_scheduled_at ? (
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-1">
                             <Badge 
                               className={`flex items-center gap-1 ${
                                 new Date(client.next_scheduled_at) < new Date() 
@@ -396,6 +421,17 @@ ${phase.milestone ? `\n🎉 MILESTONE: ${phase.label} - Celebrate this achieveme
                                 minute: "2-digit",
                               })}
                             </Badge>
+                            {client.phone && (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => sendSMS(client)}
+                                className="h-7 w-7 p-0 text-green-500 hover:text-green-700 hover:bg-green-50"
+                                title="Send SMS reminder"
+                              >
+                                <Send className="h-3 w-3" />
+                              </Button>
+                            )}
                             <Button
                               variant="ghost"
                               size="sm"
@@ -505,7 +541,23 @@ ${phase.milestone ? `\n🎉 MILESTONE: ${phase.label} - Celebrate this achieveme
                 maxLength={50}
               />
               <p className="text-xs text-gray-500 mt-1">
-                A name you'll recognize (no contact info needed)
+                A name you'll recognize
+              </p>
+            </div>
+            <div>
+              <Label>Phone Number (optional)</Label>
+              <div className="relative">
+                <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <Input
+                  value={newClient.phone}
+                  onChange={(e) => setNewClient({ ...newClient, phone: e.target.value })}
+                  placeholder="e.g., 555-123-4567"
+                  className="pl-10"
+                  type="tel"
+                />
+              </div>
+              <p className="text-xs text-gray-500 mt-1">
+                For sending SMS reminders about scheduled check-ins
               </p>
             </div>
             <div>

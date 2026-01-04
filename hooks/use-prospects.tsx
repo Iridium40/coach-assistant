@@ -13,6 +13,7 @@ export interface Prospect {
   id: string
   user_id: string
   label: string
+  phone: string | null
   status: ProspectStatus
   source: ProspectSource
   last_action: string | null
@@ -26,12 +27,14 @@ export interface Prospect {
 
 export interface NewProspect {
   label: string
+  phone?: string
   source: ProspectSource
   notes?: string
 }
 
 export interface UpdateProspect {
   label?: string
+  phone?: string | null
   status?: ProspectStatus
   source?: ProspectSource
   last_action?: string | null

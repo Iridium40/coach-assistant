@@ -43,6 +43,8 @@ import {
   CalendarPlus,
   ExternalLink,
   X,
+  Phone,
+  Send,
 } from "lucide-react"
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
@@ -86,11 +88,32 @@ export default function ProspectTrackerPage() {
 
   const [newProspect, setNewProspect] = useState({
     label: "",
+    phone: "",
     source: "social" as ProspectSource,
     notes: "",
   })
 
   const today = new Date().toISOString().split("T")[0]
+
+  // Generate SMS text for HA invite
+  const generateHASMSText = (prospect: Prospect, scheduledAt: Date): string => {
+    const dateStr = scheduledAt.toLocaleDateString("en-US", { weekday: "long", month: "short", day: "numeric" })
+    const timeStr = scheduledAt.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })
+    return `Hi! 🌟 Just confirming our Health Assessment call for ${dateStr} at ${timeStr}. I'm excited to learn about your health goals and see how I can help! Talk soon! 💪`
+  }
+
+  // Send SMS with HA scheduled info
+  const sendHASMS = (prospect: Prospect) => {
+    if (!prospect.phone || !prospect.ha_scheduled_at) return
+    const scheduledAt = new Date(prospect.ha_scheduled_at)
+    const message = generateHASMSText(prospect, scheduledAt)
+    const smsUrl = `sms:${prospect.phone}?body=${encodeURIComponent(message)}`
+    window.open(smsUrl)
+    toast({
+      title: "📱 Opening Messages",
+      description: `Sending HA reminder to ${prospect.label}`,
+    })
+  }
 
   // Convert 12-hour to 24-hour format
   const get24Hour = (hour: number, ampm: "AM" | "PM"): number => {
@@ -169,8 +192,13 @@ Talking Points:
 
   const handleAddProspect = async () => {
     if (!newProspect.label.trim()) return
-    await addProspect(newProspect)
-    setNewProspect({ label: "", source: "social", notes: "" })
+    await addProspect({
+      label: newProspect.label,
+      phone: newProspect.phone || undefined,
+      source: newProspect.source,
+      notes: newProspect.notes || undefined,
+    })
+    setNewProspect({ label: "", phone: "", source: "social", notes: "" })
     setShowAddModal(false)
   }
 
@@ -431,6 +459,17 @@ Talking Points:
                             minute: "2-digit",
                           })}
                         </Badge>
+                        {prospect.phone && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => sendHASMS(prospect)}
+                            className="h-7 w-7 p-0 text-green-500 hover:text-green-700 hover:bg-green-50"
+                            title="Send SMS reminder"
+                          >
+                            <Send className="h-3 w-3" />
+                          </Button>
+                        )}
                         <Button
                           variant="ghost"
                           size="sm"
@@ -575,7 +614,23 @@ Talking Points:
                 maxLength={50}
               />
               <p className="text-xs text-gray-500 mt-1">
-                A name you'll recognize (no contact info needed)
+                A name you'll recognize
+              </p>
+            </div>
+            <div>
+              <Label>Phone Number (optional)</Label>
+              <div className="relative">
+                <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <Input
+                  value={newProspect.phone}
+                  onChange={(e) => setNewProspect({ ...newProspect, phone: e.target.value })}
+                  placeholder="e.g., 555-123-4567"
+                  className="pl-10"
+                  type="tel"
+                />
+              </div>
+              <p className="text-xs text-gray-500 mt-1">
+                For sending SMS reminders about scheduled Health Assessments
               </p>
             </div>
             <div>

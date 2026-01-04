@@ -11,6 +11,7 @@ export interface Client {
   id: string
   user_id: string
   label: string
+  phone: string | null
   start_date: string
   status: ClientStatus
   is_coach_prospect: boolean
@@ -25,11 +26,13 @@ export interface Client {
 
 export interface NewClient {
   label: string
+  phone?: string
   start_date: string
 }
 
 export interface UpdateClient {
   label?: string
+  phone?: string | null
   start_date?: string
   status?: ClientStatus
   is_coach_prospect?: boolean
