@@ -20,16 +20,12 @@ import {
 import {
   Users,
   Plus,
-  CheckCircle,
-  Circle,
   Calendar,
   Star,
   AlertCircle,
   Clock,
   ChevronRight,
   MessageSquare,
-  Trophy,
-  Flame,
   Sparkles,
   X,
   CalendarPlus,
@@ -60,7 +56,7 @@ export default function ClientTrackerPage() {
     loading,
     stats,
     addClient,
-    toggleTouchpoint,
+    updateClient,
     toggleCoachProspect,
     updateStatus,
     needsAttention,
@@ -156,14 +152,25 @@ ${phase.milestone ? `\n🎉 MILESTONE: ${phase.label} - Celebrate this achieveme
   }
 
   // Handle adding to calendar
-  const handleAddToCalendar = () => {
+  const handleAddToCalendar = async () => {
     if (!selectedClient) return
+    
+    // Calculate the scheduled datetime
+    const targetDate = getNextDayDate(scheduleDay)
+    const hour24 = get24Hour(scheduleHour, scheduleAmPm)
+    targetDate.setHours(hour24, parseInt(scheduleMinute), 0, 0)
+    
+    // Save the scheduled time to the client record
+    await updateClient(selectedClient.id, {
+      next_scheduled_at: targetDate.toISOString()
+    })
+    
     const url = generateCalendarUrl(selectedClient, scheduleDay, scheduleHour, scheduleMinute, scheduleAmPm)
     window.open(url, "_blank")
     setShowScheduleModal(false)
     toast({
-      title: "📅 Opening Calendar",
-      description: `Scheduling ${scheduleHour}:${scheduleMinute} ${scheduleAmPm} check-in for ${selectedClient.label}`,
+      title: "📅 Check-in Scheduled",
+      description: `${scheduleHour}:${scheduleMinute} ${scheduleAmPm} on ${targetDate.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })}`,
     })
   }
 
@@ -248,9 +255,9 @@ ${phase.milestone ? `\n🎉 MILESTONE: ${phase.label} - Celebrate this achieveme
               </span>
             </div>
             <div className="flex items-center gap-2 text-gray-600">
-              <Clock className="h-4 w-4 flex-shrink-0" />
+              <CalendarPlus className="h-4 w-4 flex-shrink-0" />
               <span>
-                <strong>AM/PM:</strong> Track your morning & evening check-ins with each client.
+                <strong>Schedule:</strong> Add check-ins to your calendar and track upcoming meetings.
               </span>
             </div>
           </div>
@@ -364,35 +371,47 @@ ${phase.milestone ? `\n🎉 MILESTONE: ${phase.label} - Celebrate this achieveme
                       </div>
                     </div>
 
-                    {/* Touchpoint Buttons */}
+                    {/* Scheduled Time & Actions */}
                     {client.status === "active" && (
                       <div className="flex items-center gap-2 flex-wrap">
-                        <Button
-                          variant={client.am_done ? "default" : "outline"}
-                          size="sm"
-                          onClick={() => toggleTouchpoint(client.id, "am_done")}
-                          className={client.am_done ? "bg-green-500 hover:bg-green-600" : ""}
-                        >
-                          {client.am_done ? (
-                            <CheckCircle className="h-4 w-4 mr-1" />
-                          ) : (
-                            <Circle className="h-4 w-4 mr-1" />
-                          )}
-                          AM
-                        </Button>
-                        <Button
-                          variant={client.pm_done ? "default" : "outline"}
-                          size="sm"
-                          onClick={() => toggleTouchpoint(client.id, "pm_done")}
-                          className={client.pm_done ? "bg-green-500 hover:bg-green-600" : ""}
-                        >
-                          {client.pm_done ? (
-                            <CheckCircle className="h-4 w-4 mr-1" />
-                          ) : (
-                            <Circle className="h-4 w-4 mr-1" />
-                          )}
-                          PM
-                        </Button>
+                        {/* Scheduled Time Display */}
+                        {client.next_scheduled_at ? (
+                          <div className="flex items-center gap-2">
+                            <Badge 
+                              className={`flex items-center gap-1 ${
+                                new Date(client.next_scheduled_at) < new Date() 
+                                  ? "bg-red-100 text-red-700" 
+                                  : "bg-green-100 text-green-700"
+                              }`}
+                            >
+                              <Calendar className="h-3 w-3" />
+                              {new Date(client.next_scheduled_at).toLocaleDateString("en-US", {
+                                weekday: "short",
+                                month: "short",
+                                day: "numeric",
+                              })}
+                              {" "}
+                              {new Date(client.next_scheduled_at).toLocaleTimeString("en-US", {
+                                hour: "numeric",
+                                minute: "2-digit",
+                              })}
+                            </Badge>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => updateClient(client.id, { next_scheduled_at: null })}
+                              className="h-7 w-7 p-0 text-gray-400 hover:text-red-500"
+                              title="Clear scheduled time"
+                            >
+                              <X className="h-3 w-3" />
+                            </Button>
+                          </div>
+                        ) : (
+                          <Badge variant="outline" className="text-gray-500">
+                            <Clock className="h-3 w-3 mr-1" />
+                            Not scheduled
+                          </Badge>
+                        )}
                         <Button
                           variant="outline"
                           size="sm"

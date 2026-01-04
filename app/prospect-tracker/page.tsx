@@ -42,6 +42,7 @@ import {
   Heart,
   CalendarPlus,
   ExternalLink,
+  X,
 } from "lucide-react"
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
@@ -138,13 +139,19 @@ Talking Points:
   }
 
   // Handle scheduling HA
-  const handleScheduleHA = () => {
+  const handleScheduleHA = async () => {
     if (!schedulingProspect || !haDate) return
     
-    // Update prospect with HA scheduled status and next_action date
-    updateProspect(schedulingProspect.id, {
+    // Calculate the full scheduled datetime
+    const targetDate = new Date(haDate + "T00:00:00")
+    const hour24 = get24Hour(haHour, haAmPm)
+    targetDate.setHours(hour24, parseInt(haMinute), 0, 0)
+    
+    // Update prospect with HA scheduled status and full datetime
+    await updateProspect(schedulingProspect.id, {
       status: "ha_scheduled",
       next_action: haDate,
+      ha_scheduled_at: targetDate.toISOString(),
     })
     
     // Open Google Calendar
@@ -153,7 +160,7 @@ Talking Points:
     
     toast({
       title: "📅 HA Scheduled!",
-      description: `Health Assessment with ${schedulingProspect.label} scheduled for ${new Date(haDate).toLocaleDateString()}`,
+      description: `${haHour}:${haMinute} ${haAmPm} on ${targetDate.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })}`,
     })
     
     setShowHAScheduleModal(false)
@@ -402,8 +409,39 @@ Talking Points:
                       </div>
                     </div>
 
-                    {/* Next Action Date */}
-                    {prospect.next_action && (
+                    {/* Scheduled Date/Time for HA */}
+                    {prospect.status === "ha_scheduled" && prospect.ha_scheduled_at ? (
+                      <div className="flex items-center gap-1">
+                        <Badge 
+                          className={`flex items-center gap-1 ${
+                            new Date(prospect.ha_scheduled_at) < new Date() 
+                              ? "bg-red-100 text-red-700" 
+                              : "bg-green-100 text-green-700"
+                          }`}
+                        >
+                          <Calendar className="h-3 w-3" />
+                          {new Date(prospect.ha_scheduled_at).toLocaleDateString("en-US", {
+                            weekday: "short",
+                            month: "short",
+                            day: "numeric",
+                          })}
+                          {" "}
+                          {new Date(prospect.ha_scheduled_at).toLocaleTimeString("en-US", {
+                            hour: "numeric",
+                            minute: "2-digit",
+                          })}
+                        </Badge>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => updateProspect(prospect.id, { ha_scheduled_at: null })}
+                          className="h-7 w-7 p-0 text-gray-400 hover:text-red-500"
+                          title="Clear scheduled time"
+                        >
+                          <X className="h-3 w-3" />
+                        </Button>
+                      </div>
+                    ) : prospect.next_action && (
                       <div className="flex items-center gap-2">
                         {isOverdue ? (
                           <Badge variant="destructive" className="flex items-center gap-1">

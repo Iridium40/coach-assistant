@@ -17,6 +17,7 @@ export interface Client {
   am_done: boolean
   pm_done: boolean
   last_touchpoint_date: string | null
+  next_scheduled_at: string | null
   notes: string | null
   created_at: string
   updated_at: string
@@ -35,6 +36,7 @@ export interface UpdateClient {
   am_done?: boolean
   pm_done?: boolean
   last_touchpoint_date?: string | null
+  next_scheduled_at?: string | null
   notes?: string | null
 }
 
@@ -231,10 +233,12 @@ export function useClients() {
     return updateClient(id, { status })
   }, [updateClient])
 
-  // Check if client needs attention (no touchpoints done today)
+  // Check if client needs attention (no scheduled meeting or overdue)
   const needsAttention = useCallback((client: Client): boolean => {
     if (client.status !== 'active') return false
-    return !client.am_done && !client.pm_done
+    // Needs attention if no scheduled meeting or scheduled meeting is in the past
+    if (!client.next_scheduled_at) return true
+    return new Date(client.next_scheduled_at) < new Date()
   }, [])
 
   // Get stats

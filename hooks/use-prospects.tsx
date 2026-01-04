@@ -17,6 +17,7 @@ export interface Prospect {
   source: ProspectSource
   last_action: string | null
   next_action: string | null
+  ha_scheduled_at: string | null
   action_type: ProspectActionType | null
   notes: string | null
   created_at: string
@@ -35,6 +36,7 @@ export interface UpdateProspect {
   source?: ProspectSource
   last_action?: string | null
   next_action?: string | null
+  ha_scheduled_at?: string | null
   action_type?: ProspectActionType | null
   notes?: string | null
 }
