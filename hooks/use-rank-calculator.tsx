@@ -212,11 +212,12 @@ export function useRankCalculator(user: User | null) {
           }])
       }
 
-      // Load frontline coaches from sponsor_team view
+      // Load frontline coaches from sponsor_team view (exclude self)
       const { data: coachesResult, error: coachesError } = await supabase
         .from("sponsor_team")
         .select("coach_id, coach_name, coach_email, coach_rank")
         .eq("sponsor_id", user.id)
+        .neq("coach_id", user.id) // Don't include yourself as your own frontline coach
 
       if (coachesError) {
         console.error("Error loading frontline coaches:", coachesError)
@@ -225,6 +226,7 @@ export function useRankCalculator(user: User | null) {
           .from("profiles")
           .select("id, full_name, email, coach_rank")
           .eq("sponsor_id", user.id)
+          .neq("id", user.id) // Don't include yourself
         
         if (profilesResult) {
           const coaches: FrontlineCoach[] = profilesResult.map(c => ({
