@@ -21,6 +21,8 @@ export interface UserProfile {
   phone_number: string | null
   notification_email: string | null
   notification_phone: string | null
+  org_id: number | null
+  last_sign_in_at: string | null
   created_at: string
   updated_at: string
 }

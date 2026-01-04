@@ -132,7 +132,7 @@ export function NotificationSettings() {
             Notification Email
           </CardTitle>
           <CardDescription className="text-optavia-gray">
-            Email address for receiving announcements and calendar invites
+            All notifications (announcements, badges, calendar invites) are sent to this email
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -174,10 +174,10 @@ export function NotificationSettings() {
         <CardHeader>
           <CardTitle className="text-optavia-dark flex items-center gap-2">
             <Phone className="h-5 w-5 text-teal-600" />
-            Notification Phone (SMS)
+            SMS Calendar Invites
           </CardTitle>
           <CardDescription className="text-optavia-gray">
-            Phone number for sending SMS calendar invites to clients/prospects
+            Your phone number to enable sending meeting invites via SMS to clients/prospects
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -227,9 +227,9 @@ export function NotificationSettings() {
       {notificationSettings ? (
         <Card className="bg-white border border-gray-200 shadow-lg">
           <CardHeader>
-            <CardTitle className="text-optavia-dark">Manage Notifications</CardTitle>
+            <CardTitle className="text-optavia-dark">Email Notification Preferences</CardTitle>
             <CardDescription className="text-optavia-gray">
-              Choose how you want to receive updates and alerts
+              All notifications below are sent via email to your notification email address above
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
@@ -251,7 +251,7 @@ export function NotificationSettings() {
             <div className="flex items-center justify-between py-2">
               <div className="space-y-0.5">
                 <Label className="text-optavia-dark font-medium">Announcements</Label>
-                <p className="text-sm text-optavia-gray">Get notified about new announcements from your team</p>
+                <p className="text-sm text-optavia-gray">Receive team announcements via email</p>
               </div>
               <Switch
                 checked={notificationSettings.announcements_enabled}
@@ -266,7 +266,7 @@ export function NotificationSettings() {
             <div className="flex items-center justify-between py-2">
               <div className="space-y-0.5">
                 <Label className="text-optavia-dark font-medium">Progress Updates</Label>
-                <p className="text-sm text-optavia-gray">Get notified when you earn badges or reach milestones</p>
+                <p className="text-sm text-optavia-gray">Receive emails when you earn badges or reach milestones</p>
               </div>
               <Switch
                 checked={notificationSettings.progress_updates_enabled}
@@ -280,8 +280,8 @@ export function NotificationSettings() {
 
             <div className="flex items-center justify-between py-2">
               <div className="space-y-0.5">
-                <Label className="text-optavia-dark font-medium">Email Notifications</Label>
-                <p className="text-sm text-optavia-gray">Receive important updates via email</p>
+                <Label className="text-optavia-dark font-medium">General Email Updates</Label>
+                <p className="text-sm text-optavia-gray">Receive other important updates via email</p>
               </div>
               <Switch
                 checked={notificationSettings.email_notifications}
