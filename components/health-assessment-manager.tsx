@@ -178,8 +178,6 @@ export function HealthAssessmentManager() {
     setShowShareModal(true)
   }
 
-  const successCount = submissions.filter((s) => s.email_sent_successfully).length
-
   if (loading) {
     return (
       <Card>
@@ -253,23 +251,20 @@ export function HealthAssessmentManager() {
         </CardContent>
       </Card>
 
-      {/* Assessments List */}
+      {/* Submissions List */}
       <Card>
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
               <CardTitle className="text-optavia-dark">Health Assessments</CardTitle>
               <CardDescription className="text-optavia-gray">
-                {assessments.length} total {enrolledCount > 0 && `• ${enrolledCount} enrolled`}
+                {submissions.length} total
               </CardDescription>
             </div>
-            {enrolledCount > 0 && (
-              <Badge className="bg-green-500">{enrolledCount} Enrolled</Badge>
-            )}
           </div>
         </CardHeader>
         <CardContent>
-          {assessments.length === 0 ? (
+          {submissions.length === 0 ? (
             <div className="text-center py-8 text-optavia-gray">
               <FileText className="h-12 w-12 mx-auto mb-4 text-gray-300" />
               <p>No assessments yet</p>
@@ -277,43 +272,36 @@ export function HealthAssessmentManager() {
             </div>
           ) : (
             <div className="space-y-2">
-              {assessments.map((assessment) => (
+              {submissions.map((submission) => (
                 <div
-                  key={assessment.id}
-                  className={`p-4 border rounded-lg cursor-pointer hover:bg-gray-50 transition-colors ${
-                    assessment.enrolled ? "bg-green-50 border-green-200" : "bg-white"
-                  }`}
-                  onClick={() => setSelectedAssessment(assessment)}
+                  key={submission.id}
+                  className="p-4 border rounded-lg cursor-pointer hover:bg-gray-50 transition-colors bg-white"
+                  onClick={() => setSelectedSubmission(submission)}
                 >
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
                       <div className="flex items-center gap-2">
                         <h3 className="font-semibold text-optavia-dark">
-                          {assessment.client_name || "Unknown Client"}
+                          {submission.client_name || "Unknown Client"}
                         </h3>
-                        {assessment.enrolled && (
-                          <Badge className="bg-green-500">Enrolled</Badge>
-                        )}
-                        {assessment.call_outcome && !assessment.enrolled && (
-                          <Badge variant="outline">{assessment.call_outcome}</Badge>
+                        {submission.email_sent_successfully ? (
+                          <Badge className="bg-green-500">Received</Badge>
+                        ) : (
+                          <Badge variant="destructive">Email Failed</Badge>
                         )}
                       </div>
                       <div className="mt-1 flex flex-wrap gap-4 text-sm text-optavia-gray">
-                        {assessment.client_phone && (
+                        {submission.client_email && (
                           <span className="flex items-center gap-1">
-                            📞 {assessment.client_phone}
+                            <Mail className="h-3 w-3" />
+                            {submission.client_email}
                           </span>
                         )}
                         <span className="flex items-center gap-1">
                           <Calendar className="h-3 w-3" />
-                          {format(new Date(assessment.created_at), "MMM d, yyyy")}
+                          {format(new Date(submission.submitted_at), "MMM d, yyyy 'at' h:mm a")}
                         </span>
                       </div>
-                      {assessment.client_why && (
-                        <p className="mt-2 text-xs text-optavia-gray line-clamp-2">
-                          "{assessment.client_why}"
-                        </p>
-                      )}
                     </div>
                   </div>
                 </div>
@@ -323,24 +311,24 @@ export function HealthAssessmentManager() {
         </CardContent>
       </Card>
 
-      {/* Assessment Detail Modal */}
-      {selectedAssessment && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={() => setSelectedAssessment(null)}>
-          <Card className="max-w-lg w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+      {/* Submission Detail Modal */}
+      {selectedSubmission && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={() => setSelectedSubmission(null)}>
+          <Card className="max-w-md w-full" onClick={(e) => e.stopPropagation()}>
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div>
                   <CardTitle className="text-optavia-dark">
-                    {selectedAssessment.client_name || "Unknown Client"}
+                    {selectedSubmission.client_name || "Unknown Client"}
                   </CardTitle>
                   <CardDescription className="text-optavia-gray">
-                    {format(new Date(selectedAssessment.created_at), "MMMM d, yyyy 'at' h:mm a")}
+                    Submitted {format(new Date(selectedSubmission.submitted_at), "MMMM d, yyyy 'at' h:mm a")}
                   </CardDescription>
                 </div>
                 <Button
                   size="sm"
                   variant="ghost"
-                  onClick={() => setSelectedAssessment(null)}
+                  onClick={() => setSelectedSubmission(null)}
                 >
                   Close
                 </Button>
@@ -349,47 +337,25 @@ export function HealthAssessmentManager() {
             <CardContent className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <p className="text-xs text-optavia-gray">Phone</p>
-                  <p className="font-medium">{selectedAssessment.client_phone || "N/A"}</p>
+                  <p className="text-xs text-optavia-gray">Email</p>
+                  <p className="font-medium text-sm">{selectedSubmission.client_email || "N/A"}</p>
                 </div>
                 <div>
-                  <p className="text-xs text-optavia-gray">Call Outcome</p>
-                  <Badge className={selectedAssessment.enrolled ? "bg-green-500" : ""}>
-                    {selectedAssessment.call_outcome}
-                  </Badge>
-                </div>
-                <div>
-                  <p className="text-xs text-optavia-gray">Commitment Level</p>
-                  <p className="font-medium">{selectedAssessment.client_commitment || "N/A"}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-optavia-gray">Progress</p>
-                  <p className="font-medium">{selectedAssessment.progress || 0}%</p>
+                  <p className="text-xs text-optavia-gray">Status</p>
+                  {selectedSubmission.email_sent_successfully ? (
+                    <Badge className="bg-green-500">Email Sent</Badge>
+                  ) : (
+                    <Badge variant="destructive">Email Failed</Badge>
+                  )}
                 </div>
               </div>
 
-              {selectedAssessment.client_why && (
-                <div>
-                  <p className="text-xs text-optavia-gray mb-1">Their Why</p>
-                  <p className="text-sm bg-gray-50 p-3 rounded-lg">{selectedAssessment.client_why}</p>
-                </div>
-              )}
-
-              {selectedAssessment.call_notes && (
-                <div>
-                  <p className="text-xs text-optavia-gray mb-1">Call Notes</p>
-                  <p className="text-sm bg-gray-50 p-3 rounded-lg whitespace-pre-wrap">{selectedAssessment.call_notes}</p>
-                </div>
-              )}
-
-              {selectedAssessment.timer_seconds && selectedAssessment.timer_seconds > 0 && (
-                <div>
-                  <p className="text-xs text-optavia-gray">Call Duration</p>
-                  <p className="font-medium">
-                    {Math.floor(selectedAssessment.timer_seconds / 60)}m {selectedAssessment.timer_seconds % 60}s
-                  </p>
-                </div>
-              )}
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <p className="text-sm text-blue-900">
+                  <strong>Note:</strong> The full assessment details were sent to your email. 
+                  Check your inbox for the complete health assessment from this client.
+                </p>
+              </div>
             </CardContent>
           </Card>
         </div>
