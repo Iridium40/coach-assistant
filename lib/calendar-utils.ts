@@ -14,8 +14,9 @@ export interface CalendarEvent {
 
 /**
  * Generate ICS content for a generic calendar event
+ * Optionally includes an attendee who will receive a calendar invite
  */
-export function generateGenericICSContent(event: CalendarEvent): string {
+export function generateGenericICSContent(event: CalendarEvent, attendeeEmail?: string, attendeeName?: string, organizerEmail?: string): string {
   // Format date to ICS format: YYYYMMDDTHHMMSSZ
   const formatDate = (date: Date) => {
     return date.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '')
@@ -33,7 +34,7 @@ export function generateGenericICSContent(event: CalendarEvent): string {
       .replace(/\n/g, '\\n')
   }
   
-  const icsContent = [
+  const lines = [
     'BEGIN:VCALENDAR',
     'VERSION:2.0',
     'PRODID:-//Coaching Amplifier//Calendar//EN',
@@ -45,22 +46,47 @@ export function generateGenericICSContent(event: CalendarEvent): string {
     `DTSTART:${formatDate(event.startDate)}`,
     `DTEND:${formatDate(event.endDate)}`,
     `SUMMARY:${escapeICS(event.title)}`,
-    event.description ? `DESCRIPTION:${escapeICS(event.description)}` : '',
-    event.location ? `LOCATION:${escapeICS(event.location)}` : '',
-    'STATUS:CONFIRMED',
-    `ORGANIZER;CN=Coaching Amplifier:mailto:noreply@coachingamplifier.com`,
-    'END:VEVENT',
-    'END:VCALENDAR'
-  ].filter(Boolean).join('\r\n')
+  ]
   
-  return icsContent
+  if (event.description) {
+    lines.push(`DESCRIPTION:${escapeICS(event.description)}`)
+  }
+  
+  if (event.location) {
+    lines.push(`LOCATION:${escapeICS(event.location)}`)
+  }
+  
+  // Add organizer (the coach sending the invite)
+  if (organizerEmail) {
+    lines.push(`ORGANIZER;CN=Coach:mailto:${organizerEmail}`)
+  } else {
+    lines.push(`ORGANIZER;CN=Coaching Amplifier:mailto:noreply@coachingamplifier.com`)
+  }
+  
+  // Add attendee (the client/prospect receiving the invite)
+  if (attendeeEmail) {
+    const name = attendeeName || attendeeEmail.split('@')[0]
+    lines.push(`ATTENDEE;CUTYPE=INDIVIDUAL;ROLE=REQ-PARTICIPANT;PARTSTAT=NEEDS-ACTION;RSVP=TRUE;CN=${name}:mailto:${attendeeEmail}`)
+  }
+  
+  lines.push('STATUS:CONFIRMED')
+  lines.push('END:VEVENT')
+  lines.push('END:VCALENDAR')
+  
+  return lines.join('\r\n')
 }
 
 /**
  * Download an ICS file for a generic event
+ * If attendeeEmail is provided, the calendar invite will be sent to them when opened
  */
-export function downloadGenericICSFile(event: CalendarEvent): void {
-  const icsContent = generateGenericICSContent(event)
+export function downloadGenericICSFile(
+  event: CalendarEvent, 
+  attendeeEmail?: string, 
+  attendeeName?: string,
+  organizerEmail?: string
+): void {
+  const icsContent = generateGenericICSContent(event, attendeeEmail, attendeeName, organizerEmail)
   const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' })
   const url = URL.createObjectURL(blob)
   

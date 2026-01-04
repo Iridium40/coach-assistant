@@ -11,11 +11,11 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { CalendarPlus, Download, ExternalLink, Mail, ChevronDown, Send, Check } from "lucide-react"
+import { CalendarPlus, Download, ExternalLink, Mail, ChevronDown, Check } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
+import { useUserData } from "@/contexts/user-data-context"
 import {
   type CalendarEvent,
-  generateGenericICSContent,
   downloadGenericICSFile,
   getGenericGoogleCalendarUrl,
   getGenericOutlookCalendarUrl,
@@ -42,10 +42,12 @@ export function ScheduleCalendarOptions({
   className = "",
 }: ScheduleCalendarOptionsProps) {
   const { toast } = useToast()
+  const { user, profile } = useUserData()
   const [open, setOpen] = useState(false)
   const [email, setEmail] = useState(initialEmail || "")
-  const [showEmailInput, setShowEmailInput] = useState(false)
-  const [emailSent, setEmailSent] = useState(false)
+  const [invited, setInvited] = useState(false)
+
+  const organizerEmail = profile?.notification_email || user?.email || undefined
 
   const handleEmailChange = (value: string) => {
     setEmail(value)
@@ -91,124 +93,87 @@ export function ScheduleCalendarOptions({
     })
   }
 
-  const handleSendEmail = () => {
+  // Main action: Download ICS with attendee included, so calendar app sends invite
+  const handleEmailCalendarInvite = () => {
     if (!email) {
       toast({
         title: "Email required",
-        description: "Please enter an email address",
+        description: "Please enter the client/prospect email address",
         variant: "destructive",
       })
       return
     }
 
-    // Generate ICS content and create a data URL for download
-    const icsContent = generateGenericICSContent(event)
-    const blob = new Blob([icsContent], { type: "text/calendar;charset=utf-8" })
+    // Download ICS file with attendee included
+    // When user opens this in their calendar app, it will send an invite to the attendee
+    downloadGenericICSFile(event, email, recipientName, organizerEmail)
     
-    // Download the .ics file first so the user can attach it
-    const url = URL.createObjectURL(blob)
-    const link = document.createElement("a")
-    link.href = url
-    link.download = `${event.title.replace(/[^a-z0-9]/gi, "_")}.ics`
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
-    URL.revokeObjectURL(url)
-
-    // Open mail client with pre-filled content
-    const dateStr = event.startDate.toLocaleDateString("en-US", {
-      weekday: "long",
-      month: "long",
-      day: "numeric",
-      year: "numeric",
-    })
-    const timeStr = event.startDate.toLocaleTimeString("en-US", {
-      hour: "numeric",
-      minute: "2-digit",
-    })
-
-    const subject = encodeURIComponent(`Calendar Invite: ${event.title}`)
-    const body = encodeURIComponent(
-      `Hi${recipientName ? ` ${recipientName}` : ""}!\n\n` +
-        `You're invited to: ${event.title}\n\n` +
-        `📅 Date: ${dateStr}\n` +
-        `🕐 Time: ${timeStr}\n\n` +
-        `${event.description || ""}\n\n` +
-        `Looking forward to connecting!\n\n` +
-        `Please open the attached .ics file to add this event to your calendar.`
-    )
-
-    window.open(`mailto:${email}?subject=${subject}&body=${body}`)
-
-    setEmailSent(true)
-    setOpen(false)
+    setInvited(true)
+    onScheduleComplete?.()
+    
     toast({
-      title: "📧 Email opened",
-      description: "Attach the downloaded .ics file and send!",
+      title: "📅 Calendar invite downloaded!",
+      description: `Open the file to add to your calendar. ${recipientName || "They"} will receive an invite at ${email}.`,
     })
 
-    setTimeout(() => setEmailSent(false), 3000)
+    setTimeout(() => setInvited(false), 3000)
   }
 
   return (
-    <div className={`space-y-3 ${className}`}>
-      {/* Email Input (optional) */}
+    <div className={`space-y-4 ${className}`}>
+      {/* Email Input - Always visible when showEmailOption is true */}
       {showEmailOption && (
         <div className="space-y-2">
-          <button
-            type="button"
-            onClick={() => setShowEmailInput(!showEmailInput)}
-            className="text-sm text-purple-600 hover:text-purple-700 flex items-center gap-1"
-          >
-            <Mail className="h-3 w-3" />
-            {showEmailInput ? "Hide email option" : "Send invite to client/prospect"}
-          </button>
-          
-          {showEmailInput && (
-            <div className="flex gap-2">
-              <div className="flex-1">
-                <Input
-                  type="email"
-                  placeholder="Enter email address"
-                  value={email}
-                  onChange={(e) => handleEmailChange(e.target.value)}
-                  className="text-sm"
-                />
-              </div>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={handleSendEmail}
-                disabled={!email}
-                className="text-purple-600 border-purple-200 hover:bg-purple-50"
-              >
-                {emailSent ? (
-                  <>
-                    <Check className="h-4 w-4 mr-1" />
-                    Sent
-                  </>
-                ) : (
-                  <>
-                    <Send className="h-4 w-4 mr-1" />
-                    Send
-                  </>
-                )}
-              </Button>
-            </div>
-          )}
+          <Label className="text-sm font-medium flex items-center gap-2">
+            <Mail className="h-4 w-4 text-purple-500" />
+            Client/Prospect Email
+          </Label>
+          <div className="flex gap-2">
+            <Input
+              type="email"
+              placeholder="Enter their email address"
+              value={email}
+              onChange={(e) => handleEmailChange(e.target.value)}
+              className="flex-1"
+            />
+          </div>
+          <p className="text-xs text-gray-500">
+            They'll receive a calendar invite when you open the file
+          </p>
         </div>
       )}
 
-      {/* Calendar Options Dropdown */}
+      {/* Primary Action: Email Calendar Invite */}
+      {showEmailOption && (
+        <Button
+          type="button"
+          onClick={handleEmailCalendarInvite}
+          disabled={!email}
+          className="w-full bg-purple-600 hover:bg-purple-700 text-white"
+        >
+          {invited ? (
+            <>
+              <Check className="h-4 w-4 mr-2" />
+              Invite Downloaded!
+            </>
+          ) : (
+            <>
+              <Mail className="h-4 w-4 mr-2" />
+              Email Calendar Invite
+            </>
+          )}
+        </Button>
+      )}
+
+      {/* Secondary: Add to Your Calendar (dropdown for just yourself) */}
       <DropdownMenu open={open} onOpenChange={setOpen}>
         <DropdownMenuTrigger asChild>
           <Button
             variant="outline"
-            className="w-full border-[hsl(var(--optavia-green))] text-[hsl(var(--optavia-green))] hover:bg-[hsl(var(--optavia-green))] hover:text-white"
+            className="w-full border-gray-300 text-gray-700 hover:bg-gray-50"
           >
             <CalendarPlus className="h-4 w-4 mr-2" />
-            Add to Calendar
+            {showEmailOption ? "Or add to your calendar only" : "Add to Calendar"}
             <ChevronDown className="h-4 w-4 ml-auto" />
           </Button>
         </DropdownMenuTrigger>
