@@ -23,9 +23,19 @@ export interface ActivityItem {
   status?: string
 }
 
+export interface PriorityItem {
+  id: string
+  type: "prospect" | "client"
+  name: string
+  reason: string
+  link: string
+  urgency: "high" | "medium" | "low"
+}
+
 export interface PipelineData {
   stages: PipelineStage[]
   recentActivity: ActivityItem[]
+  priorityItems: PriorityItem[]
   totals: {
     prospects: number
     clients: number
@@ -151,9 +161,91 @@ export function usePipeline() {
     futureCoaches: clientStats.coachProspects,
   }), [prospectStats, clientStats])
 
+  // Priority items that need attention
+  const priorityItems = useMemo((): PriorityItem[] => {
+    const items: PriorityItem[] = []
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+
+    // Check prospects for overdue follow-ups and upcoming HAs
+    prospects.forEach(p => {
+      // Overdue follow-up
+      if (p.follow_up_date) {
+        const followUpDate = new Date(p.follow_up_date)
+        followUpDate.setHours(0, 0, 0, 0)
+        
+        if (followUpDate < today) {
+          items.push({
+            id: `prospect-followup-${p.id}`,
+            type: "prospect",
+            name: p.label,
+            reason: "Follow-up overdue",
+            link: "/prospect-tracker",
+            urgency: "high",
+          })
+        }
+      }
+
+      // HA scheduled today or soon
+      if (p.status === "ha_scheduled" && p.ha_scheduled_date) {
+        const haDate = new Date(p.ha_scheduled_date)
+        haDate.setHours(0, 0, 0, 0)
+        const diffDays = Math.floor((haDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24))
+        
+        if (diffDays === 0) {
+          items.push({
+            id: `prospect-ha-${p.id}`,
+            type: "prospect",
+            name: p.label,
+            reason: "HA today!",
+            link: "/prospect-tracker",
+            urgency: "high",
+          })
+        } else if (diffDays > 0 && diffDays <= 3) {
+          items.push({
+            id: `prospect-ha-${p.id}`,
+            type: "prospect",
+            name: p.label,
+            reason: `HA in ${diffDays} day${diffDays > 1 ? "s" : ""}`,
+            link: "/prospect-tracker",
+            urgency: "medium",
+          })
+        }
+      }
+    })
+
+    // Check clients needing touchpoints
+    clients.forEach(c => {
+      if (c.status === "active" && c.last_contact) {
+        const lastContact = new Date(c.last_contact)
+        const daysSinceContact = Math.floor((today.getTime() - lastContact.getTime()) / (1000 * 60 * 60 * 24))
+        
+        if (daysSinceContact >= 7) {
+          items.push({
+            id: `client-touchpoint-${c.id}`,
+            type: "client",
+            name: c.label,
+            reason: daysSinceContact >= 14 ? "Needs check-in!" : "Due for touchpoint",
+            link: "/client-tracker",
+            urgency: daysSinceContact >= 14 ? "high" : "medium",
+          })
+        }
+      }
+    })
+
+    // Sort by urgency and return top 6
+    return items
+      .sort((a, b) => {
+        const urgencyOrder = { high: 0, medium: 1, low: 2 }
+        return urgencyOrder[a.urgency] - urgencyOrder[b.urgency]
+      })
+      .slice(0, 6)
+  }, [prospects, clients])
+
   return {
     stages,
     recentActivity,
+    priorityItems,
     totals,
     loading,
     prospects,

@@ -4,13 +4,13 @@ import Link from "next/link"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Users, Heart, TrendingUp, ChevronRight, Plus } from "lucide-react"
+import { Users, Heart, TrendingUp, ChevronRight, Plus, AlertCircle, Calendar, Phone } from "lucide-react"
 import { usePipeline } from "@/hooks/use-pipeline"
 import { PipelineStage } from "./PipelineStage"
 import { ActivityFeed } from "./ActivityFeed"
 
 export function PipelineView() {
-  const { stages, recentActivity, totals, loading } = usePipeline()
+  const { stages, recentActivity, priorityItems, totals, loading } = usePipeline()
 
   if (loading) {
     return (
@@ -147,6 +147,68 @@ export function PipelineView() {
           )}
         </CardContent>
       </Card>
+
+      {/* Needs Attention Section */}
+      {priorityItems.length > 0 && (
+        <Card className="border-amber-200 bg-amber-50">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-lg flex items-center gap-2 text-amber-800">
+              <AlertCircle className="h-5 w-5" />
+              Needs Attention
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="pt-0">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+              {priorityItems.map((item) => (
+                <Link key={item.id} href={item.link}>
+                  <div className={`p-3 rounded-lg border cursor-pointer transition-all hover:shadow-md ${
+                    item.urgency === "high" 
+                      ? "bg-red-50 border-red-200 hover:bg-red-100" 
+                      : "bg-white border-gray-200 hover:bg-gray-50"
+                  }`}>
+                    <div className="flex items-start gap-2">
+                      <div className={`p-1.5 rounded-full ${
+                        item.urgency === "high" ? "bg-red-100" : "bg-amber-100"
+                      }`}>
+                        {item.type === "prospect" ? (
+                          item.reason.includes("HA") ? (
+                            <Calendar className={`h-3.5 w-3.5 ${
+                              item.urgency === "high" ? "text-red-600" : "text-amber-600"
+                            }`} />
+                          ) : (
+                            <Phone className={`h-3.5 w-3.5 ${
+                              item.urgency === "high" ? "text-red-600" : "text-amber-600"
+                            }`} />
+                          )
+                        ) : (
+                          <Heart className={`h-3.5 w-3.5 ${
+                            item.urgency === "high" ? "text-red-600" : "text-amber-600"
+                          }`} />
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="font-medium text-sm text-gray-900 truncate">
+                          {item.name}
+                        </div>
+                        <div className={`text-xs ${
+                          item.urgency === "high" ? "text-red-600 font-medium" : "text-amber-700"
+                        }`}>
+                          {item.reason}
+                        </div>
+                      </div>
+                      {item.urgency === "high" && (
+                        <Badge className="bg-red-500 text-[10px] px-1.5 py-0 flex-shrink-0">
+                          !
+                        </Badge>
+                      )}
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Activity Feed */}
       <ActivityFeed activities={recentActivity} />

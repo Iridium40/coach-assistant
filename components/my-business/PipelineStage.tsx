@@ -2,7 +2,6 @@
 
 import Link from "next/link"
 import { Card } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
 import { ChevronRight } from "lucide-react"
 import type { PipelineStage as PipelineStageType } from "@/hooks/use-pipeline"
 
@@ -23,10 +22,10 @@ export function PipelineStage({ stage, isFirst, isLast }: PipelineStageProps) {
 
   return (
     <div className="flex items-center">
-      <Link href={getLink()} className="block">
+      <Link href={getLink()} className="block group">
         <Card
-          className="p-4 min-w-[140px] hover:shadow-md transition-shadow cursor-pointer border-t-4"
-          style={{ borderTopColor: stage.color }}
+          className="p-4 min-w-[120px] hover:shadow-lg transition-all cursor-pointer border-2 group-hover:scale-105"
+          style={{ borderColor: stage.color }}
         >
           <div className="text-center">
             <div className="text-2xl mb-1">{stage.icon}</div>
@@ -41,25 +40,10 @@ export function PipelineStage({ stage, isFirst, isLast }: PipelineStageProps) {
             </div>
           </div>
 
-          {/* Preview of items */}
-          {stage.items.length > 0 && (
-            <div className="mt-3 space-y-1">
-              {stage.items.slice(0, 3).map((item, idx) => (
-                <div
-                  key={idx}
-                  className="text-xs text-gray-500 truncate px-2 py-1 rounded"
-                  style={{ backgroundColor: stage.bgColor }}
-                >
-                  {item.label}
-                </div>
-              ))}
-              {stage.items.length > 3 && (
-                <div className="text-xs text-gray-400 text-center">
-                  +{stage.items.length - 3} more
-                </div>
-              )}
-            </div>
-          )}
+          {/* Click hint on hover */}
+          <div className="mt-2 text-[10px] text-gray-400 text-center opacity-0 group-hover:opacity-100 transition-opacity">
+            Click to view
+          </div>
         </Card>
       </Link>
 
