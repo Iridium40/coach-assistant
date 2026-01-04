@@ -22,6 +22,19 @@ import { useClients, getProgramDay, getDayPhase } from "@/hooks/use-clients"
 import { useTrainingResources } from "@/hooks/use-training-resources"
 import type { ZoomCall } from "@/lib/types"
 import { getOnboardingProgress } from "@/lib/onboarding-utils"
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
+import { WaterCalculator } from "@/components/coach-tools/water-calculator"
+import { ExerciseGuide } from "@/components/coach-tools/exercise-guide"
+import { MetabolicHealthInfo } from "@/components/coach-tools/metabolic-health-info"
+import { HealthAssessment } from "@/components/coach-tools/health-assessment"
+import { ClientOnboardingDialog } from "@/components/coach-tools/client-onboarding-dialog"
+import { ClientTroubleshootingDialog } from "@/components/coach-tools/client-troubleshooting-dialog"
+import { SocialMediaPromptGenerator } from "@/components/social-media-prompt-generator"
 
 // Icon mapping for badge categories (matching badge-display.tsx)
 const badgeIcons: Record<string, React.ReactNode> = {
@@ -58,15 +71,15 @@ const coachTips = [
   "Celebrate micro-wins with clients! Each small habit they build is a step toward lasting transformation.",
 ]
 
-// Coach Tools definitions (matching external-resources-tab.tsx)
-const COACH_TOOLS: { id: string; title: string; icon: LucideIcon }[] = [
-  { id: "health-assessment", title: "Health Assessment Call Checklist", icon: ClipboardList },
-  { id: "client-onboarding", title: "Client Onboarding Tool", icon: Users },
-  { id: "client-troubleshooting", title: "Client Troubleshooting Guide", icon: Wrench },
-  { id: "water-calculator", title: "Water Intake Calculator", icon: Droplets },
-  { id: "exercise-guide", title: "Exercise & Motion Guide", icon: Dumbbell },
-  { id: "metabolic-health", title: "Metabolic Health Education", icon: Activity },
-  { id: "social-media-generator", title: "Social Media Post Generator", icon: Share2 },
+// Coach Tools definitions with components (matching external-resources-tab.tsx)
+const COACH_TOOLS: { id: string; title: string; icon: LucideIcon; component: React.ComponentType }[] = [
+  { id: "health-assessment", title: "Health Assessment Call Checklist", icon: ClipboardList, component: HealthAssessment },
+  { id: "client-onboarding", title: "Client Onboarding Tool", icon: Users, component: ClientOnboardingDialog },
+  { id: "client-troubleshooting", title: "Client Troubleshooting Guide", icon: Wrench, component: ClientTroubleshootingDialog },
+  { id: "water-calculator", title: "Water Intake Calculator", icon: Droplets, component: WaterCalculator },
+  { id: "exercise-guide", title: "Exercise & Motion Guide", icon: Dumbbell, component: ExerciseGuide },
+  { id: "metabolic-health", title: "Metabolic Health Education", icon: Activity, component: MetabolicHealthInfo },
+  { id: "social-media-generator", title: "Social Media Post Generator", icon: Share2, component: SocialMediaPromptGenerator },
 ]
 
 // External Resources definitions (matching external-resources-tab.tsx)
@@ -100,6 +113,7 @@ export function DashboardOverview() {
   const [coachTipDismissed, setCoachTipDismissed] = useState(false)
   const [pinnedToolIds, setPinnedToolIds] = useState<string[]>([])
   const [pinnedResourceIds, setPinnedResourceIds] = useState<string[]>([])
+  const [openToolId, setOpenToolId] = useState<string | null>(null)
 
   // Load pinned items from localStorage
   useEffect(() => {
@@ -680,25 +694,25 @@ export function DashboardOverview() {
           <CardContent className="pt-0">
             {hasPinnedItems ? (
               <div className="space-y-2">
-                {/* Pinned Tools */}
+                {/* Pinned Tools - Open directly in dialog */}
                 {pinnedTools.map((tool) => {
                   const IconComponent = tool.icon
                   return (
-                    <Link 
+                    <button 
                       key={tool.id}
-                      href={`/resources?category=Coach+Tools`}
-                      className="flex items-center gap-2 p-2.5 rounded-lg border-2 border-[hsl(var(--optavia-green))] bg-[hsl(var(--optavia-green-light))] hover:bg-green-100 transition-colors cursor-pointer group"
+                      onClick={() => setOpenToolId(tool.id)}
+                      className="w-full flex items-center gap-2 p-2.5 rounded-lg border-2 border-[hsl(var(--optavia-green))] bg-[hsl(var(--optavia-green-light))] hover:bg-green-100 transition-colors cursor-pointer group text-left"
                     >
                       <IconComponent className="h-4 w-4 text-[hsl(var(--optavia-green))] flex-shrink-0" />
                       <span className="font-medium text-sm text-optavia-dark group-hover:text-[hsl(var(--optavia-green))] flex-1 truncate">
                         {tool.title}
                       </span>
                       <ChevronRight className="h-3 w-3 text-optavia-gray flex-shrink-0" />
-                    </Link>
+                    </button>
                   )
                 })}
                 
-                {/* Pinned Resources */}
+                {/* Pinned Resources - Open directly in new tab */}
                 {pinnedResources.map((resource) => (
                   <a 
                     key={resource.id}
@@ -909,6 +923,31 @@ export function DashboardOverview() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Tool Dialogs - Open tools directly from Quick Links */}
+      {COACH_TOOLS.map((tool) => {
+        const ToolComponent = tool.component
+        const IconComponent = tool.icon
+        const isWideDialog = ["health-assessment", "client-onboarding", "client-troubleshooting", "social-media-generator"].includes(tool.id)
+        
+        return (
+          <Dialog key={tool.id} open={openToolId === tool.id} onOpenChange={(open) => !open && setOpenToolId(null)}>
+            <DialogContent className={`max-h-[90vh] overflow-y-auto ${isWideDialog ? "max-w-5xl" : "max-w-2xl"}`}>
+              <DialogHeader>
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-lg bg-[hsl(var(--optavia-green-light))]">
+                    <IconComponent className="h-5 w-5 text-[hsl(var(--optavia-green))]" />
+                  </div>
+                  <DialogTitle className="text-xl text-optavia-dark">{tool.title}</DialogTitle>
+                </div>
+              </DialogHeader>
+              <div className="mt-4">
+                <ToolComponent />
+              </div>
+            </DialogContent>
+          </Dialog>
+        )
+      })}
     </div>
   )
 }
