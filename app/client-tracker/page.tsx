@@ -1013,7 +1013,7 @@ ${phase.milestone ? `\n🎉 MILESTONE: ${phase.label} - Celebrate this achieveme
                   recipientEmail={clientEmail}
                   onEmailChange={setClientEmail}
                   onScheduleComplete={handleSaveSchedule}
-                  showEmailOption={true}
+                  eventType="check-in"
                 />
               )}
 

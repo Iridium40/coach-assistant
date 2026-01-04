@@ -963,7 +963,7 @@ Talking Points:
                   recipientEmail={prospectEmail}
                   onEmailChange={setProspectEmail}
                   onScheduleComplete={handleSaveHASchedule}
-                  showEmailOption={true}
+                  eventType="ha"
                 />
               )}
 

@@ -4,13 +4,11 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Mail, Check } from "lucide-react"
+import { Mail, Check, Loader2 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { useUserData } from "@/contexts/user-data-context"
-import {
-  type CalendarEvent,
-  downloadGenericICSFile,
-} from "@/lib/calendar-utils"
+import { sendCalendarInviteEmail } from "@/lib/email"
+import type { CalendarEvent } from "@/lib/calendar-utils"
 
 interface ScheduleCalendarOptionsProps {
   event: CalendarEvent
@@ -18,6 +16,7 @@ interface ScheduleCalendarOptionsProps {
   recipientEmail?: string
   onEmailChange?: (email: string) => void
   onScheduleComplete?: () => void
+  eventType?: "check-in" | "ha"
   className?: string
 }
 
@@ -27,23 +26,26 @@ export function ScheduleCalendarOptions({
   recipientEmail: initialEmail,
   onEmailChange,
   onScheduleComplete,
+  eventType = "check-in",
   className = "",
 }: ScheduleCalendarOptionsProps) {
   const { toast } = useToast()
   const { profile } = useUserData()
   const [email, setEmail] = useState(initialEmail || "")
-  const [invited, setInvited] = useState(false)
+  const [sending, setSending] = useState(false)
+  const [sent, setSent] = useState(false)
 
   // Use the coach's notification_email from their profile
   const organizerEmail = profile?.notification_email || undefined
+  const organizerName = profile?.full_name || undefined
 
   const handleEmailChange = (value: string) => {
     setEmail(value)
     onEmailChange?.(value)
   }
 
-  // Main action: Download ICS with attendee included, so calendar app sends invite
-  const handleEmailCalendarInvite = () => {
+  // Main action: Send calendar invite via email using Resend
+  const handleEmailCalendarInvite = async () => {
     if (!email) {
       toast({
         title: "Email required",
@@ -62,19 +64,47 @@ export function ScheduleCalendarOptions({
       return
     }
 
-    // Download ICS file with attendee included
-    // When user opens this in their calendar app, it will send an invite to the attendee
-    downloadGenericICSFile(event, email, recipientName, organizerEmail)
-    
-    setInvited(true)
-    onScheduleComplete?.()
-    
-    toast({
-      title: "📅 Calendar invite downloaded!",
-      description: `Open the file to add to your calendar. ${recipientName || "They"} will receive an invite at ${email}.`,
-    })
+    setSending(true)
 
-    setTimeout(() => setInvited(false), 3000)
+    try {
+      const result = await sendCalendarInviteEmail({
+        to: email,
+        toName: recipientName,
+        fromEmail: organizerEmail,
+        fromName: organizerName,
+        eventTitle: event.title,
+        eventDescription: event.description,
+        startDate: event.startDate.toISOString(),
+        endDate: event.endDate.toISOString(),
+        eventType: eventType,
+      })
+
+      if (result.success) {
+        setSent(true)
+        onScheduleComplete?.()
+        
+        toast({
+          title: "📧 Calendar invite sent!",
+          description: `${recipientName || "They"} will receive the invite at ${email}`,
+        })
+
+        setTimeout(() => setSent(false), 3000)
+      } else {
+        toast({
+          title: "Failed to send invite",
+          description: result.error || "Please try again",
+          variant: "destructive",
+        })
+      }
+    } catch (error: any) {
+      toast({
+        title: "Failed to send invite",
+        description: error.message || "Please try again",
+        variant: "destructive",
+      })
+    } finally {
+      setSending(false)
+    }
   }
 
   return (
@@ -93,7 +123,7 @@ export function ScheduleCalendarOptions({
           required
         />
         <p className="text-xs text-gray-500">
-          They'll receive a calendar invite when you open the file
+          They'll receive an email with a calendar invite attached
         </p>
       </div>
 
@@ -101,13 +131,18 @@ export function ScheduleCalendarOptions({
       <Button
         type="button"
         onClick={handleEmailCalendarInvite}
-        disabled={!email || !organizerEmail}
+        disabled={!email || !organizerEmail || sending}
         className="w-full bg-purple-600 hover:bg-purple-700 text-white"
       >
-        {invited ? (
+        {sending ? (
+          <>
+            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+            Sending...
+          </>
+        ) : sent ? (
           <>
             <Check className="h-4 w-4 mr-2" />
-            Invite Downloaded!
+            Invite Sent!
           </>
         ) : (
           <>
