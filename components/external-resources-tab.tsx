@@ -13,7 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { Pin, X, ExternalLink, Droplets, Dumbbell, Activity, ClipboardList, Users, Wrench } from "lucide-react"
+import { Pin, X, ExternalLink, Droplets, Dumbbell, Activity, ClipboardList, Users, Wrench, Share2 } from "lucide-react"
 import { ToolCard } from "@/components/coach-tools/tool-card"
 import { WaterCalculator } from "@/components/coach-tools/water-calculator"
 import { ExerciseGuide } from "@/components/coach-tools/exercise-guide"
@@ -21,6 +21,7 @@ import { MetabolicHealthInfo } from "@/components/coach-tools/metabolic-health-i
 import { HealthAssessment } from "@/components/coach-tools/health-assessment"
 import { ClientOnboardingDialog } from "@/components/coach-tools/client-onboarding-dialog"
 import { ClientTroubleshootingDialog } from "@/components/coach-tools/client-troubleshooting-dialog"
+import { SocialMediaPromptGenerator } from "@/components/social-media-prompt-generator"
 
 interface Resource {
   id: string
@@ -79,6 +80,14 @@ const COACH_TOOLS = [
     icon: Activity,
     component: MetabolicHealthInfo,
   },
+  {
+    id: "social-media-generator",
+    title: "Social Media Post Generator",
+    description: "Build prompts for ChatGPT to generate 3 unique social media post ideas instantly.",
+    icon: Share2,
+    component: SocialMediaPromptGenerator,
+    expandMode: "dialog" as const,
+  },
 ]
 
 export function ExternalResourcesTab() {
@@ -87,6 +96,7 @@ export function ExternalResourcesTab() {
   const categoryParam = searchParams.get("category")
   const [selectedCategory, setSelectedCategory] = useState<string>(categoryParam || "All")
   const [pinnedIds, setPinnedIds] = useState<string[]>([])
+  const [pinnedToolIds, setPinnedToolIds] = useState<string[]>([])
 
   // Sync selectedCategory with URL parameter when it changes
   useEffect(() => {
@@ -95,25 +105,43 @@ export function ExternalResourcesTab() {
     }
   }, [categoryParam])
 
-  // Load pinned resources from localStorage on mount
+  // Load pinned resources and tools from localStorage on mount
   useEffect(() => {
-    const saved = localStorage.getItem("pinnedResources")
-    if (saved) {
+    const savedResources = localStorage.getItem("pinnedResources")
+    if (savedResources) {
       try {
-        setPinnedIds(JSON.parse(saved))
+        setPinnedIds(JSON.parse(savedResources))
       } catch (e) {
         console.error("Failed to parse pinned resources:", e)
       }
     }
+    
+    const savedTools = localStorage.getItem("pinnedTools")
+    if (savedTools) {
+      try {
+        setPinnedToolIds(JSON.parse(savedTools))
+      } catch (e) {
+        console.error("Failed to parse pinned tools:", e)
+      }
+    }
   }, [])
 
-  // Toggle pin status
+  // Toggle pin status for resources
   const togglePin = (resourceId: string) => {
     const newPinned = pinnedIds.includes(resourceId)
       ? pinnedIds.filter((id) => id !== resourceId)
       : [...pinnedIds, resourceId]
     setPinnedIds(newPinned)
     localStorage.setItem("pinnedResources", JSON.stringify(newPinned))
+  }
+
+  // Toggle pin status for tools
+  const toggleToolPin = (toolId: string) => {
+    const newPinned = pinnedToolIds.includes(toolId)
+      ? pinnedToolIds.filter((id) => id !== toolId)
+      : [...pinnedToolIds, toolId]
+    setPinnedToolIds(newPinned)
+    localStorage.setItem("pinnedTools", JSON.stringify(newPinned))
   }
 
   // Memoize resources array to prevent unnecessary re-renders
@@ -296,6 +324,11 @@ export function ExternalResourcesTab() {
     return resources.filter((r) => pinnedIds.includes(r.id))
   }, [resources, pinnedIds])
 
+  // Get pinned tools
+  const pinnedTools = useMemo(() => {
+    return COACH_TOOLS.filter((t) => pinnedToolIds.includes(t.id))
+  }, [pinnedToolIds])
+
   // Define the desired order for categories
   const categoryOrder: string[] = ["Coach Tools", "Community", "OPTAVIA Resources", "Social Media"]
   
@@ -343,13 +376,41 @@ export function ExternalResourcesTab() {
       </div>
 
       {/* Quick Links Bar */}
-      {pinnedResources.length > 0 && (
+      {(pinnedResources.length > 0 || pinnedTools.length > 0) && (
         <div className="mb-6">
           <div className="flex items-center gap-2 mb-3">
             <Pin className="h-4 w-4 text-[hsl(var(--optavia-green))]" />
             <h3 className="text-sm font-semibold text-optavia-dark">Quick Links</h3>
           </div>
           <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-thin">
+            {/* Pinned Tools */}
+            {pinnedTools.map((tool) => {
+              const IconComponent = tool.icon
+              return (
+                <Card
+                  key={`tool-${tool.id}`}
+                  className="flex-shrink-0 bg-[hsl(var(--optavia-green-light))] border-[hsl(var(--optavia-green))] hover:shadow-md transition-shadow"
+                >
+                  <div className="flex items-center gap-2 p-2 pr-3">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-6 w-6 text-[hsl(var(--optavia-green))] hover:text-red-500 hover:bg-red-50"
+                      onClick={() => toggleToolPin(tool.id)}
+                    >
+                      <X className="h-3 w-3" />
+                    </Button>
+                    <div className="flex items-center gap-2">
+                      <IconComponent className="h-4 w-4 text-[hsl(var(--optavia-green))]" />
+                      <span className="text-sm font-medium text-optavia-dark">
+                        {tool.title}
+                      </span>
+                    </div>
+                  </div>
+                </Card>
+              )
+            })}
+            {/* Pinned Resources */}
             {pinnedResources.map((resource) => (
               <Card
                 key={resource.id}
@@ -433,6 +494,8 @@ export function ExternalResourcesTab() {
                 description={tool.description}
                 icon={tool.icon}
                 expandMode={tool.expandMode || "dialog"}
+                isPinned={pinnedToolIds.includes(tool.id)}
+                onTogglePin={() => toggleToolPin(tool.id)}
               >
                 {tool.component && <tool.component />}
               </ToolCard>

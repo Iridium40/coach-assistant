@@ -9,7 +9,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import { ChevronDown, ChevronUp, Maximize2 } from "lucide-react"
+import { ChevronDown, ChevronUp, Maximize2, Pin } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
 
 interface ToolCardProps {
@@ -20,6 +20,8 @@ interface ToolCardProps {
   children: ReactNode
   defaultExpanded?: boolean
   expandMode?: "inline" | "dialog"
+  isPinned?: boolean
+  onTogglePin?: () => void
 }
 
 export function ToolCard({
@@ -30,6 +32,8 @@ export function ToolCard({
   children,
   defaultExpanded = false,
   expandMode = "inline",
+  isPinned = false,
+  onTogglePin,
 }: ToolCardProps) {
   const [isExpanded, setIsExpanded] = useState(defaultExpanded)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
@@ -44,7 +48,11 @@ export function ToolCard({
 
   return (
     <>
-      <Card className="bg-white border-2 border-gray-200 hover:border-[hsl(var(--optavia-green))] transition-all duration-300 hover:shadow-lg overflow-hidden">
+      <Card className={`bg-white border-2 transition-all duration-300 hover:shadow-lg overflow-hidden ${
+        isPinned 
+          ? "border-[hsl(var(--optavia-green))] bg-[hsl(var(--optavia-green-light))]" 
+          : "border-gray-200 hover:border-[hsl(var(--optavia-green))]"
+      }`}>
         <CardHeader className="pb-3">
           <div className="flex items-start justify-between gap-3">
             <div className="flex items-start gap-3">
@@ -58,20 +66,40 @@ export function ToolCard({
                 </CardDescription>
               </div>
             </div>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={handleToggle}
-              className="h-8 w-8 text-optavia-gray hover:text-[hsl(var(--optavia-green))] hover:bg-[hsl(var(--optavia-green-light))]"
-            >
-              {expandMode === "dialog" ? (
-                <Maximize2 className="h-4 w-4" />
-              ) : isExpanded ? (
-                <ChevronUp className="h-4 w-4" />
-              ) : (
-                <ChevronDown className="h-4 w-4" />
+            <div className="flex items-center gap-1">
+              {onTogglePin && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    onTogglePin()
+                  }}
+                  className={`h-8 w-8 ${
+                    isPinned
+                      ? "text-[hsl(var(--optavia-green))] hover:text-red-500 hover:bg-red-50"
+                      : "text-gray-400 hover:text-[hsl(var(--optavia-green))] hover:bg-[hsl(var(--optavia-green-light))]"
+                  }`}
+                  title={isPinned ? "Unpin from Quick Links" : "Pin to Quick Links"}
+                >
+                  <Pin className={`h-4 w-4 ${isPinned ? "fill-current" : ""}`} />
+                </Button>
               )}
-            </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleToggle}
+                className="h-8 w-8 text-optavia-gray hover:text-[hsl(var(--optavia-green))] hover:bg-[hsl(var(--optavia-green-light))]"
+              >
+                {expandMode === "dialog" ? (
+                  <Maximize2 className="h-4 w-4" />
+                ) : isExpanded ? (
+                  <ChevronUp className="h-4 w-4" />
+                ) : (
+                  <ChevronDown className="h-4 w-4" />
+                )}
+              </Button>
+            </div>
           </div>
         </CardHeader>
 
