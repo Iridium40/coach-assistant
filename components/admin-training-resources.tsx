@@ -1,7 +1,7 @@
 "use client"
 
-import { useState } from "react"
-import { useTrainingResourcesAdmin, type TrainingResource } from "@/hooks/use-training-resources"
+import { useState, useMemo } from "react"
+import { useTrainingResourcesAdmin, type TrainingResource, type TrainingCategory } from "@/hooks/use-training-resources"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -16,6 +16,16 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog"
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
+import {
   Select,
   SelectContent,
   SelectItem,
@@ -23,13 +33,10 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible"
 import {
   Plus,
   Edit2,
@@ -42,9 +49,13 @@ import {
   Search,
   Lightbulb,
   ArrowLeft,
+  ChevronDown,
+  ChevronUp,
+  GripVertical,
+  ArrowUp,
+  ArrowDown,
 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
-import Link from "next/link"
 
 interface AdminTrainingResourcesProps {
   onClose?: () => void
@@ -58,6 +69,7 @@ export function AdminTrainingResources({ onClose }: AdminTrainingResourcesProps)
     addResource,
     updateResource,
     deleteResource,
+    moveResource,
   } = useTrainingResourcesAdmin()
   const { toast } = useToast()
 
@@ -65,7 +77,9 @@ export function AdminTrainingResources({ onClose }: AdminTrainingResourcesProps)
   const [showEditModal, setShowEditModal] = useState(false)
   const [editingResource, setEditingResource] = useState<TrainingResource | null>(null)
   const [searchQuery, setSearchQuery] = useState("")
-  const [filterCategory, setFilterCategory] = useState<string>("All")
+  const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set())
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+  const [resourceToDelete, setResourceToDelete] = useState<string | null>(null)
 
   const [newResource, setNewResource] = useState({
     category: "",
@@ -89,22 +103,79 @@ export function AdminTrainingResources({ onClose }: AdminTrainingResourcesProps)
     }
   }
 
-  // Filter resources
-  const filteredResources = resources.filter(r => {
-    if (filterCategory !== "All" && r.category !== filterCategory) return false
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase()
-      return (
+  // Group resources by category
+  const groupedResources = useMemo(() => {
+    const grouped: Record<string, TrainingResource[]> = {}
+    
+    // Initialize all categories (even empty ones)
+    categories.forEach(cat => {
+      grouped[cat.name] = []
+    })
+    
+    // Add resources to their categories
+    resources.forEach(r => {
+      if (!grouped[r.category]) {
+        grouped[r.category] = []
+      }
+      grouped[r.category].push(r)
+    })
+    
+    // Sort resources within each category by sort_order
+    Object.keys(grouped).forEach(cat => {
+      grouped[cat].sort((a, b) => a.sort_order - b.sort_order)
+    })
+    
+    return grouped
+  }, [resources, categories])
+
+  // Filter by search
+  const filteredGroupedResources = useMemo(() => {
+    if (!searchQuery) return groupedResources
+    
+    const query = searchQuery.toLowerCase()
+    const filtered: Record<string, TrainingResource[]> = {}
+    
+    Object.entries(groupedResources).forEach(([category, items]) => {
+      const matchingItems = items.filter(r => 
         r.title.toLowerCase().includes(query) ||
         r.description?.toLowerCase().includes(query) ||
         r.category.toLowerCase().includes(query)
       )
-    }
-    return true
-  })
+      if (matchingItems.length > 0 || category.toLowerCase().includes(query)) {
+        filtered[category] = matchingItems
+      }
+    })
+    
+    return filtered
+  }, [groupedResources, searchQuery])
 
-  // Get unique categories
-  const uniqueCategories = Array.from(new Set(resources.map(r => r.category))).sort()
+  // Get sorted categories
+  const sortedCategories = useMemo(() => {
+    return [...categories].sort((a, b) => a.sort_order - b.sort_order)
+  }, [categories])
+
+  // Toggle category expansion
+  const toggleCategory = (categoryName: string) => {
+    setExpandedCategories(prev => {
+      const newSet = new Set(prev)
+      if (newSet.has(categoryName)) {
+        newSet.delete(categoryName)
+      } else {
+        newSet.add(categoryName)
+      }
+      return newSet
+    })
+  }
+
+  // Expand all categories
+  const expandAll = () => {
+    setExpandedCategories(new Set(categories.map(c => c.name)))
+  }
+
+  // Collapse all categories
+  const collapseAll = () => {
+    setExpandedCategories(new Set())
+  }
 
   const handleAddResource = async () => {
     if (!newResource.title || !newResource.url || !newResource.category) {
@@ -112,9 +183,18 @@ export function AdminTrainingResources({ onClose }: AdminTrainingResourcesProps)
       return
     }
 
+    // Set sort_order to be at the end of the category
+    const categoryResources = groupedResources[newResource.category] || []
+    const maxOrder = categoryResources.length > 0 
+      ? Math.max(...categoryResources.map(r => r.sort_order)) 
+      : 0
+
     try {
-      await addResource(newResource)
-      toast({ title: "Success", description: "Resource added successfully" })
+      await addResource({
+        ...newResource,
+        sort_order: maxOrder + 1,
+      })
+      toast({ title: "Success", description: "Module added successfully" })
       setShowAddModal(false)
       setNewResource({
         category: "",
@@ -124,6 +204,8 @@ export function AdminTrainingResources({ onClose }: AdminTrainingResourcesProps)
         type: "document",
         sort_order: 0,
       })
+      // Expand the category to show the new resource
+      setExpandedCategories(prev => new Set(prev).add(newResource.category))
     } catch (err: any) {
       toast({ title: "Error", description: err.message, variant: "destructive" })
     }
@@ -141,7 +223,7 @@ export function AdminTrainingResources({ onClose }: AdminTrainingResourcesProps)
         type: editingResource.type,
         sort_order: editingResource.sort_order,
       })
-      toast({ title: "Success", description: "Resource updated successfully" })
+      toast({ title: "Success", description: "Module updated successfully" })
       setShowEditModal(false)
       setEditingResource(null)
     } catch (err: any) {
@@ -149,14 +231,30 @@ export function AdminTrainingResources({ onClose }: AdminTrainingResourcesProps)
     }
   }
 
-  const handleDeleteResource = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this resource?")) return
+  const handleDeleteClick = (id: string) => {
+    setResourceToDelete(id)
+    setDeleteDialogOpen(true)
+  }
+
+  const confirmDelete = async () => {
+    if (!resourceToDelete) return
 
     try {
-      await deleteResource(id)
-      toast({ title: "Success", description: "Resource deleted successfully" })
+      await deleteResource(resourceToDelete)
+      toast({ title: "Success", description: "Module deleted successfully" })
     } catch (err: any) {
       toast({ title: "Error", description: err.message, variant: "destructive" })
+    } finally {
+      setDeleteDialogOpen(false)
+      setResourceToDelete(null)
+    }
+  }
+
+  const handleMoveResource = async (resourceId: string, direction: "up" | "down") => {
+    try {
+      await moveResource(resourceId, direction)
+    } catch (err: any) {
+      toast({ title: "Error", description: "Failed to reorder module", variant: "destructive" })
     }
   }
 
@@ -180,12 +278,12 @@ export function AdminTrainingResources({ onClose }: AdminTrainingResourcesProps)
           )}
           <div>
             <h1 className="text-2xl font-bold text-optavia-dark">Manage Training Resources</h1>
-            <p className="text-optavia-gray">Add, edit, and organize training resources</p>
+            <p className="text-optavia-gray">Organize categories and modules</p>
           </div>
         </div>
         <Button onClick={() => setShowAddModal(true)} className="bg-[hsl(var(--optavia-green))]">
           <Plus className="h-4 w-4 mr-2" />
-          Add Resource
+          Add Module
         </Button>
       </div>
 
@@ -194,7 +292,7 @@ export function AdminTrainingResources({ onClose }: AdminTrainingResourcesProps)
         <Card>
           <CardContent className="p-4 text-center">
             <div className="text-2xl font-bold text-[hsl(var(--optavia-green))]">{resources.length}</div>
-            <div className="text-sm text-gray-500">Total Resources</div>
+            <div className="text-sm text-gray-500">Total Modules</div>
           </CardContent>
         </Card>
         <Card>
@@ -215,120 +313,187 @@ export function AdminTrainingResources({ onClose }: AdminTrainingResourcesProps)
         </Card>
         <Card>
           <CardContent className="p-4 text-center">
-            <div className="text-2xl font-bold text-purple-500">{uniqueCategories.length}</div>
+            <div className="text-2xl font-bold text-purple-500">{categories.length}</div>
             <div className="text-sm text-gray-500">Categories</div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Filters */}
+      {/* Search and Controls */}
       <Card className="mb-6">
         <CardContent className="p-4">
-          <div className="flex flex-col sm:flex-row gap-4">
-            <div className="relative flex-1">
+          <div className="flex flex-col sm:flex-row gap-4 items-center">
+            <div className="relative flex-1 w-full">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
               <Input
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search resources..."
+                placeholder="Search modules..."
                 className="pl-10"
               />
             </div>
-            <Select value={filterCategory} onValueChange={setFilterCategory}>
-              <SelectTrigger className="w-full sm:w-[250px]">
-                <SelectValue placeholder="Filter by category" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="All">All Categories</SelectItem>
-                {uniqueCategories.map((cat) => (
-                  <SelectItem key={cat} value={cat}>
-                    {cat}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <div className="flex gap-2">
+              <Button variant="outline" size="sm" onClick={expandAll}>
+                Expand All
+              </Button>
+              <Button variant="outline" size="sm" onClick={collapseAll}>
+                Collapse All
+              </Button>
+            </div>
           </div>
         </CardContent>
       </Card>
 
-      {/* Resources Table */}
-      <Card>
-        <CardContent className="p-0">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="w-[50px]">Type</TableHead>
-                <TableHead>Title</TableHead>
-                <TableHead className="hidden md:table-cell">Category</TableHead>
-                <TableHead className="hidden lg:table-cell">Description</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredResources.map((resource) => (
-                <TableRow key={resource.id}>
-                  <TableCell>{getTypeIcon(resource.type)}</TableCell>
-                  <TableCell>
-                    <div className="font-medium">{resource.title}</div>
-                    <div className="text-xs text-gray-500 md:hidden">{resource.category}</div>
-                  </TableCell>
-                  <TableCell className="hidden md:table-cell">
-                    <Badge variant="outline">{resource.category}</Badge>
-                  </TableCell>
-                  <TableCell className="hidden lg:table-cell max-w-xs">
-                    <p className="text-sm text-gray-500 truncate">
-                      {resource.description || "No description"}
-                    </p>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex items-center justify-end gap-2">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => window.open(resource.url, "_blank")}
-                        title="Open URL"
-                      >
-                        <ExternalLink className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => {
-                          setEditingResource(resource)
-                          setShowEditModal(true)
-                        }}
-                        title="Edit"
-                      >
-                        <Edit2 className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handleDeleteResource(resource.id)}
-                        title="Delete"
-                        className="text-red-500 hover:text-red-700"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
+      {/* Categories with Modules */}
+      <div className="space-y-4">
+        {sortedCategories.map((category) => {
+          const categoryResources = filteredGroupedResources[category.name] || []
+          const isExpanded = expandedCategories.has(category.name)
+          
+          // Skip categories not in filtered results (unless no search)
+          if (searchQuery && !filteredGroupedResources[category.name]) return null
+
+          return (
+            <Card key={category.id} className="overflow-hidden">
+              <Collapsible open={isExpanded} onOpenChange={() => toggleCategory(category.name)}>
+                <CollapsibleTrigger asChild>
+                  <CardHeader className="cursor-pointer hover:bg-gray-50 transition-colors py-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <span className="text-2xl">{category.icon}</span>
+                        <div>
+                          <CardTitle className="text-lg">{category.name}</CardTitle>
+                          {category.description && (
+                            <p className="text-sm text-gray-500">{category.description}</p>
+                          )}
+                        </div>
+                        <Badge variant="secondary" className="ml-2">
+                          {categoryResources.length} modules
+                        </Badge>
+                      </div>
+                      {isExpanded ? (
+                        <ChevronUp className="h-5 w-5 text-gray-400" />
+                      ) : (
+                        <ChevronDown className="h-5 w-5 text-gray-400" />
+                      )}
                     </div>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-          {filteredResources.length === 0 && (
-            <div className="text-center py-12 text-gray-500">
-              No resources found
-            </div>
-          )}
-        </CardContent>
-      </Card>
+                  </CardHeader>
+                </CollapsibleTrigger>
+                
+                <CollapsibleContent>
+                  <CardContent className="pt-0 pb-4">
+                    {categoryResources.length === 0 ? (
+                      <div className="text-center py-8 text-gray-500">
+                        <p>No modules in this category</p>
+                        <Button 
+                          variant="link" 
+                          onClick={() => {
+                            setNewResource(prev => ({ ...prev, category: category.name }))
+                            setShowAddModal(true)
+                          }}
+                          className="mt-2"
+                        >
+                          <Plus className="h-4 w-4 mr-1" />
+                          Add first module
+                        </Button>
+                      </div>
+                    ) : (
+                      <div className="space-y-2">
+                        {categoryResources.map((resource, index) => (
+                          <div 
+                            key={resource.id}
+                            className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors group"
+                          >
+                            {/* Order Controls */}
+                            <div className="flex flex-col gap-0.5">
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-6 w-6"
+                                disabled={index === 0}
+                                onClick={() => handleMoveResource(resource.id, "up")}
+                                title="Move up"
+                              >
+                                <ArrowUp className="h-3 w-3" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-6 w-6"
+                                disabled={index === categoryResources.length - 1}
+                                onClick={() => handleMoveResource(resource.id, "down")}
+                                title="Move down"
+                              >
+                                <ArrowDown className="h-3 w-3" />
+                              </Button>
+                            </div>
+
+                            {/* Order Number */}
+                            <div className="w-8 h-8 rounded-full bg-white border flex items-center justify-center text-sm font-medium text-gray-500">
+                              {index + 1}
+                            </div>
+
+                            {/* Type Icon */}
+                            <div className="flex-shrink-0">
+                              {getTypeIcon(resource.type)}
+                            </div>
+
+                            {/* Title and Description */}
+                            <div className="flex-1 min-w-0">
+                              <div className="font-medium truncate">{resource.title}</div>
+                              {resource.description && (
+                                <p className="text-sm text-gray-500 truncate">{resource.description}</p>
+                              )}
+                            </div>
+
+                            {/* Actions */}
+                            <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => window.open(resource.url, "_blank")}
+                                title="Open URL"
+                              >
+                                <ExternalLink className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => {
+                                  setEditingResource(resource)
+                                  setShowEditModal(true)
+                                }}
+                                title="Edit"
+                              >
+                                <Edit2 className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => handleDeleteClick(resource.id)}
+                                title="Delete"
+                                className="text-red-500 hover:text-red-700"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </CardContent>
+                </CollapsibleContent>
+              </Collapsible>
+            </Card>
+          )
+        })}
+      </div>
 
       {/* Add Modal */}
       <Dialog open={showAddModal} onOpenChange={setShowAddModal}>
         <DialogContent className="max-w-lg">
           <DialogHeader>
-            <DialogTitle>Add Training Resource</DialogTitle>
+            <DialogTitle>Add Training Module</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <div>
@@ -375,7 +540,7 @@ export function AdminTrainingResources({ onClose }: AdminTrainingResourcesProps)
               />
               <div className="flex items-start gap-2 mt-2 text-xs text-amber-600">
                 <Lightbulb className="h-3 w-3 mt-0.5" />
-                <span>Add keywords and topics to help users find this resource when searching.</span>
+                <span>Add keywords and topics to help users find this module when searching.</span>
               </div>
             </div>
             <div>
@@ -405,7 +570,7 @@ export function AdminTrainingResources({ onClose }: AdminTrainingResourcesProps)
               disabled={!newResource.title || !newResource.url || !newResource.category}
               className="bg-[hsl(var(--optavia-green))]"
             >
-              Add Resource
+              Add Module
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -415,7 +580,7 @@ export function AdminTrainingResources({ onClose }: AdminTrainingResourcesProps)
       <Dialog open={showEditModal} onOpenChange={setShowEditModal}>
         <DialogContent className="max-w-lg">
           <DialogHeader>
-            <DialogTitle>Edit Training Resource</DialogTitle>
+            <DialogTitle>Edit Training Module</DialogTitle>
           </DialogHeader>
           {editingResource && (
             <div className="space-y-4">
@@ -488,6 +653,29 @@ export function AdminTrainingResources({ onClose }: AdminTrainingResourcesProps)
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Module</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this training module? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setResourceToDelete(null)}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDelete}
+              className="bg-red-500 hover:bg-red-600 text-white"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

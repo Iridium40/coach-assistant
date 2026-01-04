@@ -280,6 +280,59 @@ export function useTrainingResourcesAdmin() {
     await reload()
   }
 
+  // Reorder resources within a category
+  const reorderResources = async (categoryName: string, resourceIds: string[]) => {
+    // Update sort_order for each resource in the new order
+    const updates = resourceIds.map((id, index) => ({
+      id,
+      sort_order: index + 1,
+    }))
+
+    for (const update of updates) {
+      const { error } = await supabase
+        .from("training_resources")
+        .update({ sort_order: update.sort_order })
+        .eq("id", update.id)
+
+      if (error) throw error
+    }
+
+    await reload()
+  }
+
+  // Move a single resource up or down within its category
+  const moveResource = async (resourceId: string, direction: "up" | "down") => {
+    // Find the resource and its siblings in the same category
+    const resource = resources.find(r => r.id === resourceId)
+    if (!resource) return
+
+    const categoryResources = resources
+      .filter(r => r.category === resource.category)
+      .sort((a, b) => a.sort_order - b.sort_order)
+
+    const currentIndex = categoryResources.findIndex(r => r.id === resourceId)
+    if (currentIndex === -1) return
+
+    const newIndex = direction === "up" ? currentIndex - 1 : currentIndex + 1
+    if (newIndex < 0 || newIndex >= categoryResources.length) return
+
+    // Swap the resources
+    const swapWith = categoryResources[newIndex]
+    
+    // Update both sort orders
+    await supabase
+      .from("training_resources")
+      .update({ sort_order: swapWith.sort_order })
+      .eq("id", resource.id)
+
+    await supabase
+      .from("training_resources")
+      .update({ sort_order: resource.sort_order })
+      .eq("id", swapWith.id)
+
+    await reload()
+  }
+
   const addCategory = async (category: Omit<TrainingCategory, "id" | "is_active">) => {
     const { data, error } = await supabase
       .from("training_categories")
@@ -300,6 +353,8 @@ export function useTrainingResourcesAdmin() {
     addResource,
     updateResource,
     deleteResource,
+    reorderResources,
+    moveResource,
     addCategory,
     reload,
   }
