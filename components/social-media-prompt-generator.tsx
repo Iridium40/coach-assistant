@@ -251,30 +251,30 @@ ${platform === "instagram" || platform === "both" ? "4. Hashtag suggestions" : "
   }
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
       {/* LEFT: Form Inputs */}
-      <div className="space-y-4">
+      <div className="space-y-3 lg:space-y-4">
         {/* Mood Selection */}
         <Card>
-          <CardHeader className="pb-3">
+          <CardHeader className="pb-2 lg:pb-3">
             <CardTitle className="text-sm font-semibold">
               1. What's the mood/tone? <span className="text-red-500">*</span>
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-2 gap-2">
+          <CardContent className="pt-0">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
               {MOOD_OPTIONS.map(option => (
                 <button
                   key={option.value}
                   onClick={() => setMood(option.value)}
-                  className={`p-3 rounded-lg border-2 text-left transition-all ${
+                  className={`p-2 lg:p-3 rounded-lg border-2 text-left transition-all ${
                     mood === option.value
                       ? "border-[hsl(var(--optavia-green))] bg-green-50"
                       : "border-gray-200 hover:border-gray-300"
                   }`}
                 >
-                  <span className="font-medium text-sm">{option.label}</span>
-                  <p className="text-xs text-gray-500 mt-0.5">{option.description}</p>
+                  <span className="font-medium text-xs lg:text-sm block truncate">{option.label}</span>
+                  <p className="text-[10px] lg:text-xs text-gray-500 mt-0.5 line-clamp-1">{option.description}</p>
                 </button>
               ))}
             </div>
@@ -283,12 +283,12 @@ ${platform === "instagram" || platform === "both" ? "4. Hashtag suggestions" : "
 
         {/* Topic Selection */}
         <Card>
-          <CardHeader className="pb-3">
+          <CardHeader className="pb-2 lg:pb-3">
             <CardTitle className="text-sm font-semibold">
               2. What's the topic? <span className="text-red-500">*</span>
             </CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="pt-0">
             <Select value={topic} onValueChange={setTopic}>
               <SelectTrigger>
                 <SelectValue placeholder="Select a topic..." />
@@ -296,7 +296,7 @@ ${platform === "instagram" || platform === "both" ? "4. Hashtag suggestions" : "
               <SelectContent>
                 {TOPIC_OPTIONS.map(option => (
                   <SelectItem key={option.value} value={option.value}>
-                    {option.label} - {option.description}
+                    {option.label}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -304,14 +304,14 @@ ${platform === "instagram" || platform === "both" ? "4. Hashtag suggestions" : "
           </CardContent>
         </Card>
 
-        {/* Platform & Post Type */}
+        {/* Platform, Post Type, CTA, Length - Compact Grid */}
         <Card>
           <CardContent className="pt-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
               <div>
-                <Label className="text-sm font-semibold mb-2 block">3. Platform</Label>
+                <Label className="text-xs font-semibold mb-1.5 block text-gray-600">Platform</Label>
                 <Select value={platform} onValueChange={setPlatform}>
-                  <SelectTrigger>
+                  <SelectTrigger className="h-9">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -324,9 +324,9 @@ ${platform === "instagram" || platform === "both" ? "4. Hashtag suggestions" : "
                 </Select>
               </div>
               <div>
-                <Label className="text-sm font-semibold mb-2 block">4. Post Type</Label>
+                <Label className="text-xs font-semibold mb-1.5 block text-gray-600">Post Type</Label>
                 <Select value={postType} onValueChange={setPostType}>
-                  <SelectTrigger>
+                  <SelectTrigger className="h-9">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -338,18 +338,10 @@ ${platform === "instagram" || platform === "both" ? "4. Hashtag suggestions" : "
                   </SelectContent>
                 </Select>
               </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* CTA & Length */}
-        <Card>
-          <CardContent className="pt-4">
-            <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label className="text-sm font-semibold mb-2 block">5. Call to Action</Label>
+                <Label className="text-xs font-semibold mb-1.5 block text-gray-600">Call to Action</Label>
                 <Select value={cta} onValueChange={setCta}>
-                  <SelectTrigger>
+                  <SelectTrigger className="h-9">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -362,9 +354,9 @@ ${platform === "instagram" || platform === "both" ? "4. Hashtag suggestions" : "
                 </Select>
               </div>
               <div>
-                <Label className="text-sm font-semibold mb-2 block">6. Length</Label>
+                <Label className="text-xs font-semibold mb-1.5 block text-gray-600">Length</Label>
                 <Select value={length} onValueChange={setLength}>
-                  <SelectTrigger>
+                  <SelectTrigger className="h-9">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -382,18 +374,18 @@ ${platform === "instagram" || platform === "both" ? "4. Hashtag suggestions" : "
 
         {/* Personal Touches */}
         <Card>
-          <CardHeader className="pb-3">
+          <CardHeader className="pb-2">
             <CardTitle className="text-sm font-semibold">
-              7. Personal touches to include (optional)
+              Personal touches (optional)
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="flex flex-wrap gap-2">
+          <CardContent className="pt-0">
+            <div className="flex flex-wrap gap-1.5">
               {PERSONAL_TOUCH_OPTIONS.map(option => (
                 <button
                   key={option.value}
                   onClick={() => togglePersonalTouch(option.value)}
-                  className={`px-3 py-1.5 rounded-full text-sm transition-all ${
+                  className={`px-2 py-1 rounded-full text-xs transition-all ${
                     personalTouches.includes(option.value)
                       ? "bg-[hsl(var(--optavia-green))] text-white"
                       : "bg-gray-100 text-gray-600 hover:bg-gray-200"
@@ -408,34 +400,36 @@ ${platform === "instagram" || platform === "both" ? "4. Hashtag suggestions" : "
 
         {/* Custom Details */}
         <Card>
-          <CardContent className="pt-4 space-y-4">
+          <CardContent className="pt-4 space-y-3">
             <div>
-              <Label className="text-sm font-semibold mb-2 block">
-                8. Specific detail to include (optional)
+              <Label className="text-xs font-semibold mb-1.5 block text-gray-600">
+                Specific detail to include (optional)
               </Label>
               <Input
                 value={specificDetail}
                 onChange={(e) => setSpecificDetail(e.target.value)}
-                placeholder="e.g., 'I just hit 50 lbs lost' or 'My son said I look happier'"
+                placeholder="e.g., 'I just hit 50 lbs lost'"
+                className="h-9 text-sm"
               />
             </div>
             
             <div>
-              <Label className="text-sm font-semibold mb-2 block">
-                9. Any other context? (optional)
+              <Label className="text-xs font-semibold mb-1.5 block text-gray-600">
+                Any other context? (optional)
               </Label>
               <Textarea
                 value={customContext}
                 onChange={(e) => setCustomContext(e.target.value)}
-                placeholder="e.g., 'I'm posting this on a Monday morning' or 'I want to address people who have tried other diets'"
-                rows={3}
+                placeholder="e.g., 'I'm posting this on a Monday morning'"
+                rows={2}
+                className="text-sm"
               />
             </div>
           </CardContent>
         </Card>
 
         {/* Generate Button */}
-        <div className="flex gap-3">
+        <div className="flex gap-2">
           <Button
             onClick={generatePrompt}
             disabled={!mood || !topic}
@@ -444,19 +438,19 @@ ${platform === "instagram" || platform === "both" ? "4. Hashtag suggestions" : "
             <Sparkles className="h-4 w-4 mr-2" />
             Generate Prompt
           </Button>
-          <Button variant="outline" onClick={resetForm}>
+          <Button variant="outline" onClick={resetForm} size="icon">
             <RotateCcw className="h-4 w-4" />
           </Button>
         </div>
       </div>
 
       {/* RIGHT: Generated Prompt Output */}
-      <div className="lg:sticky lg:top-6 h-fit space-y-4">
+      <div className="lg:sticky lg:top-4 h-fit space-y-3">
         <Card>
-          <CardHeader className="pb-3">
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-lg flex items-center gap-2">
-                📋 Your ChatGPT Prompt
+          <CardHeader className="pb-2">
+            <div className="flex items-center justify-between gap-2">
+              <CardTitle className="text-base flex items-center gap-2">
+                📋 Your Prompt
               </CardTitle>
               {generatedPrompt && (
                 <Button
@@ -469,94 +463,89 @@ ${platform === "instagram" || platform === "both" ? "4. Hashtag suggestions" : "
                 >
                   {copied ? (
                     <>
-                      <Check className="h-4 w-4 mr-1" />
+                      <Check className="h-3 w-3 mr-1" />
                       Copied!
                     </>
                   ) : (
                     <>
-                      <Copy className="h-4 w-4 mr-1" />
-                      Copy Prompt
+                      <Copy className="h-3 w-3 mr-1" />
+                      Copy
                     </>
                   )}
                 </Button>
               )}
             </div>
           </CardHeader>
-          <CardContent>
+          <CardContent className="pt-0">
             {generatedPrompt ? (
               <>
-                <div className="bg-gray-50 rounded-lg p-4 max-h-[400px] overflow-y-auto">
-                  <pre className="whitespace-pre-wrap text-sm text-gray-700 font-mono">
+                <div className="bg-gray-50 rounded-lg p-3 max-h-[250px] lg:max-h-[350px] overflow-y-auto">
+                  <pre className="whitespace-pre-wrap text-xs lg:text-sm text-gray-700 font-mono">
                     {generatedPrompt}
                   </pre>
                 </div>
                 
-                {/* Instructions */}
-                <div className="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
-                  <h3 className="font-semibold text-blue-800 mb-2 flex items-center gap-2">
-                    <Lightbulb className="h-4 w-4" />
-                    Next Steps
-                  </h3>
-                  <ol className="text-sm text-blue-700 space-y-1.5">
-                    <li>1. Click <strong>"Copy Prompt"</strong> above</li>
-                    <li>2. Open ChatGPT in a new tab</li>
-                    <li>3. Paste the prompt and press Enter</li>
-                    <li>4. Review the 3 versions and pick your favorite!</li>
-                    <li>5. Edit to add your personal voice</li>
-                  </ol>
-                </div>
-
                 {/* Quick Actions */}
-                <div className="mt-4">
+                <div className="mt-3 flex gap-2">
+                  <Button
+                    onClick={copyToClipboard}
+                    variant="outline"
+                    size="sm"
+                    className="flex-1"
+                  >
+                    <Copy className="h-3 w-3 mr-1" />
+                    Copy
+                  </Button>
                   <a
                     href="https://chat.openai.com"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center justify-center gap-2 w-full py-2.5 bg-gray-900 text-white rounded-lg font-medium hover:bg-gray-800 transition-colors"
+                    className="flex-1"
                   >
-                    <ExternalLink className="h-4 w-4" />
-                    Open ChatGPT
+                    <Button size="sm" className="w-full bg-gray-900 hover:bg-gray-800 text-white">
+                      <ExternalLink className="h-3 w-3 mr-1" />
+                      ChatGPT
+                    </Button>
                   </a>
+                </div>
+
+                {/* Instructions - Compact */}
+                <div className="mt-3 p-2.5 bg-blue-50 rounded-lg border border-blue-200">
+                  <p className="text-xs text-blue-700">
+                    <strong>Next:</strong> Copy prompt → Paste in ChatGPT → Get 3 post variations → Edit to match your voice
+                  </p>
                 </div>
               </>
             ) : (
-              <div className="bg-gray-50 rounded-lg p-8 text-center">
-                <div className="text-4xl mb-3">✏️</div>
-                <p className="text-gray-500">
-                  Fill out the form and click "Generate Prompt" to create your ChatGPT prompt
+              <div className="bg-gray-50 rounded-lg p-6 text-center">
+                <div className="text-3xl mb-2">✏️</div>
+                <p className="text-sm text-gray-500">
+                  Select mood & topic, then click "Generate Prompt"
                 </p>
-                <p className="text-sm text-gray-400 mt-2">
-                  You'll get 3 unique post variations to choose from
+                <p className="text-xs text-gray-400 mt-1">
+                  Get 3 unique post ideas
                 </p>
               </div>
             )}
           </CardContent>
         </Card>
 
-        {/* Tips Card */}
+        {/* Tips Card - More Compact */}
         <Card className="bg-gradient-to-br from-green-50 to-blue-50 border-0">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm flex items-center gap-2">
-              🎯 Pro Tips
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ul className="text-sm text-gray-600 space-y-2">
-              <li className="flex items-start gap-2">
-                <span className="text-green-500 mt-0.5">✓</span>
-                <span>Add specific details for more personalized posts</span>
+          <CardContent className="py-3">
+            <p className="text-xs font-semibold text-gray-700 mb-2">🎯 Pro Tips</p>
+            <ul className="text-xs text-gray-600 space-y-1">
+              <li className="flex items-start gap-1.5">
+                <span className="text-green-500">✓</span>
+                <span>Add specific details for personalized posts</span>
               </li>
-              <li className="flex items-start gap-2">
-                <span className="text-green-500 mt-0.5">✓</span>
-                <span>Mix up moods throughout the week for variety</span>
+              <li className="flex items-start gap-1.5">
+                <span className="text-green-500">✓</span>
+                <span>Mix up moods throughout the week</span>
               </li>
-              <li className="flex items-start gap-2">
-                <span className="text-green-500 mt-0.5">✓</span>
+              <li className="flex items-start gap-1.5">
+                <span className="text-green-500">✓</span>
                 <span>Always edit AI output to sound like YOU</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="text-green-500 mt-0.5">✓</span>
-                <span>Save your favorites to a swipe file for later</span>
               </li>
             </ul>
           </CardContent>
