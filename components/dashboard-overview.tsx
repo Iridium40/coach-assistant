@@ -570,7 +570,7 @@ export function DashboardOverview() {
               const totalMeetings = upcomingMeetings.length + haToday + clientCheckinsToday
               
               return (
-                <Link href="/client-tracker" className="block">
+                <Link href="/calendar" className="block">
                   <div className="p-4 rounded-lg bg-white border border-blue-200 hover:shadow-md transition-shadow cursor-pointer h-full">
                     <div className="flex items-center justify-between mb-2">
                       <span className="text-sm font-medium text-gray-600">Today's Meetings</span>
