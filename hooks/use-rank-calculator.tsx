@@ -1,10 +1,10 @@
 "use client"
 
-import { useState, useEffect, useCallback, useMemo } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { createClient } from "@/lib/supabase/client"
 import type { User } from "@supabase/supabase-js"
 
-// Rank order and requirements
+// Rank order
 export const RANK_ORDER = [
   'Coach',
   'Senior Coach',
@@ -17,69 +17,81 @@ export const RANK_ORDER = [
 
 export type RankType = typeof RANK_ORDER[number]
 
+// Get rank index (higher = more senior)
+export function getRankIndex(rank: string): number {
+  const index = RANK_ORDER.indexOf(rank as RankType)
+  return index >= 0 ? index : 0
+}
+
+// Check if a coach qualifies as a "qualifying leg" (Senior Coach or higher)
+export function isQualifyingLeg(rank: string): boolean {
+  return getRankIndex(rank) >= 1 // Senior Coach or higher
+}
+
+// Simplified requirements - clients, frontline coaches, and qualifying legs
 export const RANK_REQUIREMENTS: Record<RankType, {
-  minFQV: number
-  minQP: number
-  frontlineCoaches: number
   minClients: number
+  frontlineCoaches: number
+  qualifyingLegs: number  // Coaches at Senior Coach rank or higher
   description: string
   icon: string
+  note: string
 }> = {
   'Coach': {
-    minFQV: 0,
-    minQP: 0,
-    frontlineCoaches: 0,
     minClients: 0,
+    frontlineCoaches: 0,
+    qualifyingLegs: 0,
     description: 'Starting rank - welcome to the team!',
-    icon: '🌱'
+    icon: '🌱',
+    note: ''
   },
   'Senior Coach': {
-    minFQV: 1000,
-    minQP: 100,
-    frontlineCoaches: 0,
     minClients: 3,
-    description: 'Build your client base and hit 1,000 FQV',
-    icon: '⭐'
+    frontlineCoaches: 0,
+    qualifyingLegs: 0,
+    description: '3+ active clients with qualifying orders',
+    icon: '⭐',
+    note: 'Verify FQV requirements in OPTAVIA Connect'
   },
   'Executive Director': {
-    minFQV: 5000,
-    minQP: 500,
-    frontlineCoaches: 3,
     minClients: 5,
-    description: 'Sponsor 3 frontline coaches and hit 5,000 FQV',
-    icon: '💫'
+    frontlineCoaches: 3,
+    qualifyingLegs: 0,
+    description: '5+ clients and 3 frontline coaches',
+    icon: '💫',
+    note: 'Verify FQV requirements in OPTAVIA Connect'
   },
   'FIBC': {
-    minFQV: 10000,
-    minQP: 1000,
-    frontlineCoaches: 5,
     minClients: 8,
-    description: 'Front Income Business Coach - leadership begins here',
-    icon: '🏆'
+    frontlineCoaches: 5,
+    qualifyingLegs: 2,
+    description: '8+ clients, 5 coaches, 2 qualifying legs',
+    icon: '🏆',
+    note: 'Qualifying leg = Senior Coach or higher'
   },
   'Global Director': {
-    minFQV: 25000,
-    minQP: 2500,
-    frontlineCoaches: 6,
     minClients: 10,
-    description: 'Build a strong team with 25,000 FQV',
-    icon: '🌍'
+    frontlineCoaches: 6,
+    qualifyingLegs: 3,
+    description: '10+ clients, 6 coaches, 3 qualifying legs',
+    icon: '🌍',
+    note: 'Qualifying leg = Senior Coach or higher'
   },
   'Presidential Director': {
-    minFQV: 50000,
-    minQP: 5000,
-    frontlineCoaches: 8,
     minClients: 15,
-    description: 'Lead a large organization with 50,000 FQV',
-    icon: '👑'
+    frontlineCoaches: 8,
+    qualifyingLegs: 4,
+    description: '15+ clients, 8 coaches, 4 qualifying legs',
+    icon: '👑',
+    note: 'Qualifying leg = Senior Coach or higher'
   },
   'IPD': {
-    minFQV: 100000,
-    minQP: 10000,
-    frontlineCoaches: 10,
     minClients: 20,
-    description: 'Integrated Presidential Director - top tier',
-    icon: '💎'
+    frontlineCoaches: 10,
+    qualifyingLegs: 5,
+    description: '20+ clients, 10 coaches, 5 qualifying legs',
+    icon: '💎',
+    note: 'Verify all requirements in OPTAVIA Connect'
   }
 }
 
@@ -93,27 +105,27 @@ export const RANK_COLORS: Record<RankType, { bg: string; text: string; accent: s
   'IPD': { bg: 'bg-red-50', text: 'text-red-600', accent: 'bg-red-600' }
 }
 
-// Conversion rate assumptions
+// Conversion rate assumptions for projections
 export const CONVERSION_RATES = {
   cold_to_ha: 0.15,
   warm_to_ha: 0.40,
   scheduled_to_ha: 0.80,
   ha_to_client: 0.50,
   client_to_coach: 0.30,
-  avg_client_fqv: 300
+}
+
+export interface FrontlineCoach {
+  id: string
+  full_name: string | null
+  email: string | null
+  coach_rank: string
+  is_qualifying: boolean
 }
 
 export interface RankData {
   coach_id: string
   current_rank: RankType
   rank_achieved_date: string | null
-  current_fqv: number
-  current_pqv: number
-  qualifying_points: number
-  frontline_coaches: number
-  total_team_size: number
-  target_rank: RankType | null
-  target_date: string | null
 }
 
 export interface ProspectPipeline {
@@ -135,28 +147,26 @@ export interface Projections {
   projectedHAs: number
   newClients: number
   newCoaches: number
-  newFQV: number
-  totalFQV: number
   totalCoaches: number
   totalClients: number
 }
 
 export interface Gaps {
-  fqv: number
   coaches: number
   clients: number
-  qp: number
+  qualifyingLegs: number
 }
 
 export function useRankCalculator(user: User | null) {
   const [rankData, setRankData] = useState<RankData | null>(null)
+  const [frontlineCoaches, setFrontlineCoaches] = useState<FrontlineCoach[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
   const supabase = createClient()
 
-  // Load rank data
-  const loadRankData = useCallback(async () => {
+  // Load rank data and frontline coaches
+  const loadData = useCallback(async () => {
     if (!user) {
       setLoading(false)
       return
@@ -166,59 +176,69 @@ export function useRankCalculator(user: User | null) {
     setError(null)
 
     try {
-      // Try to get existing rank data
-      const { data, error: fetchError } = await supabase
+      // Load rank data
+      const { data: rankDataResult, error: rankError } = await supabase
         .from("coach_rank_data")
-        .select("*")
+        .select("coach_id, current_rank, rank_achieved_date")
         .eq("coach_id", user.id)
         .single()
 
-      if (fetchError && fetchError.code !== "PGRST116") {
-        throw fetchError
+      if (rankError && rankError.code !== "PGRST116") {
+        console.error("Error loading rank data:", rankError)
       }
 
-      if (data) {
-        setRankData(data as RankData)
+      if (rankDataResult) {
+        setRankData(rankDataResult as RankData)
       } else {
         // Create default rank data
-        const defaultData: Partial<RankData> = {
+        const defaultData: RankData = {
           coach_id: user.id,
           current_rank: "Coach",
-          current_fqv: 0,
-          current_pqv: 0,
-          qualifying_points: 0,
-          frontline_coaches: 0,
-          total_team_size: 0
+          rank_achieved_date: null
         }
+        setRankData(defaultData)
 
-        const { data: newData, error: insertError } = await supabase
+        // Try to insert default record
+        await supabase
           .from("coach_rank_data")
-          .insert([defaultData])
-          .select()
-          .single()
+          .insert([{ 
+            coach_id: user.id,
+            current_rank: "Coach",
+            current_fqv: 0,
+            current_pqv: 0,
+            qualifying_points: 0,
+            frontline_coaches: 0,
+            total_team_size: 0
+          }])
+      }
 
-        if (insertError) {
-          // If insert fails, just use default values in memory
-          setRankData(defaultData as RankData)
-        } else {
-          setRankData(newData as RankData)
-        }
+      // Load frontline coaches (profiles where sponsor_id = user.id)
+      const { data: coachesResult, error: coachesError } = await supabase
+        .from("profiles")
+        .select("id, full_name, email, coach_rank")
+        .eq("sponsor_id", user.id)
+
+      if (coachesError) {
+        console.error("Error loading frontline coaches:", coachesError)
+      }
+
+      if (coachesResult) {
+        const coaches: FrontlineCoach[] = coachesResult.map(c => ({
+          id: c.id,
+          full_name: c.full_name,
+          email: c.email,
+          coach_rank: c.coach_rank || "Coach",
+          is_qualifying: isQualifyingLeg(c.coach_rank || "Coach")
+        }))
+        setFrontlineCoaches(coaches)
       }
     } catch (err: any) {
-      console.error("Error loading rank data:", err)
+      console.error("Error loading data:", err)
       setError(err.message)
-      // Set default values on error
       setRankData({
         coach_id: user.id,
         current_rank: "Coach",
-        rank_achieved_date: null,
-        current_fqv: 0,
-        current_pqv: 0,
-        qualifying_points: 0,
-        frontline_coaches: 0,
-        total_team_size: 0,
-        target_rank: null,
-        target_date: null
+        rank_achieved_date: null
       })
     } finally {
       setLoading(false)
@@ -226,14 +246,13 @@ export function useRankCalculator(user: User | null) {
   }, [user])
 
   useEffect(() => {
-    loadRankData()
-  }, [loadRankData])
+    loadData()
+  }, [loadData])
 
   // Update rank data
   const updateRankData = useCallback(async (updates: Partial<RankData>) => {
     if (!user || !rankData) return
 
-    // Optimistic update
     setRankData(prev => prev ? { ...prev, ...updates } : prev)
 
     try {
@@ -241,23 +260,26 @@ export function useRankCalculator(user: User | null) {
         .from("coach_rank_data")
         .upsert({
           coach_id: user.id,
-          ...rankData,
-          ...updates
+          current_rank: updates.current_rank || rankData.current_rank,
+          rank_achieved_date: updates.rank_achieved_date || rankData.rank_achieved_date,
+          current_fqv: 0,
+          current_pqv: 0,
+          qualifying_points: 0,
+          frontline_coaches: frontlineCoaches.length,
+          total_team_size: frontlineCoaches.length
         })
 
       if (error) throw error
     } catch (err: any) {
       console.error("Error updating rank data:", err)
-      // Revert on error
-      loadRankData()
+      loadData()
     }
-  }, [user, rankData, loadRankData])
+  }, [user, rankData, frontlineCoaches.length, loadData])
 
   // Calculate projections from pipeline
   const calculateProjections = useCallback((
     prospects: ProspectPipeline,
-    clients: ClientStats,
-    stats: { fqv: number; frontlineCoaches: number }
+    clients: ClientStats
   ): Projections => {
     const totalProspects = prospects.cold + prospects.warm + prospects.ha_scheduled + prospects.ha_done
 
@@ -271,24 +293,20 @@ export function useRankCalculator(user: User | null) {
       (projectedHAs * CONVERSION_RATES.ha_to_client)
 
     const projectedNewCoaches = clients.coachProspects * CONVERSION_RATES.client_to_coach
-    const projectedNewFQV = projectedNewClients * CONVERSION_RATES.avg_client_fqv
 
     return {
       totalProspects,
       projectedHAs: Math.round(projectedHAs),
       newClients: Math.round(projectedNewClients),
       newCoaches: Math.round(projectedNewCoaches),
-      newFQV: Math.round(projectedNewFQV),
-      totalFQV: stats.fqv + Math.round(projectedNewFQV),
-      totalCoaches: stats.frontlineCoaches + Math.round(projectedNewCoaches),
+      totalCoaches: frontlineCoaches.length + Math.round(projectedNewCoaches),
       totalClients: clients.active + Math.round(projectedNewClients)
     }
-  }, [])
+  }, [frontlineCoaches.length])
 
   // Calculate gaps to next rank
   const calculateGaps = useCallback((
     currentRank: RankType,
-    stats: { fqv: number; qp: number; frontlineCoaches: number },
     activeClients: number
   ): Gaps | null => {
     const currentRankIndex = RANK_ORDER.indexOf(currentRank)
@@ -299,19 +317,18 @@ export function useRankCalculator(user: User | null) {
     if (!nextRank) return null
 
     const nextRankReqs = RANK_REQUIREMENTS[nextRank]
+    const qualifyingCount = frontlineCoaches.filter(c => c.is_qualifying).length
 
     return {
-      fqv: Math.max(0, nextRankReqs.minFQV - stats.fqv),
-      coaches: Math.max(0, nextRankReqs.frontlineCoaches - stats.frontlineCoaches),
+      coaches: Math.max(0, nextRankReqs.frontlineCoaches - frontlineCoaches.length),
       clients: Math.max(0, nextRankReqs.minClients - activeClients),
-      qp: Math.max(0, nextRankReqs.minQP - stats.qp)
+      qualifyingLegs: Math.max(0, nextRankReqs.qualifyingLegs - qualifyingCount)
     }
-  }, [])
+  }, [frontlineCoaches])
 
   // Calculate progress to next rank
   const calculateProgress = useCallback((
     currentRank: RankType,
-    stats: { fqv: number; frontlineCoaches: number },
     activeClients: number
   ): number => {
     const currentRankIndex = RANK_ORDER.indexOf(currentRank)
@@ -322,38 +339,25 @@ export function useRankCalculator(user: User | null) {
     if (!nextRank) return 100
 
     const nextRankReqs = RANK_REQUIREMENTS[nextRank]
-    const metrics: { weight: number; progress: number }[] = []
+    const qualifyingCount = frontlineCoaches.filter(c => c.is_qualifying).length
+    
+    // Calculate client progress (40% weight)
+    const clientProgress = nextRankReqs.minClients > 0
+      ? Math.min((activeClients / nextRankReqs.minClients) * 100, 100)
+      : 100
 
-    if (nextRankReqs.minFQV > 0) {
-      metrics.push({
-        weight: 0.5,
-        progress: Math.min((stats.fqv / nextRankReqs.minFQV) * 100, 100)
-      })
-    }
+    // Calculate coach progress (30% weight)
+    const coachProgress = nextRankReqs.frontlineCoaches > 0
+      ? Math.min((frontlineCoaches.length / nextRankReqs.frontlineCoaches) * 100, 100)
+      : 100
 
-    if (nextRankReqs.frontlineCoaches > 0) {
-      metrics.push({
-        weight: 0.3,
-        progress: Math.min((stats.frontlineCoaches / nextRankReqs.frontlineCoaches) * 100, 100)
-      })
-    } else {
-      metrics.push({ weight: 0.3, progress: 100 })
-    }
+    // Calculate qualifying legs progress (30% weight)
+    const legsProgress = nextRankReqs.qualifyingLegs > 0
+      ? Math.min((qualifyingCount / nextRankReqs.qualifyingLegs) * 100, 100)
+      : 100
 
-    if (nextRankReqs.minClients > 0) {
-      metrics.push({
-        weight: 0.2,
-        progress: Math.min((activeClients / nextRankReqs.minClients) * 100, 100)
-      })
-    } else {
-      metrics.push({ weight: 0.2, progress: 100 })
-    }
-
-    const totalWeight = metrics.reduce((sum, m) => sum + m.weight, 0)
-    const weightedProgress = metrics.reduce((sum, m) => sum + (m.progress * m.weight), 0)
-
-    return Math.round(weightedProgress / totalWeight)
-  }, [])
+    return Math.round((clientProgress * 0.4) + (coachProgress * 0.3) + (legsProgress * 0.3))
+  }, [frontlineCoaches])
 
   // Generate action items
   const generateActionItems = useCallback((
@@ -367,53 +371,55 @@ export function useRankCalculator(user: User | null) {
 
     const items: { priority: "high" | "medium" | "low"; text: string }[] = []
 
-    if (gaps.fqv > 0) {
-      const clientsNeeded = Math.ceil(gaps.fqv / CONVERSION_RATES.avg_client_fqv)
-      if (projections.newFQV < gaps.fqv) {
-        items.push({
-          priority: "high",
-          text: `Add ${clientsNeeded - projections.newClients} more prospects to close ${gaps.fqv.toLocaleString()} FQV gap`
-        })
-      }
+    // Client gaps
+    if (gaps.clients > 0) {
+      items.push({
+        priority: "high",
+        text: `Need ${gaps.clients} more active clients`
+      })
     }
 
+    // Coach gaps
     if (gaps.coaches > 0) {
       if (clients.coachProspects > 0) {
         items.push({
           priority: "high",
-          text: `Have business conversations with your ${clients.coachProspects} flagged coach prospects`
+          text: `Recruit ${gaps.coaches} more coaches (${clients.coachProspects} flagged as prospects)`
         })
       } else {
         items.push({
           priority: "medium",
-          text: `Flag ${gaps.coaches} successful clients as potential coaches`
+          text: `Need ${gaps.coaches} more frontline coaches`
         })
       }
     }
 
+    // Qualifying legs gaps
+    if (gaps.qualifyingLegs > 0) {
+      const nonQualifying = frontlineCoaches.filter(c => !c.is_qualifying)
+      if (nonQualifying.length > 0) {
+        items.push({
+          priority: "high",
+          text: `Help ${gaps.qualifyingLegs} coaches reach Senior Coach rank`
+        })
+      } else {
+        items.push({
+          priority: "medium",
+          text: `Need ${gaps.qualifyingLegs} qualifying legs (Senior Coach+)`
+        })
+      }
+    }
+
+    // Pipeline actions
     if (prospects.ha_done > 0) {
       items.push({
-        priority: "high",
-        text: `Follow up with ${prospects.ha_done} prospects who completed their Health Assessment`
-      })
-    }
-
-    if (prospects.warm > 0) {
-      items.push({
         priority: "medium",
-        text: `Schedule HAs with your ${prospects.warm} warm prospects`
+        text: `Follow up with ${prospects.ha_done} prospects who completed HA`
       })
     }
 
-    if (prospects.cold > 3) {
-      items.push({
-        priority: "low",
-        text: `Warm up ${prospects.cold} cold prospects with engagement`
-      })
-    }
-
-    return items
-  }, [])
+    return items.slice(0, 4)
+  }, [frontlineCoaches])
 
   // Get next rank
   const getNextRank = useCallback((currentRank: RankType): RankType | null => {
@@ -423,8 +429,13 @@ export function useRankCalculator(user: User | null) {
       : null
   }, [])
 
+  // Computed values
+  const qualifyingLegsCount = frontlineCoaches.filter(c => c.is_qualifying).length
+
   return {
     rankData,
+    frontlineCoaches,
+    qualifyingLegsCount,
     loading,
     error,
     updateRankData,
@@ -433,10 +444,9 @@ export function useRankCalculator(user: User | null) {
     calculateProgress,
     generateActionItems,
     getNextRank,
-    reload: loadRankData,
+    reload: loadData,
     RANK_ORDER,
     RANK_REQUIREMENTS,
-    RANK_COLORS,
-    CONVERSION_RATES
+    RANK_COLORS
   }
 }
