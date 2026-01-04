@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import Link from "next/link"
-import { useClients, getDayPhase, getProgramDay, type ClientStatus } from "@/hooks/use-clients"
+import { useClients, getDayPhase, getProgramDay, type ClientStatus, type RecurringFrequency } from "@/hooks/use-clients"
 import { useToast } from "@/hooks/use-toast"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -32,6 +32,7 @@ import {
   ExternalLink,
   Phone,
   Send,
+  Repeat,
 } from "lucide-react"
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
@@ -77,6 +78,15 @@ export default function ClientTrackerPage() {
   const [scheduleHour, setScheduleHour] = useState<number>(9)
   const [scheduleMinute, setScheduleMinute] = useState<string>("00")
   const [scheduleAmPm, setScheduleAmPm] = useState<"AM" | "PM">("AM")
+  const [recurringFrequency, setRecurringFrequency] = useState<RecurringFrequency>("none")
+
+  // Recurring frequency options
+  const RECURRING_OPTIONS: { value: RecurringFrequency; label: string }[] = [
+    { value: "none", label: "One-time" },
+    { value: "weekly", label: "Weekly" },
+    { value: "biweekly", label: "Every 2 weeks" },
+    { value: "monthly", label: "Monthly" },
+  ]
 
   const today = new Date().toISOString().split("T")[0]
 
@@ -168,10 +178,24 @@ ${phase.milestone ? `\n🎉 MILESTONE: ${phase.label} - Celebrate this achieveme
   // Open schedule modal
   const openScheduleModal = (client: any) => {
     setSelectedClient(client)
-    setScheduleDay(new Date().getDay())
-    setScheduleHour(9)
-    setScheduleMinute("00")
-    setScheduleAmPm("AM")
+    // Load existing recurring settings if available
+    if (client.recurring_day !== null && client.recurring_day !== undefined) {
+      setScheduleDay(client.recurring_day)
+    } else {
+      setScheduleDay(new Date().getDay())
+    }
+    if (client.recurring_time) {
+      const [hour, minute] = client.recurring_time.split(":")
+      const hourNum = parseInt(hour)
+      setScheduleHour(hourNum > 12 ? hourNum - 12 : hourNum === 0 ? 12 : hourNum)
+      setScheduleMinute(minute)
+      setScheduleAmPm(hourNum >= 12 ? "PM" : "AM")
+    } else {
+      setScheduleHour(9)
+      setScheduleMinute("00")
+      setScheduleAmPm("AM")
+    }
+    setRecurringFrequency(client.recurring_frequency || "none")
     setShowScheduleModal(true)
   }
 
@@ -184,17 +208,27 @@ ${phase.milestone ? `\n🎉 MILESTONE: ${phase.label} - Celebrate this achieveme
     const hour24 = get24Hour(scheduleHour, scheduleAmPm)
     targetDate.setHours(hour24, parseInt(scheduleMinute), 0, 0)
     
-    // Save the scheduled time to the client record
+    // Format time for storage (HH:MM in 24-hour format)
+    const timeStr = `${hour24.toString().padStart(2, "0")}:${scheduleMinute}`
+    
+    // Save the scheduled time and recurring settings to the client record
     await updateClient(selectedClient.id, {
-      next_scheduled_at: targetDate.toISOString()
+      next_scheduled_at: targetDate.toISOString(),
+      recurring_frequency: recurringFrequency,
+      recurring_day: recurringFrequency !== "none" ? scheduleDay : null,
+      recurring_time: recurringFrequency !== "none" ? timeStr : null,
     })
     
     const url = generateCalendarUrl(selectedClient, scheduleDay, scheduleHour, scheduleMinute, scheduleAmPm)
     window.open(url, "_blank")
     setShowScheduleModal(false)
+    
+    const recurringLabel = recurringFrequency !== "none" 
+      ? ` (${RECURRING_OPTIONS.find(r => r.value === recurringFrequency)?.label})`
+      : ""
     toast({
-      title: "📅 Check-in Scheduled",
-      description: `${scheduleHour}:${scheduleMinute} ${scheduleAmPm} on ${targetDate.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })}`,
+      title: recurringFrequency !== "none" ? "🔄 Recurring Check-in Set" : "📅 Check-in Scheduled",
+      description: `${scheduleHour}:${scheduleMinute} ${scheduleAmPm} on ${DAYS_OF_WEEK[scheduleDay].full}${recurringLabel}`,
     })
   }
 
@@ -420,6 +454,9 @@ ${phase.milestone ? `\n🎉 MILESTONE: ${phase.label} - Celebrate this achieveme
                                 hour: "numeric",
                                 minute: "2-digit",
                               })}
+                              {client.recurring_frequency && client.recurring_frequency !== "none" && (
+                                <Repeat className="h-3 w-3 ml-1" />
+                              )}
                             </Badge>
                             {client.phone && (
                               <Button
@@ -435,7 +472,12 @@ ${phase.milestone ? `\n🎉 MILESTONE: ${phase.label} - Celebrate this achieveme
                             <Button
                               variant="ghost"
                               size="sm"
-                              onClick={() => updateClient(client.id, { next_scheduled_at: null })}
+                              onClick={() => updateClient(client.id, { 
+                                next_scheduled_at: null,
+                                recurring_frequency: null,
+                                recurring_day: null,
+                                recurring_time: null 
+                              })}
                               className="h-7 w-7 p-0 text-gray-400 hover:text-red-500"
                               title="Clear scheduled time"
                             >
@@ -694,11 +736,43 @@ ${phase.milestone ? `\n🎉 MILESTONE: ${phase.label} - Celebrate this achieveme
                 <p className="text-xs text-gray-500 text-center mt-2">30 minute check-in</p>
               </div>
 
+              {/* Recurring Frequency */}
+              <div>
+                <Label className="text-sm font-medium mb-3 block flex items-center gap-2">
+                  <Repeat className="h-4 w-4 text-purple-500" />
+                  Recurring
+                </Label>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                  {RECURRING_OPTIONS.map((option) => (
+                    <button
+                      key={option.value}
+                      onClick={() => setRecurringFrequency(option.value)}
+                      className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                        recurringFrequency === option.value
+                          ? "bg-purple-600 text-white"
+                          : "bg-gray-100 hover:bg-gray-200 text-gray-700"
+                      }`}
+                    >
+                      {option.label}
+                    </button>
+                  ))}
+                </div>
+                {recurringFrequency !== "none" && (
+                  <p className="text-xs text-purple-600 mt-2 flex items-center gap-1">
+                    <Repeat className="h-3 w-3" />
+                    Repeats every {recurringFrequency === "weekly" ? "week" : recurringFrequency === "biweekly" ? "2 weeks" : "month"} on {DAYS_OF_WEEK[scheduleDay].full}
+                  </p>
+                )}
+              </div>
+
               {/* Info */}
               <div className="bg-purple-50 rounded-lg p-3 text-sm text-purple-700 flex items-start gap-2">
                 <Sparkles className="h-4 w-4 flex-shrink-0 mt-0.5" />
                 <span>
-                  This will open Google Calendar with a 30-minute event pre-filled with client details.
+                  {recurringFrequency !== "none" 
+                    ? "This will open Google Calendar. We'll track your recurring schedule and auto-advance to the next check-in date."
+                    : "This will open Google Calendar with a 30-minute event pre-filled with client details."
+                  }
                 </span>
               </div>
             </div>

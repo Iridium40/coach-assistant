@@ -1,8 +1,8 @@
--- Add scheduling and phone columns to clients and prospects tables
+-- Add scheduling, phone, and recurring columns to clients and prospects tables
 -- Run this in your Supabase SQL Editor
 
 -- ============================================
--- CLIENTS TABLE: Add next_scheduled_at and phone columns
+-- CLIENTS TABLE: Add scheduling and recurring columns
 -- ============================================
 DO $$ 
 BEGIN
@@ -39,10 +39,58 @@ BEGIN
   ELSE
     RAISE NOTICE 'Column phone already exists in clients table';
   END IF;
+  
+  -- Add recurring_frequency column (none, weekly, biweekly, monthly)
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns 
+    WHERE table_schema = 'public' 
+    AND table_name = 'clients' 
+    AND column_name = 'recurring_frequency'
+  ) THEN
+    ALTER TABLE public.clients 
+    ADD COLUMN recurring_frequency TEXT NULL CHECK (recurring_frequency IN ('none', 'weekly', 'biweekly', 'monthly'));
+    
+    RAISE NOTICE 'Column recurring_frequency added to clients table';
+  ELSE
+    RAISE NOTICE 'Column recurring_frequency already exists in clients table';
+  END IF;
+  
+  -- Add recurring_day column (0-6 for day of week)
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns 
+    WHERE table_schema = 'public' 
+    AND table_name = 'clients' 
+    AND column_name = 'recurring_day'
+  ) THEN
+    ALTER TABLE public.clients 
+    ADD COLUMN recurring_day INTEGER NULL CHECK (recurring_day >= 0 AND recurring_day <= 6);
+    
+    RAISE NOTICE 'Column recurring_day added to clients table';
+  ELSE
+    RAISE NOTICE 'Column recurring_day already exists in clients table';
+  END IF;
+  
+  -- Add recurring_time column (HH:MM format in 24-hour)
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns 
+    WHERE table_schema = 'public' 
+    AND table_name = 'clients' 
+    AND column_name = 'recurring_time'
+  ) THEN
+    ALTER TABLE public.clients 
+    ADD COLUMN recurring_time TEXT NULL;
+    
+    RAISE NOTICE 'Column recurring_time added to clients table';
+  ELSE
+    RAISE NOTICE 'Column recurring_time already exists in clients table';
+  END IF;
 END $$;
 
 COMMENT ON COLUMN public.clients.next_scheduled_at IS 'Next scheduled check-in date/time for the client';
 COMMENT ON COLUMN public.clients.phone IS 'Client phone number for SMS reminders';
+COMMENT ON COLUMN public.clients.recurring_frequency IS 'Recurring frequency: none, weekly, biweekly, or monthly';
+COMMENT ON COLUMN public.clients.recurring_day IS 'Day of week for recurring meetings (0=Sunday, 6=Saturday)';
+COMMENT ON COLUMN public.clients.recurring_time IS 'Time for recurring meetings in HH:MM 24-hour format';
 
 -- ============================================
 -- PROSPECTS TABLE: Add ha_scheduled_at and phone columns

@@ -13,8 +13,6 @@ import { Footer } from "@/components/footer"
 import { ClientTextTemplates } from "@/components/client-text-templates"
 import { RankCalculator } from "@/components/rank-calculator"
 import {
-  CheckCircle,
-  Circle,
   MessageSquare,
   Calendar,
   Users,
@@ -22,21 +20,41 @@ import {
   ChevronRight,
   Heart,
   Trophy,
-  Plus,
   Sparkles,
   TrendingUp,
   ChevronDown,
+  Clock,
+  CalendarPlus,
+  Send,
+  CheckCircle,
 } from "lucide-react"
 
 export default function WeeklyActionsDashboard() {
   const { profile } = useUserData()
   const { prospects, stats: prospectStats } = useProspects()
-  const { clients, stats: clientStats, toggleTouchpoint, needsAttention } = useClients()
+  const { clients, stats: clientStats, updateClient, needsAttention } = useClients()
 
   const [currentTime, setCurrentTime] = useState(new Date())
   const [showTextModal, setShowTextModal] = useState(false)
   const [selectedClient, setSelectedClient] = useState<any>(null)
   const [showRankCalculator, setShowRankCalculator] = useState(false)
+
+  // Generate SMS text for calendar invite
+  const generateSMSText = (client: any, scheduledAt: Date): string => {
+    const programDay = getProgramDay(client.start_date)
+    const dateStr = scheduledAt.toLocaleDateString("en-US", { weekday: "long", month: "short", day: "numeric" })
+    const timeStr = scheduledAt.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })
+    return `Hi! 🌟 Just a reminder about our check-in scheduled for ${dateStr} at ${timeStr}. Looking forward to connecting! Day ${programDay} - you're doing great! 💪`
+  }
+
+  // Send SMS with scheduled meeting info
+  const sendSMS = (client: any) => {
+    if (!client.phone || !client.next_scheduled_at) return
+    const scheduledAt = new Date(client.next_scheduled_at)
+    const message = generateSMSText(client, scheduledAt)
+    const smsUrl = `sms:${client.phone}?body=${encodeURIComponent(message)}`
+    window.open(smsUrl)
+  }
 
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 60000)
@@ -193,7 +211,7 @@ export default function WeeklyActionsDashboard() {
                       <Heart className="h-5 w-5 text-green-500" />
                       Client Check-ins
                     </CardTitle>
-                    <p className="text-xs text-gray-500 mt-1">AM/PM = Morning & evening touchpoints</p>
+                    <p className="text-xs text-gray-500 mt-1">Clients needing scheduled check-ins</p>
                   </div>
                   <Link href="/client-tracker">
                     <Button variant="ghost" size="sm" className="text-[hsl(var(--optavia-green))]">
@@ -206,7 +224,7 @@ export default function WeeklyActionsDashboard() {
                 {clientsNeedingAction.length === 0 && milestoneClients.length === 0 ? (
                   <div className="text-center py-8 text-gray-500">
                     <CheckCircle className="h-12 w-12 mx-auto mb-3 text-green-500" />
-                    <p>All client touchpoints completed today!</p>
+                    <p>All clients have scheduled check-ins!</p>
                   </div>
                 ) : (
                   <div className="space-y-3">
@@ -240,10 +258,13 @@ export default function WeeklyActionsDashboard() {
                       )
                     })}
 
-                    {/* Clients Needing Touchpoints */}
+                    {/* Clients Needing Scheduling */}
                     {clientsNeedingAction.map(client => {
                       const programDay = getProgramDay(client.start_date)
                       const phase = getDayPhase(programDay)
+                      const scheduledAt = client.next_scheduled_at ? new Date(client.next_scheduled_at) : null
+                      const isOverdue = scheduledAt && scheduledAt < new Date()
+                      
                       return (
                         <div
                           key={client.id}
@@ -263,24 +284,56 @@ export default function WeeklyActionsDashboard() {
                             </div>
                           </div>
                           <div className="flex items-center gap-2">
-                            <Button
-                              size="sm"
-                              variant={client.am_done ? "default" : "outline"}
-                              onClick={() => toggleTouchpoint(client.id, "am_done")}
-                              className={client.am_done ? "bg-green-500" : ""}
-                            >
-                              {client.am_done ? <CheckCircle className="h-3 w-3 mr-1" /> : <Circle className="h-3 w-3 mr-1" />}
-                              AM
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant={client.pm_done ? "default" : "outline"}
-                              onClick={() => toggleTouchpoint(client.id, "pm_done")}
-                              className={client.pm_done ? "bg-green-500" : ""}
-                            >
-                              {client.pm_done ? <CheckCircle className="h-3 w-3 mr-1" /> : <Circle className="h-3 w-3 mr-1" />}
-                              PM
-                            </Button>
+                            {/* Scheduled Time Display */}
+                            {scheduledAt ? (
+                              <div className="flex items-center gap-1">
+                                <Badge 
+                                  className={`flex items-center gap-1 ${
+                                    isOverdue 
+                                      ? "bg-red-100 text-red-700" 
+                                      : "bg-green-100 text-green-700"
+                                  }`}
+                                >
+                                  <Calendar className="h-3 w-3" />
+                                  {scheduledAt.toLocaleDateString("en-US", {
+                                    weekday: "short",
+                                    month: "short",
+                                    day: "numeric",
+                                  })}
+                                  {" "}
+                                  {scheduledAt.toLocaleTimeString("en-US", {
+                                    hour: "numeric",
+                                    minute: "2-digit",
+                                  })}
+                                </Badge>
+                                {client.phone && (
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => sendSMS(client)}
+                                    className="h-7 w-7 p-0 text-green-500 hover:text-green-700 hover:bg-green-50"
+                                    title="Send SMS reminder"
+                                  >
+                                    <Send className="h-3 w-3" />
+                                  </Button>
+                                )}
+                              </div>
+                            ) : (
+                              <Badge variant="outline" className="text-orange-600 border-orange-200">
+                                <Clock className="h-3 w-3 mr-1" />
+                                Needs scheduling
+                              </Badge>
+                            )}
+                            <Link href="/client-tracker">
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="text-purple-600 border-purple-200 hover:bg-purple-50"
+                              >
+                                <CalendarPlus className="h-4 w-4 mr-1" />
+                                Schedule
+                              </Button>
+                            </Link>
                             <Button
                               size="sm"
                               variant="outline"
@@ -328,8 +381,10 @@ export default function WeeklyActionsDashboard() {
                     </p>
                     {weeklyProspectReminders.map(prospect => {
                       const config = statusConfig[prospect.status]
-                      const actionDate = prospect.next_action ? new Date(prospect.next_action) : null
-                      const isPast = actionDate && actionDate < new Date(today)
+                      const hasHAScheduled = prospect.status === 'ha_scheduled' && prospect.ha_scheduled_at
+                      const scheduledDate = hasHAScheduled ? new Date(prospect.ha_scheduled_at!) : null
+                      const isOverdue = scheduledDate && scheduledDate < new Date()
+                      
                       return (
                         <div
                           key={prospect.id}
@@ -353,9 +408,49 @@ export default function WeeklyActionsDashboard() {
                                   {config.label}
                                 </Badge>
                               </div>
-                              <div className="text-sm text-gray-500">
-                                {isPast ? "Whenever you're ready" : actionDate?.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })}
-                              </div>
+                              {/* Show full scheduled date/time for HA */}
+                              {hasHAScheduled ? (
+                                <div className="flex items-center gap-1 mt-1">
+                                  <Badge 
+                                    className={`flex items-center gap-1 text-xs ${
+                                      isOverdue 
+                                        ? "bg-red-100 text-red-700" 
+                                        : "bg-green-100 text-green-700"
+                                    }`}
+                                  >
+                                    <Calendar className="h-3 w-3" />
+                                    {scheduledDate?.toLocaleDateString("en-US", {
+                                      weekday: "short",
+                                      month: "short",
+                                      day: "numeric",
+                                    })}
+                                    {" "}
+                                    {scheduledDate?.toLocaleTimeString("en-US", {
+                                      hour: "numeric",
+                                      minute: "2-digit",
+                                    })}
+                                  </Badge>
+                                  {prospect.phone && (
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      onClick={(e) => {
+                                        e.preventDefault()
+                                        const message = `Hi! 🌟 Just confirming our Health Assessment call for ${scheduledDate?.toLocaleDateString("en-US", { weekday: "long", month: "short", day: "numeric" })} at ${scheduledDate?.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })}. Looking forward to connecting! 💪`
+                                        window.open(`sms:${prospect.phone}?body=${encodeURIComponent(message)}`)
+                                      }}
+                                      className="h-6 w-6 p-0 text-green-500 hover:text-green-700 hover:bg-green-50"
+                                      title="Send SMS reminder"
+                                    >
+                                      <Send className="h-3 w-3" />
+                                    </Button>
+                                  )}
+                                </div>
+                              ) : (
+                                <div className="text-sm text-gray-500">
+                                  {prospect.next_action ? new Date(prospect.next_action).toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" }) : "No date set"}
+                                </div>
+                              )}
                             </div>
                           </div>
                           <Link href="/prospect-tracker">

@@ -7,6 +7,8 @@ import { useAuth } from "@/hooks/use-auth"
 // Types
 export type ClientStatus = 'active' | 'paused' | 'completed' | 'churned'
 
+export type RecurringFrequency = 'none' | 'weekly' | 'biweekly' | 'monthly'
+
 export interface Client {
   id: string
   user_id: string
@@ -19,6 +21,9 @@ export interface Client {
   pm_done: boolean
   last_touchpoint_date: string | null
   next_scheduled_at: string | null
+  recurring_frequency: RecurringFrequency | null
+  recurring_day: number | null  // 0-6 for day of week
+  recurring_time: string | null  // HH:MM format
   notes: string | null
   created_at: string
   updated_at: string
@@ -40,6 +45,9 @@ export interface UpdateClient {
   pm_done?: boolean
   last_touchpoint_date?: string | null
   next_scheduled_at?: string | null
+  recurring_frequency?: RecurringFrequency | null
+  recurring_day?: number | null
+  recurring_time?: string | null
   notes?: string | null
 }
 
