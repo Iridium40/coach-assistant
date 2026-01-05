@@ -244,11 +244,40 @@ export function useClients() {
     return updateClient(id, { status })
   }, [updateClient])
 
-  // Check if client needs attention (hasn't been checked in today)
+  // Check if client needs attention
+  // 1. Has a scheduled check-in for today or past (and not checked in yet)
+  // 2. Last check-in was over 10 days ago
   const needsAttention = useCallback((client: Client): boolean => {
     if (client.status !== 'active') return false
-    // Needs attention if not checked in today
-    return !client.am_done
+    
+    // If already checked in today, no attention needed
+    if (client.am_done) return false
+    
+    const now = new Date()
+    const todayStr = now.toISOString().split('T')[0]
+    
+    // Check if there's a scheduled check-in for today or past
+    if (client.next_scheduled_at) {
+      const scheduledDate = new Date(client.next_scheduled_at)
+      const scheduledDateStr = scheduledDate.toISOString().split('T')[0]
+      if (scheduledDateStr <= todayStr) {
+        return true
+      }
+    }
+    
+    // Check if last check-in was over 10 days ago
+    if (client.last_touchpoint_date) {
+      const lastCheckIn = new Date(client.last_touchpoint_date)
+      const daysSinceLastCheckIn = Math.floor((now.getTime() - lastCheckIn.getTime()) / (1000 * 60 * 60 * 24))
+      if (daysSinceLastCheckIn >= 10) {
+        return true
+      }
+    } else {
+      // No last check-in date means they've never been checked in
+      return true
+    }
+    
+    return false
   }, [])
 
   // Get stats
