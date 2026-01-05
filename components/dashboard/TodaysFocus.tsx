@@ -277,24 +277,21 @@ export function TodaysFocus({
                       <div className="text-xs text-orange-600">Check-in needed</div>
                     </div>
                   </div>
-                  <div className="flex gap-1">
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => toggleTouchpoint(client.id, "am_done")}
-                      className={`h-7 text-xs px-2 ${client.am_done ? "bg-green-100 text-green-700 border-green-300" : ""}`}
-                    >
-                      {client.am_done ? <CheckCircle className="h-3 w-3" /> : "AM"}
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => toggleTouchpoint(client.id, "pm_done")}
-                      className={`h-7 text-xs px-2 ${client.pm_done ? "bg-green-100 text-green-700 border-green-300" : ""}`}
-                    >
-                      {client.pm_done ? <CheckCircle className="h-3 w-3" /> : "PM"}
-                    </Button>
-                  </div>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => toggleTouchpoint(client.id, "am_done")}
+                    className={`h-7 text-xs px-3 ${client.am_done ? "bg-green-100 text-green-700 border-green-300" : "text-green-600 border-green-200"}`}
+                  >
+                    {client.am_done ? (
+                      <>
+                        <CheckCircle className="h-3 w-3 mr-1" />
+                        Done
+                      </>
+                    ) : (
+                      "Check In"
+                    )}
+                  </Button>
                 </div>
               )
             })}
