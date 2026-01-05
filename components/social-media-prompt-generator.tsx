@@ -267,14 +267,14 @@ ${platform === "instagram" || platform === "both" ? "4. Hashtag suggestions" : "
                 <button
                   key={option.value}
                   onClick={() => setMood(option.value)}
-                  className={`p-2 lg:p-3 rounded-lg border-2 text-left transition-all ${
+                  className={`p-3 rounded-lg border-2 text-left transition-all min-w-0 ${
                     mood === option.value
                       ? "border-[hsl(var(--optavia-green))] bg-green-50"
                       : "border-gray-200 hover:border-gray-300"
                   }`}
                 >
-                  <span className="font-medium text-xs lg:text-sm block truncate">{option.label}</span>
-                  <p className="text-[10px] lg:text-xs text-gray-500 mt-0.5 line-clamp-1">{option.description}</p>
+                  <span className="font-medium text-sm block">{option.label}</span>
+                  <p className="text-xs text-gray-500 mt-0.5 hidden sm:block">{option.description}</p>
                 </button>
               ))}
             </div>
@@ -304,14 +304,14 @@ ${platform === "instagram" || platform === "both" ? "4. Hashtag suggestions" : "
           </CardContent>
         </Card>
 
-        {/* Platform, Post Type, CTA, Length - Compact Grid */}
+        {/* Platform, Post Type, CTA, Length - Responsive Grid */}
         <Card>
           <CardContent className="pt-4">
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+            <div className="grid grid-cols-2 gap-4">
               <div>
                 <Label className="text-xs font-semibold mb-1.5 block text-gray-600">Platform</Label>
                 <Select value={platform} onValueChange={setPlatform}>
-                  <SelectTrigger className="h-9">
+                  <SelectTrigger className="h-9 w-full">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -326,7 +326,7 @@ ${platform === "instagram" || platform === "both" ? "4. Hashtag suggestions" : "
               <div>
                 <Label className="text-xs font-semibold mb-1.5 block text-gray-600">Post Type</Label>
                 <Select value={postType} onValueChange={setPostType}>
-                  <SelectTrigger className="h-9">
+                  <SelectTrigger className="h-9 w-full">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -341,7 +341,7 @@ ${platform === "instagram" || platform === "both" ? "4. Hashtag suggestions" : "
               <div>
                 <Label className="text-xs font-semibold mb-1.5 block text-gray-600">Call to Action</Label>
                 <Select value={cta} onValueChange={setCta}>
-                  <SelectTrigger className="h-9">
+                  <SelectTrigger className="h-9 w-full">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -356,7 +356,7 @@ ${platform === "instagram" || platform === "both" ? "4. Hashtag suggestions" : "
               <div>
                 <Label className="text-xs font-semibold mb-1.5 block text-gray-600">Length</Label>
                 <Select value={length} onValueChange={setLength}>
-                  <SelectTrigger className="h-9">
+                  <SelectTrigger className="h-9 w-full">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
