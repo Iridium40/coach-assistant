@@ -417,7 +417,7 @@ Talking Points:
                 onClick={() => setShowGuideModal(true)}
               >
                 <GraduationCap className="h-4 w-4 mr-2" />
-                Learn the 100's List Tracker
+                Learn the 100's List Journey
               </Button>
               <Link href="/client-tracker">
                 <Button variant="outline" className="bg-white/10 border-white/30 text-white hover:bg-white/20">
@@ -1371,7 +1371,7 @@ Talking Points:
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-hidden">
           <DialogHeader>
             <DialogTitle className="text-xl font-bold text-center">
-              Learn the 100's List Tracker
+              Learn the 100's List Journey
             </DialogTitle>
           </DialogHeader>
           <PipelineProgressionGuide />
