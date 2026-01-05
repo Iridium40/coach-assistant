@@ -39,6 +39,7 @@ import {
   ChevronLeft,
   CheckCircle,
   Circle,
+  Search,
 } from "lucide-react"
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
@@ -81,6 +82,7 @@ export default function ClientTrackerPage() {
   const [showScheduleModal, setShowScheduleModal] = useState(false)
   const [selectedClient, setSelectedClient] = useState<any>(null)
   const [filterStatus, setFilterStatus] = useState<ClientStatus | "all">("active")
+  const [searchTerm, setSearchTerm] = useState("")
   const [viewMode, setViewMode] = useState<"list" | "week">("list")
   const [weekOffset, setWeekOffset] = useState(0) // 0 = current week, 1 = next week, etc.
   
@@ -294,7 +296,9 @@ ${phase.milestone ? `\n🎉 MILESTONE: ${phase.label} - Celebrate this achieveme
     setShowTextModal(true)
   }
 
-  const filteredClients = getFilteredClients(filterStatus)
+  const filteredClients = getFilteredClients(filterStatus).filter(client =>
+    !searchTerm || client.label.toLowerCase().includes(searchTerm.toLowerCase())
+  )
 
   if (loading) {
     return (
@@ -398,22 +402,34 @@ ${phase.milestone ? `\n🎉 MILESTONE: ${phase.label} - Celebrate this achieveme
           </Card>
         </div>
 
-        {/* Filter and View Toggle */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-          {/* Filter Tabs */}
-          <div className="flex gap-2">
-            {(["active", "paused", "all"] as const).map((status) => (
-              <Button
-                key={status}
-                variant={filterStatus === status ? "default" : "outline"}
-                size="sm"
-                onClick={() => setFilterStatus(status)}
-                className={filterStatus === status ? "bg-[hsl(var(--optavia-green))]" : ""}
-              >
-                {status.charAt(0).toUpperCase() + status.slice(1)}
-              </Button>
-            ))}
+        {/* Search, Filter and View Toggle */}
+        <div className="flex flex-col gap-4 mb-6">
+          {/* Search Bar */}
+          <div className="relative max-w-md">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <Input
+              placeholder="Search clients..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10"
+            />
           </div>
+          
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            {/* Filter Tabs */}
+            <div className="flex gap-2">
+              {(["active", "paused", "all"] as const).map((status) => (
+                <Button
+                  key={status}
+                  variant={filterStatus === status ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setFilterStatus(status)}
+                  className={filterStatus === status ? "bg-[hsl(var(--optavia-green))]" : ""}
+                >
+                  {status.charAt(0).toUpperCase() + status.slice(1)}
+                </Button>
+              ))}
+            </div>
 
           {/* View Toggle */}
           <div className="flex rounded-lg border overflow-hidden">
@@ -439,6 +455,7 @@ ${phase.milestone ? `\n🎉 MILESTONE: ${phase.label} - Celebrate this achieveme
               <CalendarDays className="h-4 w-4" />
               Week
             </button>
+          </div>
           </div>
         </div>
 
