@@ -43,6 +43,7 @@ import { ShareHALink } from "@/components/coach-tools/share-ha-link"
 import { ClientOnboardingDialog } from "@/components/coach-tools/client-onboarding-dialog"
 import { ClientTroubleshootingDialog } from "@/components/coach-tools/client-troubleshooting-dialog"
 import { SocialMediaPromptGenerator } from "@/components/social-media-prompt-generator"
+import { OPTAVIAReferenceGuide } from "@/components/coach-tools/optavia-reference-guide"
 
 // Coach Tools definitions
 const COACH_TOOLS: { id: string; title: string; icon: LucideIcon; component: React.ComponentType }[] = [
@@ -54,6 +55,7 @@ const COACH_TOOLS: { id: string; title: string; icon: LucideIcon; component: Rea
   { id: "exercise-guide", title: "Exercise & Motion Guide", icon: Dumbbell, component: ExerciseGuide },
   { id: "metabolic-health", title: "Metabolic Health Education", icon: Activity, component: MetabolicHealthInfo },
   { id: "social-media-generator", title: "Social Media Post Generator", icon: Share2, component: SocialMediaPromptGenerator },
+  { id: "optavia-reference", title: "Condiments Quick Reference Guide", icon: BookOpen, component: OPTAVIAReferenceGuide },
 ]
 
 // External Resources definitions

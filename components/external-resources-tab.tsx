@@ -99,7 +99,7 @@ const COACH_TOOLS = [
   },
   {
     id: "optavia-reference",
-    title: "OPTAVIA Quick Reference",
+    title: "Condiments Quick Reference Guide",
     description: "Comprehensive guide to healthy fats, salad dressings, condiments, and portion sizes for the 5 & 1 Plan.",
     icon: BookOpen,
     component: OPTAVIAReferenceGuide,
