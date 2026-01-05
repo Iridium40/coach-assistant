@@ -565,11 +565,16 @@ Talking Points:
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          {Object.entries(statusConfig).map(([key, value]) => (
-                            <SelectItem key={key} value={key}>
-                              {value.icon} {value.label}
-                            </SelectItem>
-                          ))}
+                          {Object.entries(statusConfig)
+                            .filter(([key]) => 
+                              // Show current status + all except ha_scheduled and coach
+                              key === prospect.status || !["ha_scheduled", "coach"].includes(key)
+                            )
+                            .map(([key, value]) => (
+                              <SelectItem key={key} value={key}>
+                                {value.icon} {value.label}
+                              </SelectItem>
+                            ))}
                         </SelectContent>
                       </Select>
 
