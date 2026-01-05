@@ -19,6 +19,7 @@ import { WaterCalculator } from "@/components/coach-tools/water-calculator"
 import { ExerciseGuide } from "@/components/coach-tools/exercise-guide"
 import { MetabolicHealthInfo } from "@/components/coach-tools/metabolic-health-info"
 import { HealthAssessment } from "@/components/coach-tools/health-assessment"
+import { ShareHALink } from "@/components/coach-tools/share-ha-link"
 import { ClientOnboardingDialog } from "@/components/coach-tools/client-onboarding-dialog"
 import { ClientTroubleshootingDialog } from "@/components/coach-tools/client-troubleshooting-dialog"
 import { SocialMediaPromptGenerator } from "@/components/social-media-prompt-generator"
@@ -35,6 +36,13 @@ interface Resource {
 
 // Coach Tools definitions
 const COACH_TOOLS = [
+  {
+    id: "share-ha-link",
+    title: "Share Health Assessment",
+    description: "Send your personalized health assessment link to prospects via email, SMS, or social media.",
+    icon: Share2,
+    component: ShareHALink,
+  },
   {
     id: "health-assessment",
     title: "Health Assessment Call Checklist",
