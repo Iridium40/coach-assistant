@@ -1,5 +1,6 @@
 "use client"
 
+import React from "react"
 import Link from "next/link"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -147,24 +148,24 @@ export function QuickActions({
   const displayActions = actions.slice(0, 4)
 
   return (
-    <Card className="bg-white border border-gray-200 shadow-sm">
+    <Card className="bg-white border border-gray-200 shadow-sm h-full">
       <CardHeader className="pb-3">
         <CardTitle className="text-lg flex items-center gap-2 text-optavia-dark">
           <Sparkles className="h-5 w-5 text-amber-500" />
           Quick Actions
         </CardTitle>
       </CardHeader>
-      <CardContent className="pt-0">
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+      <CardContent className="pt-0 h-[calc(100%-60px)]">
+        <div className="grid grid-cols-2 gap-3 h-full">
           {displayActions.map((action) => (
             <Link key={action.id} href={action.href} className="flex">
               <div
-                className={`flex-1 p-4 rounded-lg border transition-all cursor-pointer ${action.bgClass}`}
+                className={`flex-1 p-4 rounded-lg border transition-all cursor-pointer flex flex-col justify-center items-center text-center aspect-square ${action.bgClass}`}
               >
                 <div className={`${action.iconClass} mb-2`}>
-                  {action.icon}
+                  {React.cloneElement(action.icon as React.ReactElement, { className: "h-8 w-8" })}
                 </div>
-                <p className="text-sm font-medium text-optavia-dark">{action.label}</p>
+                <p className="text-sm font-medium text-optavia-dark leading-tight">{action.label}</p>
                 <p className="text-xs text-gray-500 mt-1">{action.description}</p>
               </div>
             </Link>
