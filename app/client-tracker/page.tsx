@@ -347,7 +347,7 @@ ${phase.milestone ? `\n🎉 MILESTONE: ${phase.label} - Celebrate this achieveme
               <Link href="/prospect-tracker">
                 <Button variant="outline" className="bg-white/10 border-white/30 text-white hover:bg-white/20">
                   <Users className="h-4 w-4 mr-2" />
-                  Prospects
+                  100's List
                 </Button>
               </Link>
               <Button

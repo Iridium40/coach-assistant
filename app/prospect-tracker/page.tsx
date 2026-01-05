@@ -38,6 +38,12 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
+import {
   Users,
   Plus,
   Search,
@@ -460,17 +466,43 @@ Talking Points:
                 />
               </div>
               <div className="flex gap-2 flex-wrap">
-                {(["all", "new", "interested", "converted", "not_interested", "not_closed"] as const).map((status) => (
-                  <Button
-                    key={status}
-                    variant={filterStatus === status ? "default" : "outline"}
-                    size="sm"
-                    onClick={() => setFilterStatus(status)}
-                    className={filterStatus === status ? "bg-[hsl(var(--optavia-green))]" : ""}
-                  >
-                    {status === "all" ? "All" : statusConfig[status as ProspectStatus]?.label || status}
-                  </Button>
-                ))}
+                <TooltipProvider>
+                  {(["all", "new", "interested", "converted", "not_interested", "not_closed"] as const).map((status) => {
+                    const statusTooltips: Record<string, string> = {
+                      new: "Reach Out",
+                      interested: "Send HA",
+                      converted: "Client Won!",
+                      not_interested: "Remove from 100's List",
+                      not_closed: "Set Reminder to Reach Out Again",
+                    }
+                    
+                    const button = (
+                      <Button
+                        key={status}
+                        variant={filterStatus === status ? "default" : "outline"}
+                        size="sm"
+                        onClick={() => setFilterStatus(status)}
+                        className={filterStatus === status ? "bg-[hsl(var(--optavia-green))]" : ""}
+                      >
+                        {status === "all" ? "All" : statusConfig[status as ProspectStatus]?.label || status}
+                      </Button>
+                    )
+                    
+                    // "All" doesn't need a tooltip
+                    if (status === "all") return button
+                    
+                    return (
+                      <Tooltip key={status}>
+                        <TooltipTrigger asChild>
+                          {button}
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>{statusTooltips[status]}</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    )
+                  })}
+                </TooltipProvider>
               </div>
             </div>
           </CardContent>
