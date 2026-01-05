@@ -2,7 +2,11 @@
 
 import React, { useState } from 'react'
 import { Input } from "@/components/ui/input"
-import { Search, X } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { Search, X, Share2, Copy, Check, MessageSquare } from "lucide-react"
+import { useToast } from "@/hooks/use-toast"
+
+const CONDIMENT_PDF_URL = "https://optaviamedia.com/pdf/LEARN/OPTAVIA_CondimentSheet.pdf"
 
 // ============================================================================
 // CONFIGURATION DATA
@@ -427,10 +431,42 @@ interface SearchItem {
 // ============================================================================
 
 export function OPTAVIAReferenceGuide() {
+  const { toast } = useToast()
   const [activeTab, setActiveTab] = useState('fats')
   const [searchQuery, setSearchQuery] = useState('')
   const [isSearching, setIsSearching] = useState(false)
   const [showAllSpices, setShowAllSpices] = useState(false)
+  const [copied, setCopied] = useState(false)
+  const [showShareOptions, setShowShareOptions] = useState(false)
+
+  // Share functionality
+  const handleCopyLink = async () => {
+    try {
+      await navigator.clipboard.writeText(CONDIMENT_PDF_URL)
+      setCopied(true)
+      toast({
+        title: "Link copied!",
+        description: "The PDF link has been copied to your clipboard.",
+      })
+      setTimeout(() => setCopied(false), 2000)
+    } catch {
+      toast({
+        title: "Copy failed",
+        description: "Please copy the link manually",
+        variant: "destructive",
+      })
+    }
+  }
+
+  const handleTextLink = () => {
+    const message = `Check out this OPTAVIA Condiments Quick Reference Guide! 🥗\n\n${CONDIMENT_PDF_URL}`
+    // Try SMS first
+    window.open(`sms:?body=${encodeURIComponent(message)}`)
+    toast({
+      title: "Opening messages",
+      description: "Paste the link to send to your client!",
+    })
+  }
 
   // ============ SEARCH FUNCTIONALITY ============
   
@@ -784,8 +820,62 @@ export function OPTAVIAReferenceGuide() {
     <div className="space-y-4">
       {/* Header */}
       <div className="bg-gradient-to-r from-green-600 to-green-500 text-white rounded-xl p-4">
-        <h2 className="text-xl font-bold mb-1">OPTAVIA Quick Reference Guide</h2>
-        <p className="text-green-100 text-sm mb-3">Optimal Weight 5 & 1 Plan</p>
+        <div className="flex items-start justify-between mb-3">
+          <div>
+            <h2 className="text-xl font-bold mb-1">OPTAVIA Quick Reference Guide</h2>
+            <p className="text-green-100 text-sm">Optimal Weight 5 & 1 Plan</p>
+          </div>
+          
+          {/* Share Button */}
+          <div className="relative">
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => setShowShareOptions(!showShareOptions)}
+              className="bg-white/20 hover:bg-white/30 text-white border-0"
+            >
+              <Share2 className="h-4 w-4 mr-1.5" />
+              Share PDF
+            </Button>
+            
+            {/* Share Dropdown */}
+            {showShareOptions && (
+              <div className="absolute right-0 top-full mt-2 bg-white rounded-lg shadow-lg border p-2 min-w-[180px] z-10">
+                <button
+                  onClick={() => {
+                    handleCopyLink()
+                    setShowShareOptions(false)
+                  }}
+                  className="w-full flex items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-md"
+                >
+                  {copied ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
+                  {copied ? "Copied!" : "Copy Link"}
+                </button>
+                <button
+                  onClick={() => {
+                    handleTextLink()
+                    setShowShareOptions(false)
+                  }}
+                  className="w-full flex items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-md"
+                >
+                  <MessageSquare className="h-4 w-4" />
+                  Text to Client
+                </button>
+                <div className="border-t my-1" />
+                <a
+                  href={CONDIMENT_PDF_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full flex items-center gap-2 px-3 py-2 text-sm text-green-600 hover:bg-green-50 rounded-md"
+                  onClick={() => setShowShareOptions(false)}
+                >
+                  <Share2 className="h-4 w-4" />
+                  Open PDF
+                </a>
+              </div>
+            )}
+          </div>
+        </div>
         
         {/* Search Bar */}
         <div className="relative">
