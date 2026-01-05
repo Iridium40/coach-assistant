@@ -34,7 +34,7 @@ export default function DownlineProgressPage() {
   }, [authLoading, user])
 
   const loadDownlineProgress = async () => {
-    if (!user || !profile?.optavia_id) {
+    if (!user || !profile?.id) {
       setDownlineCoaches([])
       setLoading(false)
       return
@@ -43,11 +43,11 @@ export default function DownlineProgressPage() {
     const supabase = createClient()
 
     try {
-      // Get profiles for downline coaches (coaches whose parent_optavia_id matches this coach's optavia_id)
+      // Get profiles for downline coaches (coaches whose sponsor_id matches this coach's profile id)
       const { data: profiles, error: profilesError } = await supabase
         .from("profiles")
         .select("id, email, full_name, optavia_id, is_new_coach")
-        .eq("parent_optavia_id", profile.optavia_id)
+        .eq("sponsor_id", profile.id)
 
       if (profilesError) {
         console.error("Error loading profiles:", profilesError)
