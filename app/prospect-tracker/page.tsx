@@ -403,8 +403,8 @@ Talking Points:
           </Card>
           <Card>
             <CardContent className="p-4 text-center">
-              <div className="text-3xl font-bold text-blue-500">{stats.inProgress}</div>
-              <div className="text-sm text-gray-500">In Progress</div>
+              <div className="text-3xl font-bold text-purple-500">{stats.haScheduled}</div>
+              <div className="text-sm text-gray-500">HA Scheduled</div>
             </CardContent>
           </Card>
           <Card className="bg-green-50 border-green-200">
@@ -573,11 +573,14 @@ Talking Points:
                         </SelectContent>
                       </Select>
 
-                      {/* Health Assessment Controls */}
+                      {/* Health Assessment Controls - Mobile Friendly */}
                       {prospect.status !== "converted" && prospect.status !== "coach" && (
                         <div className="flex items-center border rounded-lg overflow-hidden">
-                          <span className="px-3 py-1.5 bg-gray-50 text-xs font-medium text-gray-600 border-r">
+                          <span className="px-2 sm:px-3 py-1.5 bg-gray-50 text-xs font-medium text-gray-600 border-r hidden sm:block">
                             Health Assessment
+                          </span>
+                          <span className="px-2 py-1.5 bg-gray-50 text-xs font-medium text-gray-600 border-r sm:hidden">
+                            HA
                           </span>
                           <Button
                             variant="ghost"
@@ -588,11 +591,11 @@ Talking Points:
                               setProspectPhone((prospect as any).phone || "")
                               setShowHASendModal(true)
                             }}
-                            className="rounded-none h-8 px-3 text-blue-600 hover:bg-blue-50 hover:text-blue-700"
+                            className="rounded-none h-8 px-2 sm:px-3 text-blue-600 hover:bg-blue-50 hover:text-blue-700"
                             title="Send HA Invite"
                           >
-                            <Send className="h-3.5 w-3.5 mr-1" />
-                            Send
+                            <Send className="h-3.5 w-3.5 sm:mr-1" />
+                            <span className="hidden sm:inline">Send</span>
                           </Button>
                           <div className="w-px h-5 bg-gray-200" />
                           <Button
@@ -608,11 +611,11 @@ Talking Points:
                               setProspectPhone((prospect as any).phone || "")
                               setShowHAScheduleModal(true)
                             }}
-                            className="rounded-none h-8 px-3 text-green-600 hover:bg-green-50 hover:text-green-700"
+                            className="rounded-none h-8 px-2 sm:px-3 text-green-600 hover:bg-green-50 hover:text-green-700"
                             title="Schedule HA"
                           >
-                            <CalendarPlus className="h-3.5 w-3.5 mr-1" />
-                            Schedule
+                            <CalendarPlus className="h-3.5 w-3.5 sm:mr-1" />
+                            <span className="hidden sm:inline">Schedule</span>
                           </Button>
                         </div>
                       )}
