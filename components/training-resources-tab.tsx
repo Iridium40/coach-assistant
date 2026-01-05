@@ -3,6 +3,7 @@
 import { useState, useMemo, useCallback } from "react"
 import { useTrainingResources, typeIcons, type TrainingResource } from "@/hooks/use-training-resources"
 import { useUserData } from "@/contexts/user-data-context"
+import { useBookmarks } from "@/hooks/use-bookmarks"
 import { SearchWithHistory } from "@/components/search-with-history"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -14,12 +15,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { Search, ExternalLink, FileText, Video, Palette, Link2, ChevronDown, ChevronRight, CheckCircle, Circle } from "lucide-react"
+import { Search, ExternalLink, FileText, Video, Palette, Link2, ChevronDown, ChevronRight, CheckCircle, Circle, Bookmark } from "lucide-react"
 import { EmbeddedContentViewer } from "@/components/embedded-content-viewer"
+import { useToast } from "@/hooks/use-toast"
 
 export function TrainingResourcesTab() {
   const { user, profile } = useUserData()
   const userRank = profile?.coach_rank || null
+  const { toast } = useToast()
   
   const {
     resources,
@@ -33,6 +36,8 @@ export function TrainingResourcesTab() {
     getCategoryProgress,
   } = useTrainingResources(user, userRank)
 
+  const { isBookmarked, toggleBookmark } = useBookmarks(user)
+
   const [selectedCategory, setSelectedCategory] = useState<string>("All")
   const [searchQuery, setSearchQuery] = useState("")
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set())
@@ -42,8 +47,13 @@ export function TrainingResourcesTab() {
   // Types that cannot be embedded - open directly in new tab
   const nonEmbeddableTypes = ["canva"]
   
-  // Open resource in embedded viewer or new tab
+  // Open resource in embedded viewer or new tab - also marks as complete
   const openResource = (resource: TrainingResource) => {
+    // Mark as complete when opening (if not already)
+    if (user && !isCompleted(resource.id)) {
+      toggleCompletion(resource.id)
+    }
+    
     // Check if resource type or URL indicates non-embeddable content
     const isCanvaUrl = resource.url.includes("canva.com")
     const isNonEmbeddable = nonEmbeddableTypes.includes(resource.type) || isCanvaUrl
@@ -55,6 +65,26 @@ export function TrainingResourcesTab() {
       // Open in embedded viewer
       setSelectedResource(resource)
       setViewerOpen(true)
+    }
+  }
+
+  // Handle bookmark toggle
+  const handleToggleBookmark = async (e: React.MouseEvent, resourceId: string, resourceTitle: string) => {
+    e.preventDefault()
+    e.stopPropagation()
+    
+    if (!user) return
+    
+    const wasBookmarked = isBookmarked(resourceId)
+    const success = await toggleBookmark(resourceId)
+    
+    if (success) {
+      toast({
+        title: wasBookmarked ? "Bookmark removed" : "Bookmarked!",
+        description: wasBookmarked 
+          ? `"${resourceTitle}" removed from bookmarks`
+          : `"${resourceTitle}" added to bookmarks`,
+      })
     }
   }
 
@@ -309,6 +339,7 @@ export function TrainingResourcesTab() {
                   <div className="border-t bg-gray-50/50 divide-y divide-gray-100">
                     {catResources.map((resource) => {
                       const completed = isCompleted(resource.id)
+                      const bookmarked = isBookmarked(resource.id)
                       return (
                         <div
                           key={resource.id}
@@ -361,6 +392,23 @@ export function TrainingResourcesTab() {
                               <ExternalLink className="h-4 w-4 text-gray-400 group-hover:text-[hsl(var(--optavia-green))] transition-colors" />
                             </div>
                           </button>
+
+                          {/* Bookmark Button */}
+                          {user && (
+                            <button
+                              onClick={(e) => handleToggleBookmark(e, resource.id, resource.title)}
+                              className="flex-shrink-0 p-1 hover:bg-gray-200 rounded transition-colors"
+                              title={bookmarked ? "Remove bookmark" : "Bookmark this resource"}
+                            >
+                              <Bookmark 
+                                className={`h-4 w-4 transition-colors ${
+                                  bookmarked 
+                                    ? "fill-amber-400 text-amber-400" 
+                                    : "text-gray-300 hover:text-amber-400"
+                                }`} 
+                              />
+                            </button>
+                          )}
                         </div>
                       )
                     })}
