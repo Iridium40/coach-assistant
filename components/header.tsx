@@ -63,7 +63,7 @@ export function Header({ onSettingsClick, onHomeClick, onAnnouncementsClick, onR
   const allNavItems = [
     { id: "dashboard" as const, label: "Dashboard", href: "/dashboard", fullAccessOnly: true },
     { id: "training" as const, label: "Training", href: "/training", fullAccessOnly: false },
-    { id: "calendar" as const, label: "Calendar", href: "/calendar", fullAccessOnly: true },
+    { id: "calendar" as const, label: "Events", href: "/calendar", fullAccessOnly: true },
     { id: "resources" as const, label: "Resources", href: "/resources", fullAccessOnly: true },
     { id: "recipes" as const, label: "Recipes", href: "/recipes", fullAccessOnly: true },
   ]
