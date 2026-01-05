@@ -445,25 +445,25 @@ ${phase.milestone ? `\n🎉 MILESTONE: ${phase.label} - Celebrate this achieveme
           <div className="flex rounded-lg border overflow-hidden">
             <button
               onClick={() => setViewMode("list")}
-              className={`px-4 py-2 flex items-center justify-center gap-2 text-sm font-medium transition-colors min-w-[90px] ${
+              className={`px-3 sm:px-4 py-2 flex items-center justify-center gap-1.5 sm:gap-2 text-sm font-medium transition-colors ${
                 viewMode === "list"
                   ? "bg-[hsl(var(--optavia-green))] text-white"
                   : "bg-white text-gray-700 hover:bg-gray-100"
               }`}
             >
               <List className="h-4 w-4" />
-              List
+              <span className="hidden sm:inline">List</span>
             </button>
             <button
               onClick={() => setViewMode("week")}
-              className={`px-4 py-2 flex items-center justify-center gap-2 text-sm font-medium transition-colors min-w-[90px] ${
+              className={`px-3 sm:px-4 py-2 flex items-center justify-center gap-1.5 sm:gap-2 text-sm font-medium transition-colors ${
                 viewMode === "week"
                   ? "bg-[hsl(var(--optavia-green))] text-white"
                   : "bg-white text-gray-700 hover:bg-gray-100"
               }`}
             >
               <CalendarDays className="h-4 w-4" />
-              Week
+              <span className="hidden sm:inline">Week</span>
             </button>
           </div>
           </div>
