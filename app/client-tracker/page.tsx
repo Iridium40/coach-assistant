@@ -1022,6 +1022,7 @@ ${phase.milestone ? `\n🎉 MILESTONE: ${phase.label} - Celebrate this achieveme
                   onPhoneChange={setClientPhone}
                   onScheduleComplete={handleSaveSchedule}
                   eventType="check-in"
+                  recurringFrequency={recurringFrequency}
                 />
               )}
 

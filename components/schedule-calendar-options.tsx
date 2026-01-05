@@ -10,6 +10,8 @@ import { useUserData } from "@/contexts/user-data-context"
 import { sendCalendarInviteEmail } from "@/lib/email"
 import type { CalendarEvent } from "@/lib/calendar-utils"
 
+export type RecurringFrequency = "none" | "weekly" | "biweekly" | "monthly"
+
 interface ScheduleCalendarOptionsProps {
   event: CalendarEvent
   recipientName?: string
@@ -19,6 +21,7 @@ interface ScheduleCalendarOptionsProps {
   onPhoneChange?: (phone: string) => void
   onScheduleComplete?: () => void
   eventType?: "check-in" | "ha"
+  recurringFrequency?: RecurringFrequency
   className?: string
 }
 
@@ -29,6 +32,7 @@ export function ScheduleCalendarOptions({
   onEmailChange,
   onScheduleComplete,
   eventType = "check-in",
+  recurringFrequency = "none",
   className = "",
 }: ScheduleCalendarOptionsProps) {
   const { toast } = useToast()
@@ -52,6 +56,16 @@ export function ScheduleCalendarOptions({
     onEmailChange?.(value)
   }
 
+  // Get recurring label for display
+  const getRecurringLabel = (frequency: RecurringFrequency): string => {
+    switch (frequency) {
+      case "weekly": return "every week"
+      case "biweekly": return "every 2 weeks"
+      case "monthly": return "every month"
+      default: return ""
+    }
+  }
+
   // Generate the text invite message
   const generateTextInvite = () => {
     const dateStr = event.startDate.toLocaleDateString("en-US", {
@@ -66,13 +80,18 @@ export function ScheduleCalendarOptions({
 
     const eventLabel = eventType === "ha" ? "Health Assessment" : "check-in"
     const greeting = recipientName ? `Hi ${recipientName}!` : "Hi!"
+    
+    // Add recurring info if applicable
+    const recurringInfo = recurringFrequency !== "none" 
+      ? `\n🔄 Recurring ${getRecurringLabel(recurringFrequency)}`
+      : ""
 
     return `${greeting}
 
 I'd like to schedule a ${eventLabel} with you.
 
 📅 ${dateStr}
-⏰ ${timeStr}
+⏰ ${timeStr}${recurringInfo}
 
 Looking forward to connecting with you!
 
