@@ -17,8 +17,7 @@ import {
   Mail,
   MessageSquare,
   Facebook,
-  Twitter,
-  Linkedin,
+  Instagram,
   X,
 } from "lucide-react"
 
@@ -123,15 +122,15 @@ export function ShareHealthAssessment({
     window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(assessmentLink)}`, "_blank", "width=600,height=400")
   }
 
-  const handleShareTwitter = () => {
+  const handleShareInstagram = () => {
+    // Instagram doesn't support direct URL sharing, so we copy the link and open Instagram
     if (!assessmentLink) return
-    const text = encodeURIComponent(`Take a moment to complete this quick health assessment! 💚`)
-    window.open(`https://twitter.com/intent/tweet?text=${text}&url=${encodeURIComponent(assessmentLink)}`, "_blank", "width=600,height=400")
-  }
-
-  const handleShareLinkedIn = () => {
-    if (!assessmentLink) return
-    window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(assessmentLink)}`, "_blank", "width=600,height=400")
+    navigator.clipboard.writeText(customMessage)
+    toast({
+      title: "Message copied!",
+      description: "Paste it in your Instagram DM or story",
+    })
+    window.open("https://www.instagram.com/", "_blank")
   }
 
   if (!assessmentLink) {
@@ -241,7 +240,7 @@ export function ShareHealthAssessment({
             {/* Social Media Section */}
             <div className="space-y-3">
               <Label className="font-semibold">Share on Social Media</Label>
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-2 gap-2">
                 <Button
                   variant="outline"
                   onClick={handleShareFacebook}
@@ -252,19 +251,11 @@ export function ShareHealthAssessment({
                 </Button>
                 <Button
                   variant="outline"
-                  onClick={handleShareTwitter}
-                  className="flex flex-col items-center gap-1 h-auto py-3 hover:bg-sky-50 hover:border-sky-400 hover:text-sky-600"
+                  onClick={handleShareInstagram}
+                  className="flex flex-col items-center gap-1 h-auto py-3 hover:bg-pink-50 hover:border-pink-500 hover:text-pink-600"
                 >
-                  <Twitter className="h-5 w-5" />
-                  <span className="text-xs">Twitter</span>
-                </Button>
-                <Button
-                  variant="outline"
-                  onClick={handleShareLinkedIn}
-                  className="flex flex-col items-center gap-1 h-auto py-3 hover:bg-blue-50 hover:border-blue-600 hover:text-blue-700"
-                >
-                  <Linkedin className="h-5 w-5" />
-                  <span className="text-xs">LinkedIn</span>
+                  <Instagram className="h-5 w-5" />
+                  <span className="text-xs">Instagram</span>
                 </Button>
               </div>
             </div>
