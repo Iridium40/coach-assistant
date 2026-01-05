@@ -219,8 +219,9 @@ Talking Points:
     targetDate.setHours(hour24, parseInt(haMinute), 0, 0)
     
     // Update prospect with HA scheduled status, datetime, and email
+    // Set the HA scheduled date without changing status
+    // The HA scheduled badge on the card will indicate the scheduled HA
     await updateProspect(schedulingProspect.id, {
-      status: "ha_scheduled",
       next_action: haDate,
       ha_scheduled_at: targetDate.toISOString(),
       email: prospectEmail || null,
@@ -403,7 +404,9 @@ Talking Points:
           </Card>
           <Card>
             <CardContent className="p-4 text-center">
-              <div className="text-3xl font-bold text-purple-500">{stats.haScheduled}</div>
+              <div className="text-3xl font-bold text-purple-500">
+                {prospects.filter(p => p.ha_scheduled_at && !["converted", "coach"].includes(p.status)).length}
+              </div>
               <div className="text-sm text-gray-500">HA Scheduled</div>
             </CardContent>
           </Card>
@@ -429,7 +432,7 @@ Talking Points:
                 />
               </div>
               <div className="flex gap-2 flex-wrap">
-                {(["all", "new", "interested", "ha_scheduled", "converted", "not_interested", "not_closed"] as const).map((status) => (
+                {(["all", "new", "interested", "converted", "not_interested", "not_closed"] as const).map((status) => (
                   <Button
                     key={status}
                     variant={filterStatus === status ? "default" : "outline"}
@@ -491,8 +494,8 @@ Talking Points:
                       </div>
                     </div>
 
-                    {/* Scheduled Date/Time for HA */}
-                    {prospect.status === "ha_scheduled" && prospect.ha_scheduled_at ? (
+                    {/* Scheduled Date/Time for HA - shows when ha_scheduled_at is set */}
+                    {prospect.ha_scheduled_at ? (
                       <div className="flex items-center gap-1">
                         <Badge 
                           className={`flex items-center gap-1 ${
