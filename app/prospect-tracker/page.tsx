@@ -572,7 +572,30 @@ Talking Points:
                         </SelectContent>
                       </Select>
 
-                      {/* Show Schedule button for ha_scheduled prospects */}
+                      {/* Show Schedule HA button for prospects that can be scheduled */}
+                      {(prospect.status === "new" || prospect.status === "interested" || prospect.status === "not_interested" || prospect.status === "not_closed") && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            setSchedulingProspect(prospect)
+                            setHaDate(today)
+                            setHaHour(10)
+                            setHaMinute("00")
+                            setHaAmPm("AM")
+                            setProspectEmail((prospect as any).email || "")
+                            setProspectPhone((prospect as any).phone || "")
+                            setShowHAScheduleModal(true)
+                          }}
+                          className="text-green-600 border-green-200 hover:bg-green-50"
+                          title="Schedule HA"
+                        >
+                          <CalendarPlus className="h-4 w-4 mr-1" />
+                          Schedule HA
+                        </Button>
+                      )}
+
+                      {/* Show Reschedule button for ha_scheduled prospects */}
                       {prospect.status === "ha_scheduled" && (
                         <Button
                           variant="outline"
@@ -583,13 +606,15 @@ Talking Points:
                             setHaHour(10)
                             setHaMinute("00")
                             setHaAmPm("AM")
+                            setProspectEmail((prospect as any).email || "")
+                            setProspectPhone((prospect as any).phone || "")
                             setShowHAScheduleModal(true)
                           }}
                           className="text-blue-600 border-blue-200 hover:bg-blue-50"
-                          title="Schedule HA"
+                          title="Reschedule HA"
                         >
                           <CalendarPlus className="h-4 w-4 mr-1" />
-                          Schedule
+                          Reschedule
                         </Button>
                       )}
 
