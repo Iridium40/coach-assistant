@@ -20,7 +20,6 @@ export function PipelineProgressionGuide() {
       tips: [
         'Think about who in your life struggles with health',
         'Add notes about how you know them',
-        'No contact info needed here — keep it in OPTAVIA Connect',
       ],
     },
     {
