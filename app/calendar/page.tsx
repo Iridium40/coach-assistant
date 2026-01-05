@@ -55,7 +55,7 @@ export default function CalendarPage() {
               Events
             </h2>
             <p className="text-optavia-gray text-base sm:text-lg max-w-2xl mx-auto px-4">
-              View upcoming meetings, training sessions, and team events.
+              View upcoming in-person events, meetings, and training sessions.
             </p>
           </div>
           
