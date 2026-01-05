@@ -155,11 +155,11 @@ export function QuickActions({
         </CardTitle>
       </CardHeader>
       <CardContent className="pt-0">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           {displayActions.map((action) => (
-            <Link key={action.id} href={action.href}>
+            <Link key={action.id} href={action.href} className="flex">
               <div
-                className={`p-4 rounded-lg border transition-all cursor-pointer ${action.bgClass}`}
+                className={`flex-1 p-4 rounded-lg border transition-all cursor-pointer ${action.bgClass}`}
               >
                 <div className={`${action.iconClass} mb-2`}>
                   {action.icon}
