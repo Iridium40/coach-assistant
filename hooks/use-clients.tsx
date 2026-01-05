@@ -244,12 +244,19 @@ export function useClients() {
     return updateClient(id, { status })
   }, [updateClient])
 
-  // Check if client needs attention (hasn't been checked in today)
+  // Check if client needs attention (hasn't been checked in for current time of day)
   const needsAttention = useCallback((client: Client): boolean => {
     if (client.status !== 'active') return false
-    // If already checked in today (am_done is true), no attention needed
-    if (client.am_done) return false
-    return true
+    
+    const currentHour = new Date().getHours()
+    
+    // Before noon (AM): needs attention if am_done is false
+    if (currentHour < 12) {
+      return !client.am_done
+    }
+    
+    // After noon (PM): needs attention if pm_done is false
+    return !client.pm_done
   }, [])
 
   // Get stats

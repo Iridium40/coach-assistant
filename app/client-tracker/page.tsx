@@ -736,28 +736,35 @@ ${phase.milestone ? `\n🎉 MILESTONE: ${phase.label} - Celebrate this achieveme
                             Not scheduled
                           </Badge>
                         )}
-                        {/* Check-in Button */}
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => toggleTouchpoint(client.id, "am_done")}
-                          className={client.am_done 
-                            ? "bg-green-100 text-green-700 border-green-300 hover:bg-green-200" 
-                            : "text-green-600 border-green-200 hover:bg-green-50"
-                          }
-                        >
-                          {client.am_done ? (
-                            <>
-                              <CheckCircle className="h-4 w-4 mr-1" />
-                              Checked In
-                            </>
-                          ) : (
-                            <>
-                              <Circle className="h-4 w-4 mr-1" />
-                              Check In
-                            </>
-                          )}
-                        </Button>
+                        {/* Check-in Button - AM before noon, PM after noon */}
+                        {(() => {
+                          const isAM = new Date().getHours() < 12
+                          const field = isAM ? "am_done" : "pm_done"
+                          const isCheckedIn = isAM ? client.am_done : client.pm_done
+                          return (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => toggleTouchpoint(client.id, field)}
+                              className={isCheckedIn 
+                                ? "bg-green-100 text-green-700 border-green-300 hover:bg-green-200" 
+                                : "text-green-600 border-green-200 hover:bg-green-50"
+                              }
+                            >
+                              {isCheckedIn ? (
+                                <>
+                                  <CheckCircle className="h-4 w-4 mr-1" />
+                                  {isAM ? "AM ✓" : "PM ✓"}
+                                </>
+                              ) : (
+                                <>
+                                  <Circle className="h-4 w-4 mr-1" />
+                                  {isAM ? "AM Check In" : "PM Check In"}
+                                </>
+                              )}
+                            </Button>
+                          )
+                        })()}
                         <Button
                           variant="outline"
                           size="sm"
