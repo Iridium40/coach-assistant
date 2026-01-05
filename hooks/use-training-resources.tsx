@@ -392,12 +392,26 @@ export function useTrainingResourcesAdmin() {
   }
 
   const updateCategory = async (id: string, updates: Partial<TrainingCategory>) => {
-    const { error } = await supabase
+    console.log("Updating category:", id, updates)
+    
+    const { data, error, count } = await supabase
       .from("training_categories")
       .update(updates)
       .eq("id", id)
+      .select()
 
-    if (error) throw error
+    console.log("Update result:", { data, error, count })
+    
+    if (error) {
+      console.error("Update error:", error)
+      throw error
+    }
+    
+    if (!data || data.length === 0) {
+      console.error("No rows updated - likely RLS policy issue")
+      throw new Error("Failed to update category. Check permissions.")
+    }
+    
     await reload()
   }
 
