@@ -28,28 +28,15 @@ export function PipelineSnapshot({ clients, clientStats, prospects, prospectStat
   const todayStart = new Date()
   todayStart.setHours(0, 0, 0, 0)
 
-  // Count all prospects with HA Scheduled status
-  const haScheduled = prospects.filter(p => p.status === 'ha_scheduled')
+  // Count all prospects with HA scheduled (based on ha_scheduled_at field, not status)
+  // Exclude converted/coach prospects
+  const haScheduled = prospects.filter(p => 
+    p.ha_scheduled_at && !["converted", "coach"].includes(p.status)
+  )
 
-  // Determine upcoming vs overdue based on ha_scheduled_at OR next_action
-  const upcomingHA = haScheduled.filter(p => {
-    if (p.ha_scheduled_at) {
-      return new Date(p.ha_scheduled_at) >= now
-    }
-    if (p.next_action) {
-      return new Date(p.next_action) >= todayStart
-    }
-    return true // No date = consider as upcoming (needs scheduling)
-  })
-  const overdueHA = haScheduled.filter(p => {
-    if (p.ha_scheduled_at) {
-      return new Date(p.ha_scheduled_at) < now
-    }
-    if (p.next_action) {
-      return new Date(p.next_action) < todayStart
-    }
-    return false
-  })
+  // Determine upcoming vs overdue based on ha_scheduled_at
+  const upcomingHA = haScheduled.filter(p => new Date(p.ha_scheduled_at!) >= now)
+  const overdueHA = haScheduled.filter(p => new Date(p.ha_scheduled_at!) < now)
 
   return (
     <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
