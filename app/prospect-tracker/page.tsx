@@ -64,6 +64,7 @@ import {
   Send,
   List,
   CalendarDays,
+  Info,
 } from "lucide-react"
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
@@ -451,34 +452,80 @@ Talking Points:
 
       <div className="container mx-auto px-4 py-6">
         {/* Stats */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
-          <Card>
-            <CardContent className="p-4 text-center">
-              <div className="text-3xl font-bold text-[hsl(var(--optavia-green))]">{stats.total}</div>
-              <div className="text-sm text-gray-500">Active Prospects</div>
-            </CardContent>
-          </Card>
-          <Card className={stats.overdue > 0 ? "border-orange-300 bg-orange-50" : ""}>
-            <CardContent className="p-4 text-center">
-              <div className="text-3xl font-bold text-orange-500">{stats.overdue}</div>
-              <div className="text-sm text-gray-500">Overdue</div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-4 text-center">
-              <div className="text-3xl font-bold text-purple-500">
-                {prospects.filter(p => p.ha_scheduled_at && !["converted", "coach"].includes(p.status)).length}
-              </div>
-              <div className="text-sm text-gray-500">HA Scheduled</div>
-            </CardContent>
-          </Card>
-          <Card className="bg-green-50 border-green-200">
-            <CardContent className="p-4 text-center">
-              <div className="text-3xl font-bold text-green-600">{stats.converted}</div>
-              <div className="text-sm text-gray-500">Converted</div>
-            </CardContent>
-          </Card>
-        </div>
+        <TooltipProvider>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
+            <Card>
+              <CardContent className="p-4 text-center relative">
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button className="absolute top-2 right-2 text-gray-400 hover:text-gray-600">
+                      <Info className="h-4 w-4" />
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent side="bottom" className="max-w-xs p-3 bg-white/95 backdrop-blur-sm shadow-lg border border-gray-200">
+                    <p className="font-semibold text-green-700 mb-1">Active Prospects</p>
+                    <p className="text-sm text-gray-600">Total prospects in your 100's List who haven't been converted to clients yet.</p>
+                  </TooltipContent>
+                </Tooltip>
+                <div className="text-3xl font-bold text-[hsl(var(--optavia-green))]">{stats.total}</div>
+                <div className="text-sm text-gray-500">Active Prospects</div>
+              </CardContent>
+            </Card>
+            <Card className={stats.overdue > 0 ? "border-orange-300 bg-orange-50" : ""}>
+              <CardContent className="p-4 text-center relative">
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button className="absolute top-2 right-2 text-gray-400 hover:text-gray-600">
+                      <Info className="h-4 w-4" />
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent side="bottom" className="max-w-xs p-3 bg-white/95 backdrop-blur-sm shadow-lg border border-gray-200">
+                    <p className="font-semibold text-orange-700 mb-2">⏰ Overdue Follow-ups</p>
+                    <p className="text-sm text-gray-600">Prospects with a follow-up date that has passed. Time to reach out!</p>
+                  </TooltipContent>
+                </Tooltip>
+                <div className="text-3xl font-bold text-orange-500">{stats.overdue}</div>
+                <div className="text-sm text-gray-500">Overdue</div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-4 text-center relative">
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button className="absolute top-2 right-2 text-gray-400 hover:text-gray-600">
+                      <Info className="h-4 w-4" />
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent side="bottom" className="max-w-xs p-3 bg-white/95 backdrop-blur-sm shadow-lg border border-gray-200">
+                    <p className="font-semibold text-purple-700 mb-1">📅 HA Scheduled</p>
+                    <p className="text-sm text-gray-600">Prospects who have a Health Assessment scheduled. These are your hot leads!</p>
+                  </TooltipContent>
+                </Tooltip>
+                <div className="text-3xl font-bold text-purple-500">
+                  {prospects.filter(p => p.ha_scheduled_at && !["converted", "coach"].includes(p.status)).length}
+                </div>
+                <div className="text-sm text-gray-500">HA Scheduled</div>
+              </CardContent>
+            </Card>
+            <Card className="bg-green-50 border-green-200">
+              <CardContent className="p-4 text-center relative">
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button className="absolute top-2 right-2 text-gray-400 hover:text-gray-600">
+                      <Info className="h-4 w-4" />
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent side="bottom" className="max-w-xs p-3 bg-white/95 backdrop-blur-sm shadow-lg border border-gray-200">
+                    <p className="font-semibold text-green-700 mb-1">🎉 Converted</p>
+                    <p className="text-sm text-gray-600">Prospects who have become clients! These are your wins from the 100's List.</p>
+                  </TooltipContent>
+                </Tooltip>
+                <div className="text-3xl font-bold text-green-600">{stats.converted}</div>
+                <div className="text-sm text-gray-500">Converted</div>
+              </CardContent>
+            </Card>
+          </div>
+        </TooltipProvider>
 
         {/* Search, Filter and View Toggle */}
         <div className="flex flex-col gap-4 mb-6">
