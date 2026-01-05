@@ -34,11 +34,11 @@ export function QuickActions({
     iconClass: string
   }> = []
 
-  // High priority: Overdue prospect follow-ups
+  // High priority: Overdue 100's list follow-ups
   if (overdueProspects > 0) {
     actions.push({
       id: "overdue-prospects",
-      label: "Follow Up with Prospects",
+      label: "Follow Up on 100's List",
       description: `${overdueProspects} overdue`,
       href: "/prospect-tracker",
       icon: <Clock className="h-5 w-5" />,
@@ -95,7 +95,7 @@ export function QuickActions({
     const defaultActions = [
       {
         id: "add-prospect",
-        label: "Add Prospect",
+        label: "Add to 100's List",
         description: "Grow your pipeline",
         href: "/prospect-tracker",
         icon: <UserPlus className="h-5 w-5" />,

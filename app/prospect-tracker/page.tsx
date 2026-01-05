@@ -374,14 +374,14 @@ Talking Points:
               <div className="flex items-center gap-2 text-sm opacity-90 mb-1">
                 <span>My Business</span>
                 <ChevronRight className="h-4 w-4" />
-                <span className="font-semibold">Prospect Tracker</span>
+                <span className="font-semibold">100's List Tracker</span>
               </div>
               <h1 className="text-2xl sm:text-3xl font-bold flex items-center gap-3">
                 <Users className="h-8 w-8" />
-                Prospect Tracker
+                100's List Tracker
               </h1>
               <p className="text-sm opacity-90 mt-1">
-                Track your 100s list with privacy-first labels
+                Track your 100's list with privacy-first labels
               </p>
             </div>
             <div className="flex gap-3">
@@ -396,7 +396,7 @@ Talking Points:
                 className="bg-white text-[hsl(var(--optavia-green))] hover:bg-white/90"
               >
                 <Plus className="h-4 w-4 mr-2" />
-                Add Prospect
+                Add to List
               </Button>
             </div>
           </div>
@@ -710,7 +710,7 @@ Talking Points:
       <Dialog open={showAddModal} onOpenChange={setShowAddModal}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Add Prospect</DialogTitle>
+            <DialogTitle>Add to 100's List</DialogTitle>
             <DialogDescription>Add a new prospect to your pipeline.</DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
@@ -766,7 +766,7 @@ Talking Points:
               disabled={!newProspect.label.trim()}
               className="bg-[hsl(var(--optavia-green))]"
             >
-              Add Prospect
+              Add to List
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -776,7 +776,7 @@ Talking Points:
       <Dialog open={showEditModal} onOpenChange={setShowEditModal}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Edit Prospect</DialogTitle>
+            <DialogTitle>Edit 100's List Entry</DialogTitle>
             <DialogDescription>Update prospect information.</DialogDescription>
           </DialogHeader>
           {editingProspect && (
@@ -1041,7 +1041,7 @@ Talking Points:
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Remove Prospect</AlertDialogTitle>
+            <AlertDialogTitle>Remove from 100's List</AlertDialogTitle>
             <AlertDialogDescription>
               Are you sure you want to remove this prospect? This action cannot be undone.
             </AlertDialogDescription>

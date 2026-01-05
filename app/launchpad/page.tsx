@@ -474,7 +474,7 @@ export default function NewCoachLaunchpad() {
                 <Users size={20} color="#1565c0" />
               </div>
               <div>
-                <div style={{ fontWeight: 600, color: '#1a1a1a' }}>Prospect Pipeline</div>
+                <div style={{ fontWeight: 600, color: '#1a1a1a' }}>100's List Pipeline</div>
                 <div style={{ fontSize: 12, color: '#888' }}>Manage your 100s list</div>
               </div>
             </div>

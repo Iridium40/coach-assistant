@@ -57,7 +57,7 @@ export function PipelineSnapshot({ clients, clientStats, prospects, prospectStat
       <Link href="/prospect-tracker" className="block">
         <div className="p-4 rounded-lg bg-white border border-blue-200 hover:shadow-md transition-shadow cursor-pointer h-full">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-sm font-medium text-gray-600">Prospects</span>
+            <span className="text-sm font-medium text-gray-600">100's List</span>
             <Badge variant="secondary" className="bg-blue-100 text-blue-700">
               Pipeline
             </Badge>
