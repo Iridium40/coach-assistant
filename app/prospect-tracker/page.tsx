@@ -53,7 +53,6 @@ import {
   CalendarPlus,
   ExternalLink,
   X,
-  Phone,
   Send,
 } from "lucide-react"
 import { Header } from "@/components/header"
@@ -107,7 +106,6 @@ export default function ProspectTrackerPage() {
 
   const [newProspect, setNewProspect] = useState({
     label: "",
-    phone: "",
     source: "social" as ProspectSource,
     notes: "",
   })
@@ -242,11 +240,10 @@ Talking Points:
     if (!newProspect.label.trim()) return
     await addProspect({
       label: newProspect.label,
-      phone: newProspect.phone || undefined,
       source: newProspect.source,
       notes: newProspect.notes || undefined,
     })
-    setNewProspect({ label: "", phone: "", source: "social", notes: "" })
+    setNewProspect({ label: "", source: "social", notes: "" })
     setShowAddModal(false)
   }
 
@@ -696,22 +693,6 @@ Talking Points:
               />
               <p className="text-xs text-gray-500 mt-1">
                 A name you'll recognize
-              </p>
-            </div>
-            <div>
-              <Label>Phone Number (optional)</Label>
-              <div className="relative">
-                <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                <Input
-                  value={newProspect.phone}
-                  onChange={(e) => setNewProspect({ ...newProspect, phone: e.target.value })}
-                  placeholder="e.g., 555-123-4567"
-                  className="pl-10"
-                  type="tel"
-                />
-              </div>
-              <p className="text-xs text-gray-500 mt-1">
-                For sending SMS reminders about scheduled Health Assessments
               </p>
             </div>
             <div>
