@@ -5,8 +5,7 @@ import { memo, useState, useMemo, useCallback } from "react"
 
 import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Heart, Clock, Users, Image as ImageIcon, Flame } from "lucide-react"
-import { estimateCaloriesPerServing } from "@/lib/calorie-utils"
+import { Heart, Clock, Users, Image as ImageIcon } from "lucide-react"
 import type { Recipe, UserData } from "@/lib/types"
 
 interface RecipeCardProps {
@@ -119,10 +118,6 @@ export const RecipeCard = memo(function RecipeCard({ recipe, userData, setUserDa
             <div className="flex items-center gap-1">
               <Users className="h-4 w-4" />
               <span>{recipe.servings}</span>
-            </div>
-            <div className="flex items-center gap-1 text-orange-600">
-              <Flame className="h-4 w-4" />
-              <span>~{estimateCaloriesPerServing(recipe.counts, recipe.servings)} cal</span>
             </div>
           </div>
 
