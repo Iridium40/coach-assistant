@@ -4,14 +4,11 @@ import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Mail, Check, Loader2, Phone, MessageSquare } from "lucide-react"
+import { Mail, Check, Loader2, MessageSquare, Copy } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { useUserData } from "@/contexts/user-data-context"
 import { sendCalendarInviteEmail } from "@/lib/email"
-import { openNativeSMS, isValidUSPhoneNumber } from "@/lib/sms"
 import type { CalendarEvent } from "@/lib/calendar-utils"
-
-type InviteMethod = "email" | "sms"
 
 interface ScheduleCalendarOptionsProps {
   event: CalendarEvent
@@ -29,52 +26,80 @@ export function ScheduleCalendarOptions({
   event,
   recipientName,
   recipientEmail: initialEmail,
-  recipientPhone: initialPhone,
   onEmailChange,
-  onPhoneChange,
   onScheduleComplete,
   eventType = "check-in",
   className = "",
 }: ScheduleCalendarOptionsProps) {
   const { toast } = useToast()
   const { profile } = useUserData()
-  const [method, setMethod] = useState<InviteMethod>("email")
   const [email, setEmail] = useState(initialEmail || "")
-  const [phone, setPhone] = useState(initialPhone || "")
   const [sending, setSending] = useState(false)
   const [sent, setSent] = useState(false)
+  const [copied, setCopied] = useState(false)
 
   // Use the coach's notification settings from their profile
   const organizerEmail = profile?.notification_email || undefined
   const organizerName = profile?.full_name || undefined
 
-  // Update email/phone when initial values change
+  // Update email when initial value changes
   useEffect(() => {
     if (initialEmail) setEmail(initialEmail)
   }, [initialEmail])
-
-  useEffect(() => {
-    if (initialPhone) setPhone(initialPhone)
-  }, [initialPhone])
 
   const handleEmailChange = (value: string) => {
     setEmail(value)
     onEmailChange?.(value)
   }
 
-  const handlePhoneChange = (value: string) => {
-    // Only allow digits, up to 10
-    const cleaned = value.replace(/\D/g, '').slice(0, 10)
-    setPhone(cleaned)
-    onPhoneChange?.(cleaned)
+  // Generate the text invite message
+  const generateTextInvite = () => {
+    const dateStr = event.startDate.toLocaleDateString("en-US", {
+      weekday: "long",
+      month: "long",
+      day: "numeric",
+    })
+    const timeStr = event.startDate.toLocaleTimeString("en-US", {
+      hour: "numeric",
+      minute: "2-digit",
+    })
+
+    const eventLabel = eventType === "ha" ? "Health Assessment" : "check-in"
+    const greeting = recipientName ? `Hi ${recipientName}!` : "Hi!"
+
+    return `${greeting}
+
+I'd like to schedule a ${eventLabel} with you.
+
+📅 ${dateStr}
+⏰ ${timeStr}
+
+Looking forward to connecting with you!
+
+${organizerName || "Your Coach"}`
   }
 
-  // Format phone for display
-  const formatPhoneDisplay = (value: string) => {
-    const cleaned = value.replace(/\D/g, '')
-    if (cleaned.length <= 3) return cleaned
-    if (cleaned.length <= 6) return `(${cleaned.slice(0, 3)}) ${cleaned.slice(3)}`
-    return `(${cleaned.slice(0, 3)}) ${cleaned.slice(3, 6)}-${cleaned.slice(6, 10)}`
+  // Copy text invite to clipboard
+  const handleCopyTextInvite = async () => {
+    const message = generateTextInvite()
+    
+    try {
+      await navigator.clipboard.writeText(message)
+      setCopied(true)
+      
+      toast({
+        title: "📋 Copied to clipboard!",
+        description: "Paste this message into your texting app",
+      })
+
+      setTimeout(() => setCopied(false), 3000)
+    } catch (err) {
+      toast({
+        title: "Failed to copy",
+        description: "Please try again",
+        variant: "destructive",
+      })
+    }
   }
 
   // Send via Email
@@ -140,170 +165,90 @@ export function ScheduleCalendarOptions({
     }
   }
 
-  // Send via SMS - opens native SMS app
-  const handleSMSInvite = () => {
-    if (!phone || !isValidUSPhoneNumber(phone)) {
-      toast({
-        title: "Valid phone number required",
-        description: "Please enter a 10-digit US phone number",
-        variant: "destructive",
-      })
-      return
-    }
-
-    // Open native SMS app with pre-filled message
-    openNativeSMS({
-      to: phone,
-      toName: recipientName,
-      fromName: organizerName,
-      eventTitle: event.title,
-      eventDescription: event.description,
-      startDate: event.startDate.toISOString(),
-      eventType: eventType,
-    })
-
-    setSent(true)
-    onScheduleComplete?.()
-    
-    toast({
-      title: "📱 SMS app opened!",
-      description: "Your message is ready to send",
-    })
-
-    setTimeout(() => setSent(false), 3000)
-  }
-
-  const handleSendInvite = () => {
-    if (method === "email") {
-      handleEmailInvite()
-    } else {
-      handleSMSInvite()
-    }
-  }
-
-  const isValid = method === "email" 
-    ? email && organizerEmail 
-    : phone && isValidUSPhoneNumber(phone)
+  const isValidEmail = email && organizerEmail
 
   return (
     <div className={`space-y-4 ${className}`}>
-      {/* Method Toggle */}
-      <div className="flex gap-2 p-1 bg-gray-100 dark:bg-gray-800 rounded-lg">
-        <button
+      {/* Email Section */}
+      <div className="space-y-2">
+        <Label className="text-sm font-medium flex items-center gap-2">
+          <Mail className="h-4 w-4 text-purple-500" />
+          Send Calendar Invite by Email
+        </Label>
+        <Input
+          type="email"
+          placeholder="email@example.com"
+          value={email}
+          onChange={(e) => handleEmailChange(e.target.value)}
+        />
+        <p className="text-xs text-gray-500">
+          They'll receive an email with a calendar invite attached
+        </p>
+        {!organizerEmail && (
+          <p className="text-xs text-amber-600">
+            ⚠️ Set your notification email in Settings → Notifications
+          </p>
+        )}
+        <Button
           type="button"
-          onClick={() => setMethod("email")}
-          className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-md text-sm font-medium transition-colors ${
-            method === "email"
-              ? "bg-white dark:bg-gray-700 text-purple-600 dark:text-purple-400 shadow-sm"
-              : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200"
-          }`}
+          onClick={handleEmailInvite}
+          disabled={!isValidEmail || sending}
+          className="w-full bg-purple-600 hover:bg-purple-700 text-white"
         >
-          <Mail className="h-4 w-4" />
-          Email
-        </button>
-        <button
-          type="button"
-          onClick={() => setMethod("sms")}
-          className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-md text-sm font-medium transition-colors ${
-            method === "sms"
-              ? "bg-white dark:bg-gray-700 text-teal-600 dark:text-teal-400 shadow-sm"
-              : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200"
-          }`}
-        >
-          <MessageSquare className="h-4 w-4" />
-          SMS
-        </button>
+          {sending ? (
+            <>
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              Sending...
+            </>
+          ) : sent ? (
+            <>
+              <Check className="h-4 w-4 mr-2" />
+              Invite Sent!
+            </>
+          ) : (
+            <>
+              <Mail className="h-4 w-4 mr-2" />
+              Send Email Invite
+            </>
+          )}
+        </Button>
       </div>
 
-      {/* Email Input */}
-      {method === "email" && (
-        <div className="space-y-2">
-          <Label className="text-sm font-medium flex items-center gap-2">
-            <Mail className="h-4 w-4 text-purple-500" />
-            Client/Prospect Email <span className="text-red-500">*</span>
-          </Label>
-          <Input
-            type="email"
-            placeholder="email@example.com"
-            value={email}
-            onChange={(e) => handleEmailChange(e.target.value)}
-            required
-          />
-          <p className="text-xs text-gray-500">
-            They'll receive an email with a calendar invite attached
-          </p>
-          {!organizerEmail && (
-            <p className="text-xs text-amber-600">
-              ⚠️ Set your notification email in Settings → Notifications
-            </p>
+      {/* Divider */}
+      <div className="flex items-center gap-3">
+        <div className="flex-1 border-t border-gray-200" />
+        <span className="text-xs text-gray-400 uppercase">or</span>
+        <div className="flex-1 border-t border-gray-200" />
+      </div>
+
+      {/* Copy for Text Section */}
+      <div className="space-y-2">
+        <Label className="text-sm font-medium flex items-center gap-2">
+          <MessageSquare className="h-4 w-4 text-teal-500" />
+          Copy Invite for Text Message
+        </Label>
+        <p className="text-xs text-gray-500">
+          Copy the invite message and paste it into your favorite texting app
+        </p>
+        <Button
+          type="button"
+          onClick={handleCopyTextInvite}
+          variant="outline"
+          className={`w-full ${copied ? "bg-teal-50 border-teal-300 text-teal-700" : "border-teal-200 text-teal-600 hover:bg-teal-50"}`}
+        >
+          {copied ? (
+            <>
+              <Check className="h-4 w-4 mr-2" />
+              Copied!
+            </>
+          ) : (
+            <>
+              <Copy className="h-4 w-4 mr-2" />
+              Copy Text Invite
+            </>
           )}
-        </div>
-      )}
-
-      {/* Phone Input */}
-      {method === "sms" && (
-        <div className="space-y-2">
-          <Label className="text-sm font-medium flex items-center gap-2">
-            <Phone className="h-4 w-4 text-teal-500" />
-            Client/Prospect Phone <span className="text-red-500">*</span>
-          </Label>
-          <div className="flex">
-            <span className="inline-flex items-center px-3 text-sm text-gray-500 bg-gray-100 border border-r-0 border-gray-300 rounded-l-md dark:bg-gray-700 dark:text-gray-400 dark:border-gray-600">
-              +1
-            </span>
-            <Input
-              type="tel"
-              placeholder="(555) 555-5555"
-              value={formatPhoneDisplay(phone)}
-              onChange={(e) => handlePhoneChange(e.target.value)}
-              className="rounded-l-none"
-              maxLength={14} // Formatted: (123) 456-7890
-              required
-            />
-          </div>
-          <p className="text-xs text-gray-500">
-            {phone.length === 10 ? (
-              <span className="text-green-600">✓ Valid phone number</span>
-            ) : (
-              <>Enter 10 digits (US only)</>
-            )}
-          </p>
-        </div>
-      )}
-
-      {/* Send Button */}
-      <Button
-        type="button"
-        onClick={handleSendInvite}
-        disabled={!isValid || sending}
-        className={`w-full text-white ${
-          method === "email" 
-            ? "bg-purple-600 hover:bg-purple-700" 
-            : "bg-teal-600 hover:bg-teal-700"
-        }`}
-      >
-        {sending ? (
-          <>
-            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-            Sending...
-          </>
-        ) : sent ? (
-          <>
-            <Check className="h-4 w-4 mr-2" />
-            Invite Sent!
-          </>
-        ) : method === "email" ? (
-          <>
-            <Mail className="h-4 w-4 mr-2" />
-            Send Invite by Email
-          </>
-        ) : (
-          <>
-            <MessageSquare className="h-4 w-4 mr-2" />
-            Send Invite by SMS
-          </>
-        )}
-      </Button>
+        </Button>
+      </div>
     </div>
   )
 }
