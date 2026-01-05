@@ -30,7 +30,7 @@ import {
 import { Progress } from "@/components/ui/progress"
 
 // Dashboard Components
-import { CoachTip, PipelineSnapshot, TodaysPriorities, TrainingProgressCard, RankProgressCard, QuickActions, NextTrainingCard } from "@/components/dashboard/index"
+import { CoachTip, PipelineSnapshot, TodaysPriorities, RankProgressCard, QuickActions, NextTrainingCard } from "@/components/dashboard/index"
 import { TodaysFocus } from "@/components/dashboard/TodaysFocus"
 
 // Coach Tools imports
@@ -74,7 +74,7 @@ export function DashboardOverview() {
   const { clients, stats: clientStats, toggleTouchpoint, needsAttention } = useClients()
 
   // Training resources progress - pass user rank to properly filter accessible categories
-  const { progress: trainingProgress, uniqueCategories } = useTrainingResources(user, profile?.coach_rank || null)
+  const { progress: trainingProgress } = useTrainingResources(user, profile?.coach_rank || null)
 
   // Rank calculator
   const { rankData, frontlineCoaches, qualifyingLegsCount, calculateGaps, getNextRank } = useRankCalculator(user)
@@ -239,15 +239,8 @@ export function DashboardOverview() {
         />
       </div>
 
-      {/* Main Grid: Training Progress + Quick Links + Quick Actions */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
-        {/* Section 4: Training Progress */}
-        <TrainingProgressCard
-          progress={trainingProgress}
-          badges={badges.map(b => ({ ...b, earnedAt: b.earnedAt || new Date().toISOString() }))}
-          uniqueCategories={uniqueCategories}
-        />
-
+      {/* Main Grid: Quick Links + Quick Actions */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
         {/* Quick Links Card */}
         <Card className="bg-white border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
           <CardHeader className="pb-3">
