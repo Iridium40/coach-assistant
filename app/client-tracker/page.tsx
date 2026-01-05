@@ -402,7 +402,7 @@ ${phase.milestone ? `\n🎉 MILESTONE: ${phase.label} - Celebrate this achieveme
                       <Info className="h-4 w-4" />
                     </button>
                   </TooltipTrigger>
-                  <TooltipContent side="bottom" className="max-w-xs p-3">
+                  <TooltipContent side="bottom" className="max-w-xs p-3 bg-white/95 backdrop-blur-sm shadow-lg border border-gray-200">
                     <p className="font-semibold text-green-700 mb-1">Active Clients</p>
                     <p className="text-sm text-gray-600">Clients currently on program with "Active" status.</p>
                   </TooltipContent>
@@ -419,7 +419,7 @@ ${phase.milestone ? `\n🎉 MILESTONE: ${phase.label} - Celebrate this achieveme
                       <Info className="h-4 w-4" />
                     </button>
                   </TooltipTrigger>
-                  <TooltipContent side="bottom" className="max-w-xs p-3">
+                  <TooltipContent side="bottom" className="max-w-xs p-3 bg-white/95 backdrop-blur-sm shadow-lg border border-gray-200">
                     <p className="font-semibold text-orange-700 mb-2">🚨 "Needs Attention" Triggers</p>
                     <ol className="text-sm text-gray-600 space-y-1.5 list-decimal list-inside">
                       <li><strong>Scheduled check-in is due</strong> — Meeting date is today or past</li>
@@ -440,7 +440,7 @@ ${phase.milestone ? `\n🎉 MILESTONE: ${phase.label} - Celebrate this achieveme
                       <Info className="h-4 w-4" />
                     </button>
                   </TooltipTrigger>
-                  <TooltipContent side="bottom" className="max-w-xs p-3">
+                  <TooltipContent side="bottom" className="max-w-xs p-3 bg-white/95 backdrop-blur-sm shadow-lg border border-gray-200">
                     <p className="font-semibold text-purple-700 mb-1">Coach Prospects</p>
                     <p className="text-sm text-gray-600">Active clients you've marked as potential future coaches. Keep nurturing these relationships!</p>
                   </TooltipContent>
@@ -457,7 +457,7 @@ ${phase.milestone ? `\n🎉 MILESTONE: ${phase.label} - Celebrate this achieveme
                       <Info className="h-4 w-4" />
                     </button>
                   </TooltipTrigger>
-                  <TooltipContent side="bottom" className="max-w-xs p-3">
+                  <TooltipContent side="bottom" className="max-w-xs p-3 bg-white/95 backdrop-blur-sm shadow-lg border border-gray-200">
                     <p className="font-semibold text-yellow-700 mb-1">🎉 Milestones Today</p>
                     <p className="text-sm text-gray-600">Clients hitting key milestones today:</p>
                     <ul className="text-sm text-gray-600 mt-1 space-y-0.5">
