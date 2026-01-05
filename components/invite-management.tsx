@@ -17,7 +17,6 @@ import { useToast } from "@/hooks/use-toast"
 import { createClient } from "@/lib/supabase/client"
 import { generateInviteKey, createInviteLink } from "@/lib/invites"
 import { sendInviteEmail, sendNewCoachWelcomeEmail } from "@/lib/email"
-import { Switch } from "@/components/ui/switch"
 import { Badge } from "@/components/ui/badge"
 import { X, Copy, Check, UserPlus, History, Clock, UserCheck, UserX, AlertTriangle } from "lucide-react"
 import Link from "next/link"
@@ -61,8 +60,10 @@ export function InviteManagement({ onClose }: InviteManagementProps) {
   const [email, setEmail] = useState("")
   const [coachRank, setCoachRank] = useState("")
   const [optaviaId, setOptaviaId] = useState("")
-  const [isNewCoach, setIsNewCoach] = useState(false) // Default to false, existing coaches
   const [loading, setLoading] = useState(false)
+  
+  // New coaches are those with rank "Coach" - they get welcome email with onboarding resources
+  const isNewCoach = coachRank === "Coach"
   const [generatedInvites, setGeneratedInvites] = useState<GeneratedInvite[]>([])
   const [inviteHistory, setInviteHistory] = useState<InviteHistory[]>([])
   const [loadingHistory, setLoadingHistory] = useState(true)
@@ -413,32 +414,6 @@ export function InviteManagement({ onClose }: InviteManagementProps) {
           </CardHeader>
           <CardContent className="space-y-4">
             {/* New Coach Toggle - at the top */}
-            <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg border border-blue-200">
-              <div className="flex items-center space-x-3">
-                <Switch
-                  id="isNewCoach"
-                  checked={isNewCoach}
-                  onCheckedChange={(checked) => {
-                    setIsNewCoach(checked)
-                    // If new coach, default rank to "Coach"
-                    if (checked && !coachRank) {
-                      setCoachRank("Coach")
-                    }
-                  }}
-                />
-                <div>
-                  <Label htmlFor="isNewCoach" className="cursor-pointer text-optavia-dark font-medium">
-                    This is a new coach
-                  </Label>
-                  <p className="text-xs text-optavia-gray">
-                    {isNewCoach 
-                      ? "A welcome email with onboarding resources will be sent" 
-                      : "Only the invite email will be sent"}
-                  </p>
-                </div>
-              </div>
-            </div>
-
             <div className="space-y-2">
               <Label htmlFor="fullName" className="text-optavia-dark">Full Name *</Label>
               <Input
@@ -486,6 +461,11 @@ export function InviteManagement({ onClose }: InviteManagementProps) {
                   <SelectItem value="IPD">Integrated Presidential Director (IPD)</SelectItem>
                 </SelectContent>
               </Select>
+              {coachRank === "Coach" && (
+                <p className="text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded">
+                  ✨ New coaches receive a welcome email with onboarding resources
+                </p>
+              )}
             </div>
 
             <div className="space-y-2">

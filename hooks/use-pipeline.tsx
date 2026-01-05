@@ -49,51 +49,41 @@ export function usePipeline() {
 
   const loading = prospectsLoading || clientsLoading
 
-  // Build pipeline stages
+  // Build pipeline stages - Simplified flow: NEW → INTERESTED → HA_SCHEDULED → CLIENT
   const stages = useMemo((): PipelineStage[] => {
-    const cold = prospects.filter(p => p.status === "cold")
-    const warm = prospects.filter(p => p.status === "warm")
+    const newProspects = prospects.filter(p => p.status === "new")
+    const interested = prospects.filter(p => p.status === "interested")
     const haScheduled = prospects.filter(p => p.status === "ha_scheduled")
-    const haDone = prospects.filter(p => p.status === "ha_done")
     const activeClients = clients.filter(c => c.status === "active")
     const coachProspects = clients.filter(c => c.is_coach_prospect)
 
     return [
       {
-        id: "cold",
-        label: "Cold",
-        color: "#78909c",
-        bgColor: "#eceff1",
-        icon: "🔵",
-        items: cold,
-        count: cold.length,
+        id: "new",
+        label: "New",
+        color: "#2196f3",
+        bgColor: "#e3f2fd",
+        icon: "🆕",
+        items: newProspects,
+        count: newProspects.length,
       },
       {
-        id: "warm",
-        label: "Warm",
+        id: "interested",
+        label: "Interested",
         color: "#ff9800",
         bgColor: "#fff3e0",
-        icon: "🟡",
-        items: warm,
-        count: warm.length,
+        icon: "🔥",
+        items: interested,
+        count: interested.length,
       },
       {
         id: "ha_scheduled",
         label: "HA Scheduled",
-        color: "#2196f3",
-        bgColor: "#e3f2fd",
+        color: "#9c27b0",
+        bgColor: "#f3e5f5",
         icon: "📅",
         items: haScheduled,
         count: haScheduled.length,
-      },
-      {
-        id: "ha_done",
-        label: "HA Done",
-        color: "#9c27b0",
-        bgColor: "#f3e5f5",
-        icon: "✅",
-        items: haDone,
-        count: haDone.length,
       },
       {
         id: "client",
@@ -256,13 +246,13 @@ export function usePipeline() {
 // Helper functions
 function getProspectAction(status: string): string {
   switch (status) {
-    case "cold": return "Added to pipeline"
-    case "warm": return "Moved to Warm"
+    case "new": return "Added to pipeline"
+    case "interested": return "Showing interest"
     case "ha_scheduled": return "HA Scheduled"
-    case "ha_done": return "Completed HA"
     case "converted": return "Became a client"
-    case "coach": return "Became a coach"
-    case "not_interested": return "Marked not interested"
+    case "coach": return "Future coach"
+    case "not_interested": return "Not interested (recycled)"
+    case "not_closed": return "HA not closed (recycled)"
     default: return "Updated"
   }
 }

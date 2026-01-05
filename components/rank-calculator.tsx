@@ -57,10 +57,9 @@ export function RankCalculator() {
 
   // Build prospect pipeline from actual data
   const prospectPipeline: ProspectPipeline = useMemo(() => ({
-    cold: prospects.filter(p => p.status === "cold").length,
-    warm: prospects.filter(p => p.status === "warm").length,
+    new: prospects.filter(p => p.status === "new").length,
+    interested: prospects.filter(p => p.status === "interested").length,
     ha_scheduled: prospects.filter(p => p.status === "ha_scheduled").length,
-    ha_done: prospects.filter(p => p.status === "ha_done").length,
   }), [prospects])
 
   // Build client stats from actual data

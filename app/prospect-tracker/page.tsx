@@ -427,7 +427,7 @@ Talking Points:
                 />
               </div>
               <div className="flex gap-2 flex-wrap">
-                {(["all", "cold", "warm", "ha_scheduled", "ha_done", "converted", "not_interested"] as const).map((status) => (
+                {(["all", "new", "interested", "ha_scheduled", "converted", "not_interested", "not_closed"] as const).map((status) => (
                   <Button
                     key={status}
                     variant={filterStatus === status ? "default" : "outline"}

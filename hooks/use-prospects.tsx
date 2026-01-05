@@ -5,7 +5,9 @@ import { createClient } from "@/lib/supabase/client"
 import { useAuth } from "@/hooks/use-auth"
 
 // Types
-export type ProspectStatus = 'cold' | 'warm' | 'ha_scheduled' | 'ha_done' | 'converted' | 'coach' | 'not_interested'
+// Simplified flow: NEW → INTERESTED → HA_SCHEDULED → CLIENT
+// With recycling paths: NOT_INTERESTED (from new/interested) and NOT_CLOSED (from ha_scheduled)
+export type ProspectStatus = 'new' | 'interested' | 'ha_scheduled' | 'converted' | 'coach' | 'not_interested' | 'not_closed'
 export type ProspectSource = 'social' | 'gym' | 'work' | 'family' | 'referral' | 'other'
 export type ProspectActionType = 'reach_out' | 'follow_up' | 'schedule_ha' | 'health_assessment' | 'schedule_call' | 'close'
 
@@ -45,14 +47,15 @@ export interface UpdateProspect {
 }
 
 // Status configuration for UI
+// Simplified flow: NEW → INTERESTED → HA_SCHEDULED → CLIENT
 export const statusConfig: Record<ProspectStatus, { label: string; color: string; bg: string; icon: string }> = {
-  cold: { label: 'Cold', color: '#9e9e9e', bg: '#f5f5f5', icon: '🔵' },
-  warm: { label: 'Warm', color: '#ff9800', bg: '#fff3e0', icon: '🟡' },
-  ha_scheduled: { label: 'HA Scheduled', color: '#2196f3', bg: '#e3f2fd', icon: '📅' },
-  ha_done: { label: 'HA Done', color: '#9c27b0', bg: '#f3e5f5', icon: '✅' },
+  new: { label: 'New', color: '#2196f3', bg: '#e3f2fd', icon: '🆕' },
+  interested: { label: 'Interested', color: '#ff9800', bg: '#fff3e0', icon: '🔥' },
+  ha_scheduled: { label: 'HA Scheduled', color: '#9c27b0', bg: '#f3e5f5', icon: '📅' },
   converted: { label: 'Client!', color: '#4caf50', bg: '#e8f5e9', icon: '⭐' },
-  coach: { label: 'Coach!', color: '#00A651', bg: '#e8f5e9', icon: '🏆' },
-  not_interested: { label: 'Not Now', color: '#757575', bg: '#eeeeee', icon: '⏸️' }
+  coach: { label: 'Future Coach', color: '#00A651', bg: '#e8f5e9', icon: '🚀' },
+  not_interested: { label: 'Not Interested', color: '#78909c', bg: '#eceff1', icon: '🔄' },
+  not_closed: { label: 'Not Closed', color: '#ef5350', bg: '#ffebee', icon: '🔄' }
 }
 
 // Source options for UI
@@ -124,7 +127,7 @@ export function useProspects() {
     const prospectData = {
       user_id: user.id,
       label: newProspect.label.trim(),
-      status: 'cold' as ProspectStatus,
+      status: 'new' as ProspectStatus,
       source: newProspect.source,
       last_action: today,
       next_action: today,
@@ -210,14 +213,17 @@ export function useProspects() {
 
   // Get stats
   const stats = {
-    total: prospects.filter(p => p.status !== 'not_interested').length,
-    cold: prospects.filter(p => p.status === 'cold').length,
-    warm: prospects.filter(p => p.status === 'warm').length,
-    inProgress: prospects.filter(p => ['ha_scheduled', 'ha_done'].includes(p.status)).length,
+    total: prospects.filter(p => !['not_interested', 'not_closed'].includes(p.status)).length,
+    new: prospects.filter(p => p.status === 'new').length,
+    interested: prospects.filter(p => p.status === 'interested').length,
+    haScheduled: prospects.filter(p => p.status === 'ha_scheduled').length,
     converted: prospects.filter(p => p.status === 'converted').length,
     coaches: prospects.filter(p => p.status === 'coach').length,
+    notInterested: prospects.filter(p => p.status === 'not_interested').length,
+    notClosed: prospects.filter(p => p.status === 'not_closed').length,
+    recycled: prospects.filter(p => ['not_interested', 'not_closed'].includes(p.status)).length,
     overdue: prospects.filter(p => {
-      if (!p.next_action || ['converted', 'coach', 'not_interested'].includes(p.status)) return false
+      if (!p.next_action || ['converted', 'coach', 'not_interested', 'not_closed'].includes(p.status)) return false
       return new Date(p.next_action) < new Date(new Date().toISOString().split('T')[0])
     }).length
   }

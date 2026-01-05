@@ -129,10 +129,9 @@ export interface RankData {
 }
 
 export interface ProspectPipeline {
-  cold: number
-  warm: number
+  new: number
+  interested: number
   ha_scheduled: number
-  ha_done: number
 }
 
 export interface ClientStats {
@@ -297,16 +296,14 @@ export function useRankCalculator(user: User | null) {
     prospects: ProspectPipeline,
     clients: ClientStats
   ): Projections => {
-    const totalProspects = prospects.cold + prospects.warm + prospects.ha_scheduled + prospects.ha_done
+    const totalProspects = prospects.new + prospects.interested + prospects.ha_scheduled
 
     const projectedHAs =
-      (prospects.cold * CONVERSION_RATES.cold_to_ha) +
-      (prospects.warm * CONVERSION_RATES.warm_to_ha) +
+      (prospects.new * CONVERSION_RATES.cold_to_ha) +
+      (prospects.interested * CONVERSION_RATES.warm_to_ha) +
       (prospects.ha_scheduled * CONVERSION_RATES.scheduled_to_ha)
 
-    const projectedNewClients =
-      (prospects.ha_done * CONVERSION_RATES.ha_to_client) +
-      (projectedHAs * CONVERSION_RATES.ha_to_client)
+    const projectedNewClients = projectedHAs * CONVERSION_RATES.ha_to_client
 
     const projectedNewCoaches = clients.coachProspects * CONVERSION_RATES.client_to_coach
 

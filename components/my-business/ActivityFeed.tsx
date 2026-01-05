@@ -32,13 +32,14 @@ export function ActivityFeed({ activities }: ActivityFeedProps) {
 
   const getStatusColor = (status?: string) => {
     switch (status) {
-      case "cold": return "bg-gray-100 text-gray-600"
-      case "warm": return "bg-orange-100 text-orange-700"
-      case "ha_scheduled": return "bg-blue-100 text-blue-700"
-      case "ha_done": return "bg-purple-100 text-purple-700"
+      case "new": return "bg-blue-100 text-blue-600"
+      case "interested": return "bg-orange-100 text-orange-700"
+      case "ha_scheduled": return "bg-purple-100 text-purple-700"
       case "converted":
       case "active": return "bg-green-100 text-green-700"
-      case "coach": return "bg-pink-100 text-pink-700"
+      case "coach": return "bg-emerald-100 text-emerald-700"
+      case "not_interested": return "bg-gray-100 text-gray-600"
+      case "not_closed": return "bg-red-100 text-red-600"
       default: return "bg-gray-100 text-gray-600"
     }
   }
