@@ -37,6 +37,7 @@ interface TodaysFocusProps {
   loadingMeetings: boolean
   needsAttention: (client: any) => boolean
   toggleTouchpoint: (clientId: string, field: "am_done" | "pm_done") => void
+  onCelebrateClick?: (client: any) => void
 }
 
 export function TodaysFocus({
@@ -49,6 +50,7 @@ export function TodaysFocus({
   loadingMeetings,
   needsAttention,
   toggleTouchpoint,
+  onCelebrateClick,
 }: TodaysFocusProps) {
   const {
     resources,
@@ -303,7 +305,7 @@ export function TodaysFocus({
               return (
                 <div
                   key={`milestone-${client.id}`}
-                  className="flex items-center justify-between p-2.5 bg-white rounded-lg border border-yellow-200"
+                  className="flex items-center justify-between p-2.5 bg-white rounded-lg border border-yellow-200 animate-pulse"
                 >
                   <div className="flex items-center gap-2">
                     <div className="w-8 h-8 rounded-lg bg-yellow-100 flex items-center justify-center">
@@ -311,14 +313,16 @@ export function TodaysFocus({
                     </div>
                     <div>
                       <div className="font-medium text-sm text-gray-900">{client.label}</div>
-                      <div className="text-xs text-yellow-600">{phase.label} 🎉</div>
+                      <div className="text-xs text-yellow-600">{phase.label}</div>
                     </div>
                   </div>
-                  <Link href="/client-tracker">
-                    <Button size="sm" className="bg-yellow-500 hover:bg-yellow-600 text-white text-xs h-7">
-                      Celebrate
-                    </Button>
-                  </Link>
+                  <Button 
+                    size="sm" 
+                    className="bg-yellow-500 hover:bg-yellow-600 text-white text-xs h-7"
+                    onClick={() => onCelebrateClick?.(client)}
+                  >
+                    🎉 Celebrate!
+                  </Button>
                 </div>
               )
             })}

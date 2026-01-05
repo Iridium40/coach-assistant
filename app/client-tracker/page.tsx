@@ -43,8 +43,9 @@ import {
 } from "lucide-react"
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
-import { ClientTextTemplates } from "@/components/client-text-templates"
+import { MilestoneActionModal } from "@/components/milestone-action-modal"
 import { ScheduleCalendarOptions } from "@/components/schedule-calendar-options"
+import { isMilestoneDay } from "@/hooks/use-touchpoint-templates"
 import type { CalendarEvent } from "@/lib/calendar-utils"
 
 // Days of the week
@@ -784,14 +785,18 @@ ${phase.milestone ? `\n🎉 MILESTONE: ${phase.label} - Celebrate this achieveme
                             </>
                           )}
                         </Button>
+                        {/* Text Button - highlighted for milestones */}
                         <Button
                           variant="outline"
                           size="sm"
                           onClick={() => openTextTemplates(client)}
-                          className="text-blue-600 border-blue-200 hover:bg-blue-50"
+                          className={isMilestoneDay(programDay)
+                            ? "bg-amber-100 text-amber-700 border-amber-300 hover:bg-amber-200 animate-pulse"
+                            : "text-blue-600 border-blue-200 hover:bg-blue-50"
+                          }
                         >
                           <MessageSquare className="h-4 w-4 mr-1" />
-                          Text
+                          {isMilestoneDay(programDay) ? "🎉 Celebrate!" : "Text"}
                         </Button>
                         <Button
                           variant="outline"
@@ -928,13 +933,20 @@ ${phase.milestone ? `\n🎉 MILESTONE: ${phase.label} - Celebrate this achieveme
         </DialogContent>
       </Dialog>
 
-      {/* Text Templates Modal */}
+      {/* Milestone Action Modal (Text Templates) */}
       {selectedClient && (
-        <ClientTextTemplates
+        <MilestoneActionModal
           open={showTextModal}
           onOpenChange={setShowTextModal}
           clientLabel={selectedClient.label}
           programDay={getProgramDay(selectedClient.start_date)}
+          onScheduleClick={() => {
+            setShowTextModal(false)
+            setShowScheduleModal(true)
+          }}
+          onTextSent={() => {
+            // Mark as checked in when text is sent
+          }}
         />
       )}
 

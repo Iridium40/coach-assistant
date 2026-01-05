@@ -33,6 +33,8 @@ import { Progress } from "@/components/ui/progress"
 // Dashboard Components
 import { CoachTip, PipelineSnapshot, TodaysPriorities, RankProgressCard, QuickActions, NextTrainingCard } from "@/components/dashboard/index"
 import { TodaysFocus } from "@/components/dashboard/TodaysFocus"
+import { MilestoneActionModal } from "@/components/milestone-action-modal"
+import { getProgramDay } from "@/hooks/use-clients"
 
 // Coach Tools imports
 import { WaterCalculator } from "@/components/coach-tools/water-calculator"
@@ -91,6 +93,8 @@ export function DashboardOverview() {
   const [pinnedToolIds, setPinnedToolIds] = useState<string[]>([])
   const [pinnedResourceIds, setPinnedResourceIds] = useState<string[]>([])
   const [openToolId, setOpenToolId] = useState<string | null>(null)
+  const [milestoneClient, setMilestoneClient] = useState<any | null>(null)
+  const [showMilestoneModal, setShowMilestoneModal] = useState(false)
 
   // Load pinned items from localStorage
   useEffect(() => {
@@ -222,6 +226,10 @@ export function DashboardOverview() {
           loadingMeetings={loadingMeetings}
           needsAttention={needsAttention}
           toggleTouchpoint={toggleTouchpoint}
+          onCelebrateClick={(client) => {
+            setMilestoneClient(client)
+            setShowMilestoneModal(true)
+          }}
         />
       </div>
 
@@ -445,6 +453,16 @@ export function DashboardOverview() {
           </Dialog>
         )
       })}
+
+      {/* Milestone Action Modal */}
+      {milestoneClient && (
+        <MilestoneActionModal
+          open={showMilestoneModal}
+          onOpenChange={setShowMilestoneModal}
+          clientLabel={milestoneClient.label}
+          programDay={getProgramDay(milestoneClient.start_date)}
+        />
+      )}
     </div>
   )
 }
