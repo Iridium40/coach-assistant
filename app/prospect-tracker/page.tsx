@@ -408,13 +408,15 @@ Talking Points:
               <p className="text-sm opacity-90 mt-1">
                 Track your 100's list with privacy-first labels
               </p>
-              <button
+              <Button
                 onClick={() => setShowGuideModal(true)}
-                className="flex items-center gap-1.5 text-sm text-white/90 hover:text-white mt-2 underline underline-offset-2 transition-colors"
+                variant="outline"
+                size="sm"
+                className="mt-3 bg-white/10 border-white/30 text-white hover:bg-white/20"
               >
-                <HelpCircle className="h-4 w-4" />
-                Click Here to Learn How the 100's List Works
-              </button>
+                <HelpCircle className="h-4 w-4 mr-1.5" />
+                Learn the 100's List Tracker
+              </Button>
             </div>
             <div className="flex gap-3">
               <Link href="/client-tracker">
@@ -1324,7 +1326,7 @@ Talking Points:
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <HelpCircle className="h-5 w-5 text-[hsl(var(--optavia-green))]" />
-              How the 100's List Works
+              Learn the 100's List Tracker
             </DialogTitle>
             <DialogDescription>
               Learn how to move prospects through your pipeline from first contact to client
