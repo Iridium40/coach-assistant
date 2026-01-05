@@ -395,16 +395,13 @@ export function useTrainingResourcesAdmin() {
   }
 
   const updateCategory = async (id: string, updates: Partial<TrainingCategory>) => {
-    const { data, error } = await supabase
+    const { error } = await supabase
       .from("training_categories")
       .update(updates)
       .eq("id", id)
-      .select()
-      .single()
 
     if (error) throw error
     await reload()
-    return data
   }
 
   const deleteCategory = async (id: string) => {

@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui/badge"
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogFooter,
@@ -665,6 +666,7 @@ export function AdminTrainingResources({ onClose }: AdminTrainingResourcesProps)
         <DialogContent className="max-w-lg">
           <DialogHeader>
             <DialogTitle>Add Training Module</DialogTitle>
+            <DialogDescription>Add a new training resource to a category.</DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div>
@@ -752,6 +754,7 @@ export function AdminTrainingResources({ onClose }: AdminTrainingResourcesProps)
         <DialogContent className="max-w-lg">
           <DialogHeader>
             <DialogTitle>Edit Training Module</DialogTitle>
+            <DialogDescription>Update the details for this training resource.</DialogDescription>
           </DialogHeader>
           {editingResource && (
             <div className="space-y-4">
@@ -853,6 +856,7 @@ export function AdminTrainingResources({ onClose }: AdminTrainingResourcesProps)
         <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle>Add Training Category</DialogTitle>
+            <DialogDescription>Create a new category to organize training modules.</DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div>
@@ -928,6 +932,7 @@ export function AdminTrainingResources({ onClose }: AdminTrainingResourcesProps)
         <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle>Edit Category</DialogTitle>
+            <DialogDescription>Update the category name, icon, description, or access level.</DialogDescription>
           </DialogHeader>
           {editingCategory && (
             <div className="space-y-4">
