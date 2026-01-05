@@ -55,12 +55,15 @@ import {
   ArrowRight,
   Sparkles,
   ChevronRight,
+  ChevronLeft,
   PartyPopper,
   Heart,
   CalendarPlus,
   ExternalLink,
   X,
   Send,
+  List,
+  CalendarDays,
 } from "lucide-react"
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
@@ -71,6 +74,17 @@ import type { CalendarEvent } from "@/lib/calendar-utils"
 // Time options for HA scheduling
 const HOUR_OPTIONS = Array.from({ length: 12 }, (_, i) => i + 1)
 const MINUTE_OPTIONS = ["00", "15", "30", "45"]
+
+// Days of the week
+const DAYS_OF_WEEK = [
+  { short: "Sun", full: "Sunday", value: 0 },
+  { short: "Mon", full: "Monday", value: 1 },
+  { short: "Tue", full: "Tuesday", value: 2 },
+  { short: "Wed", full: "Wednesday", value: 3 },
+  { short: "Thu", full: "Thursday", value: 4 },
+  { short: "Fri", full: "Friday", value: 5 },
+  { short: "Sat", full: "Saturday", value: 6 },
+]
 
 export default function ProspectTrackerPage() {
   const {
@@ -98,6 +112,8 @@ export default function ProspectTrackerPage() {
   const [schedulingProspect, setSchedulingProspect] = useState<Prospect | null>(null)
   const [filterStatus, setFilterStatus] = useState<ProspectStatus | "all">("all")
   const [searchTerm, setSearchTerm] = useState("")
+  const [viewMode, setViewMode] = useState<"list" | "week">("list")
+  const [weekOffset, setWeekOffset] = useState(0) // 0 = current week, 1 = next week, etc.
   const [clientStartDate, setClientStartDate] = useState("")
 
   // HA Scheduling state
@@ -455,60 +471,260 @@ Talking Points:
         {/* Filters */}
         <Card className="mb-6">
           <CardContent className="p-4">
-            <div className="flex flex-col sm:flex-row gap-4">
-              <div className="flex-1 relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                <Input
-                  placeholder="Search by label..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
-                />
-              </div>
-              <div className="flex gap-2 flex-wrap">
-                <TooltipProvider>
-                  {(["all", "new", "interested", "converted", "not_interested", "not_closed"] as const).map((status) => {
-                    const statusTooltips: Record<string, string> = {
-                      new: "Reach Out",
-                      interested: "Send HA",
-                      converted: "Client Won!",
-                      not_interested: "Remove from 100's List",
-                      not_closed: "Set Reminder to Reach Out Again",
-                    }
-                    
-                    const button = (
-                      <Button
-                        key={status}
-                        variant={filterStatus === status ? "default" : "outline"}
-                        size="sm"
-                        onClick={() => setFilterStatus(status)}
-                        className={filterStatus === status ? "bg-[hsl(var(--optavia-green))]" : ""}
-                      >
-                        {status === "all" ? "All" : statusConfig[status as ProspectStatus]?.label || status}
-                      </Button>
-                    )
-                    
-                    // "All" doesn't need a tooltip
-                    if (status === "all") return button
-                    
-                    return (
-                      <Tooltip key={status}>
-                        <TooltipTrigger asChild>
-                          {button}
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p>{statusTooltips[status]}</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    )
-                  })}
-                </TooltipProvider>
+            <div className="flex flex-col gap-4">
+              <div className="flex flex-col sm:flex-row gap-4">
+                <div className="flex-1 relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <Input
+                    placeholder="Search by label..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-10"
+                  />
+                </div>
+                <div className="flex gap-2 flex-wrap">
+                  <TooltipProvider>
+                    {(["all", "new", "interested", "converted", "not_interested", "not_closed"] as const).map((status) => {
+                      const statusTooltips: Record<string, string> = {
+                        new: "Reach Out",
+                        interested: "Send HA",
+                        converted: "Client Won!",
+                        not_interested: "Remove from 100's List",
+                        not_closed: "Set Reminder to Reach Out Again",
+                      }
+                      
+                      const button = (
+                        <Button
+                          key={status}
+                          variant={filterStatus === status ? "default" : "outline"}
+                          size="sm"
+                          onClick={() => setFilterStatus(status)}
+                          className={filterStatus === status ? "bg-[hsl(var(--optavia-green))]" : ""}
+                        >
+                          {status === "all" ? "All" : statusConfig[status as ProspectStatus]?.label || status}
+                        </Button>
+                      )
+                      
+                      // "All" doesn't need a tooltip
+                      if (status === "all") return button
+                      
+                      return (
+                        <Tooltip key={status}>
+                          <TooltipTrigger asChild>
+                            {button}
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>{statusTooltips[status]}</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      )
+                    })}
+                  </TooltipProvider>
+                </div>
+
+                {/* View Toggle */}
+                <div className="flex rounded-lg border overflow-hidden">
+                  <button
+                    onClick={() => setViewMode("list")}
+                    className={`px-4 py-2 flex items-center gap-2 text-sm font-medium transition-colors ${
+                      viewMode === "list"
+                        ? "bg-[hsl(var(--optavia-green))] text-white"
+                        : "bg-white text-gray-700 hover:bg-gray-100"
+                    }`}
+                  >
+                    <List className="h-4 w-4" />
+                    List
+                  </button>
+                  <button
+                    onClick={() => setViewMode("week")}
+                    className={`px-4 py-2 flex items-center gap-2 text-sm font-medium transition-colors ${
+                      viewMode === "week"
+                        ? "bg-[hsl(var(--optavia-green))] text-white"
+                        : "bg-white text-gray-700 hover:bg-gray-100"
+                    }`}
+                  >
+                    <CalendarDays className="h-4 w-4" />
+                    Week
+                  </button>
+                </div>
               </div>
             </div>
           </CardContent>
         </Card>
 
+        {/* Week Calendar View */}
+        {viewMode === "week" && (
+          <div className="mb-6">
+            {/* Week Navigation */}
+            <div className="flex items-center justify-between mb-4">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setWeekOffset(weekOffset - 1)}
+                disabled={weekOffset <= 0}
+              >
+                <ChevronLeft className="h-4 w-4 mr-1" />
+                Previous
+              </Button>
+              <div className="text-center">
+                <span className="font-semibold text-gray-900">
+                  {(() => {
+                    const now = new Date()
+                    const startOfWeek = new Date(now)
+                    startOfWeek.setDate(now.getDate() - now.getDay() + weekOffset * 7)
+                    const endOfWeek = new Date(startOfWeek)
+                    endOfWeek.setDate(startOfWeek.getDate() + 6)
+                    return `${startOfWeek.toLocaleDateString("en-US", { month: "short", day: "numeric" })} - ${endOfWeek.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}`
+                  })()}
+                </span>
+                {weekOffset === 0 && (
+                  <Badge className="ml-2 bg-green-100 text-green-700">This Week</Badge>
+                )}
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setWeekOffset(weekOffset + 1)}
+              >
+                Next
+                <ChevronRight className="h-4 w-4 ml-1" />
+              </Button>
+            </div>
+
+            {/* Week Grid */}
+            <div className="grid grid-cols-7 gap-2">
+              {DAYS_OF_WEEK.map((day) => {
+                const now = new Date()
+                const startOfWeek = new Date(now)
+                startOfWeek.setDate(now.getDate() - now.getDay() + weekOffset * 7)
+                const dayDate = new Date(startOfWeek)
+                dayDate.setDate(startOfWeek.getDate() + day.value)
+                const isToday = dayDate.toDateString() === now.toDateString()
+                const isPast = dayDate < new Date(now.toDateString())
+
+                // Get prospects scheduled for this day (by ha_scheduled_at)
+                const dayProspects = filteredProspects.filter((prospect) => {
+                  if (!prospect.ha_scheduled_at) return false
+                  const scheduledDate = new Date(prospect.ha_scheduled_at)
+                  return scheduledDate.toDateString() === dayDate.toDateString()
+                }).sort((a, b) => {
+                  const aTime = new Date(a.ha_scheduled_at!).getTime()
+                  const bTime = new Date(b.ha_scheduled_at!).getTime()
+                  return aTime - bTime
+                })
+
+                return (
+                  <div
+                    key={day.value}
+                    className={`min-h-[200px] rounded-lg border ${
+                      isToday
+                        ? "border-[hsl(var(--optavia-green))] bg-green-50"
+                        : isPast
+                        ? "bg-gray-50 border-gray-200"
+                        : "bg-white border-gray-200"
+                    }`}
+                  >
+                    {/* Day Header */}
+                    <div
+                      className={`px-2 py-2 border-b text-center ${
+                        isToday ? "bg-[hsl(var(--optavia-green))] text-white" : "bg-gray-100"
+                      }`}
+                    >
+                      <div className="text-xs font-medium">{day.short}</div>
+                      <div className={`text-lg font-bold ${isToday ? "" : "text-gray-700"}`}>
+                        {dayDate.getDate()}
+                      </div>
+                    </div>
+
+                    {/* Day Content */}
+                    <div className="p-2 space-y-2">
+                      {dayProspects.length === 0 ? (
+                        <div className="text-xs text-gray-400 text-center py-4">
+                          No HAs
+                        </div>
+                      ) : (
+                        dayProspects.map((prospect) => {
+                          const config = statusConfig[prospect.status]
+                          const scheduledTime = new Date(prospect.ha_scheduled_at!).toLocaleTimeString("en-US", {
+                            hour: "numeric",
+                            minute: "2-digit",
+                          })
+                          return (
+                            <div
+                              key={prospect.id}
+                              onClick={() => {
+                                setSchedulingProspect(prospect)
+                                setShowHAScheduleModal(true)
+                              }}
+                              className="p-2 rounded-lg border border-gray-200 bg-white hover:shadow-sm cursor-pointer transition-shadow"
+                              style={{ borderLeftColor: config.color, borderLeftWidth: "3px" }}
+                            >
+                              <div className="text-xs font-medium text-gray-900 truncate">
+                                {prospect.label}
+                              </div>
+                              <div className="flex items-center justify-between mt-1">
+                                <span className="text-xs text-gray-500">{scheduledTime}</span>
+                                <Badge
+                                  className="text-[10px] px-1.5 py-0"
+                                  style={{ backgroundColor: config.bg, color: config.color }}
+                                >
+                                  HA
+                                </Badge>
+                              </div>
+                            </div>
+                          )
+                        })
+                      )}
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+
+            {/* Unscheduled Prospects */}
+            {(() => {
+              const unscheduledProspects = filteredProspects.filter(p => !p.ha_scheduled_at && !["converted", "coach", "not_interested"].includes(p.status))
+              if (unscheduledProspects.length === 0) return null
+              return (
+                <div className="mt-6">
+                  <div className="flex items-center gap-2 mb-3">
+                    <AlertCircle className="h-4 w-4 text-orange-500" />
+                    <span className="font-medium text-gray-700">No HA Scheduled ({unscheduledProspects.length})</span>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {unscheduledProspects.map((prospect) => {
+                      const config = statusConfig[prospect.status]
+                      return (
+                        <Button
+                          key={prospect.id}
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            setSchedulingProspect(prospect)
+                            setShowHAScheduleModal(true)
+                          }}
+                          className="border-orange-200 text-orange-700 hover:bg-orange-50"
+                        >
+                          <div
+                            className="w-5 h-5 rounded mr-2 flex items-center justify-center text-sm"
+                            style={{ backgroundColor: config.bg }}
+                          >
+                            {config.icon}
+                          </div>
+                          {prospect.label}
+                          <CalendarPlus className="h-3 w-3 ml-2" />
+                        </Button>
+                      )
+                    })}
+                  </div>
+                </div>
+              )
+            })()}
+          </div>
+        )}
+
         {/* Prospect List */}
+        {viewMode === "list" && (
         <div className="space-y-3">
           {filteredProspects.map((prospect) => {
             const config = statusConfig[prospect.status]
@@ -736,6 +952,7 @@ Talking Points:
             </Card>
           )}
         </div>
+        )}
       </div>
 
       {/* Add Modal */}
