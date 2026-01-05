@@ -218,10 +218,10 @@ Talking Points:
     targetDate.setHours(hour24, parseInt(haMinute), 0, 0)
     
     // Update prospect with HA scheduled datetime
+    // Note: email is not stored on prospect, only used for sending invites
     const success = await updateProspect(schedulingProspect.id, {
       next_action: haDate,
       ha_scheduled_at: targetDate.toISOString(),
-      email: prospectEmail || null,
       phone: prospectPhone || null,
     })
     
