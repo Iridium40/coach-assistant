@@ -217,23 +217,29 @@ Talking Points:
     const hour24 = get24Hour(haHour, haAmPm)
     targetDate.setHours(hour24, parseInt(haMinute), 0, 0)
     
-    // Update prospect with HA scheduled status, datetime, and email
-    // Set the HA scheduled date without changing status
-    // The HA scheduled badge on the card will indicate the scheduled HA
-    await updateProspect(schedulingProspect.id, {
+    // Update prospect with HA scheduled datetime
+    const success = await updateProspect(schedulingProspect.id, {
       next_action: haDate,
       ha_scheduled_at: targetDate.toISOString(),
       email: prospectEmail || null,
       phone: prospectPhone || null,
     })
     
-    toast({
-      title: "📅 HA Scheduled!",
-      description: `${haHour}:${haMinute} ${haAmPm} on ${targetDate.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })}`,
-    })
-    
-    setShowHAScheduleModal(false)
-    setSchedulingProspect(null)
+    if (success) {
+      toast({
+        title: "📅 HA Scheduled!",
+        description: `${haHour}:${haMinute} ${haAmPm} on ${targetDate.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })}`,
+      })
+      
+      setShowHAScheduleModal(false)
+      setSchedulingProspect(null)
+    } else {
+      toast({
+        title: "Failed to schedule HA",
+        description: "Please try again",
+        variant: "destructive",
+      })
+    }
   }
 
   const handleAddProspect = async () => {
