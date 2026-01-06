@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge"
 import { 
   ChevronLeft, ChevronRight, Calendar as CalendarIcon, 
   Video, Clock, Users, UserCircle, ExternalLink, Copy, Check,
-  Grid3X3, List
+  Grid3X3, List, Share2
 } from "lucide-react"
 import { createClient } from "@/lib/supabase/client"
 import { useAuth } from "@/hooks/use-auth"
@@ -28,6 +28,7 @@ export function CalendarView() {
   const [viewMode, setViewMode] = useState<ViewMode>("week") // Default to week for better mobile UX
   const [currentDate, setCurrentDate] = useState(new Date())
   const [copiedId, setCopiedId] = useState<string | null>(null)
+  const [sharedId, setSharedId] = useState<string | null>(null)
   const [selectedEvent, setSelectedEvent] = useState<ExpandedZoomCall | null>(null)
   const supabase = createClient()
 
@@ -61,6 +62,53 @@ export function CalendarView() {
     toast({
       title: "Copied!",
       description: "Zoom link copied to clipboard",
+    })
+  }
+
+  const handleShareWithClients = async (event: ExpandedZoomCall) => {
+    const eventDate = new Date(event.occurrence_date)
+    const dateStr = eventDate.toLocaleDateString(undefined, {
+      weekday: 'long',
+      month: 'long',
+      day: 'numeric',
+      year: 'numeric'
+    })
+    const timeStr = eventDate.toLocaleTimeString(undefined, {
+      hour: 'numeric',
+      minute: '2-digit'
+    })
+
+    let shareText = `📅 ${event.title}\n\n`
+    shareText += `🗓 ${dateStr}\n`
+    shareText += `⏰ ${timeStr}`
+    if (event.duration_minutes) {
+      shareText += ` (${event.duration_minutes} min)`
+    }
+    shareText += `\n`
+    
+    if (event.description) {
+      shareText += `\n${event.description}\n`
+    }
+    
+    if (event.zoom_link) {
+      shareText += `\n🔗 Join here: ${event.zoom_link}\n`
+    }
+    
+    if (event.zoom_meeting_id) {
+      shareText += `\nMeeting ID: ${event.zoom_meeting_id}`
+    }
+    if (event.zoom_passcode) {
+      shareText += `\nPasscode: ${event.zoom_passcode}`
+    }
+    
+    shareText += `\n\nLooking forward to seeing you there! 💚`
+
+    await navigator.clipboard.writeText(shareText)
+    setSharedId(event.id)
+    setTimeout(() => setSharedId(null), 2000)
+    toast({
+      title: "Meeting Details Copied!",
+      description: "Share this with your clients via text, email, or social media",
     })
   }
 
@@ -566,6 +614,35 @@ export function CalendarView() {
                 {selectedEvent.status !== "completed" && (
                   <div className="pt-2 border-t border-gray-100">
                     <AddToCalendar event={selectedEvent} className="w-full" />
+                  </div>
+                )}
+
+                {/* Share with Clients - only for "with_clients" meetings */}
+                {selectedEvent.call_type === "with_clients" && selectedEvent.status !== "completed" && (
+                  <div className="pt-2 border-t border-gray-100">
+                    <Button
+                      variant="outline"
+                      className={`w-full ${sharedId === selectedEvent.id 
+                        ? "bg-teal-50 border-teal-300 text-teal-700" 
+                        : "border-teal-200 text-teal-600 hover:bg-teal-50"
+                      }`}
+                      onClick={() => handleShareWithClients(selectedEvent)}
+                    >
+                      {sharedId === selectedEvent.id ? (
+                        <>
+                          <Check className="h-4 w-4 mr-2" />
+                          Copied! Share with your clients
+                        </>
+                      ) : (
+                        <>
+                          <Share2 className="h-4 w-4 mr-2" />
+                          Share with Clients
+                        </>
+                      )}
+                    </Button>
+                    <p className="text-xs text-gray-500 text-center mt-1">
+                      Copy meeting details to share via text, email, or social media
+                    </p>
                   </div>
                 )}
               </div>

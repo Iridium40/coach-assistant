@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { 
   Video, Calendar, Clock, Users, ExternalLink, Copy, Check, 
-  PlayCircle, ChevronDown, ChevronUp, UserCircle
+  PlayCircle, ChevronDown, ChevronUp, UserCircle, Share2
 } from "lucide-react"
 import { createClient } from "@/lib/supabase/client"
 import { useAuth } from "@/hooks/use-auth"
@@ -23,6 +23,7 @@ export function ZoomCalls() {
   const [loading, setLoading] = useState(true)
   const [showPast, setShowPast] = useState(false)
   const [copiedId, setCopiedId] = useState<string | null>(null)
+  const [sharedId, setSharedId] = useState<string | null>(null)
   const supabase = createClient()
 
   useEffect(() => {
@@ -63,6 +64,53 @@ export function ZoomCalls() {
     toast({
       title: "Copied!",
       description: "Zoom link copied to clipboard",
+    })
+  }
+
+  const handleShareWithClients = async (call: ExpandedZoomCall, index: number) => {
+    const eventDate = new Date(call.occurrence_date)
+    const dateStr = eventDate.toLocaleDateString(undefined, {
+      weekday: 'long',
+      month: 'long',
+      day: 'numeric',
+      year: 'numeric'
+    })
+    const timeStr = eventDate.toLocaleTimeString(undefined, {
+      hour: 'numeric',
+      minute: '2-digit'
+    })
+
+    let shareText = `📅 ${call.title}\n\n`
+    shareText += `🗓 ${dateStr}\n`
+    shareText += `⏰ ${timeStr}`
+    if (call.duration_minutes) {
+      shareText += ` (${call.duration_minutes} min)`
+    }
+    shareText += `\n`
+    
+    if (call.description) {
+      shareText += `\n${call.description}\n`
+    }
+    
+    if (call.zoom_link) {
+      shareText += `\n🔗 Join here: ${call.zoom_link}\n`
+    }
+    
+    if (call.zoom_meeting_id) {
+      shareText += `\nMeeting ID: ${call.zoom_meeting_id}`
+    }
+    if (call.zoom_passcode) {
+      shareText += `\nPasscode: ${call.zoom_passcode}`
+    }
+    
+    shareText += `\n\nLooking forward to seeing you there! 💚`
+
+    await navigator.clipboard.writeText(shareText)
+    setSharedId(`${call.id}-${index}`)
+    setTimeout(() => setSharedId(null), 2000)
+    toast({
+      title: "Meeting Details Copied!",
+      description: "Share this with your clients via text, email, or social media",
     })
   }
 
@@ -237,6 +285,30 @@ export function ZoomCalls() {
                       <span>Passcode: <strong className="text-optavia-dark">{call.zoom_passcode}</strong></span>
                     )}
                   </div>
+                )}
+
+                {/* Share with Clients - only for "with_clients" meetings */}
+                {call.call_type === "with_clients" && (
+                  <Button
+                    variant="outline"
+                    onClick={() => handleShareWithClients(call, index)}
+                    className={`w-full ${sharedId === `${call.id}-${index}` 
+                      ? "bg-teal-50 border-teal-300 text-teal-700" 
+                      : "border-teal-200 text-teal-600 hover:bg-teal-50"
+                    }`}
+                  >
+                    {sharedId === `${call.id}-${index}` ? (
+                      <>
+                        <Check className="h-4 w-4 mr-2" />
+                        Copied! Share with your clients
+                      </>
+                    ) : (
+                      <>
+                        <Share2 className="h-4 w-4 mr-2" />
+                        Share with Clients
+                      </>
+                    )}
+                  </Button>
                 )}
               </CardContent>
             </Card>
