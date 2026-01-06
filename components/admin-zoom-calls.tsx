@@ -121,8 +121,8 @@ export function AdminZoomCalls({ onClose }: { onClose?: () => void }) {
     setDescription(call.description || "")
     setCallType(call.call_type)
     setScheduledAt(new Date(call.scheduled_at).toISOString().slice(0, 16))
-    setDurationMinutes(call.duration_minutes)
-    setIsRecurring(call.is_recurring)
+    setDurationMinutes(call.duration_minutes || 60)
+    setIsRecurring(call.is_recurring || false)
     setRecurrencePattern(call.recurrence_pattern || "")
     setRecurrenceDay(call.recurrence_day || "")
     setZoomLink(call.zoom_link || "")
@@ -137,6 +137,11 @@ export function AdminZoomCalls({ onClose }: { onClose?: () => void }) {
     setIsVirtual(call.is_virtual !== false)
     setEditingId(call.id)
     setShowForm(true)
+    
+    // Scroll to top so user can see the form
+    setTimeout(() => {
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+    }, 100)
   }
 
   const handleDelete = async (id: string, e?: React.MouseEvent) => {
