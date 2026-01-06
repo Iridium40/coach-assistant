@@ -1,8 +1,9 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useMemo } from "react"
 import Link from "next/link"
 import { useProspects, statusConfig, sourceOptions, actionTypeLabels, type ProspectStatus, type ProspectSource, type Prospect } from "@/hooks/use-prospects"
+import { useDebounce } from "@/hooks/use-debounce"
 import { useClients } from "@/hooks/use-clients"
 import { useUserData } from "@/contexts/user-data-context"
 import { useToast } from "@/hooks/use-toast"
@@ -75,6 +76,9 @@ import { ScheduleCalendarOptions } from "@/components/schedule-calendar-options"
 import { ShareHealthAssessment } from "@/components/share-health-assessment"
 import { PipelineProgressionGuide } from "@/components/pipeline-progression-guide"
 import { ReminderButton } from "@/components/reminders-panel"
+import { ErrorBoundary } from "@/components/ui/error-boundary"
+import { StatsCardsSkeleton, ProspectListSkeleton, WeekViewSkeleton } from "@/components/ui/skeleton-loaders"
+import { ProspectCard } from "@/components/prospect-tracker/prospect-card"
 import { HelpCircle } from "lucide-react"
 import type { CalendarEvent } from "@/lib/calendar-utils"
 
@@ -115,11 +119,14 @@ export default function ProspectTrackerPage() {
   const [showHAScheduleModal, setShowHAScheduleModal] = useState(false)
   const [showHASendModal, setShowHASendModal] = useState(false)
   const [showGuideModal, setShowGuideModal] = useState(false)
-  const [editingProspect, setEditingProspect] = useState<any>(null)
+  const [editingProspect, setEditingProspect] = useState<Prospect | null>(null)
   const [convertingProspect, setConvertingProspect] = useState<Prospect | null>(null)
   const [schedulingProspect, setSchedulingProspect] = useState<Prospect | null>(null)
   const [filterStatus, setFilterStatus] = useState<ProspectStatus | "all">("all")
   const [searchTerm, setSearchTerm] = useState("")
+  
+  // Debounce search term for better performance
+  const debouncedSearchTerm = useDebounce(searchTerm, 300)
   const [viewMode, setViewMode] = useState<"list" | "week">("list")
   const [weekOffset, setWeekOffset] = useState(0) // 0 = current week, 1 = next week, etc.
   const [clientStartDate, setClientStartDate] = useState("")
@@ -415,14 +422,34 @@ Talking Points:
     })
   }
 
-  const filteredProspects = getFilteredProspects(filterStatus, searchTerm)
+  // Memoize filtered prospects for better performance
+  const filteredProspects = useMemo(() => 
+    getFilteredProspects(filterStatus, debouncedSearchTerm),
+    [filterStatus, debouncedSearchTerm, getFilteredProspects]
+  )
 
   if (loading) {
     return (
       <div className="min-h-screen flex flex-col bg-gray-50">
         <Header />
-        <div className="flex-1 flex items-center justify-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[hsl(var(--optavia-green))]"></div>
+        {/* Page Header Skeleton */}
+        <div className="bg-gradient-to-r from-[hsl(var(--optavia-green))] to-[hsl(var(--optavia-green-dark))] text-white">
+          <div className="container mx-auto px-4 py-6">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div>
+                <div className="h-4 w-32 bg-white/20 rounded mb-2" />
+                <div className="h-8 w-48 bg-white/20 rounded mb-2" />
+                <div className="h-4 w-64 bg-white/20 rounded" />
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="container mx-auto px-4 py-6">
+          <StatsCardsSkeleton count={4} />
+          <div className="space-y-4 mb-6">
+            <div className="h-10 w-64 bg-gray-200 rounded animate-pulse" />
+          </div>
+          <ProspectListSkeleton count={5} />
         </div>
         <Footer />
       </div>
@@ -490,6 +517,7 @@ Talking Points:
       </div>
 
       <div className="container mx-auto px-4 py-6">
+        <ErrorBoundary>
         {/* Stats */}
         <TooltipProvider>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
@@ -1096,6 +1124,7 @@ Talking Points:
           )}
         </div>
         )}
+        </ErrorBoundary>
       </div>
 
       {/* Add Modal */}

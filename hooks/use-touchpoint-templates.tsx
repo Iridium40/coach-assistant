@@ -124,7 +124,8 @@ export function getMilestoneType(day: number): string | null {
 }
 
 export function useTouchpointTemplates() {
-  const supabase = createClient()
+  // Memoize supabase client to prevent re-creation on every render
+  const supabase = useMemo(() => createClient(), [])
 
   const [triggers, setTriggers] = useState<TouchpointTrigger[]>([])
   const [templates, setTemplates] = useState<TouchpointTemplate[]>([])
@@ -156,7 +157,9 @@ export function useTouchpointTemplates() {
       setMeetingInvites(invitesRes.data || [])
       setTalkingPoints(pointsRes.data || [])
     } catch (err: any) {
-      console.error("Error loading touchpoint templates:", err)
+      if (process.env.NODE_ENV === "development") {
+        console.error("Error loading touchpoint templates:", err)
+      }
       setError(err.message || "Failed to load templates")
     }
 

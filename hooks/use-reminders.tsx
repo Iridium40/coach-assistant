@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useCallback } from "react"
+import { useState, useEffect, useCallback, useMemo } from "react"
 import { createClient } from "@/lib/supabase/client"
 import { useAuth } from "@/hooks/use-auth"
 
@@ -47,7 +47,8 @@ export interface UpdateReminder {
 
 export function useReminders() {
   const { user } = useAuth()
-  const supabase = createClient()
+  // Memoize supabase client to prevent re-creation on every render
+  const supabase = useMemo(() => createClient(), [])
   
   const [reminders, setReminders] = useState<Reminder[]>([])
   const [loading, setLoading] = useState(true)
@@ -75,7 +76,6 @@ export function useReminders() {
 
       if (fetchError) {
         // Table might not exist yet - fail silently
-        console.warn('Reminders table not available:', fetchError.message)
         setError(null)
         setReminders([])
         setLoading(false)
@@ -86,7 +86,6 @@ export function useReminders() {
       setLoading(false)
     } catch (err) {
       // Silently handle if table doesn't exist
-      console.warn('Reminders fetch error:', err)
       setReminders([])
       setLoading(false)
     }

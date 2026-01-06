@@ -1,8 +1,9 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useMemo } from "react"
 import Link from "next/link"
-import { useClients, getDayPhase, getProgramDay, type ClientStatus, type RecurringFrequency } from "@/hooks/use-clients"
+import { useClients, getDayPhase, getProgramDay, type ClientStatus, type RecurringFrequency, type Client } from "@/hooks/use-clients"
+import { useDebounce } from "@/hooks/use-debounce"
 import { useToast } from "@/hooks/use-toast"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -66,6 +67,9 @@ import { ReminderButton } from "@/components/reminders-panel"
 import { GraduationCap, Trophy, Heart, Download } from "lucide-react"
 import { ScheduleCalendarOptions } from "@/components/schedule-calendar-options"
 import { isMilestoneDay } from "@/hooks/use-touchpoint-templates"
+import { ErrorBoundary } from "@/components/ui/error-boundary"
+import { StatsCardsSkeleton, ClientListSkeleton, WeekViewSkeleton } from "@/components/ui/skeleton-loaders"
+import { ClientCard } from "@/components/client-tracker/client-card"
 import type { CalendarEvent } from "@/lib/calendar-utils"
 
 // Days of the week
@@ -106,7 +110,7 @@ export default function ClientTrackerPage() {
   const [milestoneCount, setMilestoneCount] = useState(0)
   const [showClearConfirm, setShowClearConfirm] = useState(false)
   const [clientToClear, setClientToClear] = useState<string | null>(null)
-  const [selectedClient, setSelectedClient] = useState<any>(null)
+  const [selectedClient, setSelectedClient] = useState<Client | null>(null)
   const [filterStatus, setFilterStatus] = useState<ClientStatus | "all">("active")
   const [searchTerm, setSearchTerm] = useState("")
   const [viewMode, setViewMode] = useState<"list" | "week">("list")
@@ -120,6 +124,9 @@ export default function ClientTrackerPage() {
   const [recurringFrequency, setRecurringFrequency] = useState<RecurringFrequency>("none")
   const [clientEmail, setClientEmail] = useState<string>("")
   const [clientPhone, setClientPhone] = useState<string>("")
+  
+  // Debounce search term for better performance
+  const debouncedSearchTerm = useDebounce(searchTerm, 300)
 
   // Recurring frequency options
   const RECURRING_OPTIONS: { value: RecurringFrequency; label: string }[] = [
@@ -138,7 +145,7 @@ export default function ClientTrackerPage() {
   })
 
   // Generate SMS text for calendar invite
-  const generateSMSText = (client: any, scheduledAt: Date): string => {
+  const generateSMSText = (client: Client, scheduledAt: Date): string => {
     const programDay = getProgramDay(client.start_date)
     const dateStr = scheduledAt.toLocaleDateString("en-US", { weekday: "long", month: "short", day: "numeric" })
     const timeStr = scheduledAt.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })
@@ -146,7 +153,7 @@ export default function ClientTrackerPage() {
   }
 
   // Send SMS with scheduled meeting info
-  const sendSMS = (client: any) => {
+  const sendSMS = (client: Client) => {
     if (!client.phone || !client.next_scheduled_at) return
     const scheduledAt = new Date(client.next_scheduled_at)
     const message = generateSMSText(client, scheduledAt)
@@ -179,7 +186,7 @@ export default function ClientTrackerPage() {
   }
 
   // Generate Google Calendar URL
-  const generateCalendarUrl = (client: any, day: number, hour: number, minute: string, ampm: "AM" | "PM"): string => {
+  const generateCalendarUrl = (client: Client, day: number, hour: number, minute: string, ampm: "AM" | "PM"): string => {
     const targetDate = getNextDayDate(day)
     const hour24 = get24Hour(hour, ampm)
     targetDate.setHours(hour24, parseInt(minute), 0, 0)
@@ -217,7 +224,7 @@ ${phase.milestone ? `\n🎉 MILESTONE: ${phase.label} - Celebrate this achieveme
   }
 
   // Open schedule modal
-  const openScheduleModal = (client: any) => {
+  const openScheduleModal = (client: Client) => {
     setSelectedClient(client)
     // Load existing recurring settings if available
     if (client.recurring_day !== null && client.recurring_day !== undefined) {
@@ -376,21 +383,40 @@ ${phase.milestone ? `\n🎉 MILESTONE: ${phase.label} - Celebrate this achieveme
     })
   }
 
-  const openTextTemplates = (client: any) => {
+  const openTextTemplates = (client: Client) => {
     setSelectedClient(client)
     setShowTextModal(true)
   }
 
-  const filteredClients = getFilteredClients(filterStatus).filter(client =>
-    !searchTerm || client.label.toLowerCase().includes(searchTerm.toLowerCase())
+  // Memoize filtered clients for better performance
+  const filteredClients = useMemo(() => 
+    getFilteredClients(filterStatus).filter(client =>
+      !debouncedSearchTerm || client.label.toLowerCase().includes(debouncedSearchTerm.toLowerCase())
+    ), [filterStatus, debouncedSearchTerm, getFilteredClients]
   )
 
   if (loading) {
     return (
       <div className="min-h-screen flex flex-col bg-gray-50">
         <Header />
-        <div className="flex-1 flex items-center justify-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[hsl(var(--optavia-green))]"></div>
+        {/* Page Header Skeleton */}
+        <div className="bg-gradient-to-r from-[hsl(var(--optavia-green))] to-[hsl(var(--optavia-green-dark))] text-white">
+          <div className="container mx-auto px-4 py-6">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div>
+                <div className="h-4 w-32 bg-white/20 rounded mb-2" />
+                <div className="h-8 w-48 bg-white/20 rounded mb-2" />
+                <div className="h-4 w-64 bg-white/20 rounded" />
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="container mx-auto px-4 py-6">
+          <StatsCardsSkeleton count={4} />
+          <div className="space-y-4 mb-6">
+            <div className="h-10 w-64 bg-gray-200 rounded animate-pulse" />
+          </div>
+          <ClientListSkeleton count={5} />
         </div>
         <Footer />
       </div>
@@ -466,6 +492,7 @@ ${phase.milestone ? `\n🎉 MILESTONE: ${phase.label} - Celebrate this achieveme
       </div>
 
       <div className="container mx-auto px-4 py-6">
+        <ErrorBoundary>
         {/* Stats */}
         <TooltipProvider>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
@@ -1040,6 +1067,7 @@ ${phase.milestone ? `\n🎉 MILESTONE: ${phase.label} - Celebrate this achieveme
           )}
         </div>
         )}
+        </ErrorBoundary>
       </div>
 
       {/* Add Client Modal */}

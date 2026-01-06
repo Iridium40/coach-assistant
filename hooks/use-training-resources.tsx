@@ -77,7 +77,8 @@ export function useTrainingResources(user?: User | null, userRank?: string | nul
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  const supabase = createClient()
+  // Memoize supabase client to prevent re-creation on every render
+  const supabase = useMemo(() => createClient(), [])
 
   // Load resources, categories, and completions
   const loadData = useCallback(async () => {
@@ -117,7 +118,9 @@ export function useTrainingResources(user?: User | null, userRank?: string | nul
         }
       }
     } catch (err: any) {
-      console.error("Error loading training resources:", err)
+      if (process.env.NODE_ENV === "development") {
+        console.error("Error loading training resources:", err)
+      }
       setError(err.message)
     } finally {
       setLoading(false)
@@ -239,7 +242,9 @@ export function useTrainingResources(user?: User | null, userRank?: string | nul
       }
     } catch (err: any) {
       // Revert on error
-      console.error("Error toggling completion:", err)
+      if (process.env.NODE_ENV === "development") {
+        console.error("Error toggling completion:", err)
+      }
       setCompletedIds(prev => {
         const newSet = new Set(prev)
         if (isCurrentlyCompleted) {
@@ -286,7 +291,8 @@ export function useTrainingResources(user?: User | null, userRank?: string | nul
 // Admin hook for managing resources
 export function useTrainingResourcesAdmin() {
   const { resources, categories, loading, error, reload } = useTrainingResources()
-  const supabase = createClient()
+  // Memoize supabase client to prevent re-creation on every render
+  const supabase = useMemo(() => createClient(), [])
 
   const addResource = async (resource: Omit<TrainingResource, "id" | "created_at" | "updated_at" | "is_active">) => {
     const { data, error } = await supabase
@@ -392,23 +398,17 @@ export function useTrainingResourcesAdmin() {
   }
 
   const updateCategory = async (id: string, updates: Partial<TrainingCategory>) => {
-    console.log("Updating category:", id, updates)
-    
-    const { data, error, count } = await supabase
+    const { data, error } = await supabase
       .from("training_categories")
       .update(updates)
       .eq("id", id)
       .select()
-
-    console.log("Update result:", { data, error, count })
     
     if (error) {
-      console.error("Update error:", error)
       throw error
     }
     
     if (!data || data.length === 0) {
-      console.error("No rows updated - likely RLS policy issue")
       throw new Error("Failed to update category. Check permissions.")
     }
     
