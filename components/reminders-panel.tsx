@@ -447,7 +447,7 @@ function ReminderCard({
 
 // Main Reminders Panel
 export function RemindersPanel({ isOpen, onClose }: RemindersPanelProps) {
-  const { reminders, loading, stats, getUpcoming, getCompleted } = useReminders()
+  const { reminders, loading, stats, getUpcoming, getCompleted, completeReminder, uncompleteReminder, deleteReminder, isOverdue, isDueToday } = useReminders()
   const [filterView, setFilterView] = useState<"upcoming" | "completed" | "all">("upcoming")
   const [showCreateModal, setShowCreateModal] = useState(false)
   const [editingReminder, setEditingReminder] = useState<Reminder | null>(null)
@@ -540,6 +540,11 @@ export function RemindersPanel({ isOpen, onClose }: RemindersPanelProps) {
                     setEditingReminder(reminder)
                     setShowCreateModal(true)
                   }}
+                  onComplete={completeReminder}
+                  onUncomplete={uncompleteReminder}
+                  onDelete={deleteReminder}
+                  isOverdue={isOverdue}
+                  isDueToday={isDueToday}
                 />
               ))
             )}

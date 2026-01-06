@@ -20,7 +20,9 @@ import {
   MessageSquare,
   Circle,
   Target,
+  Bell,
 } from "lucide-react"
+import { useReminders } from "@/hooks/use-reminders"
 import { useTrainingResources, meetsRankRequirement, type TrainingResource, type TrainingCategory } from "@/hooks/use-training-resources"
 import { getProgramDay, getDayPhase } from "@/hooks/use-clients"
 import type { User } from "@supabase/supabase-js"
@@ -59,6 +61,8 @@ export function TodaysFocus({
     progress,
     getCategoryProgress,
   } = useTrainingResources(user, userRank)
+
+  const { reminders, completeReminder, isOverdue, isDueToday } = useReminders()
 
   const today = new Date().toISOString().split("T")[0]
   const todayStart = new Date()
