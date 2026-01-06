@@ -62,7 +62,12 @@ export function TodaysFocus({
     getCategoryProgress,
   } = useTrainingResources(user, userRank)
 
-  const { reminders, completeReminder, isOverdue, isDueToday } = useReminders()
+  const { reminders = [], completeReminder, isOverdue, isDueToday } = useReminders()
+
+  // Get today's reminders (due today or overdue, not completed)
+  const todaysReminders = reminders.filter(r => 
+    !r.is_completed && (isDueToday?.(r) || isOverdue?.(r))
+  ).slice(0, 3)
 
   const today = new Date().toISOString().split("T")[0]
   const todayStart = new Date()
@@ -124,7 +129,7 @@ export function TodaysFocus({
     return [7, 14, 21, 30].includes(day)
   }).slice(0, 2)
 
-  const hasActionItems = clientsNeedingAction.length > 0 || haScheduledToday.length > 0 || meetingsToday.length > 0 || milestoneClients.length > 0
+  const hasActionItems = clientsNeedingAction.length > 0 || haScheduledToday.length > 0 || meetingsToday.length > 0 || milestoneClients.length > 0 || todaysReminders.length > 0
 
   const formatTime = (dateString: string) => {
     const date = new Date(dateString)
@@ -326,6 +331,43 @@ export function TodaysFocus({
                     onClick={() => onCelebrateClick?.(client)}
                   >
                     🎉 Celebrate!
+                  </Button>
+                </div>
+              )
+            })}
+
+            {/* Today's Reminders */}
+            {todaysReminders.map(reminder => {
+              const reminderIsOverdue = isOverdue?.(reminder)
+              return (
+                <div
+                  key={`reminder-${reminder.id}`}
+                  className={`flex items-center justify-between p-2.5 bg-white rounded-lg border ${
+                    reminderIsOverdue ? "border-red-200" : "border-amber-200"
+                  }`}
+                >
+                  <div className="flex items-center gap-2">
+                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
+                      reminderIsOverdue ? "bg-red-100" : "bg-amber-100"
+                    }`}>
+                      <Bell className={`h-4 w-4 ${reminderIsOverdue ? "text-red-600" : "text-amber-600"}`} />
+                    </div>
+                    <div>
+                      <div className="font-medium text-sm text-gray-900">{reminder.title}</div>
+                      <div className={`text-xs ${reminderIsOverdue ? "text-red-600" : "text-amber-600"}`}>
+                        {reminderIsOverdue ? "Overdue" : "Due today"}
+                        {reminder.entity_name && ` • ${reminder.entity_name}`}
+                      </div>
+                    </div>
+                  </div>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => completeReminder?.(reminder.id)}
+                    className="h-7 text-xs px-3 text-green-600 border-green-200 hover:bg-green-50"
+                  >
+                    <CheckCircle className="h-3 w-3 mr-1" />
+                    Done
                   </Button>
                 </div>
               )

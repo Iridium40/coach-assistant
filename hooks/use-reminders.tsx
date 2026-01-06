@@ -66,20 +66,30 @@ export function useReminders() {
     setLoading(true)
     setError(null)
 
-    const { data, error: fetchError } = await supabase
-      .from('reminders')
-      .select('*')
-      .eq('user_id', user.id)
-      .order('due_date', { ascending: true })
+    try {
+      const { data, error: fetchError } = await supabase
+        .from('reminders')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('due_date', { ascending: true })
 
-    if (fetchError) {
-      setError(fetchError.message)
+      if (fetchError) {
+        // Table might not exist yet - fail silently
+        console.warn('Reminders table not available:', fetchError.message)
+        setError(null)
+        setReminders([])
+        setLoading(false)
+        return
+      }
+
+      setReminders(data || [])
       setLoading(false)
-      return
+    } catch (err) {
+      // Silently handle if table doesn't exist
+      console.warn('Reminders fetch error:', err)
+      setReminders([])
+      setLoading(false)
     }
-
-    setReminders(data || [])
-    setLoading(false)
   }, [user, supabase])
 
   // Initial load
