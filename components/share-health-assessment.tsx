@@ -2,11 +2,10 @@
 
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { Dialog, DialogContent } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import { createAssessmentLink } from "@/lib/assessment-links"
 import { useUserData } from "@/contexts/user-data-context"
 import { useToast } from "@/hooks/use-toast"
@@ -136,13 +135,13 @@ export function ShareHealthAssessment({
   if (!assessmentLink) {
     return (
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent>
-          <CardHeader>
-            <CardTitle>Share Health Assessment</CardTitle>
-            <CardDescription>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Share Health Assessment</DialogTitle>
+            <DialogDescription>
               Please set your email in your profile settings to generate an assessment link.
-            </CardDescription>
-          </CardHeader>
+            </DialogDescription>
+          </DialogHeader>
         </DialogContent>
       </Dialog>
     )
@@ -150,22 +149,17 @@ export function ShareHealthAssessment({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto p-0">
-        <Card className="border-0 shadow-none">
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <div>
-                <CardTitle className="flex items-center gap-2">
-                  <Share2 className="h-5 w-5 text-[hsl(var(--optavia-green))]" />
-                  Share Health Assessment
-                </CardTitle>
-                <CardDescription>
-                  Send your assessment link via email, SMS, or social media
-                </CardDescription>
-              </div>
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-6">
+      <DialogContent className="sm:max-w-xl w-[95vw] max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <Share2 className="h-5 w-5 text-[hsl(var(--optavia-green))]" />
+            Share Health Assessment
+          </DialogTitle>
+          <DialogDescription>
+            Send your assessment link via email, SMS, or social media
+          </DialogDescription>
+        </DialogHeader>
+        <div className="space-y-6">
             {/* Customize Message */}
             <div className="space-y-3">
               <Label htmlFor="customMessage" className="font-semibold">
@@ -260,22 +254,21 @@ export function ShareHealthAssessment({
               </div>
             </div>
 
-            {/* Copy Link Section */}
-            <div className="pt-4 border-t">
-              <div className="flex items-center gap-2 p-3 bg-gray-50 rounded-md border">
-                <code className="flex-1 text-xs break-all">{assessmentLink}</code>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={handleCopyLink}
-                  className="shrink-0"
-                >
-                  {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-                </Button>
-              </div>
+          {/* Copy Link Section */}
+          <div className="pt-4 border-t">
+            <div className="flex items-center gap-2 p-3 bg-gray-50 rounded-md border">
+              <code className="flex-1 text-xs break-all overflow-hidden">{assessmentLink}</code>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={handleCopyLink}
+                className="shrink-0"
+              >
+                {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+              </Button>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </DialogContent>
     </Dialog>
   )
