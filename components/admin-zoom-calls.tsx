@@ -72,6 +72,22 @@ export function AdminZoomCalls({ onClose }: { onClose?: () => void }) {
     loadZoomCalls()
   }, [user, isAdmin])
 
+  // When switching to virtual format (and not editing), prefill zoom details from profile
+  useEffect(() => {
+    if (isVirtual && !editingId && showForm) {
+      // Only prefill if fields are empty
+      if (!zoomLink && profile?.zoom_link) {
+        setZoomLink(profile.zoom_link)
+      }
+      if (!zoomMeetingId && profile?.zoom_meeting_id) {
+        setZoomMeetingId(profile.zoom_meeting_id)
+      }
+      if (!zoomPasscode && profile?.zoom_passcode) {
+        setZoomPasscode(profile.zoom_passcode)
+      }
+    }
+  }, [isVirtual, editingId, showForm, profile])
+
   const loadZoomCalls = async () => {
     const { data, error } = await supabase
       .from("zoom_calls")
@@ -113,6 +129,49 @@ export function AdminZoomCalls({ onClose }: { onClose?: () => void }) {
     setIsVirtual(true)
     setEditingId(null)
     setShowForm(false)
+  }
+
+  // Prefill zoom fields from user's profile settings
+  const prefillZoomFromProfile = () => {
+    if (profile?.zoom_link && !zoomLink) {
+      setZoomLink(profile.zoom_link)
+    }
+    if (profile?.zoom_meeting_id && !zoomMeetingId) {
+      setZoomMeetingId(profile.zoom_meeting_id)
+    }
+    if (profile?.zoom_passcode && !zoomPasscode) {
+      setZoomPasscode(profile.zoom_passcode)
+    }
+  }
+
+  // Handle creating a new meeting - prefill zoom fields if available
+  const handleNewMeeting = () => {
+    // Reset form first
+    setTitle("")
+    setDescription("")
+    setCallType("coach_only")
+    setScheduledAt("")
+    setDurationMinutes(60)
+    setIsRecurring(false)
+    setRecurrencePattern("")
+    setRecurrenceDay("")
+    setRecurrenceEndDate("")
+    setRecordingUrl("")
+    setRecordingPlatform("vimeo")
+    setStatus("upcoming")
+    setSendEmailNotification(true)
+    setEventType("meeting")
+    setEndDate("")
+    setLocation("")
+    setIsVirtual(true)
+    setEditingId(null)
+    
+    // Prefill zoom details from profile if available
+    setZoomLink(profile?.zoom_link || "")
+    setZoomMeetingId(profile?.zoom_meeting_id || "")
+    setZoomPasscode(profile?.zoom_passcode || "")
+    
+    setShowForm(true)
   }
 
   const handleEdit = (call: ZoomCall, e?: React.MouseEvent) => {
@@ -392,7 +451,7 @@ export function AdminZoomCalls({ onClose }: { onClose?: () => void }) {
       <div className="mb-8">
         {!showForm ? (
           <Button
-            onClick={() => setShowForm(true)}
+            onClick={handleNewMeeting}
             className="bg-[hsl(var(--optavia-green))] hover:bg-[hsl(var(--optavia-green-dark))]"
           >
             <Plus className="h-4 w-4 mr-2" />
