@@ -149,7 +149,7 @@ export function ShareHealthAssessment({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-xl w-[95vw] max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-lg w-[95vw] max-w-[95vw] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Share2 className="h-5 w-5 text-[hsl(var(--optavia-green))]" />
@@ -170,7 +170,8 @@ export function ShareHealthAssessment({
                 value={customMessage}
                 onChange={(e) => setCustomMessage(e.target.value)}
                 rows={5}
-                className="bg-white"
+                className="bg-white w-full resize-none"
+                style={{ wordBreak: 'break-word', overflowWrap: 'break-word' }}
                 placeholder="Enter your personalized message..."
               />
               <Button
@@ -256,8 +257,8 @@ export function ShareHealthAssessment({
 
           {/* Copy Link Section */}
           <div className="pt-4 border-t">
-            <div className="flex items-center gap-2 p-3 bg-gray-50 rounded-md border">
-              <code className="flex-1 text-xs break-all overflow-hidden">{assessmentLink}</code>
+            <div className="flex items-center gap-2 p-3 bg-gray-50 rounded-md border overflow-hidden">
+              <code className="flex-1 text-xs break-all whitespace-pre-wrap overflow-x-auto" style={{ wordBreak: 'break-all' }}>{assessmentLink}</code>
               <Button
                 size="sm"
                 variant="outline"
