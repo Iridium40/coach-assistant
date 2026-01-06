@@ -433,14 +433,6 @@ ${phase.milestone ? `\n🎉 MILESTONE: ${phase.label} - Celebrate this achieveme
                 </Button>
               </Link>
               <Button
-                variant="outline"
-                onClick={exportToCSV}
-                className="bg-white/10 border-white/30 text-white hover:bg-white/20"
-              >
-                <Download className="h-4 w-4 mr-2" />
-                Export
-              </Button>
-              <Button
                 onClick={() => setShowAddModal(true)}
                 className="bg-white text-[hsl(var(--optavia-green))] hover:bg-white/90"
               >
@@ -586,30 +578,42 @@ ${phase.milestone ? `\n🎉 MILESTONE: ${phase.label} - Celebrate this achieveme
               ))}
             </div>
 
-            {/* View Toggle */}
-            <div className="flex rounded-lg border overflow-hidden">
-              <button
-                onClick={() => setViewMode("list")}
-                className={`px-3 sm:px-4 py-2 flex items-center justify-center gap-1.5 sm:gap-2 text-sm font-medium transition-colors ${
-                  viewMode === "list"
-                    ? "bg-[hsl(var(--optavia-green))] text-white"
-                    : "bg-white text-gray-700 hover:bg-gray-100"
-                }`}
+            {/* View Toggle & Export */}
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={exportToCSV}
+                className="text-gray-600"
+                title="Export to CSV"
               >
-                <List className="h-4 w-4" />
-                <span className="hidden sm:inline">List</span>
-              </button>
-              <button
-                onClick={() => setViewMode("week")}
-                className={`px-3 sm:px-4 py-2 flex items-center justify-center gap-1.5 sm:gap-2 text-sm font-medium transition-colors ${
-                  viewMode === "week"
-                    ? "bg-[hsl(var(--optavia-green))] text-white"
-                    : "bg-white text-gray-700 hover:bg-gray-100"
-                }`}
-              >
-                <CalendarDays className="h-4 w-4" />
-                <span className="hidden sm:inline">Week</span>
-              </button>
+                <Download className="h-4 w-4" />
+                <span className="hidden sm:inline ml-1">Export</span>
+              </Button>
+              <div className="flex rounded-lg border overflow-hidden">
+                <button
+                  onClick={() => setViewMode("list")}
+                  className={`px-3 sm:px-4 py-2 flex items-center justify-center gap-1.5 sm:gap-2 text-sm font-medium transition-colors ${
+                    viewMode === "list"
+                      ? "bg-[hsl(var(--optavia-green))] text-white"
+                      : "bg-white text-gray-700 hover:bg-gray-100"
+                  }`}
+                >
+                  <List className="h-4 w-4" />
+                  <span className="hidden sm:inline">List</span>
+                </button>
+                <button
+                  onClick={() => setViewMode("week")}
+                  className={`px-3 sm:px-4 py-2 flex items-center justify-center gap-1.5 sm:gap-2 text-sm font-medium transition-colors ${
+                    viewMode === "week"
+                      ? "bg-[hsl(var(--optavia-green))] text-white"
+                      : "bg-white text-gray-700 hover:bg-gray-100"
+                  }`}
+                >
+                  <CalendarDays className="h-4 w-4" />
+                  <span className="hidden sm:inline">Week</span>
+                </button>
+              </div>
             </div>
           </div>
         </div>
