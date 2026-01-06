@@ -4,6 +4,7 @@ import { useState } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { UserMenu } from "@/components/user-menu"
+import { RemindersBell } from "@/components/reminders-panel"
 import { ShareProfile } from "@/components/share-profile"
 import { useAuth } from "@/hooks/use-auth"
 import { useSupabaseData } from "@/hooks/use-supabase-data"
@@ -159,7 +160,12 @@ export function Header({ onSettingsClick, onHomeClick, onAnnouncementsClick, onR
                 <UserPlus className="h-5 w-5" />
               </Button>
             )}
-            {!loading && user && <UserMenu onSettingsClick={onSettingsClick} onAnnouncementsClick={onAnnouncementsClick} onReportsClick={onReportsClick} />}
+            {!loading && user && (
+              <>
+                <RemindersBell />
+                <UserMenu onSettingsClick={onSettingsClick} onAnnouncementsClick={onAnnouncementsClick} onReportsClick={onReportsClick} />
+              </>
+            )}
           </div>
         </div>
 

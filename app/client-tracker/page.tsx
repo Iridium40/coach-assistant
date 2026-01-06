@@ -62,6 +62,7 @@ import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
 import { MilestoneActionModal } from "@/components/milestone-action-modal"
 import { ClientJourneyGuide } from "@/components/client-journey-guide"
+import { ReminderButton } from "@/components/reminders-panel"
 import { GraduationCap, Trophy, Heart, Download } from "lucide-react"
 import { ScheduleCalendarOptions } from "@/components/schedule-calendar-options"
 import { isMilestoneDay } from "@/hooks/use-touchpoint-templates"
@@ -978,7 +979,7 @@ ${phase.milestone ? `\n🎉 MILESTONE: ${phase.label} - Celebrate this achieveme
                     </div>
                   )}
 
-                  {/* Secondary Actions: Coach & Pause/Resume */}
+                  {/* Secondary Actions: Coach, Remind & Pause/Resume */}
                   <div className="mt-3 pt-3 border-t flex items-center gap-2">
                     <Button
                       variant="outline"
@@ -989,6 +990,12 @@ ${phase.milestone ? `\n🎉 MILESTONE: ${phase.label} - Celebrate this achieveme
                       <Star className="h-4 w-4 sm:mr-1" />
                       <span className="hidden sm:inline">{client.is_coach_prospect ? "Coach" : "Coach?"}</span>
                     </Button>
+                    <ReminderButton
+                      entityType="client"
+                      entityId={client.id}
+                      entityName={client.label}
+                      variant="outline"
+                    />
                     {client.status === "active" ? (
                       <Button
                         variant="outline"

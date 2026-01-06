@@ -74,6 +74,7 @@ import { Footer } from "@/components/footer"
 import { ScheduleCalendarOptions } from "@/components/schedule-calendar-options"
 import { ShareHealthAssessment } from "@/components/share-health-assessment"
 import { PipelineProgressionGuide } from "@/components/pipeline-progression-guide"
+import { ReminderButton } from "@/components/reminders-panel"
 import { HelpCircle } from "lucide-react"
 import type { CalendarEvent } from "@/lib/calendar-utils"
 
@@ -1037,7 +1038,7 @@ Talking Points:
                     )}
                   </div>
 
-                  {/* Secondary Actions: Edit & Delete */}
+                  {/* Secondary Actions: Edit, Remind & Delete */}
                   <div className="mt-3 pt-3 border-t flex items-center gap-2">
                     <Button
                       variant="outline"
@@ -1051,6 +1052,13 @@ Talking Points:
                       <Edit2 className="h-4 w-4 mr-1" />
                       <span className="text-xs sm:text-sm">Edit</span>
                     </Button>
+
+                    <ReminderButton
+                      entityType="prospect"
+                      entityId={prospect.id}
+                      entityName={prospect.label}
+                      variant="outline"
+                    />
 
                     <Button
                       variant="outline"
