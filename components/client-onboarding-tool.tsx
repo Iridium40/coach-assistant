@@ -1,13 +1,14 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { RotateCcw, Printer, Copy, Check } from "lucide-react"
+import { RotateCcw, Printer, Copy, Check, ExternalLink } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
+import { Checkbox } from "@/components/ui/checkbox"
 import { useToast } from "@/hooks/use-toast"
 
 type TabId = "welcome" | "tips" | "followup" | "quick"
@@ -17,7 +18,52 @@ interface OnboardingState {
   startDate: string
   tipChecks: string[]
   taskChecks: number[]
+  followupChecks: string[]
 }
+
+// First Week Follow-Up Checklist Items (from Setting Your Clients Up for Success)
+interface FollowupChecklistItem {
+  id: string
+  title: string
+  tip?: string
+  link?: string
+  linkText?: string
+  section: string
+  isBold?: boolean
+}
+
+const FOLLOWUP_CHECKLIST_ITEMS: FollowupChecklistItem[] = [
+  // Initial Order Section
+  { id: "initial-1", title: "Add Kit, customize as needed, and Register for Optavia Premier (check for 20% discount prior to order.)", section: "initial-order" },
+  { id: "initial-2", title: "Send Welcome Text", section: "initial-order" },
+  { id: "initial-3", title: "Add client to Client page on Facebook (For Team Tarleton clients, use Optavia Strong Client, for Team Healthy Edge clients, use Healthy Edge 3.0)", section: "initial-order" },
+  { id: "initial-4", title: "Schedule a Kickoff Call for your new client. All clients MUST have a kickoff call, and it's best to do this the Sunday before the Monday Start", section: "initial-order" },
+  
+  // New Client Videos Section
+  { id: "video-1", title: "KICKOFF CALL VIDEO", link: "https://vimeo.com/781160772/25fbd1633a?share=copy", linkText: "UNIVERSAL KICKOFF VIDEO", section: "videos", isBold: true },
+  { id: "video-2", title: "LEAN AND GREEN VIDEO", link: "https://vimeo.com/414057972", linkText: "https://vimeo.com/414057972", section: "videos", isBold: true },
+  
+  // FAQ Texts Section (prior to start date)
+  { id: "faq-1", title: "WELCOME AND 9 TIPS", link: "https://docs.google.com/document/d/1x9k469K6XvuQ8rcPdgR3z4i9iXKLxBvSIR_77UuDgpM/edit?usp=sharing", linkText: "WELCOME AND 9 TIPS", section: "faq-texts", isBold: true },
+  { id: "faq-2", title: "Digital Guides (Please ask client to save to phone and/or print)", link: "https://docs.google.com/document/d/1TtZoQcKzTT77PZP0XNlMH-e8HiYzwKhS1UL8ZW5BcT8/edit?usp=sharing", linkText: "Digital Guides", section: "faq-texts", isBold: true },
+  { id: "faq-3", title: "THE DAY BEFORE THE START DAY, SEND THE", link: "https://docs.google.com/document/d/1V4vgLqx6-0uE9ZRfIp7024tTCB5NoqjHa0YAbV0_RlU/edit?usp=sharing", linkText: "METABOLIC RESET DAY BEFORE TEXT", section: "faq-texts" },
+  { id: "faq-4", title: "DAY ONE, BEGIN SENDING", link: "https://docs.google.com/document/d/1gtH2fYDKLA6f3sv6-yxFUM8b6rLBqp8jF5R7h4ec6i4/edit?usp=sharing", linkText: "THE DAILY METABOLIC HEALTH TEXTS", section: "faq-texts" },
+  
+  // Daily/Weekly Check-ins
+  { id: "checkin-1", title: "3-5 minute daily check-in call Days 1-5 using", link: "https://docs.google.com/document/d/1HLqL_l7IELKgjlx5d3SBuXi2xdyBSaawJ5JmcKDoGHM/edit?usp=sharing", linkText: "DAILY CHECK IN QUESTIONS", tip: "EXACTLY as written", section: "check-ins" },
+  { id: "checkin-2", title: "Week 1 Celebration Call", section: "check-ins", isBold: true },
+  { id: "checkin-3", title: "OPTIONAL- send", link: "https://docs.google.com/document/d/1G9YtI07xIvazS4KZcCkLlB4N_E1axueXVeV4R0Na4Yc/edit?usp=sharing", linkText: "Day 10-30 Metabolic Health Texts", section: "check-ins" },
+  { id: "checkin-4", title: "Weekly 5-10 minute check-in call weeks 1-4", section: "check-ins" },
+  { id: "checkin-5", title: "Weekly check-in after month 1", section: "check-ins" },
+  { id: "checkin-6", title: "Invite Client to VIP Call (can be as early as Week 2, check with your mentorship to clarify)", section: "check-ins" },
+]
+
+const FOLLOWUP_SECTIONS = [
+  { id: "initial-order", title: "INITIAL ORDER", icon: "📋" },
+  { id: "videos", title: "SEND NEW CLIENT VIDEOS PRIOR TO KICKOFF CALL", icon: "🎬" },
+  { id: "faq-texts", title: "FAQ TEXTS (Send prior to start date)", icon: "📱", note: "Send these FAQ Texts to your client prior to their start date. These can be found in the CLIENT COMMUNICATION file." },
+  { id: "check-ins", title: "ONGOING CHECK-INS", icon: "📞" },
+]
 
 export function ClientOnboardingTool() {
   const { toast } = useToast()
@@ -26,6 +72,7 @@ export function ClientOnboardingTool() {
   const [startDate, setStartDate] = useState("")
   const [checkedTips, setCheckedTips] = useState<Set<string>>(new Set())
   const [checkedTasks, setCheckedTasks] = useState<Set<number>>(new Set())
+  const [checkedFollowup, setCheckedFollowup] = useState<Set<string>>(new Set())
 
   // Load state from localStorage
   useEffect(() => {
@@ -37,6 +84,7 @@ export function ClientOnboardingTool() {
         if (state.startDate) setStartDate(state.startDate)
         if (state.tipChecks) setCheckedTips(new Set(state.tipChecks))
         if (state.taskChecks) setCheckedTasks(new Set(state.taskChecks))
+        if (state.followupChecks) setCheckedFollowup(new Set(state.followupChecks))
       } catch (e) {
         console.error("Failed to load saved state", e)
       }
@@ -50,13 +98,14 @@ export function ClientOnboardingTool() {
       startDate,
       tipChecks: Array.from(checkedTips),
       taskChecks: Array.from(checkedTasks),
+      followupChecks: Array.from(checkedFollowup),
     }
     localStorage.setItem("clientOnboarding", JSON.stringify(state))
   }
 
   useEffect(() => {
     saveState()
-  }, [clientName, startDate, checkedTips, checkedTasks])
+  }, [clientName, startDate, checkedTips, checkedTasks, checkedFollowup])
 
   const copyToClipboard = (text: string) => {
     const finalText = text.replace(/Name/g, clientName || "Name")
@@ -88,6 +137,16 @@ export function ClientOnboardingTool() {
     setCheckedTasks(newChecked)
   }
 
+  const toggleFollowup = (itemId: string) => {
+    const newChecked = new Set(checkedFollowup)
+    if (newChecked.has(itemId)) {
+      newChecked.delete(itemId)
+    } else {
+      newChecked.add(itemId)
+    }
+    setCheckedFollowup(newChecked)
+  }
+
   const resetAll = () => {
     if (confirm("Reset all data for this client? This will clear all checkboxes and info.")) {
       localStorage.removeItem("clientOnboarding")
@@ -95,6 +154,7 @@ export function ClientOnboardingTool() {
       setStartDate("")
       setCheckedTips(new Set())
       setCheckedTasks(new Set())
+      setCheckedFollowup(new Set())
       toast({
         title: "Reset complete",
         description: "All data has been cleared",
@@ -104,6 +164,19 @@ export function ClientOnboardingTool() {
 
   const tipProgress = checkedTips.size
   const tipProgressPercent = Math.round((tipProgress / 9) * 100)
+
+  // Followup progress calculations
+  const getFollowupSectionProgress = (sectionId: string) => {
+    const sectionItems = FOLLOWUP_CHECKLIST_ITEMS.filter((item) => item.section === sectionId)
+    const checked = sectionItems.filter((item) => checkedFollowup.has(item.id)).length
+    return { checked, total: sectionItems.length }
+  }
+
+  const getFollowupOverallProgress = () => {
+    const total = FOLLOWUP_CHECKLIST_ITEMS.length
+    const checked = checkedFollowup.size
+    return total > 0 ? Math.round((checked / total) * 100) : 0
+  }
 
   const welcomeText = `Hello ${clientName || "Name"}!!! I am so honored to be on this journey with you! 👏 Together, we're going to work toward your health goals in a way that's simple, sustainable, and truly life-changing. WE KNOW you can do this and we can't wait to walk alongside you every step of the way!
 
@@ -207,76 +280,6 @@ Here's a great option to grab if you don't have one yet: https://amzn.to/47zW8xq
     },
   ]
 
-  const timelineItems = [
-    {
-      day: "Day 0",
-      badge: "Day 0",
-      title: "Enrollment Day",
-      tasks: [
-        { title: "Send Welcome & 9 Tips message", desc: "Use the template from the Welcome Message tab" },
-        { title: "Confirm shipping address", desc: "Make sure their box is going to the right place" },
-        { title: "Add to your tracking system", desc: "Log their start date, contact info, and goals" },
-      ],
-    },
-    {
-      day: "Day 1-2",
-      badge: "Day 1-2",
-      title: "Waiting for Box",
-      tasks: [
-        { title: "Check in: \"How's your prep going?\"", desc: "Ask about their WHYs, photos, measurements" },
-        { title: "Share a simple L&G recipe", desc: "Help them practice before Day 1" },
-      ],
-    },
-    {
-      day: "Box Arrives",
-      badge: "📦",
-      title: "Box Arrives!",
-      tasks: [
-        { title: "Celebrate! \"It's here!!! 🎉\"", desc: "Match their excitement" },
-        { title: "Confirm their start day", desc: "Usually the following Monday" },
-        { title: "Walk through the box contents", desc: "Quick call or voice memo explaining what's inside" },
-      ],
-    },
-    {
-      day: "Day 1",
-      badge: "🚀 Day 1",
-      title: "First Day on Plan",
-      tasks: [
-        { title: "Morning text: \"It's GO time! 💪\"", desc: "Pump them up first thing" },
-        { title: "Confirm they weighed in", desc: "Starting weight recorded" },
-        { title: "Evening check-in: \"How'd Day 1 go?\"", desc: "Listen for any confusion or struggles" },
-      ],
-    },
-    {
-      day: "Days 2-3",
-      badge: "Days 2-3",
-      title: "Building Rhythm",
-      tasks: [
-        { title: "Daily check-in texts", desc: "\"How are you feeling? Getting your water in?\"" },
-        { title: "Troubleshoot any issues", desc: "Hunger, timing, fueling preferences" },
-      ],
-    },
-    {
-      day: "Days 4-5",
-      badge: "Days 4-5",
-      title: "Potential Transition Symptoms",
-      tasks: [
-        { title: "Proactive check-in about symptoms", desc: "\"Some people feel tired or headachy around now — that's normal! How are you?\"" },
-        { title: "Remind about water and electrolytes", desc: "Hydration helps with transition symptoms" },
-      ],
-    },
-    {
-      day: "Day 7",
-      badge: "Day 7",
-      title: "First Weigh-In! 🎉",
-      tasks: [
-        { title: "Celebrate their first week!", desc: "\"YOU DID IT! One full week in the books!\"" },
-        { title: "Record weigh-in results", desc: "Track their progress" },
-        { title: "Schedule weekly check-in call", desc: "Set a recurring time for ongoing support" },
-      ],
-    },
-  ]
-
   const quickCopyMessages = {
     "Daily Check-Ins": [
       { title: "Morning Check-In", text: "Good morning! 🌞 How are you feeling today? Remember to get that water in early!" },
@@ -303,8 +306,6 @@ Here's a great option to grab if you don't have one yet: https://amzn.to/47zW8xq
       { title: "App Tracking Reminder", text: "Don't forget to log your fuelings in the app today! 📱 Tracking = accountability = results!" },
     ],
   }
-
-  let taskIndex = 0
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-200">
@@ -506,8 +507,27 @@ Here's a great option to grab if you don't have one yet: https://amzn.to/47zW8xq
             </div>
           </TabsContent>
 
-          {/* First Week Follow-Up Tab */}
+          {/* First Week Follow-Up Tab - Setting Your Clients Up for Success */}
           <TabsContent value="followup" className="space-y-6">
+            {/* Header */}
+            <div className="text-center border-b-4 border-black pb-4">
+              <h2 className="text-xl md:text-2xl font-bold text-optavia-dark tracking-wider uppercase">
+                Setting Your Clients Up for Success
+              </h2>
+            </div>
+
+            {/* Progress Bar */}
+            <Card>
+              <CardContent className="pt-6">
+                <div className="flex justify-between text-sm mb-2">
+                  <span className="text-slate-600">Overall Progress</span>
+                  <span className="font-semibold text-[hsl(var(--optavia-green))]">{getFollowupOverallProgress()}%</span>
+                </div>
+                <Progress value={getFollowupOverallProgress()} className="h-2" />
+              </CardContent>
+            </Card>
+
+            {/* Info Card */}
             <Card className="bg-blue-50 border-blue-200">
               <CardContent className="pt-6">
                 <div className="flex items-center gap-2 font-bold text-blue-800 mb-2">
@@ -519,44 +539,82 @@ Here's a great option to grab if you don't have one yet: https://amzn.to/47zW8xq
               </CardContent>
             </Card>
 
-            <div className="relative pl-8">
-              <div className="absolute left-3 top-0 bottom-0 w-0.5 bg-slate-200" />
-              {timelineItems.map((item, idx) => (
-                <div key={idx} className="relative mb-6 bg-white border border-slate-200 rounded-xl overflow-hidden">
-                  <div className="absolute -left-7 top-5 w-3 h-3 bg-white border-3 border-[hsl(var(--optavia-green))] rounded-full" />
-                  <div className="bg-slate-50 border-b border-slate-200 p-4 flex items-center justify-between">
-                    <div className="font-bold text-slate-800 flex items-center gap-2">
-                      <span className="bg-gradient-to-r from-[hsl(var(--optavia-green))] to-[#00c760] text-white px-3 py-1 rounded-full text-xs font-bold">
-                        {item.badge}
+            {/* Checklist Sections */}
+            {FOLLOWUP_SECTIONS.map((section) => {
+              const sectionItems = FOLLOWUP_CHECKLIST_ITEMS.filter((item) => item.section === section.id)
+              const progress = getFollowupSectionProgress(section.id)
+              
+              return (
+                <Card key={section.id} className="overflow-hidden">
+                  <CardHeader className="bg-slate-50 border-b">
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="text-base font-bold uppercase underline decoration-2 underline-offset-4">
+                        {section.icon} {section.title}
+                      </CardTitle>
+                      <span className={`text-sm font-medium px-2 py-1 rounded ${
+                        progress.checked === progress.total && progress.total > 0 
+                          ? "bg-green-100 text-green-700" 
+                          : "bg-slate-100 text-slate-600"
+                      }`}>
+                        {progress.checked}/{progress.total}
                       </span>
-                      {item.title}
                     </div>
-                  </div>
-                  <div className="p-4 space-y-3">
-                    {item.tasks.map((task, taskIdx) => {
-                      const currentTaskIndex = taskIndex++
-                      return (
-                        <div key={taskIdx} className="flex items-start gap-3 pb-3 border-b border-slate-100 last:border-0">
-                          <div
-                            className={`w-5 h-5 border-2 rounded cursor-pointer flex items-center justify-center flex-shrink-0 mt-0.5 transition-all ${
-                              checkedTasks.has(currentTaskIndex)
-                                ? "bg-[hsl(var(--optavia-green))] border-[hsl(var(--optavia-green))]"
-                                : "border-slate-300 hover:border-[hsl(var(--optavia-green))]"
-                            }`}
-                            onClick={() => toggleTask(currentTaskIndex)}
-                          >
-                            {checkedTasks.has(currentTaskIndex) && <Check className="h-3 w-3 text-white" />}
-                          </div>
-                          <div className="flex-1">
-                            <div className="font-semibold text-slate-800 text-sm">{task.title}</div>
-                            <div className="text-xs text-slate-500 mt-0.5">{task.desc}</div>
-                          </div>
+                    {section.note && (
+                      <p className="text-sm text-slate-500 mt-2">{section.note}</p>
+                    )}
+                  </CardHeader>
+                  <CardContent className="pt-4 space-y-3">
+                    {sectionItems.map((item) => (
+                      <div
+                        key={item.id}
+                        className={`flex gap-3 p-3 rounded-lg border transition-all ${
+                          checkedFollowup.has(item.id)
+                            ? "bg-green-50 border-green-200"
+                            : "bg-white border-slate-200 hover:border-slate-300"
+                        }`}
+                      >
+                        <div className="pt-0.5">
+                          <Checkbox
+                            checked={checkedFollowup.has(item.id)}
+                            onCheckedChange={() => toggleFollowup(item.id)}
+                            className="h-5 w-5 border-2 data-[state=checked]:bg-[hsl(var(--optavia-green))] data-[state=checked]:border-[hsl(var(--optavia-green))]"
+                          />
                         </div>
-                      )
-                    })}
-                  </div>
-                </div>
-              ))}
+                        <div className="flex-1 space-y-1">
+                          <div className={`${checkedFollowup.has(item.id) ? "line-through text-slate-500" : "text-slate-800"} ${item.isBold ? "font-semibold" : ""}`}>
+                            {item.title}
+                            {item.link && (
+                              <>
+                                {" "}
+                                <a
+                                  href={item.link}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-blue-600 hover:text-blue-800 underline inline-flex items-center gap-1"
+                                  onClick={(e) => e.stopPropagation()}
+                                >
+                                  {item.linkText}
+                                  <ExternalLink className="h-3 w-3" />
+                                </a>
+                              </>
+                            )}
+                          </div>
+                          {item.tip && (
+                            <div className="text-sm text-amber-700 bg-amber-50 p-2 rounded font-medium">
+                              ⚠️ {item.tip}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </CardContent>
+                </Card>
+              )
+            })}
+
+            {/* Footer Note */}
+            <div className="text-center text-sm text-slate-600 italic bg-green-50 p-4 rounded-lg border border-green-200">
+              💚 Remember: Consistent check-ins are key to client success!
             </div>
           </TabsContent>
 
