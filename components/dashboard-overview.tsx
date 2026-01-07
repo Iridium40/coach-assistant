@@ -13,13 +13,13 @@ import {
   BookOpen, UtensilsCrossed, Wrench, ExternalLink, Award,
   CheckCircle, Sparkles, Star, GraduationCap, Link2, Pin,
   ClipboardList, Droplets, Dumbbell, Activity, Share2, Bookmark,
-  Info
+  Info, Trophy, Heart
 } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
 import { useProspects } from "@/hooks/use-prospects"
 import { useClients } from "@/hooks/use-clients"
 import { useTrainingResources } from "@/hooks/use-training-resources"
-import { useRankCalculator, type RankType } from "@/hooks/use-rank-calculator"
+import { useRankCalculator, type RankType, RANK_REQUIREMENTS } from "@/hooks/use-rank-calculator"
 import { useBookmarks } from "@/hooks/use-bookmarks"
 import type { ZoomCall } from "@/lib/types"
 import { expandRecurringEvents, getEventsForDate, type ExpandedZoomCall } from "@/lib/expand-recurring-events"
@@ -103,6 +103,8 @@ export function DashboardOverview() {
   const [openToolId, setOpenToolId] = useState<string | null>(null)
   const [milestoneClient, setMilestoneClient] = useState<any | null>(null)
   const [showMilestoneModal, setShowMilestoneModal] = useState(false)
+  const [showRankPromotionModal, setShowRankPromotionModal] = useState(false)
+  const [promotedRank, setPromotedRank] = useState<string | null>(null)
 
   // Load pinned items from localStorage
   useEffect(() => {
@@ -205,6 +207,28 @@ export function DashboardOverview() {
   // Calculate rank gaps for RankProgressCard
   const nextRank = rankData ? getNextRank(rankData.current_rank as RankType) : null
   const gaps = rankData ? calculateGaps(rankData.current_rank as RankType, clientStats.active) : null
+
+  // Check if ready for promotion and show celebration
+  useEffect(() => {
+    if (!rankData || !nextRank || !gaps) return
+    
+    // Check if all gaps are 0 (ready for promotion)
+    const isReadyForPromotion = gaps.clients === 0 && gaps.coaches === 0 && gaps.qualifyingLegs === 0
+    
+    if (isReadyForPromotion) {
+      // Check if we've already shown this celebration (using localStorage)
+      const lastCelebratedRank = localStorage.getItem(`rankPromotionCelebrated_${nextRank}`)
+      const currentRankKey = `${rankData.current_rank}_to_${nextRank}`
+      
+      // Only show if we haven't celebrated this specific promotion yet
+      if (lastCelebratedRank !== currentRankKey) {
+        setPromotedRank(nextRank)
+        setShowRankPromotionModal(true)
+        // Mark as celebrated
+        localStorage.setItem(`rankPromotionCelebrated_${nextRank}`, currentRankKey)
+      }
+    }
+  }, [rankData, nextRank, gaps])
 
   return (
     <div className="container mx-auto px-4 py-4 sm:py-8">
@@ -487,6 +511,71 @@ export function DashboardOverview() {
           programDay={getProgramDay(milestoneClient.start_date)}
         />
       )}
+
+      {/* Rank Promotion Celebration Modal */}
+      {promotedRank && (() => {
+        const rankInfo = RANK_REQUIREMENTS[promotedRank as RankType]
+        const rankIcon = rankInfo?.icon || '🏆'
+        const rankName = promotedRank
+        
+        return (
+          <Dialog open={showRankPromotionModal} onOpenChange={setShowRankPromotionModal}>
+            <DialogContent className="max-w-md text-center">
+              <div className="py-6">
+                <div className="w-24 h-24 mx-auto mb-4 bg-gradient-to-br from-amber-400 via-yellow-400 to-amber-600 rounded-full flex items-center justify-center shadow-2xl animate-bounce">
+                  <Trophy className="h-12 w-12 text-white" />
+                </div>
+                <h2 className="text-3xl font-bold text-gray-800 mb-3">
+                  🎉 RANK PROMOTION! 🎉
+                </h2>
+                <div className="mb-4">
+                  <div className="text-6xl mb-2">
+                    {rankIcon}
+                  </div>
+                  <div className="text-3xl font-bold text-amber-700 mb-1">
+                    {rankName}
+                  </div>
+                  <p className="text-lg text-gray-600 mt-2">
+                    You've achieved all the requirements!
+                  </p>
+                </div>
+                <div className="bg-gradient-to-br from-amber-50 to-yellow-50 border-2 border-amber-200 rounded-lg p-5 mb-4">
+                  <div className="flex items-center justify-center gap-2 text-amber-700 mb-3">
+                    <Star className="h-6 w-6 fill-current" />
+                    <span className="font-bold text-lg">Incredible Achievement!</span>
+                    <Star className="h-6 w-6 fill-current" />
+                  </div>
+                  <p className="text-sm text-amber-800 leading-relaxed">
+                    {rankName === "Senior Coach" && "Your first promotion! You're building momentum and making a real impact. Keep going! 🌟"}
+                    {rankName === "Executive Director" && "Executive Director! You're leading by example and building a strong team. Amazing work! 💫"}
+                    {rankName === "FIBC" && "FIBC! You've built a solid foundation with qualifying legs. You're a true leader! 🏆"}
+                    {rankName === "Global Director" && "Global Director! Your influence is expanding. You're changing lives at scale! 🌍"}
+                    {rankName === "Presidential Director" && "Presidential Director! The pinnacle of leadership. You've built an incredible legacy! 👑"}
+                    {rankName === "IPD" && "IPD! The highest achievement. You've reached the absolute top! 💎"}
+                    {!["Senior Coach", "Executive Director", "FIBC", "Global Director", "Presidential Director", "IPD"].includes(rankName) && 
+                      `Congratulations on reaching ${rankName}! Your dedication and hard work have paid off. Keep inspiring others! 🎊`
+                    }
+                  </p>
+                </div>
+                <div className="bg-green-50 border border-green-200 rounded-lg p-3 mb-4">
+                  <p className="text-sm text-green-700 font-medium">
+                    💚 Remember: Rank is great, but the lives you've changed are what truly matter.
+                  </p>
+                </div>
+              </div>
+              <Button 
+                onClick={() => {
+                  setShowRankPromotionModal(false)
+                  setPromotedRank(null)
+                }}
+                className="w-full bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 text-white font-bold text-lg py-6 shadow-lg"
+              >
+                Continue the Journey! 🚀
+              </Button>
+            </DialogContent>
+          </Dialog>
+        )
+      })()}
     </div>
   )
 }
