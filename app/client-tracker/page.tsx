@@ -973,8 +973,8 @@ ${phase.milestone ? `\n🎉 MILESTONE: ${phase.label} - Celebrate this achieveme
                                 })
                                 toggleTouchpoint(client.id, "am_done")
                                 toast({
-                                  title: "✓ Check-in Completed!",
-                                  description: "Great job staying connected!",
+                                  title: "✅ Check-in Completed!",
+                                  description: "Great job staying connected with your client!",
                                 })
                               }}
                               className="h-7 w-7 p-0 bg-green-100 hover:bg-green-200 rounded-full"
@@ -1460,7 +1460,7 @@ ${phase.milestone ? `\n🎉 MILESTONE: ${phase.label} - Celebrate this achieveme
                     recurring_time: null 
                   })
                   toast({
-                    title: "Check-in cleared",
+                    title: "❌ Check-in Cancelled",
                     description: "The scheduled check-in has been removed.",
                   })
                   setClientToClear(null)
