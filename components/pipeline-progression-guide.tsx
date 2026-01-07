@@ -231,48 +231,6 @@ export function PipelineProgressionGuide() {
           ))}
         </div>
 
-        {/* Bottom Stats Preview */}
-        <div className="mt-6 bg-white rounded-xl border border-gray-200 p-4">
-          <h4 className="font-semibold text-gray-800 mb-3 text-center text-sm">Typical Conversion Funnel</h4>
-          <div className="flex items-center justify-between text-center">
-            <div className="flex-1">
-              <div className="text-xl font-bold text-gray-400">100</div>
-              <div className="text-[10px] text-gray-500">List</div>
-            </div>
-            <svg className="w-3 h-3 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-            </svg>
-            <div className="flex-1">
-              <div className="text-xl font-bold text-blue-400">60</div>
-              <div className="text-[10px] text-gray-500">Reach Out</div>
-            </div>
-            <svg className="w-3 h-3 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-            </svg>
-            <div className="flex-1">
-              <div className="text-xl font-bold text-orange-400">20</div>
-              <div className="text-[10px] text-gray-500">Interested</div>
-            </div>
-            <svg className="w-3 h-3 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-            </svg>
-            <div className="flex-1">
-              <div className="text-xl font-bold text-purple-400">10</div>
-              <div className="text-[10px] text-gray-500">HA Sched</div>
-            </div>
-            <svg className="w-3 h-3 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-            </svg>
-            <div className="flex-1">
-              <div className="text-xl font-bold text-green-500">5-10</div>
-              <div className="text-[10px] text-gray-500">Clients!</div>
-            </div>
-          </div>
-          <p className="text-[10px] text-gray-400 text-center mt-3">
-            Results vary — consistency and follow-up are key! 🔑
-          </p>
-        </div>
-
         {/* Tap hint */}
         <p className="text-center text-gray-400 text-xs mt-4">
           👆 Tap any stage to see tips
