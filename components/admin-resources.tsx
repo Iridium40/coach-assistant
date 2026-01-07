@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -22,6 +22,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 import type { ExternalResource } from "@/lib/types"
 
 // Predefined categories
@@ -58,9 +68,14 @@ export function AdminResources({ onClose }: { onClose?: () => void }) {
   const [isDynamic, setIsDynamic] = useState(false)
   const [showCondition, setShowCondition] = useState("")
   const [submitting, setSubmitting] = useState(false)
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+  const [resourceToDelete, setResourceToDelete] = useState<ExternalResource | null>(null)
 
   // Check if user is admin (case-insensitive)
   const isAdmin = profile?.user_role?.toLowerCase() === "admin"
+  
+  // Ref for form section to scroll into view
+  const formRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     if (!user || !isAdmin) {
@@ -119,15 +134,24 @@ export function AdminResources({ onClose }: { onClose?: () => void }) {
     setShowCondition(resource.show_condition || "")
     setEditingId(resource.id)
     setShowForm(true)
+    
+    // Scroll to form after state updates
+    setTimeout(() => {
+      formRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })
+    }, 100)
   }
 
-  const handleDelete = async (id: string, e?: React.MouseEvent) => {
+  const handleDeleteClick = (resource: ExternalResource, e?: React.MouseEvent) => {
     e?.stopPropagation()
     e?.preventDefault()
-    
-    if (!confirm("Are you sure you want to delete this resource?")) return
+    setResourceToDelete(resource)
+    setDeleteDialogOpen(true)
+  }
 
-    const { error } = await supabase.from("external_resources").delete().eq("id", id)
+  const handleDeleteConfirm = async () => {
+    if (!resourceToDelete) return
+
+    const { error } = await supabase.from("external_resources").delete().eq("id", resourceToDelete.id)
 
     if (error) {
       toast({
@@ -142,6 +166,9 @@ export function AdminResources({ onClose }: { onClose?: () => void }) {
       })
       loadResources()
     }
+    
+    setDeleteDialogOpen(false)
+    setResourceToDelete(null)
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -327,7 +354,7 @@ export function AdminResources({ onClose }: { onClose?: () => void }) {
       </div>
 
       {/* Create New Resource Section */}
-      <div className="mb-8">
+      <div className="mb-8" ref={formRef}>
         {!showForm ? (
           <Button
             onClick={() => setShowForm(true)}
@@ -701,7 +728,7 @@ export function AdminResources({ onClose }: { onClose?: () => void }) {
                                     <Button
                                       size="icon"
                                       variant="ghost"
-                                      onClick={(e) => handleDelete(resource.id, e)}
+                                      onClick={(e) => handleDeleteClick(resource, e)}
                                       className="h-8 w-8 text-red-500 hover:text-red-700 hover:bg-red-50"
                                     >
                                       <Trash2 className="h-4 w-4" />
@@ -742,6 +769,32 @@ export function AdminResources({ onClose }: { onClose?: () => void }) {
           </div>
         )}
       </div>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent className="bg-white">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-optavia-dark">Delete Resource</AlertDialogTitle>
+            <AlertDialogDescription className="text-optavia-gray">
+              Are you sure you want to delete "{resourceToDelete?.title}"? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel 
+              className="border-gray-300 text-optavia-dark hover:bg-gray-100"
+              onClick={() => setResourceToDelete(null)}
+            >
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteConfirm}
+              className="bg-red-600 hover:bg-red-700 text-white"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }
