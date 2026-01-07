@@ -731,7 +731,7 @@ export function ClientTroubleshootingTool() {
       {/* Main Content */}
       <main className="max-w-4xl mx-auto px-6 py-6">
         {/* Quick Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+        <div className="grid grid-cols-2 gap-3 mb-6">
           <Card className="text-center p-4">
             <div className="text-2xl mb-1">📉</div>
             <div className="text-xs font-semibold text-slate-500">Weight Issues</div>
