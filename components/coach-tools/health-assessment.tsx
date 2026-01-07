@@ -33,7 +33,7 @@ const CHECKLIST_ITEMS: ChecklistItem[] = [
   { id: "initial-4", title: "Schedule a Kickoff Call for your new client. All clients MUST have a kickoff call, and it's best to do this the Sunday before the Monday Start", section: "initial-order" },
   
   // New Client Videos Section
-  { id: "video-1", title: "KICKOFF CALL VIDEO", link: "https://vimeo.com/showcase/8816357", linkText: "UNIVERSAL KICKOFF VIDEO", section: "videos", isBold: true },
+  { id: "video-1", title: "KICKOFF CALL VIDEO", link: "https://vimeo.com/781160772/25fbd1633a?share=copy", linkText: "UNIVERSAL KICKOFF VIDEO", section: "videos", isBold: true },
   { id: "video-2", title: "LEAN AND GREEN VIDEO", link: "https://vimeo.com/414057972", linkText: "https://vimeo.com/414057972", section: "videos", isBold: true },
   
   // FAQ Texts Section (prior to start date)
