@@ -61,13 +61,23 @@ export function PipelineStage({ stage, isFirst, isLast }: PipelineStageProps) {
         >
           {/* Info icon in top-left corner */}
           {stageInfo && (
-            <div className="absolute top-1 left-1" onClick={(e) => e.preventDefault()}>
+            <div 
+              className="absolute top-1 left-1" 
+              onClick={(e) => {
+                e.preventDefault()
+                e.stopPropagation()
+              }}
+            >
               <TooltipProvider delayDuration={0}>
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <button 
+                      type="button"
                       className="text-gray-400 hover:text-gray-600 p-1 rounded-full hover:bg-gray-100 transition-colors"
-                      onClick={(e) => e.stopPropagation()}
+                      onClick={(e) => {
+                        e.preventDefault()
+                        e.stopPropagation()
+                      }}
                     >
                       <Info className="h-3.5 w-3.5" />
                     </button>
