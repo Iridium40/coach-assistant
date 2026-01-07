@@ -183,10 +183,26 @@ export function AdminZoomCalls({ onClose }: { onClose?: () => void }) {
     e?.stopPropagation()
     e?.preventDefault()
     
+    // Format the scheduled date for datetime-local input
+    // Handle both ISO string and other date formats
+    let formattedScheduledAt = ""
+    try {
+      const date = new Date(call.scheduled_at)
+      if (!isNaN(date.getTime())) {
+        formattedScheduledAt = date.toISOString().slice(0, 16)
+      }
+    } catch (err) {
+      console.error("Error parsing scheduled_at:", err)
+    }
+    
+    // Set event type first so the correct form fields render
+    setEventType(call.event_type || "meeting")
+    
+    // Then set all other fields
     setTitle(call.title)
     setDescription(call.description || "")
     setCallType(call.call_type)
-    setScheduledAt(new Date(call.scheduled_at).toISOString().slice(0, 16))
+    setScheduledAt(formattedScheduledAt)
     setDurationMinutes(call.duration_minutes || 60)
     setIsRecurring(call.is_recurring || false)
     setRecurrencePattern(call.recurrence_pattern || "")
@@ -198,7 +214,6 @@ export function AdminZoomCalls({ onClose }: { onClose?: () => void }) {
     setRecordingUrl(call.recording_url || "")
     setRecordingPlatform(call.recording_platform || "")
     setStatus(call.status)
-    setEventType(call.event_type || "meeting")
     setEndDate(call.end_date || "")
     setLocation(call.location || "")
     setIsVirtual(call.is_virtual !== false)
@@ -250,6 +265,26 @@ export function AdminZoomCalls({ onClose }: { onClose?: () => void }) {
 
     if (!user) return
 
+    // Validate required fields
+    if (!scheduledAt) {
+      toast({
+        title: "Missing Date",
+        description: "Please select a date and time for the meeting/event",
+        variant: "destructive",
+      })
+      return
+    }
+
+    const scheduledDate = new Date(scheduledAt)
+    if (isNaN(scheduledDate.getTime())) {
+      toast({
+        title: "Invalid Date",
+        description: "The selected date is invalid. Please select a valid date.",
+        variant: "destructive",
+      })
+      return
+    }
+
     // Validate recurring fields
     if (isRecurring && eventType === "meeting") {
       if (!recurrencePattern || !recurrenceDay || !recurrenceEndDate) {
@@ -263,8 +298,6 @@ export function AdminZoomCalls({ onClose }: { onClose?: () => void }) {
     }
 
     setSubmitting(true)
-
-    const scheduledDate = new Date(scheduledAt)
     const callData = {
       title,
       description: description || null,
