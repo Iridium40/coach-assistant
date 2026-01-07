@@ -447,36 +447,10 @@ export function ExternalResourcesTab() {
     return COACH_TOOLS.filter((t) => pinnedToolIds.includes(t.id))
   }, [pinnedToolIds])
 
-  // Get unique categories from all resources (including DB resources)
-  const allResourceCategories = useMemo(() => {
-    const cats = new Set(resources.map(r => r.category))
-    return Array.from(cats).sort()
-  }, [resources])
+  // Resource categories (matching the admin page)
+  const categories = ["All", "Coach Tools", "OPTAVIA Portals", "Social Media", "Communities", "Training"]
 
-  // Simplified category order per Phase 4 of UX redesign + Training if present
-  const categories = useMemo(() => {
-    const baseCategories = ["All", "Coach Tools", "OPTAVIA Portals", "Communities"]
-    // Add Training if there are training resources
-    if (allResourceCategories.includes("Training")) {
-      baseCategories.push("Training")
-    }
-    // Add any other custom categories from the database
-    allResourceCategories.forEach(cat => {
-      if (!["Community", "OPTAVIA Resources", "Habits of Health", "Social Media", "Training", "Other"].includes(cat)) {
-        if (!baseCategories.includes(cat)) {
-          baseCategories.push(cat)
-        }
-      }
-    })
-    // Add "Other" at the end if present
-    if (allResourceCategories.includes("Other") && !baseCategories.includes("Other")) {
-      baseCategories.push("Other")
-    }
-    return baseCategories
-  }, [allResourceCategories])
-
-  // Memoize filtered resources with simplified category mapping and search
-  // Resources are already sorted by category and sort_order from the combined array
+  // Memoize filtered resources with search
   const filteredResources = useMemo(() => {
     if (selectedCategory === "Coach Tools") return []
     const filtered = resources.filter((resource) => {
@@ -492,19 +466,6 @@ export function ExternalResourcesTab() {
       
       // Apply category filter
       if (selectedCategory === "All") return true
-      // Map simplified categories to original categories
-      if (selectedCategory === "OPTAVIA Portals") {
-        return resource.category === "OPTAVIA Resources" || resource.category === "Habits of Health" || resource.category === "Social Media"
-      }
-      if (selectedCategory === "Communities") {
-        return resource.category === "Community"
-      }
-      if (selectedCategory === "Training") {
-        return resource.category === "Training"
-      }
-      if (selectedCategory === "Other") {
-        return resource.category === "Other"
-      }
       return resource.category === selectedCategory
     })
     // Sort by sort_order within the filtered results
