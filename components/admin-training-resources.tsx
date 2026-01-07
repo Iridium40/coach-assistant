@@ -81,7 +81,17 @@ export function AdminTrainingResources({ onClose }: AdminTrainingResourcesProps)
   const { toast } = useToast()
 
   // Track unsaved changes for admin
-  const { hasUnsavedChanges, isSaving, changeCount, trackChange, saveChanges } = useAdminChanges({
+  const { 
+    hasUnsavedChanges, 
+    isSaving, 
+    changeCount, 
+    trackChange, 
+    saveChanges,
+    showLeaveDialog,
+    confirmLeave,
+    saveAndLeave,
+    cancelLeave,
+  } = useAdminChanges({
     storageKeys: ["training-resources-search-history"],
   })
 
@@ -1045,6 +1055,10 @@ export function AdminTrainingResources({ onClose }: AdminTrainingResourcesProps)
         isSaving={isSaving}
         changeCount={changeCount}
         onSave={saveChanges}
+        showLeaveDialog={showLeaveDialog}
+        onConfirmLeave={confirmLeave}
+        onSaveAndLeave={saveAndLeave}
+        onCancelLeave={cancelLeave}
       />
     </div>
   )

@@ -76,7 +76,17 @@ export function AdminZoomCalls({ onClose }: { onClose?: () => void }) {
   const isAdmin = profile?.user_role?.toLowerCase() === "admin"
 
   // Track unsaved changes for admin
-  const { hasUnsavedChanges, isSaving, changeCount, trackChange, saveChanges } = useAdminChanges()
+  const { 
+    hasUnsavedChanges, 
+    isSaving, 
+    changeCount, 
+    trackChange, 
+    saveChanges,
+    showLeaveDialog,
+    confirmLeave,
+    saveAndLeave,
+    cancelLeave,
+  } = useAdminChanges()
 
   useEffect(() => {
     if (!user || !isAdmin) {
@@ -1166,12 +1176,16 @@ export function AdminZoomCalls({ onClose }: { onClose?: () => void }) {
         })()}
       </div>
 
-      {/* Floating Save Button */}
+      {/* Floating Save Button & Leave Dialog */}
       <AdminSaveButton
         hasUnsavedChanges={hasUnsavedChanges}
         isSaving={isSaving}
         changeCount={changeCount}
         onSave={saveChanges}
+        showLeaveDialog={showLeaveDialog}
+        onConfirmLeave={confirmLeave}
+        onSaveAndLeave={saveAndLeave}
+        onCancelLeave={cancelLeave}
       />
     </div>
   )

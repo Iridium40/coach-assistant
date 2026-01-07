@@ -74,7 +74,17 @@ export function InviteManagement({ onClose }: InviteManagementProps) {
   const isAdmin = profile?.user_role?.toLowerCase() === "admin"
 
   // Track unsaved changes for admin
-  const { hasUnsavedChanges, isSaving, changeCount, trackChange, saveChanges } = useAdminChanges()
+  const { 
+    hasUnsavedChanges, 
+    isSaving, 
+    changeCount, 
+    trackChange, 
+    saveChanges,
+    showLeaveDialog,
+    confirmLeave,
+    saveAndLeave,
+    cancelLeave,
+  } = useAdminChanges()
 
   // Load invite history
   useEffect(() => {
@@ -702,6 +712,10 @@ export function InviteManagement({ onClose }: InviteManagementProps) {
         isSaving={isSaving}
         changeCount={changeCount}
         onSave={saveChanges}
+        showLeaveDialog={showLeaveDialog}
+        onConfirmLeave={confirmLeave}
+        onSaveAndLeave={saveAndLeave}
+        onCancelLeave={cancelLeave}
       />
     </div>
   )
