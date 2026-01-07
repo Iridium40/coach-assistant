@@ -20,6 +20,8 @@ import {
 import { useUserData } from "@/contexts/user-data-context"
 import { createClient } from "@/lib/supabase/client"
 import { useToast } from "@/hooks/use-toast"
+import { useAdminChanges } from "@/hooks/use-admin-changes"
+import { AdminSaveButton } from "@/components/admin-save-button"
 import { sendAnnouncementEmail } from "@/lib/email"
 import { X, Plus, Edit, Trash2, Search, Send, RefreshCw } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
@@ -63,6 +65,9 @@ export function AdminAnnouncements({ onClose }: { onClose?: () => void }) {
 
   // Check if user is admin (case-insensitive)
   const isAdmin = profile?.user_role?.toLowerCase() === "admin"
+
+  // Track unsaved changes for admin
+  const { hasUnsavedChanges, isSaving, changeCount, trackChange, saveChanges } = useAdminChanges()
 
   useEffect(() => {
     if (!user || !isAdmin) {
@@ -142,6 +147,7 @@ export function AdminAnnouncements({ onClose }: { onClose?: () => void }) {
         title: "Success",
         description: "Announcement deleted",
       })
+      trackChange()
       loadAnnouncements()
     }
     
@@ -216,11 +222,13 @@ export function AdminAnnouncements({ onClose }: { onClose?: () => void }) {
           title: "Announcement Resent",
           description: `Sent ${emailsSent} email notification(s)`,
         })
+        trackChange()
       } else {
         toast({
           title: "Announcement Resent",
           description: "Announcement has been resent",
         })
+        trackChange()
       }
 
       loadAnnouncements()
@@ -297,6 +305,7 @@ export function AdminAnnouncements({ onClose }: { onClose?: () => void }) {
         title: "Success",
         description: editingId ? "Announcement updated" : "Announcement created",
       })
+      trackChange()
       resetForm()
       loadAnnouncements()
 
@@ -683,7 +692,14 @@ export function AdminAnnouncements({ onClose }: { onClose?: () => void }) {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Floating Save Button */}
+      <AdminSaveButton
+        hasUnsavedChanges={hasUnsavedChanges}
+        isSaving={isSaving}
+        changeCount={changeCount}
+        onSave={saveChanges}
+      />
     </div>
   )
 }
-

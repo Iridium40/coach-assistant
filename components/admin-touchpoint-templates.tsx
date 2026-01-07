@@ -3,6 +3,8 @@
 import { useState, useEffect, useCallback } from "react"
 import { createClient } from "@/lib/supabase/client"
 import { useToast } from "@/hooks/use-toast"
+import { useAdminChanges } from "@/hooks/use-admin-changes"
+import { AdminSaveButton } from "@/components/admin-save-button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -85,6 +87,9 @@ const TOKENS = [
 export function AdminTouchpointTemplates() {
   const supabase = createClient()
   const { toast } = useToast()
+
+  // Track unsaved changes for admin
+  const { hasUnsavedChanges, isSaving, changeCount, trackChange, saveChanges } = useAdminChanges()
 
   // Data state
   const [triggers, setTriggers] = useState<TouchpointTrigger[]>([])
@@ -200,6 +205,7 @@ export function AdminTouchpointTemplates() {
 
         if (error) throw error
         toast({ title: "Template updated!" })
+        trackChange()
       } else {
         const { error } = await supabase.from("touchpoint_templates").insert({
           trigger_id: selectedTrigger.id,
@@ -211,6 +217,7 @@ export function AdminTouchpointTemplates() {
 
         if (error) throw error
         toast({ title: "Template created!" })
+        trackChange()
       }
 
       setShowTemplateModal(false)
@@ -246,6 +253,7 @@ export function AdminTouchpointTemplates() {
 
       loadData()
       toast({ title: "Default template updated!" })
+      trackChange()
     } catch (error) {
       toast({
         title: "Failed to update default",
@@ -267,6 +275,7 @@ export function AdminTouchpointTemplates() {
       if (error) throw error
       loadData()
       toast({ title: "Template deleted" })
+      trackChange()
     } catch (error) {
       toast({
         title: "Failed to delete template",
@@ -301,6 +310,7 @@ export function AdminTouchpointTemplates() {
 
       loadData()
       toast({ title: "Meeting invite saved!" })
+      trackChange()
     } catch (error) {
       toast({
         title: "Failed to save meeting invite",
@@ -788,6 +798,14 @@ export function AdminTouchpointTemplates() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Floating Save Button */}
+      <AdminSaveButton
+        hasUnsavedChanges={hasUnsavedChanges}
+        isSaving={isSaving}
+        changeCount={changeCount}
+        onSave={saveChanges}
+      />
     </div>
   )
 }

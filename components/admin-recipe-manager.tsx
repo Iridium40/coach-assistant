@@ -26,6 +26,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useUserData } from "@/contexts/user-data-context"
 import { createClient } from "@/lib/supabase/client"
 import { useToast } from "@/hooks/use-toast"
+import { useAdminChanges } from "@/hooks/use-admin-changes"
+import { AdminSaveButton } from "@/components/admin-save-button"
 import { 
   X, 
   Search, 
@@ -103,6 +105,11 @@ export function AdminRecipeManager({ onClose }: AdminRecipeManagerProps) {
   const [activeTab, setActiveTab] = useState<"list" | "create">("list")
 
   const isAdmin = profile?.user_role?.toLowerCase() === "admin"
+
+  // Track unsaved changes for admin
+  const { hasUnsavedChanges, isSaving, changeCount, trackChange, saveChanges } = useAdminChanges({
+    storageKeys: ["recipes-search-history"],
+  })
 
   // Get unique categories
   const categories = useMemo(() => {
@@ -344,6 +351,7 @@ export function AdminRecipeManager({ onClose }: AdminRecipeManagerProps) {
           title: "Recipe created",
           description: `"${editingRecipe.title}" has been added`,
         })
+        trackChange()
       } else {
         // Update existing recipe
         const { error } = await supabase
@@ -357,6 +365,7 @@ export function AdminRecipeManager({ onClose }: AdminRecipeManagerProps) {
           title: "Recipe updated",
           description: `"${editingRecipe.title}" has been saved`,
         })
+        trackChange()
       }
 
       await refreshContent()
@@ -389,6 +398,7 @@ export function AdminRecipeManager({ onClose }: AdminRecipeManagerProps) {
         title: "Recipe deleted",
         description: `"${deleteConfirm.title}" has been removed`,
       })
+      trackChange()
 
       await refreshContent()
       setDeleteConfirm(null)
@@ -960,6 +970,14 @@ export function AdminRecipeManager({ onClose }: AdminRecipeManagerProps) {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Floating Save Button */}
+      <AdminSaveButton
+        hasUnsavedChanges={hasUnsavedChanges}
+        isSaving={isSaving}
+        changeCount={changeCount}
+        onSave={saveChanges}
+      />
     </div>
   )
 }

@@ -2,6 +2,8 @@
 
 import { useState, useMemo } from "react"
 import { useTrainingResourcesAdmin, type TrainingResource, type TrainingCategory, COACH_RANKS } from "@/hooks/use-training-resources"
+import { useAdminChanges } from "@/hooks/use-admin-changes"
+import { AdminSaveButton } from "@/components/admin-save-button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -77,6 +79,11 @@ export function AdminTrainingResources({ onClose }: AdminTrainingResourcesProps)
     moveCategory,
   } = useTrainingResourcesAdmin()
   const { toast } = useToast()
+
+  // Track unsaved changes for admin
+  const { hasUnsavedChanges, isSaving, changeCount, trackChange, saveChanges } = useAdminChanges({
+    storageKeys: ["training-resources-search-history"],
+  })
 
   const [showAddModal, setShowAddModal] = useState(false)
   const [showEditModal, setShowEditModal] = useState(false)
@@ -212,6 +219,7 @@ export function AdminTrainingResources({ onClose }: AdminTrainingResourcesProps)
         sort_order: maxOrder + 1,
       })
       toast({ title: "Success", description: "Module added successfully" })
+      trackChange()
       setShowAddModal(false)
       setNewResource({
         category: "",
@@ -241,6 +249,7 @@ export function AdminTrainingResources({ onClose }: AdminTrainingResourcesProps)
         sort_order: editingResource.sort_order,
       })
       toast({ title: "Success", description: "Module updated successfully" })
+      trackChange()
       setShowEditModal(false)
       setEditingResource(null)
     } catch (err: any) {
@@ -259,6 +268,7 @@ export function AdminTrainingResources({ onClose }: AdminTrainingResourcesProps)
     try {
       await deleteResource(resourceToDelete)
       toast({ title: "Success", description: "Module deleted successfully" })
+      trackChange()
     } catch (err: any) {
       toast({ title: "Error", description: err.message, variant: "destructive" })
     } finally {
@@ -270,6 +280,7 @@ export function AdminTrainingResources({ onClose }: AdminTrainingResourcesProps)
   const handleMoveResource = async (resourceId: string, direction: "up" | "down") => {
     try {
       await moveResource(resourceId, direction)
+      trackChange()
     } catch (err: any) {
       toast({ title: "Error", description: "Failed to reorder module", variant: "destructive" })
     }
@@ -291,6 +302,7 @@ export function AdminTrainingResources({ onClose }: AdminTrainingResourcesProps)
         required_rank: newCategory.required_rank || null,
       })
       toast({ title: "Success", description: "Category added successfully" })
+      trackChange()
       setShowAddCategoryModal(false)
       setNewCategory({ name: "", description: "", icon: "📚", required_rank: "" })
     } catch (err: any) {
@@ -309,6 +321,7 @@ export function AdminTrainingResources({ onClose }: AdminTrainingResourcesProps)
         required_rank: editingCategory.required_rank,
       })
       toast({ title: "Success", description: "Category updated successfully" })
+      trackChange()
       setShowEditCategoryModal(false)
       setEditingCategory(null)
     } catch (err: any) {
@@ -340,6 +353,7 @@ export function AdminTrainingResources({ onClose }: AdminTrainingResourcesProps)
     try {
       await deleteCategory(categoryToDelete.id)
       toast({ title: "Success", description: "Category deleted successfully" })
+      trackChange()
     } catch (err: any) {
       toast({ title: "Error", description: err.message, variant: "destructive" })
     } finally {
@@ -351,6 +365,7 @@ export function AdminTrainingResources({ onClose }: AdminTrainingResourcesProps)
   const handleMoveCategory = async (categoryId: string, direction: "up" | "down") => {
     try {
       await moveCategory(categoryId, direction)
+      trackChange()
     } catch (err: any) {
       toast({ title: "Error", description: "Failed to reorder category", variant: "destructive" })
     }
@@ -1023,6 +1038,14 @@ export function AdminTrainingResources({ onClose }: AdminTrainingResourcesProps)
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Floating Save Button */}
+      <AdminSaveButton
+        hasUnsavedChanges={hasUnsavedChanges}
+        isSaving={isSaving}
+        changeCount={changeCount}
+        onSave={saveChanges}
+      />
     </div>
   )
 }

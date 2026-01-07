@@ -10,6 +10,8 @@ import { Textarea } from "@/components/ui/textarea"
 import { useUserData } from "@/contexts/user-data-context"
 import { createClient } from "@/lib/supabase/client"
 import { useToast } from "@/hooks/use-toast"
+import { useAdminChanges } from "@/hooks/use-admin-changes"
+import { AdminSaveButton } from "@/components/admin-save-button"
 import { sendMeetingEmail } from "@/lib/email"
 import { 
   X, Plus, Edit, Trash2, Search, Video, Calendar, Clock, Users, 
@@ -63,6 +65,9 @@ export function AdminZoomCalls({ onClose }: { onClose?: () => void }) {
 
   // Check if user is admin (case-insensitive)
   const isAdmin = profile?.user_role?.toLowerCase() === "admin"
+
+  // Track unsaved changes for admin
+  const { hasUnsavedChanges, isSaving, changeCount, trackChange, saveChanges } = useAdminChanges()
 
   useEffect(() => {
     if (!user || !isAdmin) {
@@ -225,6 +230,7 @@ export function AdminZoomCalls({ onClose }: { onClose?: () => void }) {
         title: "Success",
         description: "Meeting deleted",
       })
+      trackChange()
       loadZoomCalls()
     }
   }
@@ -310,6 +316,7 @@ export function AdminZoomCalls({ onClose }: { onClose?: () => void }) {
       title: "Success",
       description: editingId ? "Meeting updated" : "Meeting created",
     })
+    trackChange()
 
     // Send email notifications if enabled and this is a new meeting (not editing)
     if (sendEmailNotification && !editingId && status === "upcoming") {
@@ -1091,6 +1098,14 @@ export function AdminZoomCalls({ onClose }: { onClose?: () => void }) {
           ))
         })()}
       </div>
+
+      {/* Floating Save Button */}
+      <AdminSaveButton
+        hasUnsavedChanges={hasUnsavedChanges}
+        isSaving={isSaving}
+        changeCount={changeCount}
+        onSave={saveChanges}
+      />
     </div>
   )
 }

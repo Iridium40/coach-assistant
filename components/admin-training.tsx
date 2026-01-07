@@ -10,6 +10,8 @@ import { Textarea } from "@/components/ui/textarea"
 import { useUserData } from "@/contexts/user-data-context"
 import { createClient } from "@/lib/supabase/client"
 import { useToast } from "@/hooks/use-toast"
+import { useAdminChanges } from "@/hooks/use-admin-changes"
+import { AdminSaveButton } from "@/components/admin-save-button"
 import { 
   X, Plus, Edit, Trash2, ChevronDown, ChevronRight, 
   FileText, Video, ExternalLink, Loader2,
@@ -115,6 +117,9 @@ export function AdminTraining({ onClose }: { onClose?: () => void }) {
   const [deleting, setDeleting] = useState(false)
 
   const isAdmin = profile?.user_role?.toLowerCase() === "admin"
+
+  // Track unsaved changes for admin
+  const { hasUnsavedChanges, isSaving, changeCount, trackChange, saveChanges } = useAdminChanges()
 
   useEffect(() => {
     if (!user || !isAdmin) {
@@ -244,6 +249,7 @@ export function AdminTraining({ onClose }: { onClose?: () => void }) {
         toast({ title: "Error", description: "Failed to update module", variant: "destructive" })
       } else {
         toast({ title: "Success", description: "Module updated successfully" })
+        trackChange()
         setShowModuleModal(false)
         loadData()
       }
@@ -266,6 +272,7 @@ export function AdminTraining({ onClose }: { onClose?: () => void }) {
         toast({ title: "Error", description: "Failed to create module", variant: "destructive" })
       } else {
         toast({ title: "Success", description: "Module created successfully" })
+        trackChange()
         setShowModuleModal(false)
         loadData()
       }
@@ -325,6 +332,7 @@ export function AdminTraining({ onClose }: { onClose?: () => void }) {
         toast({ title: "Error", description: "Failed to update resource", variant: "destructive" })
       } else {
         toast({ title: "Success", description: "Resource updated successfully" })
+        trackChange()
         setShowResourceModal(false)
         loadData()
       }
@@ -346,6 +354,7 @@ export function AdminTraining({ onClose }: { onClose?: () => void }) {
         toast({ title: "Error", description: "Failed to create resource", variant: "destructive" })
       } else {
         toast({ title: "Success", description: "Resource added successfully" })
+        trackChange()
         setShowResourceModal(false)
         loadData()
       }
@@ -369,6 +378,7 @@ export function AdminTraining({ onClose }: { onClose?: () => void }) {
       toast({ title: "Error", description: `Failed to delete ${deleteConfirm.type}`, variant: "destructive" })
     } else {
       toast({ title: "Success", description: `${deleteConfirm.type === "module" ? "Module" : "Resource"} deleted successfully` })
+      trackChange()
       loadData()
     }
     setDeleting(false)
@@ -401,6 +411,7 @@ export function AdminTraining({ onClose }: { onClose?: () => void }) {
     if (result1.error || result2.error) {
       toast({ title: "Error", description: "Failed to reorder module", variant: "destructive" })
     } else {
+      trackChange()
       // Update local state immediately for responsive UI
       const updatedModules = [...modules]
       const idx1 = updatedModules.findIndex(m => m.id === currentModule.id)
@@ -437,6 +448,7 @@ export function AdminTraining({ onClose }: { onClose?: () => void }) {
     if (result1.error || result2.error) {
       toast({ title: "Error", description: "Failed to reorder resource", variant: "destructive" })
     } else {
+      trackChange()
       // Update local state immediately for responsive UI
       const updatedResources = [...resources]
       const idx1 = updatedResources.findIndex(r => r.id === currentResource.id)
@@ -925,6 +937,14 @@ export function AdminTraining({ onClose }: { onClose?: () => void }) {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Floating Save Button */}
+      <AdminSaveButton
+        hasUnsavedChanges={hasUnsavedChanges}
+        isSaving={isSaving}
+        changeCount={changeCount}
+        onSave={saveChanges}
+      />
     </div>
   )
 }

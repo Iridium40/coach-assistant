@@ -10,6 +10,8 @@ import { Textarea } from "@/components/ui/textarea"
 import { useUserData } from "@/contexts/user-data-context"
 import { createClient } from "@/lib/supabase/client"
 import { useToast } from "@/hooks/use-toast"
+import { useAdminChanges } from "@/hooks/use-admin-changes"
+import { AdminSaveButton } from "@/components/admin-save-button"
 import { 
   X, Plus, Edit, Trash2, Search, ExternalLink, Link as LinkIcon,
   ChevronUp, ChevronDown, Eye, EyeOff, Loader2, GripVertical
@@ -76,6 +78,11 @@ export function AdminResources({ onClose }: { onClose?: () => void }) {
   
   // Ref for form section to scroll into view
   const formRef = useRef<HTMLDivElement>(null)
+
+  // Track unsaved changes for admin
+  const { hasUnsavedChanges, isSaving, changeCount, trackChange, saveChanges } = useAdminChanges({
+    storageKeys: ["pinnedResources", "resources-search-history"],
+  })
 
   useEffect(() => {
     if (!user || !isAdmin) {
@@ -164,6 +171,7 @@ export function AdminResources({ onClose }: { onClose?: () => void }) {
         title: "Success",
         description: "Resource deleted",
       })
+      trackChange()
       loadResources()
     }
     
@@ -228,6 +236,7 @@ export function AdminResources({ onClose }: { onClose?: () => void }) {
       description: `Resource ${editingId ? "updated" : "created"} successfully`,
     })
     
+    trackChange()
     resetForm()
     loadResources()
     setSubmitting(false)
@@ -257,6 +266,7 @@ export function AdminResources({ onClose }: { onClose?: () => void }) {
         variant: "destructive",
       })
     } else {
+      trackChange()
       loadResources()
     }
   }
@@ -299,6 +309,7 @@ export function AdminResources({ onClose }: { onClose?: () => void }) {
     }
 
     toast({ title: "Success", description: "Resource order updated" })
+    trackChange()
     loadResources()
     setSavingOrder(false)
   }
@@ -795,6 +806,14 @@ export function AdminResources({ onClose }: { onClose?: () => void }) {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Floating Save Button */}
+      <AdminSaveButton
+        hasUnsavedChanges={hasUnsavedChanges}
+        isSaving={isSaving}
+        changeCount={changeCount}
+        onSave={saveChanges}
+      />
     </div>
   )
 }
