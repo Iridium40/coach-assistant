@@ -211,7 +211,8 @@ export function ExternalResourcesTab() {
   }
 
   // Convert database resources to the Resource format (preserving sort_order)
-  const dbResourcesConverted: (Resource & { sort_order: number })[] = useMemo(() => {
+  // All resources now come from the database and can be managed via admin panel
+  const resources: (Resource & { sort_order: number })[] = useMemo(() => {
     return dbResources.map(r => ({
       id: r.id,
       title: r.title,
@@ -230,212 +231,14 @@ export function ExternalResourcesTab() {
         return false
       }
       return true
-    })
-  }, [dbResources, profile?.optavia_id])
-
-  // Static resources that are always available (fallback/built-in resources)
-  // These have high sort_order values so DB resources appear first within each category
-  const staticResources: (Resource & { sort_order: number })[] = useMemo(() => [
-    {
-      id: "optavia-strong-fb",
-      title: "Optavia Strong Facebook Group",
-      description: "Join our community of coaches within OPTAVIA. Connect, share experiences, and support each other in building successful coaching businesses.",
-      url: "https://www.facebook.com/groups/810104670912639",
-      buttonText: "Go to Facebook Group",
-      category: "Community",
-      sort_order: 100,
-      features: [
-        "Connect with fellow coaches",
-        "Share best practices and tips",
-        "Get support and encouragement",
-        "Stay updated on community events",
-        "Build your coaching network",
-      ],
-    },
-    {
-      id: "healthy-edge-team",
-      title: "Healthy Edge 3.0 Team Page",
-      description: "Welcome to Healthy Edge 3.0! Where legacy meets fresh momentum, and a brand-new chapter begins.",
-      url: "https://www.facebook.com/groups/2156291101444241",
-      buttonText: "Join Team Page",
-      category: "Community",
-      sort_order: 101,
-      features: [
-        "Team updates and announcements",
-        "Fresh momentum and new beginnings",
-        "Connect with Healthy Edge team members",
-        "Legacy community support",
-        "Exclusive team resources",
-      ],
-    },
-    {
-      id: "healthy-edge-client",
-      title: "Healthy Edge 3.0 Client Page",
-      description: "Welcome to Healthy Edge 3.0 — our new, energized, and improved client community page!",
-      url: "https://www.facebook.com/groups/778947831962215",
-      buttonText: "Join Client Page",
-      category: "Community",
-      sort_order: 102,
-      features: [
-        "Client community and support",
-        "Share success stories and wins",
-        "Energized and improved community",
-        "Connect with fellow clients",
-        "Inspiration and motivation",
-      ],
-    },
-    {
-      id: "optavia-connect",
-      title: "OPTAVIA Connect",
-      description: "Access your OPTAVIA Connect portal to manage your business, track your progress, and access exclusive resources for coaches.",
-      url: "https://optaviaconnect.com/login",
-      buttonText: "Go to OPTAVIA Connect",
-      category: "OPTAVIA Resources",
-      sort_order: 100,
-      features: [
-        "Business performance tracking and analytics",
-        "Client management tools and resources",
-        "Training materials and certifications",
-        "Marketing resources and support",
-        "Commission and earnings information",
-      ],
-    },
-    ...(profile?.optavia_id
-      ? [
-          {
-            id: "optavia-profile",
-            title: "OPTAVIA Profile",
-            description: "View your OPTAVIA coach profile page to showcase your coaching business and connect with potential clients.",
-            url: `https://www.optavia.com/us/en/coach/${profile.optavia_id}`,
-            buttonText: "View My OPTAVIA Profile",
-            category: "OPTAVIA Resources",
-            sort_order: 101,
-            features: [
-              "Public coach profile page",
-              "Share your coaching journey and story",
-              "Connect with potential clients",
-              "Build your coaching network",
-              "Showcase your achievements and success",
-            ],
-          },
-        ]
-      : []),
-    {
-      id: "optavia-blog",
-      title: "OPTAVIA Blog",
-      description: "Discover helpful articles, tips, and insights to support your coaching journey and help your clients live their Lean & Green Life™.",
-      url: "https://www.optaviablog.com",
-      buttonText: "Visit OPTAVIA Blog",
-      category: "OPTAVIA Resources",
-      sort_order: 102,
-      features: [
-        "Lean & Green meal recipes and tips",
-        "Weight loss strategies and motivation",
-        "Metabolic health insights",
-        "Healthy lifestyle tips and habits",
-        "Success stories and inspiration",
-      ],
-    },
-    {
-      id: "habits-of-health",
-      title: "Habits of Health",
-      description: "Access Dr. A's Habits of Health system including daily tips, health assessments, the LifeBook, and transformational resources for whole-body wellness.",
-      url: "https://www.habitsofhealth.com/",
-      buttonText: "Visit Habits of Health",
-      category: "Habits of Health",
-      sort_order: 100,
-      features: [
-        "Take the health assessment",
-        "Download the LifeBook preview",
-        "Daily tips and motivation from Dr. A",
-        "Join the global Habits of Health community",
-        "30-day email health challenge",
-        "Blog articles on creating lasting habits",
-      ],
-    },
-    {
-      id: "optavia-habits-of-health",
-      title: "OPTAVIA Habits of Health System",
-      description: "The official OPTAVIA Habits of Health Transformational System covering the six habits: Weight Management, Eating & Hydration, Motion, Sleep, Mind, and Surroundings.",
-      url: "https://www.optavia.com/us/en/habits-of-health",
-      buttonText: "Learn the 6 Habits",
-      category: "Habits of Health",
-      sort_order: 101,
-      features: [
-        "Six Habits of Health framework",
-        "Habit tracking in the OPTAVIA app",
-        "Micro-habits approach for lasting change",
-        "Evidence-based behavior change system",
-        "Holistic wellness beyond just nutrition",
-        "Developed by Dr. Wayne Scott Andersen",
-      ],
-    },
-    {
-      id: "optavia-fb",
-      title: "OPTAVIA Facebook",
-      description: "Follow OPTAVIA on Facebook for the latest updates, success stories, and community engagement.",
-      url: "https://www.facebook.com/optavia",
-      buttonText: "Go to Facebook Page",
-      category: "Social Media",
-      sort_order: 100,
-      features: [
-        "Latest OPTAVIA news and updates",
-        "Success stories and testimonials",
-        "Community engagement and discussions",
-        "Health and wellness tips",
-        "Event announcements and promotions",
-      ],
-    },
-    {
-      id: "optavia-ig",
-      title: "OPTAVIA Instagram",
-      description: "Get inspired by OPTAVIA's Instagram feed featuring healthy recipes, transformation stories, and lifestyle tips.",
-      url: "https://www.instagram.com/optavia",
-      buttonText: "Go to Instagram Page",
-      category: "Social Media",
-      sort_order: 101,
-      features: [
-        "Visual inspiration and recipes",
-        "Transformation stories and testimonials",
-        "Healthy lifestyle tips and tricks",
-        "Behind-the-scenes content",
-        "Community highlights and features",
-      ],
-    },
-    {
-      id: "optavia-yt",
-      title: "OPTAVIA YouTube",
-      description: "Watch OPTAVIA videos including recipes, coaching tips, success stories, and educational content.",
-      url: "https://www.youtube.com/optavia",
-      buttonText: "Visit YouTube Channel",
-      category: "Social Media",
-      sort_order: 102,
-      features: [
-        "Recipe videos and cooking tutorials",
-        "Coaching tips and strategies",
-        "Success stories and transformations",
-        "Educational health content",
-        "Live events and webinars",
-      ],
-    },
-  ], [profile?.optavia_id])
-
-  // Combine database resources with static resources (DB resources take priority)
-  // Sort by category first, then by sort_order within each category
-  const resources: (Resource & { sort_order: number })[] = useMemo(() => {
-    // DB resources override static resources with the same ID
-    const dbIds = new Set(dbResourcesConverted.map(r => r.id))
-    const filteredStatic = staticResources.filter(r => !dbIds.has(r.id))
-    const combined = [...dbResourcesConverted, ...filteredStatic]
-    
-    // Sort by category, then by sort_order
-    return combined.sort((a, b) => {
+    }).sort((a, b) => {
+      // Sort by category, then by sort_order
       if (a.category !== b.category) {
         return a.category.localeCompare(b.category)
       }
       return a.sort_order - b.sort_order
     })
-  }, [dbResourcesConverted, staticResources])
+  }, [dbResources, profile?.optavia_id])
 
   // Get pinned resources
   const pinnedResources = useMemo(() => {
