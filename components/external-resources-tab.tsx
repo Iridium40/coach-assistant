@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo, useEffect } from "react"
+import { useState, useMemo, useEffect, useCallback } from "react"
 import { useSearchParams } from "next/navigation"
 import { ResourceCard } from "@/components/resource-card"
 import { useUserData } from "@/contexts/user-data-context"
@@ -13,7 +13,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { Pin, X, ExternalLink, Droplets, Dumbbell, Activity, ClipboardList, Users, Wrench, Share2, BookOpen } from "lucide-react"
+import { Pin, X, ExternalLink, Droplets, Dumbbell, Activity, ClipboardList, Users, Wrench, Share2, BookOpen, Search } from "lucide-react"
+import { SearchWithHistory } from "@/components/search-with-history"
 import { ToolCard } from "@/components/coach-tools/tool-card"
 import { WaterCalculator } from "@/components/coach-tools/water-calculator"
 import { ExerciseGuide } from "@/components/coach-tools/exercise-guide"
@@ -118,6 +119,7 @@ export function ExternalResourcesTab() {
   const [pinnedToolIds, setPinnedToolIds] = useState<string[]>([])
   const [dbResources, setDbResources] = useState<DBExternalResource[]>([])
   const [loadingResources, setLoadingResources] = useState(true)
+  const [searchQuery, setSearchQuery] = useState("")
 
   // Fetch resources from database
   useEffect(() => {
@@ -450,11 +452,22 @@ export function ExternalResourcesTab() {
     return baseCategories
   }, [allResourceCategories])
 
-  // Memoize filtered resources with simplified category mapping
+  // Memoize filtered resources with simplified category mapping and search
   // Resources are already sorted by category and sort_order from the combined array
   const filteredResources = useMemo(() => {
     if (selectedCategory === "Coach Tools") return []
     const filtered = resources.filter((resource) => {
+      // Apply search filter
+      if (searchQuery) {
+        const query = searchQuery.toLowerCase()
+        const matchesSearch = 
+          resource.title.toLowerCase().includes(query) ||
+          resource.description.toLowerCase().includes(query) ||
+          resource.features.some(f => f.toLowerCase().includes(query))
+        if (!matchesSearch) return false
+      }
+      
+      // Apply category filter
       if (selectedCategory === "All") return true
       // Map simplified categories to original categories
       if (selectedCategory === "OPTAVIA Portals") {
@@ -473,7 +486,54 @@ export function ExternalResourcesTab() {
     })
     // Sort by sort_order within the filtered results
     return filtered.sort((a, b) => a.sort_order - b.sort_order)
-  }, [resources, selectedCategory])
+  }, [resources, selectedCategory, searchQuery])
+
+  // Filter coach tools by search query
+  const filteredCoachTools = useMemo(() => {
+    if (!searchQuery) return COACH_TOOLS
+    const query = searchQuery.toLowerCase()
+    return COACH_TOOLS.filter(tool => 
+      tool.title.toLowerCase().includes(query) ||
+      tool.description.toLowerCase().includes(query)
+    )
+  }, [searchQuery])
+
+  // Generate search suggestions from resource titles, descriptions, and tool names
+  const searchSuggestions = useMemo(() => {
+    const suggestions: Set<string> = new Set()
+    
+    // Add resource titles
+    resources.forEach((resource) => {
+      suggestions.add(resource.title)
+      // Add key words from description (first few words)
+      const descWords = resource.description.split(" ").slice(0, 4).join(" ")
+      if (descWords.length > 5) {
+        suggestions.add(descWords)
+      }
+    })
+    
+    // Add coach tool titles
+    COACH_TOOLS.forEach((tool) => {
+      suggestions.add(tool.title)
+    })
+    
+    // Add common keywords
+    suggestions.add("OPTAVIA")
+    suggestions.add("Facebook")
+    suggestions.add("Instagram")
+    suggestions.add("YouTube")
+    suggestions.add("Training")
+    suggestions.add("Calculator")
+    suggestions.add("Health")
+    suggestions.add("Coach")
+    
+    return Array.from(suggestions)
+  }, [resources])
+
+  // Handle search change
+  const handleSearchChange = useCallback((value: string) => {
+    setSearchQuery(value)
+  }, [])
 
   // Check if we should show coach tools
   const showCoachTools = selectedCategory === "All" || selectedCategory === "Coach Tools"
@@ -488,6 +548,19 @@ export function ExternalResourcesTab() {
         <p className="text-optavia-gray text-base sm:text-lg max-w-2xl mx-auto px-4">
           Access external resources, tools, and communities to support your coaching journey and help your clients succeed.
         </p>
+      </div>
+
+      {/* Search Bar */}
+      <div className="mb-6">
+        <div className="max-w-md">
+          <SearchWithHistory
+            value={searchQuery}
+            onChange={handleSearchChange}
+            placeholder="Search resources and tools..."
+            suggestions={searchSuggestions}
+            storageKey="resources"
+          />
+        </div>
       </div>
 
       {/* Category Filter - Mobile Dropdown */}
@@ -526,22 +599,24 @@ export function ExternalResourcesTab() {
       </div>
 
       {/* Coach Tools Section */}
-      {showCoachTools && (
+      {showCoachTools && filteredCoachTools.length > 0 && (
         <div className="mb-8">
           {selectedCategory === "All" && (
             <h3 className="font-heading font-semibold text-lg text-optavia-dark mb-4 flex items-center gap-2">
               <Wrench className="h-5 w-5 text-[hsl(var(--optavia-green))]" />
               Coach Tools
+              {searchQuery && <span className="text-sm font-normal text-optavia-gray">({filteredCoachTools.length} results)</span>}
             </h3>
           )}
           {selectedCategory === "Coach Tools" && (
             <h3 className="font-heading font-semibold text-lg text-optavia-dark mb-4 flex items-center gap-2">
               <Wrench className="h-5 w-5 text-[hsl(var(--optavia-green))]" />
               Coach Tools
+              {searchQuery && <span className="text-sm font-normal text-optavia-gray">({filteredCoachTools.length} results)</span>}
             </h3>
           )}
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {COACH_TOOLS.map((tool) => (
+            {filteredCoachTools.map((tool) => (
               <ToolCard
                 key={tool.id}
                 id={tool.id}
@@ -610,7 +685,16 @@ export function ExternalResourcesTab() {
         </>
       )}
 
-      {filteredResources.length === 0 && selectedCategory !== "All" && selectedCategory !== "Coach Tools" && (
+      {/* No Results Message */}
+      {filteredResources.length === 0 && filteredCoachTools.length === 0 && searchQuery && (
+        <div className="text-center py-12">
+          <Search className="h-12 w-12 text-optavia-gray mx-auto mb-4 opacity-50" />
+          <p className="text-optavia-gray text-lg">No results found for "{searchQuery}"</p>
+          <p className="text-optavia-gray text-sm mt-2">Try adjusting your search terms or clear the search</p>
+        </div>
+      )}
+
+      {filteredResources.length === 0 && !searchQuery && selectedCategory !== "All" && selectedCategory !== "Coach Tools" && (
         <div className="text-center py-12 text-optavia-gray">No resources found in this category.</div>
       )}
     </div>
