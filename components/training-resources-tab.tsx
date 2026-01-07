@@ -133,15 +133,33 @@ export function TrainingResourcesTab() {
     return filterResources(selectedCategory, searchQuery)
   }, [filterResources, selectedCategory, searchQuery])
 
-  // Group filtered resources by category for display
+  // Group filtered resources by category for display, maintaining sort order
   const groupedFiltered = useMemo(() => {
     const grouped: Record<string, typeof resources> = {}
     filteredResources.forEach(r => {
       if (!grouped[r.category]) grouped[r.category] = []
       grouped[r.category].push(r)
     })
+    // Sort resources within each category by sort_order
+    Object.keys(grouped).forEach(cat => {
+      grouped[cat].sort((a, b) => a.sort_order - b.sort_order)
+    })
     return grouped
   }, [filteredResources])
+
+  // Get categories in correct order based on uniqueCategories
+  const orderedCategories = useMemo(() => {
+    const categoriesInResults = Object.keys(groupedFiltered)
+    // Sort by the order in uniqueCategories
+    return categoriesInResults.sort((a, b) => {
+      const aIndex = uniqueCategories.indexOf(a)
+      const bIndex = uniqueCategories.indexOf(b)
+      // If not found in uniqueCategories, put at end
+      const aOrder = aIndex === -1 ? 999 : aIndex
+      const bOrder = bIndex === -1 ? 999 : bIndex
+      return aOrder - bOrder
+    })
+  }, [groupedFiltered, uniqueCategories])
 
   const getTypeIcon = (type: string) => {
     switch (type) {
@@ -259,7 +277,7 @@ export function TrainingResourcesTab() {
       )}
 
       {/* Resources grouped by category */}
-      {Object.entries(groupedFiltered).length === 0 ? (
+      {orderedCategories.length === 0 ? (
         <div className="text-center py-12 text-optavia-gray">
           <Search className="h-12 w-12 mx-auto mb-4 opacity-30" />
           <p>No resources found matching your criteria.</p>
@@ -286,7 +304,8 @@ export function TrainingResourcesTab() {
             </Button>
           </div>
 
-          {Object.entries(groupedFiltered).map(([category, catResources]) => {
+          {orderedCategories.map((category) => {
+            const catResources = groupedFiltered[category]
             const isExpanded = expandedCategories.has(category)
             const catProgress = getCategoryProgress(category)
             const isComplete = catProgress.completed === catProgress.total && catProgress.total > 0
