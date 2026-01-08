@@ -263,7 +263,7 @@ export async function POST(request: NextRequest) {
         const expiresAt = new Date()
         expiresAt.setDate(expiresAt.getDate() + 30) // 30 days expiration
         
-        // Create invite record
+        // Create invite record (is_bulk_invite = true means no sponsor_id will be set)
         const { data: inviteData, error: insertError } = await supabase
           .from("invites")
           .insert({
@@ -275,6 +275,7 @@ export async function POST(request: NextRequest) {
             expires_at: expiresAt.toISOString(),
             is_active: true,
             email_status: "sent",
+            is_bulk_invite: true,
           })
           .select("id")
           .single()

@@ -222,14 +222,16 @@ export function SetPasswordForm({ onSuccess, inviteKey }: SetPasswordFormProps) 
 
     // Mark invite as used
     if (signUpData?.user) {
-      // Get the invite to find who sent it (the sponsor)
+      // Get the invite to find who sent it (the sponsor) and check if it's a bulk invite
       const { data: inviteData_full } = await supabase
         .from("invites")
-        .select("invited_by")
+        .select("invited_by, is_bulk_invite")
         .eq("invite_key", inviteKey)
         .single()
 
-      const sponsorId: string | null = inviteData_full?.invited_by || null
+      // Only set sponsor_id for non-bulk invites (bulk invites don't set sponsor)
+      const isBulkInvite = inviteData_full?.is_bulk_invite === true
+      const sponsorId: string | null = isBulkInvite ? null : (inviteData_full?.invited_by || null)
 
       await supabase
         .from("invites")
@@ -239,7 +241,7 @@ export function SetPasswordForm({ onSuccess, inviteKey }: SetPasswordFormProps) 
         })
         .eq("invite_key", inviteKey)
 
-      // Update profile with coach rank, optavia ID, and sponsor_id
+      // Update profile with coach rank, optavia ID, and sponsor_id (null for bulk invites)
       await supabase
         .from("profiles")
         .update({
