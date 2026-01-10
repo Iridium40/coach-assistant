@@ -3,6 +3,57 @@ import { NextRequest, NextResponse } from "next/server"
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 
+// Resend Audience and Segment IDs for Coaching Amplifier
+const RESEND_AUDIENCE_ID = process.env.RESEND_AUDIENCE_ID
+const RESEND_SEGMENT_ID = process.env.RESEND_SEGMENT_ID
+
+/**
+ * Add contact to Resend audience and segment for marketing purposes
+ */
+async function addContactToResendSegment(
+  email: string,
+  fullName: string
+): Promise<void> {
+  try {
+    if (!RESEND_AUDIENCE_ID || !RESEND_SEGMENT_ID) {
+      return
+    }
+
+    const nameParts = fullName.trim().split(" ")
+    const firstName = nameParts[0] || ""
+    const lastName = nameParts.slice(1).join(" ") || ""
+
+    // Create contact in audience
+    const { data: contactData } = await resend.contacts.create({
+      audienceId: RESEND_AUDIENCE_ID,
+      email: email,
+      firstName: firstName,
+      lastName: lastName,
+      unsubscribed: false,
+    })
+
+    // Add to segment
+    const contactId = contactData?.id
+    if (contactId) {
+      await fetch(
+        `https://api.resend.com/segments/${RESEND_SEGMENT_ID}/contacts`,
+        {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${process.env.RESEND_API_KEY}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ email }),
+        }
+      )
+    }
+
+    console.log(`Added ${email} to Coaching Amplifier segment`)
+  } catch (error: any) {
+    console.warn(`Failed to add ${email} to segment:`, error.message)
+  }
+}
+
 export async function POST(request: NextRequest) {
   try {
     const { to, fullName, coachRank, inviteLink, invitedBy } = await request.json()
@@ -662,6 +713,9 @@ You've got this! Your transformation journey continues... 💚
         { status: 500 }
       )
     }
+
+    // Add contact to Resend segment for marketing/audience tracking
+    await addContactToResendSegment(to, fullName)
 
     return NextResponse.json({ success: true, data })
   } catch (error: any) {
