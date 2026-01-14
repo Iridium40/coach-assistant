@@ -371,6 +371,15 @@ export function ExternalResourcesTab() {
             storageKey="resources"
           />
         </div>
+        {/* Search Results Summary */}
+        {searchQuery && (
+          <div className="mt-2 text-sm text-optavia-gray">
+            Found {filteredCoachTools.length + filteredResources.length} results for "{searchQuery}"
+            {filteredCoachTools.length > 0 && filteredResources.length > 0 && (
+              <span> ({filteredCoachTools.length} tools, {filteredResources.length} resources)</span>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Category Filter - Mobile Dropdown */}
@@ -450,7 +459,8 @@ export function ExternalResourcesTab() {
           {selectedCategory === "All" && (
             <h3 className="font-heading font-semibold text-lg text-optavia-dark mb-4 flex items-center gap-2">
               <ExternalLink className="h-5 w-5 text-[hsl(var(--optavia-green))]" />
-              OPTAVIA & Community
+              External Resources
+              {searchQuery && <span className="text-sm font-normal text-optavia-gray">({filteredResources.length} results)</span>}
             </h3>
           )}
           {selectedCategory === "OPTAVIA Portals" && (
