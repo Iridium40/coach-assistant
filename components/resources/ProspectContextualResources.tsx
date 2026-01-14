@@ -62,14 +62,18 @@ export function ProspectContextualResources({
       const filtered = (data || []).filter((resource) => {
         const features = resource.features as ExternalResource['features']
         
+        // Ensure arrays are actually arrays
+        const showIn = Array.isArray(features?.show_in) ? features.show_in : []
+        const relevantStages = Array.isArray(features?.relevant_stages) ? features.relevant_stages : []
+        
         // If features has show_in, check if it includes prospect_tracker
-        if (features?.show_in && !features.show_in.includes('prospect_tracker')) {
+        if (showIn.length > 0 && !showIn.includes('prospect_tracker')) {
           return false
         }
 
         // Check if relevant_stages includes current stage
-        if (features?.relevant_stages && features.relevant_stages.length > 0) {
-          return features.relevant_stages.includes(stage)
+        if (relevantStages.length > 0) {
+          return relevantStages.includes(stage)
         }
 
         // Check show_condition for general prospect resources

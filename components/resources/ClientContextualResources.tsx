@@ -67,13 +67,15 @@ export function ClientContextualResources({
         const features = resource.features as ExternalResource['features']
         
         // If features has show_in, check if it includes client_tracker
-        if (features?.show_in && !features.show_in.includes('client_tracker')) {
+        const showIn = Array.isArray(features?.show_in) ? features.show_in : []
+        if (showIn.length > 0 && !showIn.includes('client_tracker')) {
           return false
         }
 
         // If features has relevant_days, check if current day is included
-        if (features?.relevant_days && features.relevant_days.length > 0) {
-          return features.relevant_days.includes(programDay)
+        const relevantDays = Array.isArray(features?.relevant_days) ? features.relevant_days : []
+        if (relevantDays.length > 0) {
+          return relevantDays.includes(programDay)
         }
 
         // If no relevant_days specified, include the resource (it matched show_condition)

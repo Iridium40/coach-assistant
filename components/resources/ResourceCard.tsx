@@ -101,7 +101,8 @@ export function ResourceCard({
   showTags = false,
 }: ResourceCardProps) {
   const resourceType = features?.type
-  const tags = features?.tags || []
+  // Ensure tags is always an array
+  const tags = Array.isArray(features?.tags) ? features.tags : []
   
   if (compact) {
     return (

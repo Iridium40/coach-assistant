@@ -115,10 +115,15 @@ export function TrainingContextualResources({
 
       // Filter by tags if available
       const filtered = (data || []).filter((resource) => {
-        if (!resource.features) return false;
+        // If no features, still include if it matches the category
+        if (!resource.features) return true;
         
         const features = resource.features as Resource['features'];
-        const resourceTags = features.tags || [];
+        // Ensure tags is always an array
+        const resourceTags = Array.isArray(features.tags) ? features.tags : [];
+        
+        // If resource has no tags, include it (it's in the category)
+        if (resourceTags.length === 0) return true;
         
         // Check if any of the mapping tags match resource tags
         const hasMatchingTag = mapping.tags.some(tag => 
