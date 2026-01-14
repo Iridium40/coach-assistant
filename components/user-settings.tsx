@@ -6,13 +6,6 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
 import { useUserData } from "@/contexts/user-data-context"
 import { useToast } from "@/hooks/use-toast"
 import { createClient } from "@/lib/supabase/client"
@@ -24,7 +17,6 @@ interface SponsorInfo {
   full_name: string | null
   email: string | null
   avatar_url: string | null
-  coach_rank: string | null
 }
 
 interface UserSettingsProps {
@@ -47,7 +39,6 @@ export function UserSettings({ onClose }: UserSettingsProps) {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [uploading, setUploading] = useState(false)
   const [fullName, setFullName] = useState(profile?.full_name || "")
-  const [coachRank, setCoachRank] = useState<string>(profile?.coach_rank || "")
   const [optaviaId, setOptaviaId] = useState(profile?.optavia_id || "")
   const [phoneNumber, setPhoneNumber] = useState(profile?.phone_number || "")
   const [sponsorInfo, setSponsorInfo] = useState<SponsorInfo | null>(null)
@@ -57,7 +48,6 @@ export function UserSettings({ onClose }: UserSettingsProps) {
   useEffect(() => {
     if (profile) {
       setFullName(profile.full_name || "")
-      setCoachRank(profile.coach_rank || "")
       setOptaviaId(profile.optavia_id || "")
       setPhoneNumber(profile.phone_number || "")
     } else {
@@ -81,7 +71,7 @@ export function UserSettings({ onClose }: UserSettingsProps) {
       try {
         const { data, error } = await supabase
           .from("profiles")
-          .select("id, full_name, email, avatar_url, coach_rank")
+          .select("id, full_name, email, avatar_url")
           .eq("id", profile.sponsor_id)
           .single()
 
@@ -235,14 +225,9 @@ export function UserSettings({ onClose }: UserSettingsProps) {
       }
     } else {
       // Admins can update all fields
-      // Automatically set is_new_coach based on coach rank
-      const isNewCoach = coachRank === "Coach" || coachRank === ""
-
       const { error } = await updateProfile({
         full_name: fullName,
         phone_number: phoneNumber || null,
-        is_new_coach: isNewCoach,
-        coach_rank: coachRank || null,
         optavia_id: optaviaId || null,
       })
 
@@ -391,44 +376,6 @@ export function UserSettings({ onClose }: UserSettingsProps) {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="coachRank" className="text-optavia-dark">Coach Rank</Label>
-              <Select 
-                value={coachRank || "none"} 
-                onValueChange={(value) => setCoachRank(value === "none" ? "" : value)}
-                disabled={isCoach}
-              >
-                <SelectTrigger 
-                  id="coachRank" 
-                  className={`w-full border-2 text-optavia-dark ${
-                    isCoach 
-                      ? "bg-gray-100 border-gray-200 cursor-not-allowed opacity-70" 
-                      : "bg-white border-gray-300 hover:border-[hsl(var(--optavia-green))] focus:border-[hsl(var(--optavia-green))]"
-                  }`}
-                >
-                  <SelectValue placeholder="Select coach rank" />
-                </SelectTrigger>
-                <SelectContent className="bg-white border-2 border-gray-300">
-                  <SelectItem value="none" className="text-optavia-dark hover:bg-gray-100">None</SelectItem>
-                  <SelectItem value="Coach" className="text-optavia-dark hover:bg-gray-100">Coach</SelectItem>
-                  <SelectItem value="SC" className="text-optavia-dark hover:bg-gray-100">Senior Coach (SC)</SelectItem>
-                  <SelectItem value="MG" className="text-optavia-dark hover:bg-gray-100">Manager (MG)</SelectItem>
-                  <SelectItem value="AD" className="text-optavia-dark hover:bg-gray-100">Associate Director (AD)</SelectItem>
-                  <SelectItem value="DR" className="text-optavia-dark hover:bg-gray-100">Director (DR)</SelectItem>
-                  <SelectItem value="ED" className="text-optavia-dark hover:bg-gray-100">Executive Director (ED)</SelectItem>
-                  <SelectItem value="IED" className="text-optavia-dark hover:bg-gray-100">Integrated Executive Director (IED)</SelectItem>
-                  <SelectItem value="FIBC" className="text-optavia-dark hover:bg-gray-100">Fully Integrated Business Coach (FIBC)</SelectItem>
-                  <SelectItem value="IGD" className="text-optavia-dark hover:bg-gray-100">Integrated Global Director (IGD)</SelectItem>
-                  <SelectItem value="FIBL" className="text-optavia-dark hover:bg-gray-100">Fully Integrated Business Leader (FIBL)</SelectItem>
-                  <SelectItem value="IND" className="text-optavia-dark hover:bg-gray-100">Integrated National Director (IND)</SelectItem>
-                  <SelectItem value="IPD" className="text-optavia-dark hover:bg-gray-100">Integrated Presidential Director (IPD)</SelectItem>
-                </SelectContent>
-              </Select>
-              {isCoach && (
-                <p className="text-xs text-optavia-gray">Contact an admin to update your coach rank</p>
-              )}
-            </div>
-
-            <div className="space-y-2">
               <Label htmlFor="optaviaId" className="text-optavia-dark">Optavia ID</Label>
               <Input
                 id="optaviaId"
@@ -476,11 +423,6 @@ export function UserSettings({ onClose }: UserSettingsProps) {
                     <div className="flex-1">
                       <div className="font-semibold text-optavia-dark">{sponsorInfo.full_name || "Unknown"}</div>
                       <div className="text-sm text-optavia-gray">{sponsorInfo.email}</div>
-                      {sponsorInfo.coach_rank && (
-                        <div className="text-xs text-[hsl(var(--optavia-green))] font-medium mt-0.5">
-                          {sponsorInfo.coach_rank === "Coach" ? "Coach" : sponsorInfo.coach_rank}
-                        </div>
-                      )}
                     </div>
                   </div>
                 </div>
