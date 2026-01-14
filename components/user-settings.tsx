@@ -10,6 +10,8 @@ import { useUserData } from "@/contexts/user-data-context"
 import { useToast } from "@/hooks/use-toast"
 import { createClient } from "@/lib/supabase/client"
 import { Upload, X, UserCheck } from "lucide-react"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { COACH_RANK_OPTIONS, type CoachRank } from "@/lib/coach-ranks"
 
 interface SponsorInfo {
   id: string
@@ -37,7 +39,7 @@ export function UserSettings({ onClose }: UserSettingsProps) {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [uploading, setUploading] = useState(false)
   const [fullName, setFullName] = useState(profile?.full_name || "")
-  const [coachRank, setCoachRank] = useState(profile?.coach_rank || "")
+  const [coachRank, setCoachRank] = useState<CoachRank | "">(profile?.coach_rank || "")
   const [optaviaId, setOptaviaId] = useState(profile?.optavia_id || "")
   const [phoneNumber, setPhoneNumber] = useState(profile?.phone_number || "")
   const [sponsorInfo, setSponsorInfo] = useState<SponsorInfo | null>(null)
@@ -47,7 +49,7 @@ export function UserSettings({ onClose }: UserSettingsProps) {
   useEffect(() => {
     if (profile) {
       setFullName(profile.full_name || "")
-      setCoachRank(profile.coach_rank || "")
+      setCoachRank((profile.coach_rank as CoachRank) || "")
       setOptaviaId(profile.optavia_id || "")
       setPhoneNumber(profile.phone_number || "")
     } else {
@@ -208,6 +210,7 @@ export function UserSettings({ onClose }: UserSettingsProps) {
       const { error } = await updateProfile({
         full_name: fullName,
         phone_number: phoneNumber || null,
+        coach_rank: coachRank || null,
       })
 
       if (error) {
@@ -229,6 +232,7 @@ export function UserSettings({ onClose }: UserSettingsProps) {
         full_name: fullName,
         phone_number: phoneNumber || null,
         optavia_id: optaviaId || null,
+        coach_rank: coachRank || null,
       })
 
       if (error) {
@@ -358,14 +362,22 @@ export function UserSettings({ onClose }: UserSettingsProps) {
 
             <div className="space-y-2">
               <Label htmlFor="coachRank" className="text-optavia-dark">Coach Rank</Label>
-              <Input
-                id="coachRank"
-                value={coachRank || "Not set"}
-                readOnly
-                disabled
-                className="bg-gray-100 border-gray-200 text-optavia-dark cursor-not-allowed opacity-70"
-              />
-              <p className="text-xs text-optavia-gray">Coach rank is managed by admins</p>
+              <Select
+                value={coachRank || undefined}
+                onValueChange={(value) => setCoachRank(value as CoachRank)}
+              >
+                <SelectTrigger id="coachRank" className="bg-white border-gray-300 text-optavia-dark">
+                  <SelectValue placeholder="Select rank" />
+                </SelectTrigger>
+                <SelectContent>
+                  {COACH_RANK_OPTIONS.map((opt) => (
+                    <SelectItem key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-optavia-gray">This is used for rank-based features and training access.</p>
             </div>
 
             <div className="space-y-2">

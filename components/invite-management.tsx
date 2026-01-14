@@ -15,6 +15,8 @@ import { sendInviteEmail } from "@/lib/email"
 import { Badge } from "@/components/ui/badge"
 import { X, Copy, Check, UserPlus, History, Clock, UserCheck, UserX, AlertTriangle } from "lucide-react"
 import Link from "next/link"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { COACH_RANK_OPTIONS, type CoachRank } from "@/lib/coach-ranks"
 
 interface InviteManagementProps {
   onClose?: () => void
@@ -56,14 +58,22 @@ export function InviteManagement({ onClose }: InviteManagementProps) {
   const [optaviaId, setOptaviaId] = useState("")
   const [loading, setLoading] = useState(false)
   
-  // All coaches default to IPD rank
-  const defaultCoachRank = "IPD"
+  const [assignedCoachRank, setAssignedCoachRank] = useState<CoachRank>(
+    (profile?.coach_rank as CoachRank) || "IPD"
+  )
   const [generatedInvites, setGeneratedInvites] = useState<GeneratedInvite[]>([])
   const [inviteHistory, setInviteHistory] = useState<InviteHistory[]>([])
   const [loadingHistory, setLoadingHistory] = useState(true)
   const [showHistory, setShowHistory] = useState(false)
 
   const isAdmin = profile?.user_role?.toLowerCase() === "admin"
+
+  useEffect(() => {
+    // Keep a sensible default when profile loads/changes
+    if (profile?.coach_rank) {
+      setAssignedCoachRank(profile.coach_rank as CoachRank)
+    }
+  }, [profile?.coach_rank])
 
   // Track unsaved changes for admin
   const { 
@@ -197,7 +207,7 @@ export function InviteManagement({ onClose }: InviteManagementProps) {
           invited_by: user.id,
           invited_email: email,
           invited_full_name: fullName,
-          coach_rank: defaultCoachRank,
+          coach_rank: assignedCoachRank,
           optavia_id: optaviaId || null,
           expires_at: expiresAt.toISOString(),
           is_active: true,
@@ -215,7 +225,7 @@ export function InviteManagement({ onClose }: InviteManagementProps) {
         id: data.id,
         fullName: fullName || "",
         email: email,
-        coachRank: defaultCoachRank,
+        coachRank: assignedCoachRank,
         inviteLink: link,
         createdAt: new Date().toISOString(),
       }
@@ -226,7 +236,7 @@ export function InviteManagement({ onClose }: InviteManagementProps) {
       const emailResult = await sendInviteEmail({
         to: email,
         fullName: fullName,
-        coachRank: defaultCoachRank,
+        coachRank: assignedCoachRank,
         inviteLink: link,
         invitedBy: profile?.full_name || user.email || "an admin",
       })
@@ -366,11 +376,22 @@ export function InviteManagement({ onClose }: InviteManagementProps) {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="flex items-center justify-between rounded-lg border border-gray-200 bg-gray-50 px-3 py-2">
-              <span className="text-sm text-optavia-gray">Assigned coach rank</span>
-              <Badge variant="secondary" className="font-semibold">
-                {defaultCoachRank}
-              </Badge>
+            <div className="space-y-2">
+              <Label htmlFor="assignedCoachRank" className="text-optavia-dark">
+                Assigned coach rank
+              </Label>
+              <Select value={assignedCoachRank} onValueChange={(v) => setAssignedCoachRank(v as CoachRank)}>
+                <SelectTrigger id="assignedCoachRank" className="bg-white border-gray-300 text-optavia-dark">
+                  <SelectValue placeholder="Select rank" />
+                </SelectTrigger>
+                <SelectContent>
+                  {COACH_RANK_OPTIONS.map((opt) => (
+                    <SelectItem key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             {/* New Coach Toggle - at the top */}
             <div className="space-y-2">
