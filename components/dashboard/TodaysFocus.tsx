@@ -150,7 +150,7 @@ export function TodaysFocus({
   }
 
   return (
-    <Card className="bg-gradient-to-br from-green-50 to-emerald-50 border-2 border-[hsl(var(--optavia-green))] shadow-lg">
+    <Card className="bg-gradient-to-br from-[hsl(var(--optavia-green-light))] to-white border-2 border-[hsl(var(--optavia-green))] shadow-lg">
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <CardTitle className="text-xl flex items-center gap-2 text-optavia-dark">
@@ -167,11 +167,11 @@ export function TodaysFocus({
       <CardContent className="pt-0 space-y-4">
         {/* Academy Section */}
         {isAcademyComplete ? (
-          <div className="flex items-center gap-3 p-3 bg-green-100 rounded-lg border border-green-200">
-            <CheckCircle className="h-6 w-6 text-green-600 flex-shrink-0" />
+          <div className="flex items-center gap-3 p-3 bg-orange-50 rounded-lg border border-orange-200">
+            <CheckCircle className="h-6 w-6 text-orange-600 flex-shrink-0" />
             <div className="flex-1">
-              <p className="font-semibold text-green-800 text-sm">Academy Complete! 🎉</p>
-              <p className="text-xs text-green-700">
+              <p className="font-semibold text-orange-800 text-sm">Academy Complete! 🎉</p>
+              <p className="text-xs text-orange-700">
                 {academyProgress.total} modules completed
               </p>
             </div>
@@ -185,16 +185,16 @@ export function TodaysFocus({
           <div className="bg-white rounded-lg p-3 border border-gray-200">
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-2">
-                <GraduationCap className="h-4 w-4 text-[hsl(var(--optavia-green))]" />
+                <GraduationCap className="h-4 w-4 text-[hsl(var(--optavia-accent))]" />
                 <span className="text-sm font-medium text-gray-700">Continue Academy</span>
               </div>
-              <span className="text-xs text-[hsl(var(--optavia-green))] font-bold">
+              <span className="text-xs text-[hsl(var(--optavia-accent))] font-bold">
                 {academyProgress.percentage}%
               </span>
             </div>
-            <Progress value={academyProgress.percentage} className="h-1.5 mb-2" />
-            <div className="flex items-center gap-2 p-2 bg-green-50 rounded border border-green-100">
-              <span className="text-lg">🎓</span>
+            <Progress value={academyProgress.percentage} className="h-1.5 mb-2 [&>div]:bg-[hsl(var(--optavia-accent))]" />
+            <div className="flex items-center gap-2 p-2 bg-orange-50 rounded border border-orange-200">
+              <span className="text-lg">🧡</span>
               <div className="flex-1 min-w-0">
                 <p className="text-xs text-gray-500">Up Next</p>
                 <p className="text-sm font-medium text-gray-900 truncate">
@@ -202,7 +202,7 @@ export function TodaysFocus({
                 </p>
               </div>
               <Link href={`/academy/${nextAcademyModule.id}`}>
-                <Button size="sm" className="bg-[hsl(var(--optavia-green))] hover:bg-[hsl(var(--optavia-green-dark))] text-white text-xs">
+                <Button size="sm" className="bg-[hsl(var(--optavia-accent))] hover:bg-[hsl(var(--optavia-accent))]/90 text-white text-xs">
                   Start
                   <ChevronRight className="h-3 w-3 ml-1" />
                 </Button>
