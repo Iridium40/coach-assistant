@@ -72,6 +72,37 @@ export function ProspectCard({
   const config = statusConfig[prospect.status]
   const isOverdue = daysUntil !== null && daysUntil < 0
 
+  const handleShareHA = async () => {
+    // Mark that we've sent/shared the HA (so the card reflects progress)
+    const today = new Date()
+    const todayStr = today.toISOString().split("T")[0]
+    const next = new Date(today)
+    next.setDate(next.getDate() + 2)
+    const nextStr = next.toISOString().split("T")[0]
+
+    const success = await onUpdateProspect(prospect.id, {
+      action_type: "health_assessment",
+      last_action: todayStr,
+      next_action: nextStr,
+    })
+
+    if (!success) {
+      onToast({
+        title: "Error",
+        description: "Couldn't update prospect status. Please try again.",
+        variant: "destructive",
+      })
+      return
+    }
+
+    onToast({
+      title: "Marked as HA shared",
+      description: "This prospect is now tracked as 'Do HA' with a follow-up in 2 days.",
+    })
+
+    setShowShareAssessment(true)
+  }
+
   const handleCompleteHA = async () => {
     await onUpdateProspect(prospect.id, {
       ha_scheduled_at: null,
@@ -245,24 +276,21 @@ export function ProspectCard({
               <span className="text-xs sm:text-sm">Schedule</span>
             </Button>
           )}
-
-          {/* Send Health Assessment Link */}
-          {prospect.status !== "converted" && prospect.status !== "coach" && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setShowShareAssessment(true)}
-              className="flex-1 text-purple-600 border-purple-200 hover:bg-purple-50"
-              title="Send Health Assessment"
-            >
-              <Share2 className="h-4 w-4 mr-1" />
-              <span className="text-xs sm:text-sm">Send HA</span>
-            </Button>
-          )}
         </div>
 
         {/* Secondary Actions: Edit, Remind & Delete */}
         <div className="mt-3 pt-3 border-t flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleShareHA}
+            title="Share Health Assessment"
+            className="text-purple-600 border-purple-200 hover:bg-purple-50"
+          >
+            <Share2 className="h-4 w-4 mr-1" />
+            <span className="text-xs sm:text-sm">Share HA</span>
+          </Button>
+
           <Button
             variant="outline"
             size="sm"
