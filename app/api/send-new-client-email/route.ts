@@ -32,20 +32,20 @@ export async function POST(request: NextRequest) {
     
     const bodyContent = `
       <div style="padding: 30px 20px;">
-        <div style="background: linear-gradient(135deg, #00A651 0%, #2d5016 100%); padding: 40px 30px; border-radius: 12px; margin-bottom: 25px; text-align: center;">
+        <div style="background: linear-gradient(135deg, #37B6AE 0%, #2A9C95 100%); padding: 40px 30px; border-radius: 12px; margin-bottom: 25px; text-align: center;">
           <div style="font-size: 72px; margin-bottom: 15px;">🎉</div>
           <h1 style="color: white; margin: 0; font-size: 32px; font-weight: bold;">Congratulations!</h1>
           <p style="color: white; margin: 15px 0 0 0; font-size: 20px; opacity: 0.95;">You're changing lives!</p>
         </div>
         
-        <div style="background-color: #f0fdf4; padding: 25px; border-radius: 8px; margin-bottom: 25px; border-left: 4px solid #00A651; text-align: center;">
-          <p style="color: #166534; margin: 0; font-size: 18px; font-weight: bold;">
+        <div style="background-color: #EAF7F6; padding: 25px; border-radius: 8px; margin-bottom: 25px; border-left: 4px solid #37B6AE; text-align: center;">
+          <p style="color: #2A9C95; margin: 0; font-size: 18px; font-weight: bold;">
             🌟 New Client Added 🌟
           </p>
-          <h2 style="color: #00A651; margin: 15px 0 5px 0; font-size: 28px; font-weight: bold;">
+          <h2 style="color: #37B6AE; margin: 15px 0 5px 0; font-size: 28px; font-weight: bold;">
             ${clientName}
           </h2>
-          <p style="color: #166534; margin: 0; font-size: 16px;">
+          <p style="color: #2A9C95; margin: 0; font-size: 16px;">
             Starting: ${formattedDate}
           </p>
         </div>
@@ -78,25 +78,25 @@ export async function POST(request: NextRequest) {
           </a>
         </div>
         
-        <div style="background-color: #e7f5e7; padding: 20px; border-radius: 6px; margin: 20px 0; text-align: center;">
-          <p style="margin: 0; font-size: 18px; color: #2d5016; font-weight: bold;">
+        <div style="background-color: #EAF7F6; padding: 20px; border-radius: 6px; margin: 20px 0; text-align: center;">
+          <p style="margin: 0; font-size: 18px; color: #2A9C95; font-weight: bold;">
             🌱 Remember: Every journey starts with a single step.
           </p>
-          <p style="margin: 10px 0 0 0; font-size: 14px; color: #2d5016;">
+          <p style="margin: 10px 0 0 0; font-size: 14px; color: #2A9C95;">
             You just helped ${clientName} take theirs!
           </p>
         </div>
         
         <p style="font-size: 16px; color: #333; margin: 30px 0 0 0;">
           Keep up the amazing work!<br><br>
-          <strong>The Coaching Amplifier Team</strong>
+          <strong>The Coach Assistant Hub Team</strong>
         </p>
       </div>
     `
     
     const footer = getEmailFooter()
     
-    const htmlContent = getEmailWrapper(header + bodyContent + footer, "New Client Celebration - Coaching Amplifier")
+    const htmlContent = getEmailWrapper(header + bodyContent + footer, "New Client Celebration - Coach Assistant Hub")
 
     const textContent = `
 🎉 Congratulations! You're changing lives!
@@ -123,12 +123,12 @@ View your clients: ${appUrl}/client-tracker
 Remember: Every journey starts with a single step. You just helped ${clientName} take theirs!
 
 Keep up the amazing work!
-The Coaching Amplifier Team
+The Coach Assistant Hub Team
     `
 
     // Send email using Resend
     const { data, error } = await resend.emails.send({
-      from: "Coaching Amplifier <onboarding@coachingamplifier.com>",
+      from: "Coach Assistant Hub <onboarding@coachingamplifier.com>",
       to: [to],
       subject: subject,
       html: htmlContent,

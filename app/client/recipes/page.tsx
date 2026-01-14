@@ -29,7 +29,7 @@ function LoadingState() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 to-white">
       <div className="text-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#2d5016] mx-auto mb-4"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#2A9C95] mx-auto mb-4"></div>
         <p className="text-gray-600">Loading recipes...</p>
       </div>
     </div>
@@ -169,7 +169,7 @@ function ClientRecipesContent() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 to-white">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#2d5016] mx-auto mb-4"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#2A9C95] mx-auto mb-4"></div>
           <p className="text-gray-600">Loading recipes...</p>
         </div>
       </div>
@@ -194,7 +194,7 @@ function ClientRecipesContent() {
             </div>
             {coachName && (
               <div className="text-sm text-gray-600">
-                Shared by <span className="font-medium text-[#2d5016]">{coachName}</span>
+                Shared by <span className="font-medium text-[#2A9C95]">{coachName}</span>
               </div>
             )}
           </div>
@@ -202,7 +202,7 @@ function ClientRecipesContent() {
       </header>
 
       {/* Hero Section */}
-      <div className="bg-gradient-to-r from-[#2d5016] to-[#3d6b1e] text-white py-10">
+      <div className="bg-gradient-to-r from-[#2A9C95] to-[#3d6b1e] text-white py-10">
         <div className="container mx-auto px-4">
           <div className="flex flex-col lg:flex-row items-center justify-between gap-8">
             {/* Left side - Title and description */}
@@ -257,7 +257,7 @@ function ClientRecipesContent() {
                         type="submit"
                         disabled={subscribing || (!turnstileToken && process.env.NODE_ENV !== "development")}
                         size="sm"
-                        className="bg-white text-[#2d5016] hover:bg-green-50 font-semibold px-4 h-9 whitespace-nowrap disabled:opacity-50"
+                        className="bg-white text-[#2A9C95] hover:bg-green-50 font-semibold px-4 h-9 whitespace-nowrap disabled:opacity-50"
                       >
                         {subscribing ? (
                           <Loader2 className="h-4 w-4 animate-spin" />
@@ -319,7 +319,7 @@ function ClientRecipesContent() {
                 size="sm"
                 onClick={() => setSelectedCategory(cat)}
                 className={selectedCategory === cat 
-                  ? "bg-[#2d5016] hover:bg-[#3d6b1e] text-white" 
+                  ? "bg-[#2A9C95] hover:bg-[#3d6b1e] text-white" 
                   : "border-gray-300 text-gray-700 hover:bg-gray-50"
                 }
               >
@@ -367,12 +367,12 @@ function ClientRecipesContent() {
                   <Badge className="absolute bottom-2 left-2 bg-white/90 text-gray-800 text-xs">
                     {recipe.difficulty}
                   </Badge>
-                  <Badge className="absolute bottom-2 right-2 bg-[#2d5016]/90 text-white text-xs">
+                  <Badge className="absolute bottom-2 right-2 bg-[#2A9C95]/90 text-white text-xs">
                     {recipe.category}
                   </Badge>
                 </div>
                 <CardContent className="p-4">
-                  <h3 className="font-semibold text-gray-800 group-hover:text-[#2d5016] transition-colors line-clamp-1">
+                  <h3 className="font-semibold text-gray-800 group-hover:text-[#2A9C95] transition-colors line-clamp-1">
                     {recipe.title}
                   </h3>
                   <p className="text-sm text-gray-600 mt-1 line-clamp-2">

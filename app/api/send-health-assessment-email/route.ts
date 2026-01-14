@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
     const formatAssessment = () => {
       let html = `
         <div style="font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px;">
-          <h2 style="color: #00A651; border-bottom: 2px solid #00A651; padding-bottom: 10px;">
+          <h2 style="color: #37B6AE; border-bottom: 2px solid #37B6AE; padding-bottom: 10px;">
             Health Assessment Submission
           </h2>
           
@@ -47,12 +47,12 @@ export async function POST(request: NextRequest) {
           <div style="margin: 20px 0;">
             <h3 style="color: #333; border-bottom: 1px solid #ddd; padding-bottom: 5px;">Goals</h3>
             <p><strong>Current Health State:</strong></p>
-            <p style="background: #f9f9f9; padding: 10px; border-left: 3px solid #00A651; margin: 10px 0;">
+            <p style="background: #f9f9f9; padding: 10px; border-left: 3px solid #37B6AE; margin: 10px 0;">
               ${formatValue(assessmentData.goalsCurrentState)}
             </p>
             ${assessmentData.goalsWhy ? `
               <p><strong>Why they want to lose weight:</strong></p>
-              <p style="background: #f9f9f9; padding: 10px; border-left: 3px solid #00A651; margin: 10px 0;">
+              <p style="background: #f9f9f9; padding: 10px; border-left: 3px solid #37B6AE; margin: 10px 0;">
                 ${formatValue(assessmentData.goalsWhy)}
               </p>
             ` : ""}
@@ -101,7 +101,7 @@ export async function POST(request: NextRequest) {
           ${assessmentData.additionalNotes ? `
             <div style="margin: 20px 0;">
               <h3 style="color: #333; border-bottom: 1px solid #ddd; padding-bottom: 5px;">Additional Notes</h3>
-              <p style="background: #f9f9f9; padding: 10px; border-left: 3px solid #00A651; margin: 10px 0;">
+              <p style="background: #f9f9f9; padding: 10px; border-left: 3px solid #37B6AE; margin: 10px 0;">
                 ${formatValue(assessmentData.additionalNotes)}
               </p>
             </div>

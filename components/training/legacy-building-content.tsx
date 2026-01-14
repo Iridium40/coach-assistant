@@ -18,7 +18,7 @@ const lessons = [
   { id: "8.1.2", title: "Building Multiple FIBC Teams", type: "Strategic Training", icon: Network, duration: "25 min read" },
 ]
 
-const bubbleColors = ["#2196f3", "#4caf50", "#ff9800", "#e91e63", "#00bcd4", "#795548"]
+const bubbleColors = ["#2196f3", "#37B6AE", "#ff9800", "#e91e63", "#00bcd4", "#795548"]
 
 const ipdRequirements = [
   { requirement: "6 FIBC Teams", description: "Six personally sponsored coaches who have achieved FIBC status", icon: "🎯" },
@@ -30,7 +30,7 @@ const ipdRequirements = [
 const developmentStages = [
   { stage: "Stage 1: Identification", color: "#2196f3", bgColor: "#e3f2fd", criteria: ["Shows consistent production", "Demonstrates leadership potential", "Has coachable attitude"] },
   { stage: "Stage 2: Development", color: "#ff9800", bgColor: "#fff8e1", criteria: ["Actively building team", "Developing their own leaders", "Growing organizational volume"] },
-  { stage: "Stage 3: Qualification", color: "#4caf50", bgColor: "#e8f5e9", criteria: ["Meeting FIBC thresholds", "Has qualified leaders", "Operating independently"] },
+  { stage: "Stage 3: Qualification", color: "#37B6AE", bgColor: "#EAF7F6", criteria: ["Meeting FIBC thresholds", "Has qualified leaders", "Operating independently"] },
   { stage: "Stage 4: Maintenance", color: "#9c27b0", bgColor: "#f3e5f5", criteria: ["Consistent FIBC qualification", "Developing their own FIBCs", "Minimal support needed"] },
 ]
 
@@ -318,7 +318,7 @@ export function LegacyBuildingContent() {
                       <h3 className="text-lg font-bold mb-4">The 6-Bubble Portfolio Strategy</h3>
                       <div className="grid grid-cols-3 gap-4">
                         {[
-                          { type: "Anchor Bubbles (2-3)", desc: "Your strongest, most established FIBC teams", color: "#4caf50", strategy: "Quarterly strategy, peer mastermind" },
+                          { type: "Anchor Bubbles (2-3)", desc: "Your strongest, most established FIBC teams", color: "#37B6AE", strategy: "Quarterly strategy, peer mastermind" },
                           { type: "Growth Bubbles (2-3)", desc: "Leaders in active FIBC development", color: "#2196f3", strategy: "Weekly to bi-weekly engagement" },
                           { type: "Emerging Bubbles (1-2)", desc: "Early-stage potential FIBC candidates", color: "#ff9800", strategy: "Vision conversations, skills development" },
                         ].map((item, i) => (

@@ -57,7 +57,7 @@ export default function NewCoachLaunchpad() {
       title: "Welcome & Setup",
       theme: "Get Started",
       icon: Rocket,
-      color: "#4caf50",
+      color: "#37B6AE",
       milestone: "First Steps",
       tasks: [
         { title: "Watch Welcome Video", type: "video", duration: "10 min", link: "/training/welcome-getting-started", description: "Meet your upline and understand the journey ahead" },
@@ -330,7 +330,7 @@ export default function NewCoachLaunchpad() {
     switch (type) {
       case 'video': return '#e91e63';
       case 'training': return '#2196f3';
-      case 'action': return '#4caf50';
+      case 'action': return '#37B6AE';
       case 'exercise': return '#ff9800';
       case 'call': return '#9c27b0';
       case 'celebration': return '#ffc107';
@@ -373,7 +373,7 @@ export default function NewCoachLaunchpad() {
       )}
 
       {/* Header */}
-      <header style={{ background: 'linear-gradient(135deg, #00A651 0%, #006633 100%)', padding: '24px 32px', color: 'white', boxShadow: '0 4px 20px rgba(0, 166, 81, 0.3)' }}>
+      <header style={{ background: 'linear-gradient(135deg, #37B6AE 0%, #006633 100%)', padding: '24px 32px', color: 'white', boxShadow: '0 4px 20px rgba(0, 166, 81, 0.3)' }}>
         <div style={{ maxWidth: 1200, margin: '0 auto' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
             <div>
@@ -426,10 +426,10 @@ export default function NewCoachLaunchpad() {
           <div style={{ background: 'white', borderRadius: 12, padding: 20, boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
               <div>
-                <div style={{ fontSize: 32, fontWeight: 700, color: '#4caf50' }}>{totalCompleted}</div>
+                <div style={{ fontSize: 32, fontWeight: 700, color: '#37B6AE' }}>{totalCompleted}</div>
                 <div style={{ fontSize: 12, color: '#888' }}>Tasks Completed</div>
               </div>
-              <CheckCircle size={24} color="#4caf50" style={{ opacity: 0.3 }} />
+              <CheckCircle size={24} color="#37B6AE" style={{ opacity: 0.3 }} />
             </div>
           </div>
           <div style={{ background: 'white', borderRadius: 12, padding: 20, boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}>
@@ -503,7 +503,7 @@ export default function NewCoachLaunchpad() {
           </Link>
           <Link href="/training" style={{ textDecoration: 'none' }}>
             <div style={{ background: 'white', borderRadius: 12, padding: 20, boxShadow: '0 2px 8px rgba(0,0,0,0.06)', display: 'flex', alignItems: 'center', gap: 12, cursor: 'pointer' }}>
-              <div style={{ padding: 10, background: '#e8f5e9', borderRadius: 10 }}>
+              <div style={{ padding: 10, background: '#EAF7F6', borderRadius: 10 }}>
                 <BookOpen size={20} color="#2e7d32" />
               </div>
               <div>
@@ -547,7 +547,7 @@ export default function NewCoachLaunchpad() {
                         background: isActive ? '#f0faf4' : (isToday ? '#fff8e1' : 'white'),
                         cursor: isUnlocked ? 'pointer' : 'not-allowed',
                         opacity: isUnlocked ? 1 : 0.5,
-                        borderLeft: isActive ? '3px solid #00A651' : '3px solid transparent',
+                        borderLeft: isActive ? '3px solid #37B6AE' : '3px solid transparent',
                         textAlign: 'left'
                       }}
                     >
@@ -555,7 +555,7 @@ export default function NewCoachLaunchpad() {
                         width: 36,
                         height: 36,
                         borderRadius: 10,
-                        background: isComplete ? '#4caf50' : (isUnlocked ? day.color : '#e0e0e0'),
+                        background: isComplete ? '#37B6AE' : (isUnlocked ? day.color : '#e0e0e0'),
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center'
@@ -569,13 +569,13 @@ export default function NewCoachLaunchpad() {
                         )}
                       </div>
                       <div style={{ flex: 1 }}>
-                        <div style={{ fontSize: 12, fontWeight: 600, color: isActive ? '#00A651' : '#1a1a1a' }}>
+                        <div style={{ fontSize: 12, fontWeight: 600, color: isActive ? '#37B6AE' : '#1a1a1a' }}>
                           Day {day.day}
                           {isToday && <span style={{ marginLeft: 6, color: '#ff9800', fontSize: 10 }}>TODAY</span>}
                         </div>
                         <div style={{ fontSize: 11, color: '#888' }}>{day.title}</div>
                       </div>
-                      <div style={{ fontSize: 11, color: isComplete ? '#4caf50' : '#888' }}>
+                      <div style={{ fontSize: 11, color: isComplete ? '#37B6AE' : '#888' }}>
                         {progress.completed}/{progress.total}
                       </div>
                     </button>
@@ -649,7 +649,7 @@ export default function NewCoachLaunchpad() {
                               style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, marginTop: 2 }}
                             >
                               {isCompleted ? (
-                                <CheckCircle size={24} color="#4caf50" fill="#4caf50" />
+                                <CheckCircle size={24} color="#37B6AE" fill="#37B6AE" />
                               ) : (
                                 <Circle size={24} color={typeColor} />
                               )}
@@ -738,7 +738,7 @@ export default function NewCoachLaunchpad() {
                       disabled={day.day === 30 || !isDayUnlocked(day.day + 1)}
                       style={{
                         padding: '10px 20px',
-                        background: (day.day === 30 || !isDayUnlocked(day.day + 1)) ? '#f5f5f5' : 'linear-gradient(135deg, #00A651, #00c853)',
+                        background: (day.day === 30 || !isDayUnlocked(day.day + 1)) ? '#f5f5f5' : 'linear-gradient(135deg, #37B6AE, #00c853)',
                         border: 'none',
                         borderRadius: 8,
                         cursor: (day.day === 30 || !isDayUnlocked(day.day + 1)) ? 'not-allowed' : 'pointer',

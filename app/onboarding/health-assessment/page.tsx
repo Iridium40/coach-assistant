@@ -15,13 +15,13 @@ export default function OnboardingHealthAssessmentPage() {
         <div className="container max-w-4xl mx-auto px-4 py-3">
           <div className="flex items-center justify-between">
             <Link href="/onboarding/acronyms">
-              <Button variant="ghost" size="sm" className="text-gray-600 hover:text-[#00A651]">
+              <Button variant="ghost" size="sm" className="text-gray-600 hover:text-[#37B6AE]">
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Previous: Acronyms
               </Button>
             </Link>
             <Link href="/training">
-              <Button size="sm" className="bg-[#00A651] hover:bg-[#00c760] text-white">
+              <Button size="sm" className="bg-[#37B6AE] hover:bg-[#52BEBC] text-white">
                 Back to Training
                 <ArrowRight className="h-4 w-4 ml-2" />
               </Button>
@@ -31,7 +31,7 @@ export default function OnboardingHealthAssessmentPage() {
       </div>
 
       {/* Hero Section */}
-      <div className="bg-gradient-to-r from-[#00A651] via-[#00c760] to-[#00A651] rounded-b-3xl px-6 py-12 md:py-16 text-center text-white relative overflow-hidden mb-8">
+      <div className="bg-gradient-to-r from-[#37B6AE] via-[#52BEBC] to-[#37B6AE] rounded-b-3xl px-6 py-12 md:py-16 text-center text-white relative overflow-hidden mb-8">
         <div className="absolute inset-0 bg-gradient-radial from-white/10 to-transparent animate-pulse"></div>
         <div className="relative z-10">
           <div className="text-5xl md:text-6xl mb-4">📞</div>
@@ -346,7 +346,7 @@ export default function OnboardingHealthAssessmentPage() {
             </Button>
           </Link>
           <Link href="/training">
-            <Button className="bg-[#00A651] hover:bg-[#00c760] text-white">
+            <Button className="bg-[#37B6AE] hover:bg-[#52BEBC] text-white">
               Back to Training
               <ArrowRight className="h-4 w-4 ml-2" />
             </Button>

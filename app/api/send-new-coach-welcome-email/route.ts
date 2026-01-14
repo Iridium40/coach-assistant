@@ -63,7 +63,7 @@ export async function POST(request: NextRequest) {
 
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: linear-gradient(135deg, #f8faf8 0%, #e8f5e9 100%);
+            background: linear-gradient(135deg, #f8faf8 0%, #EAF7F6 100%);
             min-height: 100vh;
             padding: 40px 20px;
             color: #1a1a1a;
@@ -76,7 +76,7 @@ export async function POST(request: NextRequest) {
         }
 
         .hero {
-            background: linear-gradient(135deg, #00A651 0%, #00c760 50%, #00A651 100%);
+            background: linear-gradient(135deg, #37B6AE 0%, #52BEBC 50%, #37B6AE 100%);
             border-radius: 24px;
             padding: 48px 40px;
             text-align: center;
@@ -122,7 +122,7 @@ export async function POST(request: NextRequest) {
         .card-icon {
             width: 56px;
             height: 56px;
-            background: linear-gradient(135deg, #00A651 0%, #00c760 100%);
+            background: linear-gradient(135deg, #37B6AE 0%, #52BEBC 100%);
             border-radius: 16px;
             display: flex;
             align-items: center;
@@ -176,7 +176,7 @@ export async function POST(request: NextRequest) {
         }
 
         .flow-step {
-            background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+            background: linear-gradient(135deg, #EAF7F6 0%, #c8e6c9 100%);
             padding: 16px 24px;
             border-radius: 12px;
             text-align: center;
@@ -186,7 +186,7 @@ export async function POST(request: NextRequest) {
 
         .flow-arrow {
             font-size: 1.5rem;
-            color: #00A651;
+            color: #37B6AE;
         }
 
         .quote-box {
@@ -196,7 +196,7 @@ export async function POST(request: NextRequest) {
             margin: 20px 0;
             font-style: italic;
             color: #555;
-            border-left: 4px solid #00A651;
+            border-left: 4px solid #37B6AE;
         }
 
         .action-grid {
@@ -207,7 +207,7 @@ export async function POST(request: NextRequest) {
         }
 
         .action-item {
-            background: linear-gradient(135deg, #f8faf8 0%, #e8f5e9 100%);
+            background: linear-gradient(135deg, #f8faf8 0%, #EAF7F6 100%);
             border-radius: 16px;
             padding: 24px;
             text-align: center;
@@ -222,7 +222,7 @@ export async function POST(request: NextRequest) {
         .action-item .action-word {
             font-size: 1.3rem;
             font-weight: 700;
-            color: #00A651;
+            color: #37B6AE;
             margin-bottom: 8px;
         }
 
@@ -233,7 +233,7 @@ export async function POST(request: NextRequest) {
         }
 
         .important-banner {
-            background: linear-gradient(135deg, #00A651 0%, #00c760 100%);
+            background: linear-gradient(135deg, #37B6AE 0%, #52BEBC 100%);
             border-radius: 16px;
             padding: 24px 32px;
             text-align: center;
@@ -358,7 +358,7 @@ export async function POST(request: NextRequest) {
             content: "✓";
             position: absolute;
             left: 0;
-            color: #00A651;
+            color: #37B6AE;
             font-weight: bold;
             font-size: 1.2rem;
         }
@@ -373,7 +373,7 @@ export async function POST(request: NextRequest) {
 
         .footer .logo-text {
             font-weight: 700;
-            color: #00A651;
+            color: #37B6AE;
             font-size: 1.1rem;
             margin-bottom: 8px;
         }
@@ -411,7 +411,7 @@ export async function POST(request: NextRequest) {
         </div>
 
         <!-- Account Setup Card -->
-        <div class="card" style="border: 2px solid #00A651; background: linear-gradient(135deg, #f8faf8 0%, #e8f5e9 100%);">
+        <div class="card" style="border: 2px solid #37B6AE; background: linear-gradient(135deg, #f8faf8 0%, #EAF7F6 100%);">
             <div class="card-header">
                 <div class="card-icon">🔐</div>
                 <div>
@@ -425,9 +425,9 @@ export async function POST(request: NextRequest) {
             </p>
             
             ${coachRank ? `
-            <div style="background-color: #e8f5e9; padding: 12px 16px; border-radius: 8px; margin-bottom: 16px; border-left: 4px solid #00A651;">
+            <div style="background-color: #EAF7F6; padding: 12px 16px; border-radius: 8px; margin-bottom: 16px; border-left: 4px solid #37B6AE;">
                 <p style="margin: 0; font-size: 14px; color: #333;">
-                    <strong style="color: #00A651;">Your Coach Rank:</strong> ${coachRank}
+                    <strong style="color: #37B6AE;">Your Coach Rank:</strong> ${coachRank}
                 </p>
             </div>
             ` : ""}
@@ -435,14 +435,14 @@ export async function POST(request: NextRequest) {
             <p style="color: #555; margin-bottom: 20px;">Click the button below to set your password and create your account:</p>
             
             <div style="text-align: center; margin: 24px 0;">
-                <a href="${inviteLink}" style="display: inline-block; background: linear-gradient(135deg, #00A651 0%, #00c760 100%); color: white; padding: 16px 32px; border-radius: 12px; text-decoration: none; font-weight: 700; font-size: 1.1rem; box-shadow: 0 4px 12px rgba(0, 166, 81, 0.3);">
+                <a href="${inviteLink}" style="display: inline-block; background: linear-gradient(135deg, #37B6AE 0%, #52BEBC 100%); color: white; padding: 16px 32px; border-radius: 12px; text-decoration: none; font-weight: 700; font-size: 1.1rem; box-shadow: 0 4px 12px rgba(55, 182, 174, 0.3);">
                     Set Password & Create Account
                 </a>
             </div>
             
             <div style="background-color: #f5f5f5; padding: 12px 16px; border-radius: 8px; margin-top: 16px;">
                 <p style="margin: 0 0 8px 0; font-size: 12px; color: #666; font-weight: 600;">Or copy this link:</p>
-                <p style="word-break: break-all; color: #00A651; font-size: 12px; margin: 0; font-family: monospace;">${inviteLink}</p>
+                <p style="word-break: break-all; color: #37B6AE; font-size: 12px; margin: 0; font-family: monospace;">${inviteLink}</p>
             </div>
             
             <div style="background-color: #fff8e1; padding: 12px 16px; border-radius: 8px; margin-top: 16px; border-left: 4px solid #ffc107;">
@@ -507,7 +507,7 @@ export async function POST(request: NextRequest) {
             </p>
 
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
-                <div style="background: #e8f5e9; padding: 20px; border-radius: 12px;">
+                <div style="background: #EAF7F6; padding: 20px; border-radius: 12px;">
                     <div style="font-weight: 600; color: #2e7d32; margin-bottom: 8px;">As a New Client</div>
                     <p style="font-size: 0.9rem; color: #555;">Daily, step-by-step guidance from your <strong>Health Coach</strong></p>
                 </div>

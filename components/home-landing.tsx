@@ -8,7 +8,7 @@ export function HomeLanding() {
   return (
     <div className="min-h-screen bg-white">
       {/* Hero Section */}
-      <div className="relative bg-[#FFF6ED] py-16 sm:py-24 md:py-32">
+      <div className="relative bg-[#EAF7F6] py-16 sm:py-24 md:py-32">
         <div className="container mx-auto px-4">
           <div className="text-center max-w-4xl mx-auto">
             <div className="mb-8">
@@ -97,7 +97,7 @@ export function HomeLanding() {
       </div>
 
       {/* CTA Section */}
-      <div className="py-16 sm:py-20 md:py-24 bg-[#FFF6ED]">
+      <div className="py-16 sm:py-20 md:py-24 bg-[#EAF7F6]">
         <div className="container mx-auto px-4">
           <div className="text-center max-w-3xl mx-auto">
             <h2 className="font-heading font-bold text-2xl sm:text-3xl md:text-4xl text-optavia-dark mb-4 sm:mb-6">

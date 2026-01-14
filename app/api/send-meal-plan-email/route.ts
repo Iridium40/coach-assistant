@@ -89,8 +89,8 @@ export async function POST(request: NextRequest) {
       // 5&1 plan: single Lean & Green column
       tableHeaders = `
         <tr>
-          <th style="padding: 12px; border: 1px solid #e5e7eb; background-color: #2d5016; color: white; text-align: left;">Day</th>
-          <th style="padding: 12px; border: 1px solid #e5e7eb; background-color: #2d5016; color: white; text-align: left;">Lean & Green</th>
+          <th style="padding: 12px; border: 1px solid #e5e7eb; background-color: #2A9C95; color: white; text-align: left;">Day</th>
+          <th style="padding: 12px; border: 1px solid #e5e7eb; background-color: #2A9C95; color: white; text-align: left;">Lean & Green</th>
         </tr>
       `
       mealPlanRows = days.map(day => {
@@ -110,9 +110,9 @@ export async function POST(request: NextRequest) {
       // 4&2 plan: two columns for lunch and dinner
       tableHeaders = `
         <tr>
-          <th style="padding: 12px; border: 1px solid #e5e7eb; background-color: #2d5016; color: white; text-align: left;">Day</th>
-          <th style="padding: 12px; border: 1px solid #e5e7eb; background-color: #2d5016; color: white; text-align: left;">L&G #1</th>
-          <th style="padding: 12px; border: 1px solid #e5e7eb; background-color: #2d5016; color: white; text-align: left;">L&G #2</th>
+          <th style="padding: 12px; border: 1px solid #e5e7eb; background-color: #2A9C95; color: white; text-align: left;">Day</th>
+          <th style="padding: 12px; border: 1px solid #e5e7eb; background-color: #2A9C95; color: white; text-align: left;">L&G #1</th>
+          <th style="padding: 12px; border: 1px solid #e5e7eb; background-color: #2A9C95; color: white; text-align: left;">L&G #2</th>
         </tr>
       `
       mealPlanRows = days.map(day => {
@@ -137,7 +137,7 @@ export async function POST(request: NextRequest) {
     const shoppingListHtml = shoppingList.length > 0 
       ? `
         <div style="margin-top: 30px;">
-          <h3 style="color: #2d5016; font-size: 20px; margin: 0 0 15px 0; border-bottom: 2px solid #2d5016; padding-bottom: 10px;">
+          <h3 style="color: #2A9C95; font-size: 20px; margin: 0 0 15px 0; border-bottom: 2px solid #2A9C95; padding-bottom: 10px;">
             🛒 Shopping List
           </h3>
           <div style="columns: 2; column-gap: 30px;">
@@ -187,13 +187,13 @@ export async function POST(request: NextRequest) {
         </div>
         
         <div style="text-align: center; margin: 20px 0 30px 0;">
-          <a href="${clientRecipesUrl}" style="color: #2d5016; text-decoration: underline; font-size: 14px;">
+          <a href="${clientRecipesUrl}" style="color: #2A9C95; text-decoration: underline; font-size: 14px;">
             Browse All Lean & Green Recipes →
           </a>
         </div>
         
         <div style="background-color: #ffffff; border: 1px solid #e5e7eb; border-radius: 8px; padding: 25px; margin: 20px 0; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
-          <h3 style="color: #2d5016; font-size: 20px; margin: 0 0 20px 0; border-bottom: 2px solid #2d5016; padding-bottom: 10px;">
+          <h3 style="color: #2A9C95; font-size: 20px; margin: 0 0 20px 0; border-bottom: 2px solid #2A9C95; padding-bottom: 10px;">
             📅 Weekly Meal Schedule
           </h3>
           
@@ -209,7 +209,7 @@ export async function POST(request: NextRequest) {
         
         ${shoppingListHtml}
         
-        <div style="background-color: #ecfdf5; padding: 15px; border-radius: 6px; margin: 20px 0; border-left: 4px solid #2d5016;">
+        <div style="background-color: #ecfdf5; padding: 15px; border-radius: 6px; margin: 20px 0; border-left: 4px solid #2A9C95;">
           <p style="margin: 0; font-size: 14px; color: #065f46;">
             <strong>Tip:</strong> Print out your shopping list and meal plan to keep them handy throughout the week. Remember, preparation is key to success!
           </p>

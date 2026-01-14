@@ -114,9 +114,9 @@ function generateInviteEmailContent(
       </p>
       
       ${coachRank ? `
-        <div style="background-color: #f8f9fa; padding: 15px; border-radius: 6px; margin: 20px 0; border-left: 4px solid #2d5016;">
+        <div style="background-color: #f8f9fa; padding: 15px; border-radius: 6px; margin: 20px 0; border-left: 4px solid #2A9C95;">
           <p style="margin: 0; font-size: 15px; color: #333;">
-            <strong style="color: #2d5016;">Your Coach Rank:</strong> ${coachRank}
+            <strong style="color: #2A9C95;">Your Coach Rank:</strong> ${coachRank}
           </p>
         </div>
       ` : ""}
@@ -131,7 +131,7 @@ function generateInviteEmailContent(
       
       <div style="background-color: #f8f9fa; padding: 15px; border-radius: 6px; margin: 20px 0;">
         <p style="margin: 0 0 10px 0; font-size: 14px; color: #666; font-weight: bold;">Or copy and paste this link:</p>
-        <p style="word-break: break-all; color: #2d5016; font-size: 13px; margin: 0; font-family: monospace;">${inviteLink}</p>
+        <p style="word-break: break-all; color: #2A9C95; font-size: 13px; margin: 0; font-family: monospace;">${inviteLink}</p>
       </div>
       
       <div style="background-color: #fff3cd; padding: 15px; border-radius: 6px; margin: 20px 0; border-left: 4px solid #ffc107;">

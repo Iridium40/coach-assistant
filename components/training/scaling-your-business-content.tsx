@@ -19,20 +19,20 @@ const lessons = [
 ]
 
 const allInPhases = [
-  { phase: "Days 1-7: Foundation", color: "#4caf50", focus: "Building habits and creating initial wins", goal: "First new client + first business conversation" },
+  { phase: "Days 1-7: Foundation", color: "#37B6AE", focus: "Building habits and creating initial wins", goal: "First new client + first business conversation" },
   { phase: "Days 8-14: Acceleration", color: "#2196f3", focus: "Increasing intensity and expanding reach", goal: "2+ new clients + 1 new coach conversation" },
   { phase: "Days 15-21: Peak Performance", color: "#ff9800", focus: "Maximum output and team duplication", goal: "2+ new clients + 1 new coach signed" },
   { phase: "Days 22-30: Finish Strong", color: "#9c27b0", focus: "Closing strong and creating sustainability", goal: "Hit overall goal + create repeatable systems" },
 ]
 
 const mapFramework = [
-  { step: "M - Mission", desc: "What's the ONE main objective for this month?", color: "#4caf50" },
+  { step: "M - Mission", desc: "What's the ONE main objective for this month?", color: "#37B6AE" },
   { step: "A - Actions", desc: "What specific actions will accomplish the mission?", color: "#2196f3" },
   { step: "P - Priorities", desc: "What are the top 3-5 priorities that get my best energy?", color: "#ff9800" },
 ]
 
 const dreamLifeCategories = [
-  { category: "Financial Freedom", icon: "💰", color: "#4caf50" },
+  { category: "Financial Freedom", icon: "💰", color: "#37B6AE" },
   { category: "Time Freedom", icon: "⏰", color: "#2196f3" },
   { category: "Relationships", icon: "❤️", color: "#e91e63" },
   { category: "Health & Vitality", icon: "💪", color: "#ff9800" },

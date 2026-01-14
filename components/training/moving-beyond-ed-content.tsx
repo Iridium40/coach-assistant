@@ -17,7 +17,7 @@ const lessons = [
 ]
 
 const rankPath = [
-  { rank: "Executive Director (ED)", focus: "Personal production + initial team building", keyMetric: "Consistent personal volume + 2-3 active legs", timeframe: "6-18 months from start", color: "#4caf50" },
+  { rank: "Executive Director (ED)", focus: "Personal production + initial team building", keyMetric: "Consistent personal volume + 2-3 active legs", timeframe: "6-18 months from start", color: "#37B6AE" },
   { rank: "Field Independent Business Coach (FIBC)", focus: "Team development + leadership cultivation", keyMetric: "Multiple EDs in organization + consistent team volume", timeframe: "12-24 months from ED", color: "#2196f3" },
   { rank: "Global Director", focus: "Building leaders who build leaders", keyMetric: "FIBCs in organization + significant depth", timeframe: "18-36 months from FIBC", color: "#9c27b0" },
   { rank: "Presidential Director", focus: "Organization-wide leadership + culture", keyMetric: "Multiple Global Directors + massive leverage", timeframe: "Varies widely", color: "#f44336" },
@@ -31,7 +31,7 @@ const mindsetShifts = [
 ]
 
 const pillars = [
-  { pillar: "Personal Production", atED: "50-60%", atFIBC: "20-30%", beyond: "10-20%", color: "#4caf50" },
+  { pillar: "Personal Production", atED: "50-60%", atFIBC: "20-30%", beyond: "10-20%", color: "#37B6AE" },
   { pillar: "Leadership Development", atED: "20-30%", atFIBC: "40-50%", beyond: "50-60%", color: "#2196f3" },
   { pillar: "Team Building Systems", atED: "10-15%", atFIBC: "15-20%", beyond: "15-20%", color: "#ff9800" },
   { pillar: "Culture Building", atED: "5-10%", atFIBC: "10-15%", beyond: "15-20%", color: "#9c27b0" },

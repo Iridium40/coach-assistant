@@ -132,13 +132,13 @@ export default function OnboardingAcronymsPage() {
         <div className="container max-w-3xl mx-auto px-4 py-3">
           <div className="flex items-center justify-between">
             <Link href="/onboarding/business">
-              <Button variant="ghost" size="sm" className="text-gray-600 hover:text-[#00A651]">
+              <Button variant="ghost" size="sm" className="text-gray-600 hover:text-[#37B6AE]">
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Previous: Business Resources
               </Button>
             </Link>
             <Link href="/onboarding/health-assessment">
-              <Button size="sm" className="bg-[#00A651] hover:bg-[#00c760] text-white">
+              <Button size="sm" className="bg-[#37B6AE] hover:bg-[#52BEBC] text-white">
                 Next: Health Assessment
                 <ArrowRight className="h-4 w-4 ml-2" />
               </Button>
@@ -149,7 +149,7 @@ export default function OnboardingAcronymsPage() {
 
       <div className="container max-w-3xl mx-auto px-4 py-12 pb-16">
         <div className="text-center mb-8">
-          <h1 className="text-3xl md:text-4xl font-bold text-[#00A651] mb-2">📖 Acronyms Guide</h1>
+          <h1 className="text-3xl md:text-4xl font-bold text-[#37B6AE] mb-2">📖 Acronyms Guide</h1>
           <p className="text-gray-600 text-lg">Master the language of OPTAVIA coaching</p>
         </div>
 
@@ -173,8 +173,8 @@ export default function OnboardingAcronymsPage() {
               onClick={() => setSelectedCategory(cat.id)}
               className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
                 selectedCategory === cat.id
-                  ? "bg-[#00A651] text-white border-2 border-[#00A651]"
-                  : "bg-white text-gray-600 border-2 border-gray-300 hover:border-[#00A651] hover:text-[#00A651]"
+                  ? "bg-[#37B6AE] text-white border-2 border-[#37B6AE]"
+                  : "bg-white text-gray-600 border-2 border-gray-300 hover:border-[#37B6AE] hover:text-[#37B6AE]"
               }`}
             >
               {cat.label}
@@ -187,7 +187,7 @@ export default function OnboardingAcronymsPage() {
           {filteredAcronyms.map(acronym => (
             <div
               key={acronym.id}
-              className={`bg-white rounded-2xl p-6 shadow-lg border transition-all hover:border-[#00A651] ${
+              className={`bg-white rounded-2xl p-6 shadow-lg border transition-all hover:border-[#37B6AE] ${
                 acronym.highlight === "money" ? "bg-gradient-to-br from-green-50 to-green-100/50" :
                 acronym.highlight === "highlight" ? "bg-gradient-to-br from-yellow-50 to-amber-50" :
                 "border-green-100"
@@ -199,7 +199,7 @@ export default function OnboardingAcronymsPage() {
                     ? "bg-gradient-to-br from-green-600 to-green-700 text-white" :
                     acronym.highlight === "highlight"
                     ? "bg-gradient-to-br from-orange-500 to-yellow-500 text-white" :
-                    "bg-gradient-to-br from-[#00A651] to-[#00c760] text-white"
+                    "bg-gradient-to-br from-[#37B6AE] to-[#52BEBC] text-white"
                 }`}>
                   {acronym.acronym}
                 </div>
@@ -242,7 +242,7 @@ export default function OnboardingAcronymsPage() {
             </Button>
           </Link>
           <Link href="/onboarding/health-assessment">
-            <Button className="bg-[#00A651] hover:bg-[#00c760] text-white">
+            <Button className="bg-[#37B6AE] hover:bg-[#52BEBC] text-white">
               Next: Health Assessment
               <ArrowRight className="h-4 w-4 ml-2" />
             </Button>

@@ -17,7 +17,7 @@ function LoadingState() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 to-white">
       <div className="text-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#2d5016] mx-auto mb-4"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#2A9C95] mx-auto mb-4"></div>
         <p className="text-gray-600">Loading recipe...</p>
       </div>
     </div>
@@ -122,7 +122,7 @@ function ClientRecipeDetailContent() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 to-white">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#2d5016] mx-auto mb-4"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#2A9C95] mx-auto mb-4"></div>
           <p className="text-gray-600">Loading recipe...</p>
         </div>
       </div>
@@ -140,7 +140,7 @@ function ClientRecipeDetailContent() {
           </p>
           <Button
             onClick={() => router.push("/client/recipes")}
-            className="bg-[#2d5016] hover:bg-[#3d6b1e] text-white gap-2"
+            className="bg-[#2A9C95] hover:bg-[#3d6b1e] text-white gap-2"
           >
             <UtensilsCrossed className="h-4 w-4" />
             Browse All Recipes
@@ -161,7 +161,7 @@ function ClientRecipeDetailContent() {
                 variant="ghost"
                 size="sm"
                 onClick={() => router.push("/client/recipes")}
-                className="gap-2 text-gray-700 hover:text-[#2d5016]"
+                className="gap-2 text-gray-700 hover:text-[#2A9C95]"
               >
                 <ArrowLeft className="h-4 w-4" />
                 <span className="hidden sm:inline">All Recipes</span>
@@ -177,7 +177,7 @@ function ClientRecipeDetailContent() {
             </picture>
             {coachName && (
               <div className="text-sm text-gray-600 hidden sm:block">
-                Shared by <span className="font-medium text-[#2d5016]">{coachName}</span>
+                Shared by <span className="font-medium text-[#2A9C95]">{coachName}</span>
               </div>
             )}
           </div>
@@ -210,17 +210,17 @@ function ClientRecipeDetailContent() {
         {/* Quick Stats */}
         <div className="grid grid-cols-3 sm:grid-cols-5 gap-3 sm:gap-4 mb-6 sm:mb-8">
           <Card className="p-3 sm:p-4 text-center bg-white">
-            <Clock className="h-5 w-5 text-[#2d5016] mx-auto mb-1" />
+            <Clock className="h-5 w-5 text-[#2A9C95] mx-auto mb-1" />
             <div className="text-xs text-gray-500">Prep</div>
             <div className="font-bold text-gray-800">{recipe.prepTime}m</div>
           </Card>
           <Card className="p-3 sm:p-4 text-center bg-white">
-            <Clock className="h-5 w-5 text-[#2d5016] mx-auto mb-1" />
+            <Clock className="h-5 w-5 text-[#2A9C95] mx-auto mb-1" />
             <div className="text-xs text-gray-500">Cook</div>
             <div className="font-bold text-gray-800">{recipe.cookTime}m</div>
           </Card>
           <Card className="p-3 sm:p-4 text-center bg-white">
-            <Users className="h-5 w-5 text-[#2d5016] mx-auto mb-1" />
+            <Users className="h-5 w-5 text-[#2A9C95] mx-auto mb-1" />
             <div className="text-xs text-gray-500">Serves</div>
             <div className="font-bold text-gray-800">{recipe.servings}</div>
           </Card>
@@ -230,7 +230,7 @@ function ClientRecipeDetailContent() {
             <div className="font-bold text-gray-800">~{estimateCaloriesPerServing(recipe.counts, recipe.servings)}</div>
           </Card>
           <Card className="p-3 sm:p-4 text-center bg-white">
-            <ChefHat className="h-5 w-5 text-[#2d5016] mx-auto mb-1" />
+            <ChefHat className="h-5 w-5 text-[#2A9C95] mx-auto mb-1" />
             <div className="text-xs text-gray-500">Level</div>
             <div className="font-bold text-gray-800 text-sm">{recipe.difficulty}</div>
           </Card>
@@ -244,19 +244,19 @@ function ClientRecipeDetailContent() {
           <h3 className="font-semibold text-lg text-gray-800 mb-4">OPTAVIA Counts</h3>
           <div className="grid grid-cols-4 gap-4">
             <div className="text-center">
-              <div className="text-2xl sm:text-3xl font-bold text-[#2d5016]">{recipe.counts.lean}</div>
+              <div className="text-2xl sm:text-3xl font-bold text-[#2A9C95]">{recipe.counts.lean}</div>
               <div className="text-sm text-gray-600">Lean</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl sm:text-3xl font-bold text-[#2d5016]">{recipe.counts.green}</div>
+              <div className="text-2xl sm:text-3xl font-bold text-[#2A9C95]">{recipe.counts.green}</div>
               <div className="text-sm text-gray-600">Green</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl sm:text-3xl font-bold text-[#2d5016]">{recipe.counts.fat}</div>
+              <div className="text-2xl sm:text-3xl font-bold text-[#2A9C95]">{recipe.counts.fat}</div>
               <div className="text-sm text-gray-600">Healthy Fat</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl sm:text-3xl font-bold text-[#2d5016]">{recipe.counts.condiment}</div>
+              <div className="text-2xl sm:text-3xl font-bold text-[#2A9C95]">{recipe.counts.condiment}</div>
               <div className="text-sm text-gray-600">Condiment</div>
             </div>
           </div>
@@ -270,7 +270,7 @@ function ClientRecipeDetailContent() {
               <ul className="space-y-2 mb-4">
                 {recipe.ingredients.map((ingredient, index) => (
                   <li key={index} className="flex gap-2 text-sm sm:text-base text-gray-700">
-                    <span className="text-[#2d5016] flex-shrink-0">•</span>
+                    <span className="text-[#2A9C95] flex-shrink-0">•</span>
                     <span className="break-words">{ingredient}</span>
                   </li>
                 ))}
@@ -308,7 +308,7 @@ function ClientRecipeDetailContent() {
               <ol className="space-y-4">
                 {recipe.instructions.map((instruction, index) => (
                   <li key={index} className="flex gap-3">
-                    <span className="flex-shrink-0 w-7 h-7 rounded-full bg-[#2d5016] text-white flex items-center justify-center text-sm font-bold">
+                    <span className="flex-shrink-0 w-7 h-7 rounded-full bg-[#2A9C95] text-white flex items-center justify-center text-sm font-bold">
                       {index + 1}
                     </span>
                     <span className="text-sm sm:text-base text-gray-700 pt-0.5">{instruction}</span>
@@ -320,7 +320,7 @@ function ClientRecipeDetailContent() {
         </div>
 
         {/* Call to Action */}
-        <Card className="mt-8 p-6 bg-gradient-to-r from-[#2d5016] to-[#3d6b1e] text-white text-center">
+        <Card className="mt-8 p-6 bg-gradient-to-r from-[#2A9C95] to-[#3d6b1e] text-white text-center">
           <h3 className="text-xl font-bold mb-2">Ready to Start Your Health Journey?</h3>
           <p className="text-green-100 mb-4">
             Connect with your OPTAVIA Health Coach to learn more about the program.
@@ -328,7 +328,7 @@ function ClientRecipeDetailContent() {
           <Button
             onClick={() => router.push("/client/recipes")}
             variant="secondary"
-            className="bg-white text-[#2d5016] hover:bg-green-50 gap-2"
+            className="bg-white text-[#2A9C95] hover:bg-green-50 gap-2"
           >
             <UtensilsCrossed className="h-4 w-4" />
             Explore More Recipes

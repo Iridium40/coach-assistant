@@ -30,15 +30,15 @@ export async function POST(request: NextRequest) {
         </p>
         
         ${coachRank ? `
-          <div style="background-color: #f8f9fa; padding: 15px; border-radius: 6px; margin: 20px 0; border-left: 4px solid #2d5016;">
+          <div style="background-color: #f8f9fa; padding: 15px; border-radius: 6px; margin: 20px 0; border-left: 4px solid #2A9C95;">
             <p style="margin: 0; font-size: 15px; color: #333;">
-              <strong style="color: #2d5016;">Your Coach Rank:</strong> ${coachRank}
+              <strong style="color: #2A9C95;">Your Coach Rank:</strong> ${coachRank}
             </p>
           </div>
         ` : ""}
         
-        <div style="background-color: #e7f5e7; padding: 20px; border-radius: 8px; margin: 25px 0; border-left: 4px solid #2d5016;">
-          <h2 style="color: #2d5016; margin-top: 0; font-size: 20px; font-weight: bold;">What's Next?</h2>
+        <div style="background-color: #e7f5e7; padding: 20px; border-radius: 8px; margin: 25px 0; border-left: 4px solid #2A9C95;">
+          <h2 style="color: #2A9C95; margin-top: 0; font-size: 20px; font-weight: bold;">What's Next?</h2>
           <ul style="margin: 10px 0; padding-left: 20px; color: #333; font-size: 15px; line-height: 1.8;">
             <li>Explore our comprehensive resource library</li>
             <li>Access training modules to enhance your coaching skills</li>
@@ -57,19 +57,19 @@ export async function POST(request: NextRequest) {
         </div>
         
         <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin: 25px 0;">
-          <h3 style="color: #2d5016; margin-top: 0; font-size: 18px; font-weight: bold;">Quick Tips to Get Started</h3>
+          <h3 style="color: #2A9C95; margin-top: 0; font-size: 18px; font-weight: bold;">Quick Tips to Get Started</h3>
           <div style="margin-top: 15px;">
             <p style="margin: 10px 0; font-size: 15px; color: #333;">
-              <strong style="color: #2d5016;">📚 Training Tab:</strong> Browse modules organized by category - Getting Started, Business Building, Client Support, and Training.
+              <strong style="color: #2A9C95;">📚 Training Tab:</strong> Browse modules organized by category - Getting Started, Business Building, Client Support, and Training.
             </p>
             <p style="margin: 10px 0; font-size: 15px; color: #333;">
-              <strong style="color: #2d5016;">🍽️ Recipes Tab:</strong> Access a collection of Lean & Green recipes to share with your clients.
+              <strong style="color: #2A9C95;">🍽️ Recipes Tab:</strong> Access a collection of Lean & Green recipes to share with your clients.
             </p>
             <p style="margin: 10px 0; font-size: 15px; color: #333;">
-              <strong style="color: #2d5016;">🏆 Achievements:</strong> Complete resources in each category to earn achievement badges and track your progress.
+              <strong style="color: #2A9C95;">🏆 Achievements:</strong> Complete resources in each category to earn achievement badges and track your progress.
             </p>
             <p style="margin: 10px 0; font-size: 15px; color: #333;">
-              <strong style="color: #2d5016;">⚙️ Settings:</strong> Customize your profile, upload an avatar, and manage your notification preferences.
+              <strong style="color: #2A9C95;">⚙️ Settings:</strong> Customize your profile, upload an avatar, and manage your notification preferences.
             </p>
           </div>
         </div>

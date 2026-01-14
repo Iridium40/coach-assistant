@@ -110,11 +110,11 @@ export function Header({ onSettingsClick, onHomeClick, onAnnouncementsClick, onR
               }}
             >
                 <picture>
-                  <source srcSet="/branding/ca_logo_large.svg" type="image/svg+xml" />
+                  <source srcSet="/branding/ca_icon.svg" type="image/svg+xml" />
                   <img
-                    src="/branding/ca_logo_large.png"
+                    src="/branding/ca_icon.png"
                     alt="Coach Assistant Hub"
-                    className="h-10 sm:h-12 md:h-14 w-auto"
+                    className="h-10 sm:h-11 md:h-12 w-auto"
                   />
                 </picture>
             </Link>

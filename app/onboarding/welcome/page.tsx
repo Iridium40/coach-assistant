@@ -6,19 +6,19 @@ import Link from "next/link"
 
 export default function OnboardingWelcomePage() {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-green-50 to-green-100/50" style={{ fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif" }}>
+    <div className="min-h-screen bg-gradient-to-b from-teal-50 to-teal-100/50" style={{ fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif" }}>
       {/* Navigation Bar */}
-      <div className="bg-white border-b border-green-100 sticky top-0 z-40">
+      <div className="bg-white border-b border-teal-100 sticky top-0 z-40">
         <div className="container max-w-3xl mx-auto px-4 py-3">
           <div className="flex items-center justify-between">
             <Link href="/training">
-              <Button variant="ghost" size="sm" className="text-gray-600 hover:text-[#00A651]">
+              <Button variant="ghost" size="sm" className="text-gray-600 hover:text-[#37B6AE]">
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Back to Training
               </Button>
             </Link>
             <Link href="/onboarding/business">
-              <Button size="sm" className="bg-[#00A651] hover:bg-[#00c760] text-white">
+              <Button size="sm" className="bg-[#37B6AE] hover:bg-[#52BEBC] text-white">
                 Next: Business Resources
                 <ArrowRight className="h-4 w-4 ml-2" />
               </Button>
@@ -28,7 +28,7 @@ export default function OnboardingWelcomePage() {
       </div>
 
       {/* Hero Section */}
-      <div className="bg-gradient-to-r from-[#00A651] via-[#00c760] to-[#00A651] rounded-b-3xl px-6 py-12 md:py-16 text-center text-white relative overflow-hidden mb-8">
+      <div className="bg-gradient-to-r from-[#37B6AE] via-[#52BEBC] to-[#37B6AE] rounded-b-3xl px-6 py-12 md:py-16 text-center text-white relative overflow-hidden mb-8">
         <div className="absolute inset-0 bg-gradient-radial from-white/10 to-transparent animate-pulse"></div>
         <div className="relative z-10">
           <div className="text-5xl md:text-6xl mb-4">🎉</div>
@@ -39,7 +39,7 @@ export default function OnboardingWelcomePage() {
 
       <div className="container max-w-3xl mx-auto px-4 pb-16 space-y-6">
         {/* The Secret */}
-        <div className="bg-white rounded-2xl p-6 md:p-8 shadow-lg border border-green-100">
+        <div className="bg-white rounded-2xl p-6 md:p-8 shadow-lg border border-teal-100">
           <div className="bg-gradient-to-r from-yellow-50 to-amber-50 rounded-xl p-6 mb-6 border-l-4 border-yellow-500">
             <div className="text-xs uppercase tracking-wider text-amber-700 font-bold mb-2">🔑 The Secret to New Coach Growth</div>
             <div className="text-lg md:text-xl font-bold text-gray-800">SIMPLE, CONSISTENT ACTION</div>
@@ -50,9 +50,9 @@ export default function OnboardingWelcomePage() {
         </div>
 
         {/* Apprenticeship Model */}
-        <div className="bg-white rounded-2xl p-6 md:p-8 shadow-lg border border-green-100">
+        <div className="bg-white rounded-2xl p-6 md:p-8 shadow-lg border border-teal-100">
           <div className="flex items-center gap-4 mb-6">
-            <div className="w-14 h-14 bg-gradient-to-br from-[#00A651] to-[#00c760] rounded-2xl flex items-center justify-center text-2xl">🎓</div>
+            <div className="w-14 h-14 bg-gradient-to-br from-[#37B6AE] to-[#52BEBC] rounded-2xl flex items-center justify-center text-2xl">🎓</div>
             <div>
               <h2 className="text-2xl font-bold text-gray-900">The Apprenticeship Model</h2>
               <p className="text-gray-600">Learn by doing, not just reading</p>
@@ -60,14 +60,14 @@ export default function OnboardingWelcomePage() {
           </div>
 
           <div className="flex flex-col md:flex-row items-center justify-center gap-3 mb-6">
-            <div className="bg-green-50 px-6 py-4 rounded-xl text-center font-semibold text-green-800">Your Coach SHOWS</div>
-            <div className="text-2xl text-[#00A651]">→</div>
-            <div className="bg-green-50 px-6 py-4 rounded-xl text-center font-semibold text-green-800">You WATCH</div>
-            <div className="text-2xl text-[#00A651]">→</div>
-            <div className="bg-green-50 px-6 py-4 rounded-xl text-center font-semibold text-green-800">You LEARN</div>
+            <div className="bg-teal-50 px-6 py-4 rounded-xl text-center font-semibold text-teal-900">Your Coach SHOWS</div>
+            <div className="text-2xl text-[#37B6AE]">→</div>
+            <div className="bg-teal-50 px-6 py-4 rounded-xl text-center font-semibold text-teal-900">You WATCH</div>
+            <div className="text-2xl text-[#37B6AE]">→</div>
+            <div className="bg-teal-50 px-6 py-4 rounded-xl text-center font-semibold text-teal-900">You LEARN</div>
           </div>
 
-          <div className="bg-gray-50 rounded-xl p-6 italic text-gray-700 border-l-4 border-[#00A651] mb-4">
+          <div className="bg-gray-50 rounded-xl p-6 italic text-gray-700 border-l-4 border-[#37B6AE] mb-4">
             Think of it like being a student teacher who shadows an experienced teacher to learn how to do the job. You will <strong>NEVER</strong> be alone on your coaching journey!
           </div>
 
@@ -78,7 +78,7 @@ export default function OnboardingWelcomePage() {
               "Keep ALL communication in that thread for best support"
             ].map((item, i) => (
               <li key={i} className="flex items-start gap-3">
-                <span className="text-[#00A651] font-bold text-xl mt-0.5">✓</span>
+                <span className="text-[#37B6AE] font-bold text-xl mt-0.5">✓</span>
                 <span className="text-gray-700">{item}</span>
               </li>
             ))}
@@ -86,9 +86,9 @@ export default function OnboardingWelcomePage() {
         </div>
 
         {/* The Parallel */}
-        <div className="bg-white rounded-2xl p-6 md:p-8 shadow-lg border border-green-100">
+        <div className="bg-white rounded-2xl p-6 md:p-8 shadow-lg border border-teal-100">
           <div className="flex items-center gap-4 mb-6">
-            <div className="w-14 h-14 bg-gradient-to-br from-[#00A651] to-[#00c760] rounded-2xl flex items-center justify-center text-2xl">🔄</div>
+            <div className="w-14 h-14 bg-gradient-to-br from-[#37B6AE] to-[#52BEBC] rounded-2xl flex items-center justify-center text-2xl">🔄</div>
             <div>
               <h2 className="text-2xl font-bold text-gray-900">Client → Coach Parallel</h2>
               <p className="text-gray-600">Same support, different focus</p>
@@ -98,8 +98,8 @@ export default function OnboardingWelcomePage() {
           <p className="text-gray-600 mb-6">Launching as a coach is a lot like starting as a client:</p>
 
           <div className="grid md:grid-cols-2 gap-4 mb-6">
-            <div className="bg-green-50 p-5 rounded-xl">
-              <div className="font-semibold text-green-800 mb-2">As a New Client</div>
+            <div className="bg-teal-50 p-5 rounded-xl">
+              <div className="font-semibold text-teal-900 mb-2">As a New Client</div>
               <p className="text-sm text-gray-700">Daily, step-by-step guidance from your <strong>Health Coach</strong></p>
             </div>
             <div className="bg-blue-50 p-5 rounded-xl">
@@ -115,9 +115,9 @@ export default function OnboardingWelcomePage() {
         </div>
 
         {/* Your First 30 Days */}
-        <div className="bg-white rounded-2xl p-6 md:p-8 shadow-lg border border-green-100">
+        <div className="bg-white rounded-2xl p-6 md:p-8 shadow-lg border border-teal-100">
           <div className="flex items-center gap-4 mb-6">
-            <div className="w-14 h-14 bg-gradient-to-br from-[#00A651] to-[#00c760] rounded-2xl flex items-center justify-center text-2xl">📅</div>
+            <div className="w-14 h-14 bg-gradient-to-br from-[#37B6AE] to-[#52BEBC] rounded-2xl flex items-center justify-center text-2xl">📅</div>
             <div>
               <h2 className="text-2xl font-bold text-gray-900">Your First 30 Days</h2>
               <p className="text-gray-600">Focus on these 4 core activities</p>
@@ -131,9 +131,9 @@ export default function OnboardingWelcomePage() {
               { icon: "👂", word: "LISTEN", desc: "To Health Assessment calls" },
               { icon: "💪", word: "SUPPORT", desc: "New clients by co-coaching with mentors" }
             ].map((action, i) => (
-              <div key={i} className="bg-gradient-to-br from-green-50 to-green-100/50 p-6 rounded-xl text-center border-2 border-transparent hover:border-[#00A651] transition-colors">
+              <div key={i} className="bg-gradient-to-br from-teal-50 to-teal-100/50 p-6 rounded-xl text-center border-2 border-transparent hover:border-[#37B6AE] transition-colors">
                 <div className="text-4xl mb-3">{action.icon}</div>
-                <div className="text-xl font-bold text-[#00A651] mb-2">{action.word}</div>
+                <div className="text-xl font-bold text-[#37B6AE] mb-2">{action.word}</div>
                 <div className="text-sm text-gray-700">{action.desc}</div>
               </div>
             ))}
@@ -145,15 +145,15 @@ export default function OnboardingWelcomePage() {
         </div>
 
         {/* Important Banner */}
-        <div className="bg-gradient-to-r from-[#00A651] to-[#00c760] rounded-2xl p-8 text-center text-white shadow-lg">
+        <div className="bg-gradient-to-r from-[#37B6AE] to-[#52BEBC] rounded-2xl p-8 text-center text-white shadow-lg">
           <div className="text-xl md:text-2xl font-bold mb-2">🚀 COACHES WHO ATTEND WEEKLY THEIR FIRST MONTH GROW FASTER!</div>
           <div className="text-lg opacity-95">Consistency is the key to your success</div>
         </div>
 
         {/* Saturday Huddle */}
-        <div className="bg-white rounded-2xl p-6 md:p-8 shadow-lg border border-green-100">
+        <div className="bg-white rounded-2xl p-6 md:p-8 shadow-lg border border-teal-100">
           <div className="flex items-center gap-4 mb-6">
-            <div className="w-14 h-14 bg-gradient-to-br from-[#00A651] to-[#00c760] rounded-2xl flex items-center justify-center text-2xl">📹</div>
+            <div className="w-14 h-14 bg-gradient-to-br from-[#37B6AE] to-[#52BEBC] rounded-2xl flex items-center justify-center text-2xl">📹</div>
             <div>
               <h2 className="text-2xl font-bold text-gray-900">Saturday New Coach Huddle</h2>
               <p className="text-gray-600">Your weekly connection with the team</p>
@@ -183,7 +183,7 @@ export default function OnboardingWelcomePage() {
         </div>
 
         {/* Navigation Footer */}
-        <div className="flex justify-between items-center gap-4 pt-8 border-t border-green-200 mt-8">
+        <div className="flex justify-between items-center gap-4 pt-8 border-t border-teal-200 mt-8">
           <Link href="/training">
             <Button variant="outline" className="border-gray-300 text-gray-700 hover:bg-gray-50">
               <ArrowLeft className="h-4 w-4 mr-2" />
@@ -191,7 +191,7 @@ export default function OnboardingWelcomePage() {
             </Button>
           </Link>
           <Link href="/onboarding/business">
-            <Button className="bg-[#00A651] hover:bg-[#00c760] text-white">
+            <Button className="bg-[#37B6AE] hover:bg-[#52BEBC] text-white">
               Next: Business Resources
               <ArrowRight className="h-4 w-4 ml-2" />
             </Button>

@@ -18,7 +18,7 @@ export async function POST(request: NextRequest) {
     // Priority color mapping
     const priorityColors: Record<string, string> = {
       low: "#6b7280", // gray
-      normal: "#2d5016", // green
+      normal: "#2A9C95", // green
       high: "#f59e0b", // amber
       urgent: "#ef4444", // red
     }

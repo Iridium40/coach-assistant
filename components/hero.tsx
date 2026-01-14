@@ -9,7 +9,7 @@ export function Hero({ userData, firstName, badges = [], backgroundImage }: Hero
   return (
     <div 
       className="relative h-[160px] sm:h-[200px] md:h-[240px] overflow-hidden flex items-center justify-center"
-      style={{ backgroundColor: "#FFF6ED" }}
+      style={{ backgroundColor: "#EAF7F6" }}
     >
       <div className="container mx-auto px-4 h-full flex items-center justify-center">
         <picture>

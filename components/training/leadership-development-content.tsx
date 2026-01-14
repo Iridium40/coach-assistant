@@ -32,7 +32,7 @@ const goldStandardElements = [
 ]
 
 const dailyActivities = [
-  { activity: "Leader Connections", target: "3-5 daily", icon: "🤝", color: "#4caf50" },
+  { activity: "Leader Connections", target: "3-5 daily", icon: "🤝", color: "#37B6AE" },
   { activity: "Team Recognition", target: "5+ daily", icon: "🎉", color: "#ff9800" },
   { activity: "Training Delivered", target: "30-60 min", icon: "📚", color: "#2196f3" },
   { activity: "Pipeline Review", target: "15-30 min", icon: "📊", color: "#9c27b0" },

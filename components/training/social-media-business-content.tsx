@@ -191,7 +191,7 @@ const lessons: Lesson[] = [
           content: "80% of your content should provide VALUE. Only 20% should directly promote your business. This ratio builds trust without feeling salesy.",
           categories: [
             { category: "Lifestyle & Personal (30%)", color: "#e3f2fd", borderColor: "#2196f3", examples: ["Your morning routine", "Family moments", "Hobbies and interests", "Day in your life", "What you're grateful for"], why: "People buy from people they LIKE. Let them see the real you." },
-            { category: "Value & Education (30%)", color: "#e8f5e9", borderColor: "#4caf50", examples: ["Health tips", "Recipe ideas", "Mindset motivation", "Quick workout tips", "Meal prep hacks"], why: "Position yourself as a helpful resource, not just a salesperson." },
+            { category: "Value & Education (30%)", color: "#EAF7F6", borderColor: "#37B6AE", examples: ["Health tips", "Recipe ideas", "Mindset motivation", "Quick workout tips", "Meal prep hacks"], why: "Position yourself as a helpful resource, not just a salesperson." },
             { category: "Transformation & Results (20%)", color: "#fff8e1", borderColor: "#ffc107", examples: ["Your before/after photos", "Client success stories (with permission)", "Non-scale victories", "Energy and mood changes", "Milestone celebrations"], why: "Show PROOF that what you do works. Results speak louder than words." },
             { category: "Business & Opportunity (20%)", color: "#fce4ec", borderColor: "#e91e63", examples: ["Why you became a coach", "What you love about OPTAVIA", "Income or freedom stories", "Invitations to learn more", "Program highlights"], why: "This is where you invite people to work with you – but only 20%!" },
           ],

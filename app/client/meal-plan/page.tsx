@@ -33,7 +33,7 @@ function LoadingState() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 to-white">
       <div className="text-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#2d5016] mx-auto mb-4"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#2A9C95] mx-auto mb-4"></div>
         <p className="text-gray-600">Loading your meal plan...</p>
       </div>
     </div>
@@ -202,7 +202,7 @@ function ClientMealPlanContent() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 to-white">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#2d5016] mx-auto mb-4"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#2A9C95] mx-auto mb-4"></div>
           <p className="text-gray-600">Loading your meal plan...</p>
         </div>
       </div>
@@ -220,7 +220,7 @@ function ClientMealPlanContent() {
           </p>
           <Button
             onClick={() => router.push("/client/recipes")}
-            className="bg-[#2d5016] hover:bg-[#3d6b1e] text-white gap-2"
+            className="bg-[#2A9C95] hover:bg-[#3d6b1e] text-white gap-2"
           >
             <UtensilsCrossed className="h-4 w-4" />
             Browse Recipes
@@ -258,7 +258,7 @@ function ClientMealPlanContent() {
       </header>
 
       {/* Hero Section */}
-      <div className="bg-gradient-to-r from-[#2d5016] to-[#3d6b1e] text-white py-10 print:py-6 print:bg-[#2d5016]">
+      <div className="bg-gradient-to-r from-[#2A9C95] to-[#3d6b1e] text-white py-10 print:py-6 print:bg-[#2A9C95]">
         <div className="container mx-auto px-4 text-center">
           <h1 className="text-3xl md:text-4xl font-bold mb-2">
             Your Weekly Meal Plan
@@ -284,7 +284,7 @@ function ClientMealPlanContent() {
         {/* Weekly Schedule - Calendar View */}
         <section className="mb-8">
           <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
-            <Calendar className="h-5 w-5 text-[#2d5016]" />
+            <Calendar className="h-5 w-5 text-[#2A9C95]" />
             Weekly Schedule
           </h2>
           
@@ -300,7 +300,7 @@ function ClientMealPlanContent() {
                 return (
                   <div key={day} className="bg-white rounded-lg border border-gray-200 overflow-hidden">
                     {/* Day Header */}
-                    <div className="bg-[#2d5016] px-2 py-1.5 text-center">
+                    <div className="bg-[#2A9C95] px-2 py-1.5 text-center">
                       <span className="text-xs font-semibold text-white">{day.slice(0, 3)}</span>
                     </div>
                     
@@ -384,7 +384,7 @@ function ClientMealPlanContent() {
                 <div key={day} className="flex items-center gap-3 bg-white rounded-lg border border-gray-200 p-2">
                   {/* Day */}
                   <div className="w-12 flex-shrink-0 text-center">
-                    <div className="text-xs font-bold text-[#2d5016]">{day.slice(0, 3)}</div>
+                    <div className="text-xs font-bold text-[#2A9C95]">{day.slice(0, 3)}</div>
                   </div>
                   
                   {/* Meal(s) */}
@@ -455,7 +455,7 @@ function ClientMealPlanContent() {
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
             <div>
               <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
-                <ShoppingCart className="h-5 w-5 text-[#2d5016]" />
+                <ShoppingCart className="h-5 w-5 text-[#2A9C95]" />
                 Shopping List
               </h2>
               <p className="text-xs text-gray-500 mt-1">
@@ -493,8 +493,8 @@ function ClientMealPlanContent() {
                     >
                       <div className={`w-5 h-5 rounded border-2 flex-shrink-0 flex items-center justify-center transition-colors ${
                         isChecked 
-                          ? 'bg-[#2d5016] border-[#2d5016]' 
-                          : 'border-gray-300 group-hover:border-[#2d5016]'
+                          ? 'bg-[#2A9C95] border-[#2A9C95]' 
+                          : 'border-gray-300 group-hover:border-[#2A9C95]'
                       }`}>
                         {isChecked && <Check className="h-3 w-3 text-white" />}
                       </div>
@@ -522,7 +522,7 @@ function ClientMealPlanContent() {
         <div className="mt-6 text-center print:hidden">
           <Button
             onClick={() => router.push("/client/recipes")}
-            className="bg-[#2d5016] hover:bg-[#3d6b1e] text-white gap-2"
+            className="bg-[#2A9C95] hover:bg-[#3d6b1e] text-white gap-2"
           >
             <UtensilsCrossed className="h-4 w-4" />
             Browse More Recipes

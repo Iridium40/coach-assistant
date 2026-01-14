@@ -68,9 +68,9 @@ export async function POST(request: NextRequest) {
           A new meeting has been scheduled. Here are the details:
         </p>
         
-        <div style="background-color: #ffffff; border: 2px solid #2d5016; border-radius: 8px; padding: 25px; margin: 20px 0; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+        <div style="background-color: #ffffff; border: 2px solid #2A9C95; border-radius: 8px; padding: 25px; margin: 20px 0; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
           <div style="margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid #eee;">
-            <h2 style="color: #2d5016; margin: 0 0 10px 0; font-size: 24px; font-weight: bold;">
+            <h2 style="color: #2A9C95; margin: 0 0 10px 0; font-size: 24px; font-weight: bold;">
               ${meetingTitle}
             </h2>
             <span style="background-color: ${callTypeColor}; color: white; padding: 4px 12px; border-radius: 12px; font-size: 12px; font-weight: bold;">
@@ -110,7 +110,7 @@ export async function POST(request: NextRequest) {
           </a>
         </div>
         
-        <div style="background-color: #f0fdf4; padding: 15px; border-radius: 6px; margin: 20px 0; border-left: 4px solid #2d5016;">
+        <div style="background-color: #f0fdf4; padding: 15px; border-radius: 6px; margin: 20px 0; border-left: 4px solid #2A9C95;">
           <p style="margin: 0; font-size: 14px; color: #166534;">
             <strong>💡 Tip:</strong> Add this meeting to your personal calendar using the "Add to Calendar" button in the app.
           </p>

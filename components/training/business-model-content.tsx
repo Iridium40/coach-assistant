@@ -159,7 +159,7 @@ const lessons: Lesson[] = [
         {
           title: "The Two Types of Income",
           incomeTypes: [
-            { type: "Front-End Income", icon: "💵", color: "#e8f5e9", borderColor: "#4caf50", description: "Money you earn immediately from client orders", sources: ["Client acquisition bonuses", "Commissions on client orders", "First order bonuses"], tip: "This is your 'right now' money – great for getting started!" },
+            { type: "Front-End Income", icon: "💵", color: "#EAF7F6", borderColor: "#37B6AE", description: "Money you earn immediately from client orders", sources: ["Client acquisition bonuses", "Commissions on client orders", "First order bonuses"], tip: "This is your 'right now' money – great for getting started!" },
             { type: "Back-End Income", icon: "📈", color: "#e3f2fd", borderColor: "#2196f3", description: "Residual income that builds over time", sources: ["Ongoing client reorders", "Team volume overrides", "Rank bonuses and incentives"], tip: "This is your 'freedom' money – it keeps coming even when you're not actively working!" },
           ],
         },
@@ -427,7 +427,7 @@ export function BusinessModelContent() {
   const getCategoryColor = (category: string) => {
     switch (category) {
       case "Program":
-        return { bg: "#e8f5e9", text: "#2e7d32" }
+        return { bg: "#EAF7F6", text: "#2e7d32" }
       case "Business":
         return { bg: "#e3f2fd", text: "#1565c0" }
       case "Volume":

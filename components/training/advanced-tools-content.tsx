@@ -45,7 +45,7 @@ const powerPromptCategories = [
   {
     category: "Team Training",
     icon: "👥",
-    color: "#4caf50",
+    color: "#37B6AE",
     prompts: [
       { title: "Training Module", prompt: "Create a training guide on [TOPIC] for my team. Include: overview, step-by-step process, common mistakes to avoid, scripts they can use, and action items." },
       { title: "Role-Play Scenarios", prompt: "Create 5 role-play scenarios for practicing Health Assessments. For each, provide: prospect's background, their objection, and ideal coaching response." },

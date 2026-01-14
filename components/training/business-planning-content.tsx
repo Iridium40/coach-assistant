@@ -194,7 +194,7 @@ const lessons: Lesson[] = [
           title: "Your Daily ED Tracker",
           isDailyTracker: true,
           categories: [
-            { category: "Personal Development", color: "#e8f5e9", borderColor: "#4caf50", items: [{ id: "pd1", task: "Review my MAP goals (2 min)", priority: "HIGH" }, { id: "pd2", task: "Personal development reading/listening (15+ min)", priority: "HIGH" }, { id: "pd3", task: "Mindset practice (gratitude, visualization, affirmations)", priority: "MEDIUM" }] },
+            { category: "Personal Development", color: "#EAF7F6", borderColor: "#37B6AE", items: [{ id: "pd1", task: "Review my MAP goals (2 min)", priority: "HIGH" }, { id: "pd2", task: "Personal development reading/listening (15+ min)", priority: "HIGH" }, { id: "pd3", task: "Mindset practice (gratitude, visualization, affirmations)", priority: "MEDIUM" }] },
             { category: "Client Acquisition", color: "#e3f2fd", borderColor: "#2196f3", items: [{ id: "ca1", task: "Start 5+ new conversations", priority: "HIGH" }, { id: "ca2", task: "Follow up with all pending prospects", priority: "HIGH" }, { id: "ca3", task: "Post value-driven content on social media", priority: "MEDIUM" }, { id: "ca4", task: "Schedule or conduct Health Assessments", priority: "HIGH" }] },
             { category: "Client Support", color: "#fff8e1", borderColor: "#ffc107", items: [{ id: "cs1", task: "Check in with all active clients", priority: "HIGH" }, { id: "cs2", task: "Send encouraging texts/messages", priority: "MEDIUM" }, { id: "cs3", task: "Address any client questions or concerns", priority: "HIGH" }] },
             { category: "Team Development", color: "#fce4ec", borderColor: "#e91e63", items: [{ id: "td1", task: "Check in with team members on their goals", priority: "HIGH" }, { id: "td2", task: "Recognize team wins (shoutouts, celebrations)", priority: "MEDIUM" }, { id: "td3", task: "Support a team member with a call or strategy session", priority: "MEDIUM" }, { id: "td4", task: "Review team projections in Connect", priority: "HIGH" }] },
@@ -214,7 +214,7 @@ const lessons: Lesson[] = [
           title: "Tracking Your Consistency",
           content: "Print this tracker or use a notebook to check off daily items. At the end of each week, count your completion rate. EDs aim for 80%+ consistency.",
           consistencyLevels: [
-            { level: "90-100%", status: "ED-Level Consistency", description: "You're operating like an Executive Director. Keep it up!", color: "#4caf50" },
+            { level: "90-100%", status: "ED-Level Consistency", description: "You're operating like an Executive Director. Keep it up!", color: "#37B6AE" },
             { level: "80-89%", status: "Strong Performance", description: "Great work! Small improvements will push you to the next level.", color: "#8bc34a" },
             { level: "70-79%", status: "Room to Grow", description: "You're building habits. Identify what's holding you back.", color: "#ffc107" },
             { level: "Below 70%", status: "Needs Focus", description: "Time to recommit. What support do you need to stay consistent?", color: "#f44336" },

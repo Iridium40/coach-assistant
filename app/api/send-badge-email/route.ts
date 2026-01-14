@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
       name: badgeName,
       description: badgeDescription || "Achievement unlocked!",
       emoji: "🏆",
-      color: "#2d5016",
+      color: "#2A9C95",
     }
 
     // Create email content
@@ -62,8 +62,8 @@ export async function POST(request: NextRequest) {
           </a>
         </div>
         
-        <div style="background-color: #e7f5e7; padding: 15px; border-radius: 6px; margin: 20px 0; border-left: 4px solid #2d5016;">
-          <p style="margin: 0; font-size: 14px; color: #2d5016;">
+        <div style="background-color: #e7f5e7; padding: 15px; border-radius: 6px; margin: 20px 0; border-left: 4px solid #2A9C95;">
+          <p style="margin: 0; font-size: 14px; color: #2A9C95;">
             <strong>💡 Tip:</strong> Continue completing resources to unlock more achievements and badges!
           </p>
         </div>

@@ -127,8 +127,8 @@ export async function POST(request: NextRequest) {
           }
         </p>
         
-        <div style="background-color: #ffffff; border: 2px solid #2d5016; border-radius: 8px; padding: 25px; margin: 20px 0; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-          <h2 style="color: #2d5016; margin: 0 0 20px 0; font-size: 20px; font-weight: bold;">
+        <div style="background-color: #ffffff; border: 2px solid #2A9C95; border-radius: 8px; padding: 25px; margin: 20px 0; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+          <h2 style="color: #2A9C95; margin: 0 0 20px 0; font-size: 20px; font-weight: bold;">
             ${eventTitle}
           </h2>
           
@@ -151,7 +151,7 @@ export async function POST(request: NextRequest) {
           ` : ""}
         </div>
         
-        <div style="background-color: #f0fdf4; padding: 15px; border-radius: 6px; margin: 20px 0; border-left: 4px solid #2d5016;">
+        <div style="background-color: #f0fdf4; padding: 15px; border-radius: 6px; margin: 20px 0; border-left: 4px solid #2A9C95;">
           <p style="margin: 0; font-size: 14px; color: #166534;">
             <strong>📎 Calendar Invite Attached:</strong> Open the attached .ics file to add this event to your calendar (Google Calendar, Outlook, Apple Calendar, etc.)
           </p>

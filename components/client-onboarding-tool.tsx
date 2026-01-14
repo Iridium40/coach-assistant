@@ -310,7 +310,7 @@ Here's a great option to grab if you don't have one yet: https://amzn.to/47zW8xq
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-200">
       {/* Tool Header */}
-      <div className="sticky top-[73px] z-40 bg-gradient-to-r from-[hsl(var(--optavia-green))] to-[#00c760] text-white shadow-lg shadow-green-500/30">
+      <div className="sticky top-[73px] z-40 bg-gradient-to-r from-[hsl(var(--optavia-green))] to-[#52BEBC] text-white shadow-lg shadow-teal-500/30">
         <div className="max-w-4xl mx-auto px-6 py-5">
           <div className="flex items-center justify-between gap-4 flex-wrap">
             <h1 className="text-xl font-bold flex items-center gap-2">
@@ -355,7 +355,7 @@ Here's a great option to grab if you don't have one yet: https://amzn.to/47zW8xq
       {/* Main Content */}
       <main className="max-w-4xl mx-auto px-6 py-6">
         {/* Client Info Card */}
-        <Card className="mb-6 bg-gradient-to-br from-green-50 to-emerald-50 border-2 border-[hsl(var(--optavia-green))]">
+        <Card className="mb-6 bg-gradient-to-br from-teal-50 to-teal-100 border-2 border-[hsl(var(--optavia-green))]">
           <CardHeader>
             <CardTitle className="text-xs uppercase tracking-wider text-[hsl(var(--optavia-green))] font-semibold">
               👤 Client Information
@@ -364,7 +364,7 @@ Here's a great option to grab if you don't have one yet: https://amzn.to/47zW8xq
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="clientName" className="text-xs font-semibold text-green-800">
+                <Label htmlFor="clientName" className="text-xs font-semibold text-teal-900">
                   Client First Name
                 </Label>
                 <Input
@@ -372,11 +372,11 @@ Here's a great option to grab if you don't have one yet: https://amzn.to/47zW8xq
                   value={clientName}
                   onChange={(e) => setClientName(e.target.value)}
                   placeholder="Enter name..."
-                  className="border-green-200 focus:border-[hsl(var(--optavia-green))] focus:ring-[hsl(var(--optavia-green))]"
+                  className="border-teal-200 focus:border-[hsl(var(--optavia-green))] focus:ring-[hsl(var(--optavia-green))]"
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="startDate" className="text-xs font-semibold text-green-800">
+                <Label htmlFor="startDate" className="text-xs font-semibold text-teal-900">
                   Start Date
                 </Label>
                 <Input
@@ -384,7 +384,7 @@ Here's a great option to grab if you don't have one yet: https://amzn.to/47zW8xq
                   type="date"
                   value={startDate}
                   onChange={(e) => setStartDate(e.target.value)}
-                  className="border-green-200 focus:border-[hsl(var(--optavia-green))] focus:ring-[hsl(var(--optavia-green))]"
+                  className="border-teal-200 focus:border-[hsl(var(--optavia-green))] focus:ring-[hsl(var(--optavia-green))]"
                 />
               </div>
             </div>
@@ -417,7 +417,7 @@ Here's a great option to grab if you don't have one yet: https://amzn.to/47zW8xq
                   <Button
                     size="sm"
                     onClick={() => copyToClipboard(welcomeText)}
-                    className="absolute top-3 right-3 bg-[hsl(var(--optavia-green))] hover:bg-green-700"
+                      className="absolute top-3 right-3 bg-[hsl(var(--optavia-green))] hover:bg-[hsl(var(--optavia-green-dark))]"
                   >
                     <Copy className="h-3 w-3 mr-1" />
                     Copy
@@ -460,7 +460,7 @@ Here's a great option to grab if you don't have one yet: https://amzn.to/47zW8xq
               {tips.map((tip) => (
                 <Card key={tip.id} className="overflow-hidden">
                   <div className="bg-slate-50 border-b border-slate-200 p-4 flex items-center gap-3">
-                    <div className="w-9 h-9 bg-gradient-to-br from-[hsl(var(--optavia-green))] to-[#00c760] text-white rounded-lg flex items-center justify-center font-extrabold text-base flex-shrink-0">
+                    <div className="w-9 h-9 bg-gradient-to-br from-[hsl(var(--optavia-green))] to-[#52BEBC] text-white rounded-lg flex items-center justify-center font-extrabold text-base flex-shrink-0">
                       {tip.id}
                     </div>
                     <div className="font-bold text-slate-800 flex-1">{tip.title}</div>
@@ -468,7 +468,7 @@ Here's a great option to grab if you don't have one yet: https://amzn.to/47zW8xq
                       className={`w-6 h-6 border-2 rounded-md cursor-pointer flex items-center justify-center transition-all ${
                         checkedTips.has(tip.id)
                           ? "bg-[hsl(var(--optavia-green))] border-[hsl(var(--optavia-green))]"
-                          : "border-slate-300 hover:border-[hsl(var(--optavia-green))] hover:bg-green-50"
+                              : "border-slate-300 hover:border-[hsl(var(--optavia-green))] hover:bg-teal-50"
                       }`}
                       onClick={() => toggleTip(tip.id)}
                     >
@@ -495,11 +495,11 @@ Here's a great option to grab if you don't have one yet: https://amzn.to/47zW8xq
                         </a>
                       </div>
                     )}
-                    <div className="bg-green-50 border-l-4 border-[hsl(var(--optavia-green))] p-3 rounded-r-lg">
+                    <div className="bg-teal-50 border-l-4 border-[hsl(var(--optavia-green))] p-3 rounded-r-lg">
                       <div className="text-xs font-bold text-[hsl(var(--optavia-green))] uppercase tracking-wide mb-1">
                         💬 {tip.id === "3" ? "Coaching Note" : tip.id === "4" ? "When to Remeasure" : tip.id === "5" ? "Quick Math" : tip.id === "6" ? "Getting Started" : tip.id === "7" ? "Introducing It" : tip.id === "8" ? "How to Use It" : tip.id === "9" ? "App Setup Help" : "If They Haven't Done It"}
                       </div>
-                      <p className="text-sm text-green-800 italic">{tip.script}</p>
+                      <p className="text-sm text-teal-900 italic">{tip.script}</p>
                     </div>
                   </CardContent>
                 </Card>
@@ -553,7 +553,7 @@ Here's a great option to grab if you don't have one yet: https://amzn.to/47zW8xq
                       </CardTitle>
                       <span className={`text-sm font-medium px-2 py-1 rounded ${
                         progress.checked === progress.total && progress.total > 0 
-                          ? "bg-green-100 text-green-700" 
+                          ? "bg-teal-100 text-teal-800" 
                           : "bg-slate-100 text-slate-600"
                       }`}>
                         {progress.checked}/{progress.total}
@@ -569,7 +569,7 @@ Here's a great option to grab if you don't have one yet: https://amzn.to/47zW8xq
                         key={item.id}
                         className={`flex gap-3 p-3 rounded-lg border transition-all ${
                           checkedFollowup.has(item.id)
-                            ? "bg-green-50 border-green-200"
+                            ? "bg-teal-50 border-teal-200"
                             : "bg-white border-slate-200 hover:border-slate-300"
                         }`}
                       >
@@ -613,7 +613,7 @@ Here's a great option to grab if you don't have one yet: https://amzn.to/47zW8xq
             })}
 
             {/* Footer Note */}
-            <div className="text-center text-sm text-slate-600 italic bg-green-50 p-4 rounded-lg border border-green-200">
+            <div className="text-center text-sm text-slate-600 italic bg-teal-50 p-4 rounded-lg border border-teal-200">
               💚 Remember: Consistent check-ins are key to client success!
             </div>
           </TabsContent>
@@ -648,7 +648,7 @@ Here's a great option to grab if you don't have one yet: https://amzn.to/47zW8xq
                       <button
                         key={idx}
                         onClick={() => copyToClipboard(msg.text)}
-                        className="text-left p-4 bg-slate-50 border border-slate-200 rounded-lg hover:border-[hsl(var(--optavia-green))] hover:bg-green-50 transition-all"
+                        className="text-left p-4 bg-slate-50 border border-slate-200 rounded-lg hover:border-[hsl(var(--optavia-green))] hover:bg-teal-50 transition-all"
                       >
                         <div className="font-semibold text-slate-800 text-sm mb-1">{msg.title}</div>
                         <div className="text-xs text-slate-500 truncate">{msg.text}</div>

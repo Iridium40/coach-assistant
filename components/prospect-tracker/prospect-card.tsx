@@ -138,6 +138,11 @@ export function ProspectCard({
               >
                 {config.label}
               </Badge>
+              {prospect.action_type === "health_assessment" && (
+                <Badge className="bg-[hsl(var(--optavia-green-light))] text-[hsl(var(--optavia-green-dark))] border border-[hsl(var(--optavia-green))]">
+                  HA Shared
+                </Badge>
+              )}
             </div>
             <div className="flex items-center gap-3 text-sm text-gray-500 mt-1">
               <span>
@@ -279,7 +284,7 @@ export function ProspectCard({
         </div>
 
         {/* Secondary Actions: Edit, Remind & Delete */}
-        <div className="mt-3 pt-3 border-t flex items-center gap-2">
+        <div className="mt-3 pt-3 border-t grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-2">
           <Button
             variant="outline"
             size="sm"

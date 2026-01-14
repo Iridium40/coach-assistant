@@ -370,7 +370,7 @@ const lessons: Lesson[] = [
         {
           title: "Strategic vs. Desperate: Know the Difference",
           comparison: {
-            strategic: { title: "Strategic End-of-Month", characteristics: ["Planned and proactive (starts mid-month)", "Focused on client value and timing", "Supports team members genuinely", "Maintains long-term relationships", "Wins feel good and sustainable"], color: "#e8f5e9" },
+            strategic: { title: "Strategic End-of-Month", characteristics: ["Planned and proactive (starts mid-month)", "Focused on client value and timing", "Supports team members genuinely", "Maintains long-term relationships", "Wins feel good and sustainable"], color: "#EAF7F6" },
             desperate: { title: "Desperate End-of-Month", characteristics: ["Reactive and last-minute", "Pushy or manipulative tactics", "Pressures team inappropriately", "Damages relationships for short-term wins", "Wins feel hollow and unsustainable"], color: "#ffebee" },
           },
           principle: "Always choose strategic over desperate. Your reputation and relationships are worth more than any single month's numbers.",
