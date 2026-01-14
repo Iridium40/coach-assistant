@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/select"
 import { Search, ExternalLink, FileText, Video, Palette, Link2, ChevronDown, ChevronRight, CheckCircle, Circle, Bookmark } from "lucide-react"
 import { EmbeddedContentViewer } from "@/components/embedded-content-viewer"
+import { TrainingContextualResources } from "@/components/resources"
 import { useToast } from "@/hooks/use-toast"
 
 export function TrainingResourcesTab() {
@@ -355,82 +356,89 @@ export function TrainingResourcesTab() {
 
                 {/* Resources List - Collapsible */}
                 {isExpanded && (
-                  <div className="border-t bg-gray-50/50 divide-y divide-gray-100">
-                    {catResources.map((resource) => {
-                      const completed = isCompleted(resource.id)
-                      const bookmarked = isBookmarked(resource.id)
-                      return (
-                        <div
-                          key={resource.id}
-                          className={`flex items-center gap-2 px-3 py-2 hover:bg-gray-100 transition-colors group ${
-                            completed ? "bg-green-50/50" : ""
-                          }`}
-                        >
-                          {/* Checkbox */}
-                          {user && (
-                            <button
-                              onClick={(e) => {
-                                e.preventDefault()
-                                e.stopPropagation()
-                                toggleCompletion(resource.id)
-                              }}
-                              className="flex-shrink-0 p-0.5"
-                              title={completed ? "Mark as incomplete" : "Mark as complete"}
-                            >
-                              {completed ? (
-                                <CheckCircle className="h-5 w-5 text-green-600" />
-                              ) : (
-                                <Circle className="h-5 w-5 text-gray-300 hover:text-gray-400" />
-                              )}
-                            </button>
-                          )}
-
-                          {/* Type Icon */}
-                          <div className="flex-shrink-0 w-6 h-6 rounded bg-white border border-gray-200 flex items-center justify-center">
-                            {getTypeIcon(resource.type)}
-                          </div>
-
-                          {/* Content - Clickable to open in viewer */}
-                          <button
-                            onClick={() => openResource(resource)}
-                            className="flex-1 min-w-0 flex items-center gap-2 text-left"
+                  <div className="border-t">
+                    <div className="bg-gray-50/50 divide-y divide-gray-100">
+                      {catResources.map((resource) => {
+                        const completed = isCompleted(resource.id)
+                        const bookmarked = isBookmarked(resource.id)
+                        return (
+                          <div
+                            key={resource.id}
+                            className={`flex items-center gap-2 px-3 py-2 hover:bg-gray-100 transition-colors group ${
+                              completed ? "bg-green-50/50" : ""
+                            }`}
                           >
-                            <div className="flex-1 min-w-0">
-                              <h4 className={`font-medium text-sm leading-snug group-hover:text-[hsl(var(--optavia-green))] transition-colors truncate ${
-                                completed ? "text-gray-500" : "text-optavia-dark"
-                              }`}>
-                                {resource.title}
-                              </h4>
+                            {/* Checkbox */}
+                            {user && (
+                              <button
+                                onClick={(e) => {
+                                  e.preventDefault()
+                                  e.stopPropagation()
+                                  toggleCompletion(resource.id)
+                                }}
+                                className="flex-shrink-0 p-0.5"
+                                title={completed ? "Mark as incomplete" : "Mark as complete"}
+                              >
+                                {completed ? (
+                                  <CheckCircle className="h-5 w-5 text-green-600" />
+                                ) : (
+                                  <Circle className="h-5 w-5 text-gray-300 hover:text-gray-400" />
+                                )}
+                              </button>
+                            )}
+
+                            {/* Type Icon */}
+                            <div className="flex-shrink-0 w-6 h-6 rounded bg-white border border-gray-200 flex items-center justify-center">
+                              {getTypeIcon(resource.type)}
                             </div>
 
-                            {/* Type badge + Open Icon */}
-                            <div className="flex items-center gap-2 flex-shrink-0">
-                              <Badge variant="outline" className="text-[10px] capitalize hidden sm:inline-flex">
-                                {resource.type}
-                              </Badge>
-                              <ExternalLink className="h-4 w-4 text-gray-400 group-hover:text-[hsl(var(--optavia-green))] transition-colors" />
-                            </div>
-                          </button>
-
-                          {/* Bookmark Button */}
-                          {user && (
+                            {/* Content - Clickable to open in viewer */}
                             <button
-                              onClick={(e) => handleToggleBookmark(e, resource.id, resource.title)}
-                              className="flex-shrink-0 p-1 hover:bg-gray-200 rounded transition-colors"
-                              title={bookmarked ? "Remove bookmark" : "Bookmark this resource"}
+                              onClick={() => openResource(resource)}
+                              className="flex-1 min-w-0 flex items-center gap-2 text-left"
                             >
-                              <Bookmark 
-                                className={`h-4 w-4 transition-colors ${
-                                  bookmarked 
-                                    ? "fill-amber-400 text-amber-400" 
-                                    : "text-gray-300 hover:text-amber-400"
-                                }`} 
-                              />
+                              <div className="flex-1 min-w-0">
+                                <h4 className={`font-medium text-sm leading-snug group-hover:text-[hsl(var(--optavia-green))] transition-colors truncate ${
+                                  completed ? "text-gray-500" : "text-optavia-dark"
+                                }`}>
+                                  {resource.title}
+                                </h4>
+                              </div>
+
+                              {/* Type badge + Open Icon */}
+                              <div className="flex items-center gap-2 flex-shrink-0">
+                                <Badge variant="outline" className="text-[10px] capitalize hidden sm:inline-flex">
+                                  {resource.type}
+                                </Badge>
+                                <ExternalLink className="h-4 w-4 text-gray-400 group-hover:text-[hsl(var(--optavia-green))] transition-colors" />
+                              </div>
                             </button>
-                          )}
-                        </div>
-                      )
-                    })}
+
+                            {/* Bookmark Button */}
+                            {user && (
+                              <button
+                                onClick={(e) => handleToggleBookmark(e, resource.id, resource.title)}
+                                className="flex-shrink-0 p-1 hover:bg-gray-200 rounded transition-colors"
+                                title={bookmarked ? "Remove bookmark" : "Bookmark this resource"}
+                              >
+                                <Bookmark 
+                                  className={`h-4 w-4 transition-colors ${
+                                    bookmarked 
+                                      ? "fill-amber-400 text-amber-400" 
+                                      : "text-gray-300 hover:text-amber-400"
+                                  }`} 
+                                />
+                              </button>
+                            )}
+                          </div>
+                        )
+                      })}
+                    </div>
+                    
+                    {/* Related External Resources for this category */}
+                    <div className="p-3 bg-white border-t">
+                      <TrainingContextualResources trainingCategory={category} />
+                    </div>
                   </div>
                 )}
               </div>

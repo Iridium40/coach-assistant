@@ -38,6 +38,23 @@ import type { ExternalResource } from "@/lib/types"
 
 // Resource categories (matching the public resources page filters)
 const CATEGORIES = [
+  // Getting Started & Business
+  "Getting Started",
+  "Tax & Finance",
+  "Business Development",
+  // Client Journey
+  "Journey Kickoff",
+  "Client Text Templates",
+  "Client Support",
+  "Client Support Videos",
+  // Nutrition & Health
+  "Nutrition Guides",
+  // Social & Marketing
+  "Social Media Strategy",
+  // Mindset & Growth
+  "Troubleshooting",
+  "Coaching Real Talk",
+  // Legacy categories
   "OPTAVIA Portals",
   "Social Media",
   "Communities",

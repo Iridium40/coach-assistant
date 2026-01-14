@@ -4,6 +4,7 @@ import { ReactNode } from "react"
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
 import { ModuleQuiz } from "@/components/training/module-quiz"
+import { TrainingContextualResources } from "@/components/resources"
 import { getModuleQuiz } from "@/lib/quiz-data"
 import { ChevronRight, Clock, Award } from "lucide-react"
 import Link from "next/link"
@@ -17,6 +18,46 @@ interface TrainingModuleWrapperProps {
   children: ReactNode
   nextModuleHref?: string
   nextModuleTitle?: string
+  resourceCategory?: string // Optional: override the auto-detected category
+  resourceTags?: string[] // Optional: specific tags for this module
+}
+
+// Map module IDs to training categories (from database) for contextual resources
+const MODULE_CATEGORY_MAP: Record<string, string> = {
+  // Coach Launch Playbook modules
+  'welcome-orientation': 'COACH LAUNCH PLAYBOOK',
+  'business-setup': 'BRANDING YOUR BUSINESS QUICK LINKS',
+  
+  // Social Media modules
+  'social-media-preparation': 'USING SOCIAL MEDIA TO BUILD YOUR BUSINESS',
+  'social-media-posting': 'USING SOCIAL MEDIA TO BUILD YOUR BUSINESS',
+  'social-media-business': 'USING SOCIAL MEDIA TO BUILD YOUR BUSINESS',
+  
+  // Client launching and support modules
+  'first-client-conversations': 'LAUNCHING A CLIENT AND COACHING THROUGH MONTH ONE',
+  'first-client': 'LAUNCHING A CLIENT AND COACHING THROUGH MONTH ONE',
+  'client-resources': 'CLIENT SUPPORT TEXTS AND VIDEOS',
+  'advanced-client-support': 'CLIENT SUPPORT TEXTS AND VIDEOS',
+  'understanding-health-assessment': 'COACH LAUNCH PLAYBOOK',
+  'health-assessment-mastery': 'COACH LAUNCH PLAYBOOK',
+  
+  // Business building modules
+  'business-model': 'COACHING 10X',
+  'business-planning': 'COACHING 10X',
+  'client-acquisition': 'COACH LAUNCH PLAYBOOK',
+  'connect-business': 'HOW TO USE CONNECT TO GROW YOUR BUSINESS',
+  'team-building': 'COACHING 10X',
+  'scaling-your-business': 'MOVING TO ED AND BEYOND',
+  
+  // Leadership and growth modules
+  'leadership-development': 'MOVING TO ED AND BEYOND',
+  'legacy-building': 'MOVING TO ED AND BEYOND',
+  'ten-x-system': 'COACHING 10X',
+  'thirty-day-evaluation': 'COACH LAUNCH PLAYBOOK',
+  
+  // Troubleshooting and advanced
+  'moving-beyond-ed': 'MOVING TO ED AND BEYOND',
+  'advanced-tools': 'CLIENT SUPPORT TEXTS AND VIDEOS',
 }
 
 export function TrainingModuleWrapper({
@@ -27,9 +68,14 @@ export function TrainingModuleWrapper({
   moduleNumber,
   children,
   nextModuleHref,
-  nextModuleTitle
+  nextModuleTitle,
+  resourceCategory,
+  resourceTags = []
 }: TrainingModuleWrapperProps) {
   const quiz = getModuleQuiz(moduleId)
+  
+  // Determine the category for contextual resources
+  const effectiveCategory = resourceCategory || MODULE_CATEGORY_MAP[moduleId] || 'Getting Started'
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-green-50 to-slate-50">
@@ -71,6 +117,14 @@ export function TrainingModuleWrapper({
           <div className="max-w-6xl mx-auto">
             {/* Main Content */}
             {children}
+
+            {/* Related External Resources */}
+            <div className="mt-12 pt-8 border-t-2 border-gray-200">
+              <TrainingContextualResources 
+                trainingCategory={effectiveCategory}
+                trainingTags={resourceTags}
+              />
+            </div>
 
             {/* Knowledge Check Quiz */}
             {quiz && (

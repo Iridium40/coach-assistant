@@ -1,5 +1,6 @@
 "use client"
 
+import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -11,6 +12,11 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible"
+import {
   Calendar,
   Clock,
   Trash2,
@@ -20,8 +26,12 @@ import {
   X,
   Send,
   CheckCircle,
+  Lightbulb,
+  ChevronDown,
+  ChevronUp,
 } from "lucide-react"
 import { ReminderButton } from "@/components/reminders-panel"
+import { ProspectContextualResources } from "@/components/resources"
 import {
   statusConfig,
   sourceOptions,
@@ -55,6 +65,7 @@ export function ProspectCard({
   onClearHA,
   onToast,
 }: ProspectCardProps) {
+  const [showResources, setShowResources] = useState(false)
   const config = statusConfig[prospect.status]
   const isOverdue = daysUntil !== null && daysUntil < 0
 
@@ -269,6 +280,32 @@ export function ProspectCard({
             📝 {prospect.notes}
           </div>
         )}
+
+        {/* Contextual Resources Section */}
+        <Collapsible open={showResources} onOpenChange={setShowResources}>
+          <CollapsibleTrigger asChild>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="w-full mt-3 pt-3 border-t flex items-center justify-center gap-2 text-gray-500 hover:text-gray-700 hover:bg-gray-50"
+            >
+              <Lightbulb className="h-4 w-4 text-amber-500" />
+              <span className="text-xs">Helpful Resources for This Stage</span>
+              {showResources ? (
+                <ChevronUp className="h-4 w-4" />
+              ) : (
+                <ChevronDown className="h-4 w-4" />
+              )}
+            </Button>
+          </CollapsibleTrigger>
+          <CollapsibleContent className="mt-3">
+            <ProspectContextualResources
+              stage={prospect.status}
+              prospectName={prospect.label}
+              compact
+            />
+          </CollapsibleContent>
+        </Collapsible>
       </CardContent>
     </Card>
   )

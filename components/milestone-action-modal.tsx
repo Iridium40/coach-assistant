@@ -22,7 +22,9 @@ import {
   Phone,
   Star,
   Loader2,
+  Lightbulb,
 } from "lucide-react"
+import { ClientContextualResources } from "@/components/resources"
 
 interface MilestoneActionModalProps {
   open: boolean
@@ -46,7 +48,7 @@ export function MilestoneActionModal({
   const { triggers, loading, getTrigger, personalizeMessage } = useTouchpointTemplates()
 
   const [copiedId, setCopiedId] = useState<string | null>(null)
-  const [activeTab, setActiveTab] = useState<"templates" | "meeting" | "talking">("templates")
+  const [activeTab, setActiveTab] = useState<"templates" | "meeting" | "talking" | "resources">("templates")
 
   // Get the trigger for this day
   const trigger = getTrigger(programDay)
@@ -173,7 +175,7 @@ export function MilestoneActionModal({
         {/* Tabs for call triggers */}
         {isCallRecommended ? (
           <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)} className="flex-1 overflow-hidden flex flex-col">
-            <TabsList className="grid w-full grid-cols-3">
+            <TabsList className="grid w-full grid-cols-4">
               <TabsTrigger value="templates" className="text-xs">
                 📱 Text
               </TabsTrigger>
@@ -182,6 +184,9 @@ export function MilestoneActionModal({
               </TabsTrigger>
               <TabsTrigger value="talking" className="text-xs">
                 💬 Points
+              </TabsTrigger>
+              <TabsTrigger value="resources" className="text-xs">
+                💡 Resources
               </TabsTrigger>
             </TabsList>
 
@@ -335,30 +340,59 @@ export function MilestoneActionModal({
                   </div>
                 )}
               </TabsContent>
+
+              <TabsContent value="resources" className="mt-0">
+                <ClientContextualResources
+                  programDay={programDay}
+                  clientName={clientLabel}
+                  compact
+                />
+              </TabsContent>
             </div>
           </Tabs>
         ) : (
           /* Text-only triggers */
-          <div className="flex-1 overflow-y-auto space-y-3 mt-2">
-            {trigger.templates.length === 0 ? (
-              <p className="text-gray-500 text-sm text-center py-4">No templates available</p>
-            ) : (
-              trigger.templates.map((template) => (
-                <TemplateCard
-                  key={template.id}
-                  template={template}
-                  personalizedMessage={personalizeMessage(template.message, {
-                    firstName,
-                    days: programDay,
-                    coachName,
-                    nextMilestone: getNextMilestone(programDay),
-                  })}
-                  copied={copiedId === template.id}
-                  onCopy={() => copyToClipboard(template.message, template.id)}
+          <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)} className="flex-1 overflow-hidden flex flex-col">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="templates" className="text-xs">
+                📱 Text Templates
+              </TabsTrigger>
+              <TabsTrigger value="resources" className="text-xs">
+                💡 Resources
+              </TabsTrigger>
+            </TabsList>
+
+            <div className="flex-1 overflow-y-auto mt-4">
+              <TabsContent value="templates" className="mt-0 space-y-3">
+                {trigger.templates.length === 0 ? (
+                  <p className="text-gray-500 text-sm text-center py-4">No templates available</p>
+                ) : (
+                  trigger.templates.map((template) => (
+                    <TemplateCard
+                      key={template.id}
+                      template={template}
+                      personalizedMessage={personalizeMessage(template.message, {
+                        firstName,
+                        days: programDay,
+                        coachName,
+                        nextMilestone: getNextMilestone(programDay),
+                      })}
+                      copied={copiedId === template.id}
+                      onCopy={() => copyToClipboard(template.message, template.id)}
+                    />
+                  ))
+                )}
+              </TabsContent>
+
+              <TabsContent value="resources" className="mt-0">
+                <ClientContextualResources
+                  programDay={programDay}
+                  clientName={clientLabel}
+                  compact
                 />
-              ))
-            )}
-          </div>
+              </TabsContent>
+            </div>
+          </Tabs>
         )}
 
         {/* Tip */}

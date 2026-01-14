@@ -1,8 +1,14 @@
 "use client"
 
+import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible"
 import {
   Calendar,
   Star,
@@ -13,8 +19,12 @@ import {
   CheckCircle,
   Circle,
   X,
+  Lightbulb,
+  ChevronDown,
+  ChevronUp,
 } from "lucide-react"
 import { ReminderButton } from "@/components/reminders-panel"
+import { ClientContextualResources } from "@/components/resources"
 import { getDayPhase, getProgramDay, type Client, type ClientStatus } from "@/hooks/use-clients"
 import { isMilestoneDay } from "@/hooks/use-touchpoint-templates"
 
@@ -43,6 +53,7 @@ export function ClientCard({
   onClearSchedule,
   needsAttention,
 }: ClientCardProps) {
+  const [showResources, setShowResources] = useState(false)
   const programDay = getProgramDay(client.start_date)
   const phase = getDayPhase(programDay)
   const attention = needsAttention(client)
@@ -271,6 +282,32 @@ export function ClientCard({
             📝 {client.notes}
           </div>
         )}
+
+        {/* Contextual Resources Section */}
+        <Collapsible open={showResources} onOpenChange={setShowResources}>
+          <CollapsibleTrigger asChild>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="w-full mt-3 pt-3 border-t flex items-center justify-center gap-2 text-gray-500 hover:text-gray-700 hover:bg-gray-50"
+            >
+              <Lightbulb className="h-4 w-4 text-amber-500" />
+              <span className="text-xs">Day {programDay} Resources</span>
+              {showResources ? (
+                <ChevronUp className="h-4 w-4" />
+              ) : (
+                <ChevronDown className="h-4 w-4" />
+              )}
+            </Button>
+          </CollapsibleTrigger>
+          <CollapsibleContent className="mt-3">
+            <ClientContextualResources
+              programDay={programDay}
+              clientName={client.label}
+              compact
+            />
+          </CollapsibleContent>
+        </Collapsible>
       </CardContent>
     </Card>
   )

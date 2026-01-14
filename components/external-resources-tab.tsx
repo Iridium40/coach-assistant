@@ -241,8 +241,32 @@ export function ExternalResourcesTab() {
     return COACH_TOOLS.filter((t) => pinnedToolIds.includes(t.id))
   }, [pinnedToolIds])
 
-  // Resource categories (matching the admin page)
-  const categories = ["All", "Coach Tools", "OPTAVIA Portals", "Social Media", "Communities", "Training"]
+  // Resource categories - includes all database categories plus Coach Tools
+  const categories = [
+    "All",
+    "Coach Tools",
+    // Getting Started & Business
+    "Getting Started",
+    "Tax & Finance",
+    "Business Development",
+    // Client Journey
+    "Journey Kickoff",
+    "Client Text Templates",
+    "Client Support",
+    "Client Support Videos",
+    // Nutrition & Health
+    "Nutrition Guides",
+    // Social & Marketing
+    "Social Media Strategy",
+    // Mindset & Growth
+    "Troubleshooting",
+    "Coaching Real Talk",
+    // Legacy categories
+    "OPTAVIA Portals",
+    "Social Media",
+    "Communities",
+    "Training",
+  ]
 
   // Memoize filtered resources with search
   const filteredResources = useMemo(() => {
@@ -251,10 +275,13 @@ export function ExternalResourcesTab() {
       // Apply search filter
       if (searchQuery) {
         const query = searchQuery.toLowerCase()
+        // Search in title, description, category, and tags
+        const tags = (resource.features as any)?.tags || []
         const matchesSearch = 
           resource.title.toLowerCase().includes(query) ||
           resource.description.toLowerCase().includes(query) ||
-          resource.features.some(f => f.toLowerCase().includes(query))
+          resource.category.toLowerCase().includes(query) ||
+          tags.some((t: string) => t.toLowerCase().includes(query))
         if (!matchesSearch) return false
       }
       

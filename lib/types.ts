@@ -75,6 +75,14 @@ export interface ZoomCall {
   is_virtual?: boolean
 }
 
+export interface ExternalResourceFeatures {
+  type?: string
+  tags?: string[]
+  show_in?: string[]
+  relevant_days?: number[]
+  relevant_stages?: string[]
+}
+
 export interface ExternalResource {
   id: string
   title: string
@@ -82,7 +90,7 @@ export interface ExternalResource {
   url: string
   button_text: string
   category: string
-  features: string[]
+  features: ExternalResourceFeatures | null
   sort_order: number
   is_active: boolean
   is_dynamic: boolean

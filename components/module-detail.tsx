@@ -15,6 +15,7 @@ import { useSupabaseData } from "@/hooks/use-supabase-data"
 import { useUserData } from "@/contexts/user-data-context"
 import { useToast } from "@/hooks/use-toast"
 import { isOnboardingResource, checkOnboardingComplete, markOnboardingComplete } from "@/lib/onboarding-utils"
+import { TrainingContextualResources } from "@/components/resources"
 import type { Module, UserData } from "@/lib/types"
 
 interface ModuleDetailProps {
@@ -306,6 +307,13 @@ export function ModuleDetail({ module, userData, setUserData, onBack }: ModuleDe
             </Card>
           )
         })}
+      </div>
+
+      {/* Related External Resources */}
+      <div className="mt-8">
+        <TrainingContextualResources 
+          trainingCategory={module.category}
+        />
       </div>
 
       {/* Resource View Modal */}
