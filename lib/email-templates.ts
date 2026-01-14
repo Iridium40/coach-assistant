@@ -52,7 +52,7 @@ export function getEmailHeader(title: string, subtitle?: string): string {
         display: none;
       }
     </style>
-    <div class="email-header" style="background-color: #ffffff; padding: 30px 20px; text-align: center; border-bottom: 3px solid #2d5016;">
+    <div class="email-header" style="background-color: #ffffff; padding: 30px 20px; text-align: center; border-bottom: 3px solid #2A9C95;">
       <img src="${logoUrl}" alt="Coach Assistant Hub" class="email-logo" style="max-width: 300px; height: auto; margin-bottom: 20px; display: block; margin-left: auto; margin-right: auto;" />
       <img src="${darkLogoUrl}" alt="Coach Assistant Hub" class="email-logo-dark" style="max-width: 300px; height: auto; margin-bottom: 20px; display: none; margin-left: auto; margin-right: auto;" />
       ${subtitle ? `<p class="email-header-text" style="color: #666; font-size: 16px; margin: 10px 0 0 0;">${subtitle}</p>` : ""}
@@ -69,7 +69,7 @@ export function getEmailFooter(): string {
   return `
     <div class="email-border" style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #eee; text-align: center;">
       <p class="email-text-muted" style="color: #666; font-size: 14px; margin: 10px 0;">
-        <a href="${appUrl}" class="email-link" style="color: #2d5016; text-decoration: none;">Coach Assistant Hub</a>
+        <a href="${appUrl}" class="email-link" style="color: #2A9C95; text-decoration: none;">Coach Assistant Hub</a>
       </p>
       <p class="email-text-muted" style="color: #999; font-size: 12px; margin: 5px 0;">
         Amplify your coaching business with powerful resources and tools
@@ -85,7 +85,7 @@ export function getEmailFooter(): string {
  * Generate a primary button style
  */
 export function getButtonStyle(): string {
-  return "background-color: #2d5016; color: white; padding: 14px 28px; text-decoration: none; border-radius: 6px; display: inline-block; font-weight: bold; font-size: 16px;"
+  return "background-color: #37B6AE; color: white; padding: 14px 28px; text-decoration: none; border-radius: 6px; display: inline-block; font-weight: bold; font-size: 16px;"
 }
 
 /**
@@ -116,7 +116,7 @@ export function getEmailWrapper(content: string, title?: string): string {
               color: #b0b0b0 !important;
             }
             .email-link {
-              color: #7cb342 !important;
+              color: #F4963E !important;
             }
             .email-border {
               border-color: #333 !important;
@@ -163,14 +163,14 @@ export function getModuleCompletionEmailTemplate(options: {
   )
 
   const unlockedModuleSection = hasUnlockedModule ? `
-    <div style="background: linear-gradient(135deg, #2d5016 0%, #2d5016dd 100%); padding: 30px; border-radius: 12px; margin-bottom: 25px; text-align: center;">
+    <div style="background: linear-gradient(135deg, #2A9C95 0%, #2A9C95dd 100%); padding: 30px; border-radius: 12px; margin-bottom: 25px; text-align: center;">
       <div style="font-size: 64px; margin-bottom: 10px;">🔓</div>
       <h1 style="color: white; margin: 0; font-size: 28px; font-weight: bold;">New Module Unlocked!</h1>
       <p style="color: white; margin: 10px 0 0 0; font-size: 18px; opacity: 0.95;">You now have access to Module ${options.unlockedModuleNumber}</p>
     </div>
 
-    <div style="background-color: #f8f9fa; padding: 25px; border-radius: 8px; margin-bottom: 25px; border-left: 4px solid #2d5016;">
-      <h2 style="color: #2d5016; margin-top: 0; font-size: 24px; font-weight: bold;">
+    <div style="background-color: #f8f9fa; padding: 25px; border-radius: 8px; margin-bottom: 25px; border-left: 4px solid #2A9C95;">
+      <h2 style="color: #2A9C95; margin-top: 0; font-size: 24px; font-weight: bold;">
         ${options.unlockedModuleTitle}
       </h2>
       ${options.unlockedModuleRank ? `
@@ -186,14 +186,14 @@ export function getModuleCompletionEmailTemplate(options: {
 
   const bodyContent = `
     <div style="padding: 30px 20px;">
-      <div style="background: linear-gradient(135deg, #00A651 0%, #00c760 100%); padding: 30px; border-radius: 12px; margin-bottom: 25px; text-align: center;">
+      <div style="background: linear-gradient(135deg, #37B6AE 0%, #52BEBC 100%); padding: 30px; border-radius: 12px; margin-bottom: 25px; text-align: center;">
         <div style="font-size: 64px; margin-bottom: 10px;">✅</div>
         <h1 style="color: white; margin: 0; font-size: 28px; font-weight: bold;">Congratulations!</h1>
         <p style="color: white; margin: 10px 0 0 0; font-size: 18px; opacity: 0.95;">You've successfully completed Module ${options.completedModuleNumber}</p>
       </div>
 
-      <div style="background-color: #f8f9fa; padding: 25px; border-radius: 8px; margin-bottom: 25px; border-left: 4px solid #00A651;">
-        <h2 style="color: #00A651; margin-top: 0; font-size: 24px; font-weight: bold;">
+      <div style="background-color: #f8f9fa; padding: 25px; border-radius: 8px; margin-bottom: 25px; border-left: 4px solid #37B6AE;">
+        <h2 style="color: #37B6AE; margin-top: 0; font-size: 24px; font-weight: bold;">
           ${options.completedModuleTitle}
         </h2>
         <p style="color: #666; margin: 10px 0 0 0; font-size: 16px; line-height: 1.5;">
@@ -234,8 +234,8 @@ export function getModuleCompletionEmailTemplate(options: {
         `}
       </div>
       
-      <div style="background-color: #e7f5e7; padding: 15px; border-radius: 6px; margin: 20px 0; border-left: 4px solid #2d5016;">
-        <p style="margin: 0; font-size: 14px; color: #2d5016;">
+      <div style="background-color: #EAF7F6; padding: 15px; border-radius: 6px; margin: 20px 0; border-left: 4px solid #2A9C95;">
+        <p style="margin: 0; font-size: 14px; color: #2A9C95;">
           <strong>💡 Tip:</strong> ${hasUnlockedModule 
             ? `Continue your momentum by starting the next module while the concepts are fresh in your mind!`
             : `Continue completing modules to unlock new training and advance your coaching career!`
@@ -322,10 +322,10 @@ export function getHealthAssessmentEmailTemplate(options: {
 
   const bodyContent = `
     <div style="max-width: 600px; margin: 0 auto; padding: 20px; font-family: Arial, sans-serif;">
-      <h2 style="color: #2d5016; margin-bottom: 20px;">Health Assessment Call Summary</h2>
+      <h2 style="color: #2A9C95; margin-bottom: 20px;">Health Assessment Call Summary</h2>
       
-      <div style="background: #f0fdf4; border: 2px solid #00A651; border-radius: 8px; padding: 20px; margin-bottom: 20px;">
-        <h3 style="color: #00A651; margin-top: 0; text-transform: uppercase; font-size: 12px; letter-spacing: 1px;">Client Information</h3>
+      <div style="background: #EAF7F6; border: 2px solid #37B6AE; border-radius: 8px; padding: 20px; margin-bottom: 20px;">
+        <h3 style="color: #37B6AE; margin-top: 0; text-transform: uppercase; font-size: 12px; letter-spacing: 1px;">Client Information</h3>
         <table style="width: 100%; border-collapse: collapse;">
           <tr>
             <td style="padding: 8px 0; font-weight: bold; color: #166534;">Name:</td>
@@ -353,7 +353,7 @@ export function getHealthAssessmentEmailTemplate(options: {
       </div>
 
       <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 20px; margin-bottom: 20px;">
-        <h3 style="color: #2d5016; margin-top: 0;">Call Summary</h3>
+        <h3 style="color: #2A9C95; margin-top: 0;">Call Summary</h3>
         <table style="width: 100%; border-collapse: collapse;">
           <tr>
             <td style="padding: 8px 0; font-weight: bold; color: #64748b;">Duration:</td>
@@ -372,17 +372,17 @@ export function getHealthAssessmentEmailTemplate(options: {
 
       ${options.phaseProgress && options.phaseProgress.length > 0 ? `
       <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 20px; margin-bottom: 20px;">
-        <h3 style="color: #2d5016; margin-top: 0;">Phase Progress</h3>
+        <h3 style="color: #2A9C95; margin-top: 0;">Phase Progress</h3>
         ${options.phaseProgress.map((phase) => `
           <div style="margin-bottom: 12px;">
             <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
               <span style="font-weight: 600; color: #1e293b;">${phase.phase}</span>
-              <span style="color: ${phase.checked === phase.total && phase.total > 0 ? "#00A651" : "#64748b"}; font-weight: ${phase.checked === phase.total && phase.total > 0 ? "bold" : "normal"}">
+              <span style="color: ${phase.checked === phase.total && phase.total > 0 ? "#37B6AE" : "#64748b"}; font-weight: ${phase.checked === phase.total && phase.total > 0 ? "bold" : "normal"}">
                 ${phase.checked}/${phase.total}
               </span>
             </div>
             <div style="background: #e2e8f0; height: 8px; border-radius: 4px; overflow: hidden;">
-              <div style="background: ${phase.checked === phase.total && phase.total > 0 ? "#00A651" : "#94a3b8"}; height: 100%; width: ${phase.total > 0 ? (phase.checked / phase.total) * 100 : 0}%; border-radius: 4px;"></div>
+              <div style="background: ${phase.checked === phase.total && phase.total > 0 ? "#37B6AE" : "#94a3b8"}; height: 100%; width: ${phase.total > 0 ? (phase.checked / phase.total) * 100 : 0}%; border-radius: 4px;"></div>
             </div>
           </div>
         `).join("")}
@@ -391,9 +391,9 @@ export function getHealthAssessmentEmailTemplate(options: {
 
       ${Object.keys(options.notes).length > 0 ? `
       <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 20px; margin-bottom: 20px;">
-        <h3 style="color: #2d5016; margin-top: 0;">Your Notes</h3>
+        <h3 style="color: #2A9C95; margin-top: 0;">Your Notes</h3>
         ${Object.entries(options.notes).map(([key, value]) => value ? `
-          <div style="margin-bottom: 12px; padding: 12px; background: #f8fafc; border-left: 3px solid #00A651; border-radius: 4px;">
+          <div style="margin-bottom: 12px; padding: 12px; background: #f8fafc; border-left: 3px solid #37B6AE; border-radius: 4px;">
             <p style="margin: 0; color: #1e293b; white-space: pre-wrap;">${value}</p>
           </div>
         ` : "").join("")}
@@ -402,7 +402,7 @@ export function getHealthAssessmentEmailTemplate(options: {
 
       ${options.callNotes ? `
       <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 20px; margin-bottom: 20px;">
-        <h3 style="color: #2d5016; margin-top: 0;">Additional Notes</h3>
+        <h3 style="color: #2A9C95; margin-top: 0;">Additional Notes</h3>
         <p style="color: #1e293b; white-space: pre-wrap; line-height: 1.6;">${options.callNotes}</p>
       </div>
       ` : ""}

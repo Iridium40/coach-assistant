@@ -61,15 +61,15 @@ export interface DayPhase {
 
 export function getDayPhase(day: number): DayPhase {
   if (day <= 3) return { label: 'Critical Phase', color: '#f44336', bg: '#ffebee' }
-  if (day === 7) return { label: 'Week 1 Complete! 🎉', color: '#4caf50', bg: '#e8f5e9', milestone: true }
+  if (day === 7) return { label: 'Week 1 Complete! 🎉', color: '#37B6AE', bg: '#EAF7F6', milestone: true }
   if (day <= 7) return { label: 'Week 1', color: '#ff9800', bg: '#fff3e0' }
-  if (day === 14) return { label: '2 Weeks! ⭐', color: '#4caf50', bg: '#e8f5e9', milestone: true }
+  if (day === 14) return { label: '2 Weeks! ⭐', color: '#37B6AE', bg: '#EAF7F6', milestone: true }
   if (day <= 14) return { label: 'Week 2', color: '#2196f3', bg: '#e3f2fd' }
-  if (day === 21) return { label: '21 Days - Habit Formed! 💎', color: '#4caf50', bg: '#e8f5e9', milestone: true }
+  if (day === 21) return { label: '21 Days - Habit Formed! 💎', color: '#37B6AE', bg: '#EAF7F6', milestone: true }
   if (day <= 21) return { label: 'Week 3', color: '#9c27b0', bg: '#f3e5f5' }
   if (day === 30) return { label: 'ONE MONTH! 👑', color: '#ffd700', bg: '#fffde7', milestone: true }
   if (day < 30) return { label: 'Week 4', color: '#00bcd4', bg: '#e0f7fa' }
-  return { label: `Day ${day}`, color: '#4caf50', bg: '#e8f5e9' }
+  return { label: `Day ${day}`, color: '#37B6AE', bg: '#EAF7F6' }
 }
 
 export function getProgramDay(startDate: string): number {

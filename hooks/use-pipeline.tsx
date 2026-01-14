@@ -88,8 +88,8 @@ export function usePipeline() {
       {
         id: "client",
         label: "Client",
-        color: "#4caf50",
-        bgColor: "#e8f5e9",
+        color: "#37B6AE",
+        bgColor: "#EAF7F6",
         icon: "⭐",
         items: activeClients,
         count: activeClients.length,

@@ -4,11 +4,11 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  /* OPTAVIA Brand Colors - Matching Optavia.com */
-  --optavia-green: 142 100% 33%;        /* #00A651 - Primary green */
-  --optavia-green-dark: 142 100% 27%;   /* #008C45 - Darker green for hover */
-  --optavia-green-light: 120 40% 95%;    /* #E8F5E9 - Light green backgrounds */
-  --optavia-accent: 88 52% 55%;          /* #7CB342 - Secondary green accent */
+  /* Coach Assistant Hub Brand Colors */
+  --optavia-green: 176 53.6% 46.5%;        /* #37B6AE - Primary teal */
+  --optavia-green-dark: 176 57.6% 38.8%;   /* #2A9C95 - Hover/darker teal */
+  --optavia-green-light: 175 44.8% 94.3%;  /* #EAF7F6 - Light teal backgrounds */
+  --optavia-accent: 29 89.2% 60.0%;        /* #F4963E - Accent orange */
   --optavia-dark: 0 0% 20%;              /* #333333 - Dark text/headings */
   --optavia-gray: 0 0% 40%;              /* #666666 - Body text */
   --optavia-light-gray: 0 0% 60%;       /* #999999 - Muted text, icons */
@@ -162,7 +162,7 @@
   }
 }
 
-/* OPTAVIA Design System - Button Styles */
+/* Coach Assistant Hub Design System - Button Styles */
 @layer components {
   .btn-primary {
     @apply bg-[hsl(var(--optavia-green))] text-white hover:bg-[hsl(var(--optavia-green-dark))];
