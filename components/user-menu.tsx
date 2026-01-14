@@ -102,6 +102,11 @@ export function UserMenu({ onSettingsClick, onAnnouncementsClick, onReportsClick
             <p className="text-xs leading-none text-optavia-gray">
               {user?.email}
             </p>
+            {profile?.coach_rank && (
+              <p className="text-xs leading-none text-optavia-gray">
+                Rank: {profile.coach_rank}
+              </p>
+            )}
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator className="bg-gray-200" />

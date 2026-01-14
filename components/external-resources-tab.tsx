@@ -13,7 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { Pin, X, ExternalLink, Droplets, Dumbbell, Activity, Users, Wrench, Share2, BookOpen, Search } from "lucide-react"
+import { Pin, X, ExternalLink, Droplets, Dumbbell, Activity, Users, Wrench, Share2, BookOpen, Search, ClipboardList } from "lucide-react"
 import { SearchWithHistory } from "@/components/search-with-history"
 import { ToolCard } from "@/components/coach-tools/tool-card"
 import { WaterCalculator } from "@/components/coach-tools/water-calculator"
@@ -21,6 +21,7 @@ import { ExerciseGuide } from "@/components/coach-tools/exercise-guide"
 import { MetabolicHealthInfo } from "@/components/coach-tools/metabolic-health-info"
 import { ClientOnboardingDialog } from "@/components/coach-tools/client-onboarding-dialog"
 import { ClientTroubleshootingDialog } from "@/components/coach-tools/client-troubleshooting-dialog"
+import { ShareHALink } from "@/components/coach-tools/share-ha-link"
 import { SocialMediaPromptGenerator } from "@/components/social-media-prompt-generator"
 import { OPTAVIAReferenceGuide } from "@/components/coach-tools/optavia-reference-guide"
 import { createClient } from "@/lib/supabase/client"
@@ -38,6 +39,14 @@ interface Resource {
 
 // Coach Tools definitions
 const COACH_TOOLS = [
+  {
+    id: "health-assessment",
+    title: "Health Assessment Coaching Tool",
+    description: "Share your personalized Health Assessment link with prospects and review submissions via email.",
+    icon: ClipboardList,
+    component: ShareHALink,
+    expandMode: "dialog" as const,
+  },
   {
     id: "client-onboarding",
     title: "Client Onboarding Tool",

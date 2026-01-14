@@ -308,7 +308,14 @@ export function InviteManagement({ onClose }: InviteManagementProps) {
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="font-heading font-bold text-2xl sm:text-3xl text-optavia-dark">Invite Coach</h1>
+        <div className="space-y-1">
+          <h1 className="font-heading font-bold text-2xl sm:text-3xl text-optavia-dark">Invite Coach</h1>
+          {profile?.coach_rank && (
+            <p className="text-sm text-optavia-gray">
+              Your coach rank: <span className="font-semibold text-optavia-dark">{profile.coach_rank}</span>
+            </p>
+          )}
+        </div>
         {onClose && (
           <Button variant="ghost" size="icon" onClick={onClose}>
             <X className="h-4 w-4" />
@@ -359,6 +366,12 @@ export function InviteManagement({ onClose }: InviteManagementProps) {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
+            <div className="flex items-center justify-between rounded-lg border border-gray-200 bg-gray-50 px-3 py-2">
+              <span className="text-sm text-optavia-gray">Assigned coach rank</span>
+              <Badge variant="secondary" className="font-semibold">
+                {defaultCoachRank}
+              </Badge>
+            </div>
             {/* New Coach Toggle - at the top */}
             <div className="space-y-2">
               <Label htmlFor="fullName" className="text-optavia-dark">Full Name *</Label>
@@ -524,6 +537,11 @@ export function InviteManagement({ onClose }: InviteManagementProps) {
                                 <StatusIcon className="h-3 w-3" />
                                 {status.label}
                               </Badge>
+                              {invite.coach_rank && (
+                                <Badge variant="secondary" className="flex items-center gap-1">
+                                  {invite.coach_rank}
+                                </Badge>
+                              )}
                             </div>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">

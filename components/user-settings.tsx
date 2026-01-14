@@ -37,6 +37,7 @@ export function UserSettings({ onClose }: UserSettingsProps) {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [uploading, setUploading] = useState(false)
   const [fullName, setFullName] = useState(profile?.full_name || "")
+  const [coachRank, setCoachRank] = useState(profile?.coach_rank || "")
   const [optaviaId, setOptaviaId] = useState(profile?.optavia_id || "")
   const [phoneNumber, setPhoneNumber] = useState(profile?.phone_number || "")
   const [sponsorInfo, setSponsorInfo] = useState<SponsorInfo | null>(null)
@@ -46,6 +47,7 @@ export function UserSettings({ onClose }: UserSettingsProps) {
   useEffect(() => {
     if (profile) {
       setFullName(profile.full_name || "")
+      setCoachRank(profile.coach_rank || "")
       setOptaviaId(profile.optavia_id || "")
       setPhoneNumber(profile.phone_number || "")
     } else {
@@ -352,6 +354,18 @@ export function UserSettings({ onClose }: UserSettingsProps) {
                 className="bg-gray-100 border-gray-200 text-optavia-dark cursor-not-allowed opacity-70"
               />
               <p className="text-xs text-optavia-gray">Email cannot be changed</p>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="coachRank" className="text-optavia-dark">Coach Rank</Label>
+              <Input
+                id="coachRank"
+                value={coachRank || "Not set"}
+                readOnly
+                disabled
+                className="bg-gray-100 border-gray-200 text-optavia-dark cursor-not-allowed opacity-70"
+              />
+              <p className="text-xs text-optavia-gray">Coach rank is managed by admins</p>
             </div>
 
             <div className="space-y-2">

@@ -5,6 +5,7 @@ import { Footer } from "@/components/footer"
 import { Hero } from "@/components/hero"
 import { TrainingResourcesTab } from "@/components/training-resources-tab"
 import { Announcements } from "@/components/announcements"
+import { AcademyOverview } from "@/components/academy/AcademyOverview"
 import { useUserData } from "@/contexts/user-data-context"
 
 export default function TrainingPage() {
@@ -29,6 +30,7 @@ export default function TrainingPage() {
         <Hero />
         <Announcements />
         <div className="container mx-auto px-4 py-4 sm:py-8 bg-white">
+          <AcademyOverview />
           <TrainingResourcesTab />
         </div>
       </main>

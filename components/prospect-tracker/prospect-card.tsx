@@ -25,6 +25,7 @@ import {
   CalendarPlus,
   X,
   Send,
+  Share2,
   CheckCircle,
   Lightbulb,
   ChevronDown,
@@ -32,6 +33,7 @@ import {
 } from "lucide-react"
 import { ReminderButton } from "@/components/reminders-panel"
 import { ProspectContextualResources } from "@/components/resources"
+import { ShareHealthAssessment } from "@/components/share-health-assessment"
 import {
   statusConfig,
   sourceOptions,
@@ -66,6 +68,7 @@ export function ProspectCard({
   onToast,
 }: ProspectCardProps) {
   const [showResources, setShowResources] = useState(false)
+  const [showShareAssessment, setShowShareAssessment] = useState(false)
   const config = statusConfig[prospect.status]
   const isOverdue = daysUntil !== null && daysUntil < 0
 
@@ -204,7 +207,7 @@ export function ProspectCard({
         )}
 
         {/* Action Buttons - All on same row */}
-        <div className="mt-4 flex gap-2">
+        <div className="mt-4 flex flex-col sm:flex-row gap-2">
           {/* Status Select */}
           <Select
             value={prospect.status}
@@ -240,6 +243,20 @@ export function ProspectCard({
             >
               <CalendarPlus className="h-4 w-4 mr-1" />
               <span className="text-xs sm:text-sm">Schedule</span>
+            </Button>
+          )}
+
+          {/* Send Health Assessment Link */}
+          {prospect.status !== "converted" && prospect.status !== "coach" && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowShareAssessment(true)}
+              className="flex-1 text-purple-600 border-purple-200 hover:bg-purple-50"
+              title="Send Health Assessment"
+            >
+              <Share2 className="h-4 w-4 mr-1" />
+              <span className="text-xs sm:text-sm">Send HA</span>
             </Button>
           )}
         </div>
@@ -306,6 +323,14 @@ export function ProspectCard({
             />
           </CollapsibleContent>
         </Collapsible>
+
+        {/* Share Health Assessment Modal */}
+        <ShareHealthAssessment
+          open={showShareAssessment}
+          onOpenChange={setShowShareAssessment}
+          recipientName={prospect.label}
+          initialPhone={prospect.phone || ""}
+        />
       </CardContent>
     </Card>
   )
