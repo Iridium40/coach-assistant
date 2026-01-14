@@ -56,6 +56,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        <meta
+          name="impact-site-verification"
+          value="e0712f42-87d1-4221-b367-98caf8613037"
+        />
+      </head>
       <body className={`${montserrat.variable} ${openSans.variable} font-sans antialiased`}>
         <Providers>
           {children}

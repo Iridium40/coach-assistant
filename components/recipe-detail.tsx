@@ -1,12 +1,14 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card } from "@/components/ui/card"
-import { ArrowLeft, Clock, Users, Heart, ChefHat, Share2, Copy, Check } from "lucide-react"
+import { ArrowLeft, Clock, Users, Heart, ChefHat, Share2, Copy, Check, ShoppingCart } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import type { Recipe, UserData } from "@/lib/types"
+import { keyForIngredient, recipeSentStorageKey } from "@/lib/instacart/ingredient"
+import { RetailerPickerDialog, getSavedRetailer } from "@/components/instacart/retailer-picker-dialog"
 
 interface RecipeDetailProps {
   recipe: Recipe
@@ -20,6 +22,131 @@ export function RecipeDetail({ recipe, userData, setUserData, toggleFavoriteReci
   const { toast } = useToast()
   const [copied, setCopied] = useState(false)
   const isFavorite = userData.favoriteRecipes.includes(recipe.id)
+  const [instacartLoading, setInstacartLoading] = useState(false)
+  const [showRetailerPicker, setShowRetailerPicker] = useState(false)
+  const [showOrdered, setShowOrdered] = useState(false)
+  const [selectedKeys, setSelectedKeys] = useState<Set<string>>(new Set())
+  const [sentKeys, setSentKeys] = useState<Set<string>>(new Set())
+  const [selectedRetailer, setSelectedRetailer] = useState<{ id: string; name: string } | null>(null)
+
+  const sentStorageKey = useMemo(() => recipeSentStorageKey(recipe.id), [recipe.id])
+
+  useEffect(() => {
+    // Load persisted "sent to Instacart" set for this recipe
+    try {
+      const raw = window.localStorage.getItem(sentStorageKey)
+      if (raw) {
+        const parsed = JSON.parse(raw)
+        if (Array.isArray(parsed)) {
+          setSentKeys(new Set(parsed))
+        }
+      }
+    } catch {
+      // ignore
+    }
+    setSelectedRetailer(getSavedRetailer())
+    setSelectedKeys(new Set())
+  }, [sentStorageKey, recipe.id])
+
+  const visibleIngredients = useMemo(() => {
+    const items = recipe.ingredients.map((nameRaw) => ({
+      nameRaw,
+      key: keyForIngredient(nameRaw),
+    }))
+    if (showOrdered) return items
+    return items.filter((i) => !sentKeys.has(i.key))
+  }, [recipe.ingredients, sentKeys, showOrdered])
+
+  const selectedCount = useMemo(() => selectedKeys.size, [selectedKeys])
+
+  const persistSent = (next: Set<string>) => {
+    setSentKeys(next)
+    try {
+      window.localStorage.setItem(sentStorageKey, JSON.stringify(Array.from(next)))
+    } catch {
+      // ignore
+    }
+  }
+
+  const toggleIngredient = (key: string) => {
+    setSelectedKeys((prev) => {
+      const next = new Set(prev)
+      if (next.has(key)) next.delete(key)
+      else next.add(key)
+      return next
+    })
+  }
+
+  const clearSelection = () => setSelectedKeys(new Set())
+
+  const selectAllVisible = () => {
+    setSelectedKeys(new Set(visibleIngredients.map((i) => i.key)))
+  }
+
+  const resetOrdered = () => {
+    persistSent(new Set())
+    clearSelection()
+    toast({ title: "Reset", description: "Ordered ingredients restored." })
+  }
+
+  const createInstacartCart = async () => {
+    if (selectedKeys.size === 0) {
+      toast({
+        title: "Select ingredients",
+        description: "Choose at least one ingredient to order.",
+        variant: "destructive",
+      })
+      return
+    }
+
+    const retailer = selectedRetailer || getSavedRetailer()
+    if (!retailer) {
+      setShowRetailerPicker(true)
+      return
+    }
+
+    const selected = recipe.ingredients
+      .map((nameRaw) => ({ nameRaw, key: keyForIngredient(nameRaw) }))
+      .filter((i) => selectedKeys.has(i.key))
+
+    setInstacartLoading(true)
+    try {
+      const resp = await fetch("/api/instacart/cart/create", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          retailerId: retailer.id,
+          items: selected.map((i) => ({ nameRaw: i.nameRaw, count: 1 })),
+        }),
+      })
+      const data = await resp.json()
+      if (!resp.ok) throw new Error(data?.error || "Failed to create cart")
+
+      const checkoutUrl: string | undefined = data?.checkoutUrl
+      if (!checkoutUrl) throw new Error("Missing checkout URL")
+
+      // Open checkout then mark as sent/removed
+      window.open(checkoutUrl, "_blank", "noopener,noreferrer")
+
+      const nextSent = new Set(sentKeys)
+      for (const i of selected) nextSent.add(i.key)
+      persistSent(nextSent)
+      clearSelection()
+
+      toast({
+        title: "Instacart cart created",
+        description: `Opened checkout at ${retailer.name}.`,
+      })
+    } catch (e: any) {
+      toast({
+        title: "Instacart error",
+        description: e?.message || "Couldn't create Instacart cart.",
+        variant: "destructive",
+      })
+    } finally {
+      setInstacartLoading(false)
+    }
+  }
 
   // Format ingredients for sharing
   const getIngredientsText = () => {
@@ -182,14 +309,79 @@ export function RecipeDetail({ recipe, userData, setUserData, toggleFavoriteReci
         <div>
           <h2 className="font-heading font-bold text-xl sm:text-2xl text-optavia-dark mb-3 sm:mb-4">Ingredients</h2>
           <Card className="p-4 sm:p-6">
+            <div className="flex flex-col gap-2 mb-3">
+              <div className="flex items-center justify-between gap-2">
+                <div className="text-xs text-optavia-gray">
+                  {selectedCount > 0 ? `${selectedCount} selected` : "Select ingredients to order via Instacart"}
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button variant="ghost" size="sm" className="h-8 px-2" onClick={selectAllVisible}>
+                    Select all
+                  </Button>
+                  <Button variant="ghost" size="sm" className="h-8 px-2" onClick={clearSelection}>
+                    Clear
+                  </Button>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between gap-2">
+                <div className="text-xs text-optavia-gray">
+                  Store:{" "}
+                  <button
+                    type="button"
+                    className="font-medium text-[hsl(var(--optavia-green))] hover:underline"
+                    onClick={() => setShowRetailerPicker(true)}
+                  >
+                    {selectedRetailer?.name || "Choose store"}
+                  </button>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-8 px-2"
+                    onClick={() => setShowOrdered((v) => !v)}
+                  >
+                    {showOrdered ? "Hide ordered" : "Show ordered"}
+                  </Button>
+                  <Button variant="ghost" size="sm" className="h-8 px-2" onClick={resetOrdered}>
+                    Reset
+                  </Button>
+                </div>
+              </div>
+            </div>
+
             <ul className="space-y-2 mb-4">
-              {recipe.ingredients.map((ingredient, index) => (
-                <li key={index} className="flex gap-2 text-sm sm:text-base text-optavia-gray">
-                  <span className="text-[hsl(var(--optavia-green))] flex-shrink-0">•</span>
-                  <span className="break-words">{ingredient}</span>
-                </li>
-              ))}
+              {visibleIngredients.map((i) => {
+                const isSent = sentKeys.has(i.key)
+                const isSelected = selectedKeys.has(i.key)
+                return (
+                  <li key={i.key} className="flex items-start gap-2 text-sm sm:text-base text-optavia-gray">
+                    <input
+                      type="checkbox"
+                      className="mt-1 h-4 w-4 accent-[hsl(var(--optavia-green))]"
+                      checked={isSelected}
+                      onChange={() => toggleIngredient(i.key)}
+                      disabled={isSent && !showOrdered}
+                    />
+                    <span className={`break-words ${isSent ? "line-through opacity-60" : ""}`}>{i.nameRaw}</span>
+                  </li>
+                )
+              })}
+              {visibleIngredients.length === 0 && (
+                <li className="text-sm text-optavia-gray text-center py-3">No ingredients to show.</li>
+              )}
             </ul>
+
+            <Button
+              onClick={createInstacartCart}
+              disabled={instacartLoading || selectedCount === 0}
+              className="w-full gap-2 mb-3 bg-[hsl(var(--optavia-green))] hover:bg-[hsl(var(--optavia-green-dark))]"
+            >
+              {instacartLoading ? <Check className="h-4 w-4" /> : <ShoppingCart className="h-4 w-4" />}
+              {instacartLoading ? "Creating cart..." : "Create Instacart cart (selected)"}
+            </Button>
+
             {/* Share/Copy Buttons */}
             <div className="flex gap-2 pt-3 border-t border-gray-200">
               <Button
@@ -233,6 +425,12 @@ export function RecipeDetail({ recipe, userData, setUserData, toggleFavoriteReci
           </Card>
         </div>
       </div>
+
+      <RetailerPickerDialog
+        open={showRetailerPicker}
+        onOpenChange={setShowRetailerPicker}
+        onSelected={(r) => setSelectedRetailer(r)}
+      />
     </div>
   )
 }
