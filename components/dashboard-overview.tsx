@@ -75,7 +75,7 @@ const EXTERNAL_RESOURCES: { id: string; title: string; url: string }[] = [
 ]
 
 export function DashboardOverview() {
-  const { user, profile, badges, recipes, favoriteRecipes } = useUserData()
+  const { user, profile, badges, recipes, favoriteRecipes, completedResources } = useUserData()
   const supabase = createClient()
 
   // CRM hooks
@@ -270,6 +270,7 @@ export function DashboardOverview() {
           user={user}
           userRank={profile?.coach_rank || null}
           isNewCoach={profile?.is_new_coach}
+          completedResources={completedResources}
           clients={clients}
           prospects={prospects}
           upcomingMeetings={upcomingMeetings}

@@ -23,17 +23,18 @@ import {
   Bell,
 } from "lucide-react"
 import { useReminders } from "@/hooks/use-reminders"
-import { useTrainingResources, meetsRankRequirement, type TrainingResource, type TrainingCategory } from "@/hooks/use-training-resources"
 import { getProgramDay, getDayPhase } from "@/hooks/use-clients"
 import type { User } from "@supabase/supabase-js"
 import type { Prospect } from "@/hooks/use-prospects"
 import type { ZoomCall } from "@/lib/types"
 import type { ExpandedZoomCall } from "@/lib/expand-recurring-events"
+import { ACADEMY_MODULES, ACADEMY_RESOURCE_IDS, getAcademyProgress } from "@/lib/academy-utils"
 
 interface TodaysFocusProps {
   user: User | null
   userRank: string | null
   isNewCoach?: boolean
+  completedResources: string[]
   clients: any[]
   prospects: Prospect[]
   upcomingMeetings: ExpandedZoomCall[]
@@ -47,6 +48,7 @@ export function TodaysFocus({
   user,
   userRank,
   isNewCoach,
+  completedResources,
   clients,
   prospects,
   upcomingMeetings,
@@ -55,14 +57,6 @@ export function TodaysFocus({
   toggleTouchpoint,
   onCelebrateClick,
 }: TodaysFocusProps) {
-  const {
-    resources,
-    categories,
-    isCompleted,
-    progress,
-    getCategoryProgress,
-  } = useTrainingResources(user, userRank)
-
   const { reminders = [], completeReminder, isOverdue, isDueToday } = useReminders()
 
   // Get today's reminders (due today or overdue, not completed)
@@ -76,34 +70,24 @@ export function TodaysFocus({
   const todayEnd = new Date()
   todayEnd.setHours(23, 59, 59, 999)
 
-  // Get training recommendation
-  const trainingRecommendation = useMemo(() => {
-    if (!categories.length || !resources.length) return null
+  // Academy progress + next module (based on academy-resource-* completions)
+  const academyProgress = useMemo(() => {
+    return getAcademyProgress(completedResources || [])
+  }, [completedResources])
 
-    const accessibleCategories = categories
-      .filter(cat => cat.is_active && meetsRankRequirement(userRank, cat.required_rank))
-      .sort((a, b) => a.sort_order - b.sort_order)
+  const nextAcademyResourceId = useMemo(() => {
+    return ACADEMY_RESOURCE_IDS.find((id) => !completedResources.includes(id)) || null
+  }, [completedResources])
 
-    for (const category of accessibleCategories) {
-      const categoryResources = resources
-        .filter(r => r.category === category.name)
-        .sort((a, b) => a.sort_order - b.sort_order)
+  const nextAcademyModule = useMemo(() => {
+    if (!nextAcademyResourceId) return null
+    const num = nextAcademyResourceId.split("-").pop() // "1".."6"
+    const moduleId = num ? `module-${num}` : null
+    if (!moduleId) return null
+    return ACADEMY_MODULES.find((m) => m.id === moduleId) || { id: moduleId, title: "Academy Module", requiredRank: null }
+  }, [nextAcademyResourceId])
 
-      const nextResource = categoryResources.find(r => !isCompleted(r.id))
-
-      if (nextResource) {
-        return {
-          category,
-          nextResource,
-          categoryProgress: getCategoryProgress(category.name),
-          overallProgress: progress,
-        }
-      }
-    }
-    return null
-  }, [categories, resources, userRank, isCompleted, getCategoryProgress, progress])
-
-  const isTrainingComplete = !trainingRecommendation && progress.total > 0 && progress.completed >= progress.total
+  const isAcademyComplete = academyProgress.total > 0 && academyProgress.completed >= academyProgress.total
 
   // Get clients needing touchpoints (limited)
   const clientsNeedingAction = clients
@@ -173,22 +157,22 @@ export function TodaysFocus({
             <Target className="h-5 w-5 text-[hsl(var(--optavia-green))]" />
             Today's Focus
           </CardTitle>
-          {!isTrainingComplete && progress.total > 0 && (
+          {!isAcademyComplete && academyProgress.total > 0 && (
             <Badge variant="secondary" className="bg-white">
-              Training: {progress.completed}/{progress.total}
+              Academy: {academyProgress.completed}/{academyProgress.total}
             </Badge>
           )}
         </div>
       </CardHeader>
       <CardContent className="pt-0 space-y-4">
-        {/* Training Section */}
-        {isTrainingComplete ? (
+        {/* Academy Section */}
+        {isAcademyComplete ? (
           <div className="flex items-center gap-3 p-3 bg-green-100 rounded-lg border border-green-200">
             <CheckCircle className="h-6 w-6 text-green-600 flex-shrink-0" />
             <div className="flex-1">
-              <p className="font-semibold text-green-800 text-sm">All Training Complete! 🎉</p>
+              <p className="font-semibold text-green-800 text-sm">Academy Complete! 🎉</p>
               <p className="text-xs text-green-700">
-                {progress.total} modules completed
+                {academyProgress.total} modules completed
               </p>
             </div>
             <Link href="/training">
@@ -197,27 +181,27 @@ export function TodaysFocus({
               </Button>
             </Link>
           </div>
-        ) : trainingRecommendation ? (
+        ) : nextAcademyModule ? (
           <div className="bg-white rounded-lg p-3 border border-gray-200">
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-2">
                 <GraduationCap className="h-4 w-4 text-[hsl(var(--optavia-green))]" />
-                <span className="text-sm font-medium text-gray-700">Continue Training</span>
+                <span className="text-sm font-medium text-gray-700">Continue Academy</span>
               </div>
               <span className="text-xs text-[hsl(var(--optavia-green))] font-bold">
-                {progress.percentage}%
+                {academyProgress.percentage}%
               </span>
             </div>
-            <Progress value={progress.percentage} className="h-1.5 mb-2" />
+            <Progress value={academyProgress.percentage} className="h-1.5 mb-2" />
             <div className="flex items-center gap-2 p-2 bg-green-50 rounded border border-green-100">
-              <span className="text-lg">{trainingRecommendation.category.icon}</span>
+              <span className="text-lg">🎓</span>
               <div className="flex-1 min-w-0">
                 <p className="text-xs text-gray-500">Up Next</p>
                 <p className="text-sm font-medium text-gray-900 truncate">
-                  {trainingRecommendation.nextResource.title}
+                  {nextAcademyModule.title}
                 </p>
               </div>
-              <Link href="/training">
+              <Link href={`/academy/${nextAcademyModule.id}`}>
                 <Button size="sm" className="bg-[hsl(var(--optavia-green))] hover:bg-[hsl(var(--optavia-green-dark))] text-white text-xs">
                   Start
                   <ChevronRight className="h-3 w-3 ml-1" />
@@ -228,7 +212,7 @@ export function TodaysFocus({
         ) : null}
 
         {/* Divider if we have both sections */}
-        {(isTrainingComplete || trainingRecommendation) && (hasActionItems || !hasActionItems) && (
+        {(isAcademyComplete || nextAcademyModule) && (hasActionItems || !hasActionItems) && (
           <div className="border-t border-green-200" />
         )}
 
