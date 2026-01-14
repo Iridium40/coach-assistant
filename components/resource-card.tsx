@@ -10,7 +10,7 @@ interface ResourceCardProps {
   description: string
   url: string
   buttonText: string
-  features?: string[]
+  features?: string[] | { tags?: string[]; type?: string; [key: string]: any } | null
   isPinned?: boolean
   onTogglePin?: () => void
 }
@@ -25,8 +25,15 @@ export function ResourceCard({
   isPinned, 
   onTogglePin 
 }: ResourceCardProps) {
+  // Handle both legacy array format and new JSONB object format
+  const featuresList = Array.isArray(features) 
+    ? features 
+    : (features?.tags && Array.isArray(features.tags))
+      ? features.tags 
+      : []
+  
   // Show only top 3 features for compactness
-  const displayFeatures = features?.slice(0, 3) || []
+  const displayFeatures = featuresList.slice(0, 3)
 
   return (
     <Card className="group relative overflow-hidden bg-white border-2 border-gray-200 hover:border-[hsl(var(--optavia-green))] transition-all duration-300 hover:shadow-lg">

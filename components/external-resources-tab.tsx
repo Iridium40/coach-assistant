@@ -33,7 +33,7 @@ interface Resource {
   url: string
   buttonText: string
   category: string
-  features: string[]
+  features: string[] | { tags?: string[]; type?: string; [key: string]: any } | null
 }
 
 // Coach Tools definitions
@@ -213,7 +213,7 @@ export function ExternalResourcesTab() {
         : r.url,
       buttonText: r.button_text,
       category: r.category,
-      features: r.features || [],
+      features: r.features,
       sort_order: r.sort_order,
     })).filter(r => {
       // Filter out dynamic resources if user doesn't meet the condition
@@ -276,7 +276,12 @@ export function ExternalResourcesTab() {
       if (searchQuery) {
         const query = searchQuery.toLowerCase()
         // Search in title, description, category, and tags
-        const tags = (resource.features as any)?.tags || []
+        // Handle both legacy array format and new JSONB object format
+        const tags = Array.isArray(resource.features) 
+          ? resource.features 
+          : (resource.features?.tags && Array.isArray(resource.features.tags))
+            ? resource.features.tags 
+            : []
         const matchesSearch = 
           resource.title.toLowerCase().includes(query) ||
           resource.description.toLowerCase().includes(query) ||
