@@ -31,7 +31,7 @@ export function AcademyOverview() {
             </div>
             <div className="flex-1">
               <CardTitle className="text-white text-2xl sm:text-3xl font-bold">
-                Coaching Amplifier Academy
+                Coach Assistant Academy
               </CardTitle>
               <CardDescription className="text-white/90 text-base sm:text-lg mt-1">
                 Structured courses to elevate your coaching career

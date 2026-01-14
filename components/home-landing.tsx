@@ -12,17 +12,20 @@ export function HomeLanding() {
         <div className="container mx-auto px-4">
           <div className="text-center max-w-4xl mx-auto">
             <div className="mb-8">
-              <img 
-                src="/branding/ca_logo.png" 
-                alt="Coaching Amplifier" 
-                className="h-20 sm:h-24 md:h-32 w-auto mx-auto"
-              />
+              <picture>
+                <source srcSet="/branding/ca_logo_large.svg" type="image/svg+xml" />
+                <img
+                  src="/branding/ca_logo_large.png"
+                  alt="Coach Assistant Hub"
+                  className="h-20 sm:h-24 md:h-32 w-auto mx-auto"
+                />
+              </picture>
             </div>
             <h1 className="font-heading font-bold text-3xl sm:text-4xl md:text-5xl lg:text-6xl text-optavia-dark mb-4 sm:mb-6">
-              Welcome to Coaching Amplifier
+              Welcome to Coach Assistant Hub
             </h1>
             <p className="text-lg sm:text-xl md:text-2xl text-optavia-gray mb-8 sm:mb-12 max-w-2xl mx-auto">
-              Your comprehensive resource center for coaching success, training modules, and delicious Lean & Green recipes
+              Your hub for coaching success—training, tools, and delicious Lean & Green recipes
             </p>
             <Button
               size="lg"

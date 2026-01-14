@@ -37,7 +37,7 @@ export function generateGenericICSContent(event: CalendarEvent, attendeeEmail?: 
   const lines = [
     'BEGIN:VCALENDAR',
     'VERSION:2.0',
-    'PRODID:-//Coaching Amplifier//Calendar//EN',
+    'PRODID:-//Coach Assistant Hub//Calendar//EN',
     'CALSCALE:GREGORIAN',
     'METHOD:REQUEST',
     'BEGIN:VEVENT',
@@ -60,7 +60,7 @@ export function generateGenericICSContent(event: CalendarEvent, attendeeEmail?: 
   if (organizerEmail) {
     lines.push(`ORGANIZER;CN=Coach:mailto:${organizerEmail}`)
   } else {
-    lines.push(`ORGANIZER;CN=Coaching Amplifier:mailto:noreply@coachingamplifier.com`)
+    lines.push(`ORGANIZER;CN=Coach Assistant Hub:mailto:noreply@coachingamplifier.com`)
   }
   
   // Add attendee (the client/prospect receiving the invite)
@@ -236,7 +236,7 @@ export function generateICSContent(call: ZoomCall): string {
   const icsContent = [
     'BEGIN:VCALENDAR',
     'VERSION:2.0',
-    'PRODID:-//Coaching Amplifier//Zoom Calls//EN',
+    'PRODID:-//Coach Assistant Hub//Zoom Calls//EN',
     'CALSCALE:GREGORIAN',
     'METHOD:PUBLISH',
     'BEGIN:VEVENT',
@@ -248,7 +248,7 @@ export function generateICSContent(call: ZoomCall): string {
     `DESCRIPTION:${escapeICS(description)}`,
     call.zoom_link ? `URL:${call.zoom_link}` : '',
     'STATUS:CONFIRMED',
-    `ORGANIZER;CN=Coaching Amplifier:mailto:noreply@coachingamplifier.com`,
+    `ORGANIZER;CN=Coach Assistant Hub:mailto:noreply@coachingamplifier.com`,
     'END:VEVENT',
     'END:VCALENDAR'
   ].filter(Boolean).join('\r\n')

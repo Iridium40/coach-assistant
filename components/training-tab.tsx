@@ -136,7 +136,7 @@ export const TrainingTab = memo(function TrainingTab({ userData, setUserData, on
         </p>
       </div>
 
-      {/* Coaching Amplifier Academy - Prominent Section (Hidden for training-only orgs) */}
+      {/* Coach Assistant Academy - Prominent Section (Hidden for training-only orgs) */}
       {academyModules.length > 0 && !isTrainingOnly && (
         <div className="mb-8 sm:mb-12">
           <Card className="bg-gradient-to-br from-[hsl(var(--optavia-green))] to-[hsl(var(--optavia-green-dark))] border-0 shadow-xl">
@@ -147,7 +147,7 @@ export const TrainingTab = memo(function TrainingTab({ userData, setUserData, on
                 </div>
                 <div className="flex-1">
                   <CardTitle className="text-white text-2xl sm:text-3xl font-bold">
-                    Coaching Amplifier Academy
+                    Coach Assistant Academy
                   </CardTitle>
                   <CardDescription className="text-white/90 text-base sm:text-lg mt-1">
                     Structured training courses to elevate your coaching career

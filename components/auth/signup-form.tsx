@@ -233,7 +233,7 @@ export function SignupForm({ onSuccess, onSwitchToLogin, inviteKey }: SignupForm
       <CardHeader>
         <CardTitle className="text-2xl font-heading text-optavia-dark">Create Account</CardTitle>
         <CardDescription className="text-optavia-gray">
-          {inviteKey ? "Sign up with your invite link" : "Sign up for Coaching Amplifier"}
+          {inviteKey ? "Sign up with your invite link" : "Sign up for Coach Assistant Hub"}
         </CardDescription>
       </CardHeader>
       <CardContent>

@@ -18,11 +18,14 @@ export default function LoginPage() {
       <div className="flex-1 flex flex-col items-center justify-center px-4 py-12">
         {/* Logo */}
         <div className="mb-8 sm:mb-12">
-          <img 
-            src="/branding/ca_logo.png" 
-            alt="Coaching Amplifier" 
-            className="h-16 sm:h-20 md:h-24 w-auto mx-auto"
-          />
+          <picture>
+            <source srcSet="/branding/ca_logo_large.svg" type="image/svg+xml" />
+            <img
+              src="/branding/ca_logo_large.png"
+              alt="Coach Assistant Hub"
+              className="h-16 sm:h-20 md:h-24 w-auto mx-auto"
+            />
+          </picture>
         </div>
 
         <div className="w-full max-w-md space-y-4">

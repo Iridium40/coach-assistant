@@ -44,7 +44,7 @@ export function LoginForm({ onSuccess, onSwitchToSignup }: LoginFormProps) {
     <Card className="w-full max-w-md mx-auto bg-white border border-gray-200 shadow-lg">
       <CardHeader>
         <CardTitle className="text-2xl font-heading text-optavia-dark">Welcome Back</CardTitle>
-        <CardDescription className="text-optavia-gray">Sign in to your Coaching Amplifier account</CardDescription>
+        <CardDescription className="text-optavia-gray">Sign in to your Coach Assistant Hub account</CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">

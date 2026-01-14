@@ -53,8 +53,8 @@ export function getEmailHeader(title: string, subtitle?: string): string {
       }
     </style>
     <div class="email-header" style="background-color: #ffffff; padding: 30px 20px; text-align: center; border-bottom: 3px solid #2d5016;">
-      <img src="${logoUrl}" alt="Coaching Amplifier" class="email-logo" style="max-width: 300px; height: auto; margin-bottom: 20px; display: block; margin-left: auto; margin-right: auto;" />
-      <img src="${darkLogoUrl}" alt="Coaching Amplifier" class="email-logo-dark" style="max-width: 300px; height: auto; margin-bottom: 20px; display: none; margin-left: auto; margin-right: auto;" />
+      <img src="${logoUrl}" alt="Coach Assistant Hub" class="email-logo" style="max-width: 300px; height: auto; margin-bottom: 20px; display: block; margin-left: auto; margin-right: auto;" />
+      <img src="${darkLogoUrl}" alt="Coach Assistant Hub" class="email-logo-dark" style="max-width: 300px; height: auto; margin-bottom: 20px; display: none; margin-left: auto; margin-right: auto;" />
       ${subtitle ? `<p class="email-header-text" style="color: #666; font-size: 16px; margin: 10px 0 0 0;">${subtitle}</p>` : ""}
     </div>
   `
@@ -69,13 +69,13 @@ export function getEmailFooter(): string {
   return `
     <div class="email-border" style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #eee; text-align: center;">
       <p class="email-text-muted" style="color: #666; font-size: 14px; margin: 10px 0;">
-        <a href="${appUrl}" class="email-link" style="color: #2d5016; text-decoration: none;">Coaching Amplifier</a>
+        <a href="${appUrl}" class="email-link" style="color: #2d5016; text-decoration: none;">Coach Assistant Hub</a>
       </p>
       <p class="email-text-muted" style="color: #999; font-size: 12px; margin: 5px 0;">
         Amplify your coaching business with powerful resources and tools
       </p>
       <p class="email-text-muted" style="color: #999; font-size: 12px; margin: 20px 0 0 0;">
-        © ${new Date().getFullYear()} Coaching Amplifier. All rights reserved.
+        © ${new Date().getFullYear()} Coach Assistant Hub. All rights reserved.
       </p>
     </div>
   `
@@ -100,7 +100,7 @@ export function getEmailWrapper(content: string, title?: string): string {
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <meta name="color-scheme" content="light dark">
         <meta name="supported-color-schemes" content="light dark">
-        <title>${title || "Coaching Amplifier"}</title>
+        <title>${title || "Coach Assistant Hub"}</title>
         <style>
           @media (prefers-color-scheme: dark) {
             .email-body {
@@ -159,7 +159,7 @@ export function getModuleCompletionEmailTemplate(options: {
 
   const header = getEmailHeader(
     hasUnlockedModule ? "Achievement Unlocked!" : "Module Complete!",
-    "You've completed a Coaching Amplifier Academy module!"
+    "You've completed a Coach Assistant Academy module!"
   )
 
   const unlockedModuleSection = hasUnlockedModule ? `
@@ -214,7 +214,7 @@ export function getModuleCompletionEmailTemplate(options: {
       
       <p class="email-text" style="font-size: 16px; color: #333; margin: 0 0 30px 0;">
         ${hasUnlockedModule
-          ? `You're making incredible progress in the Coaching Amplifier Academy! Ready to take on the next challenge?`
+          ? `You're making incredible progress in the Coach Assistant Academy! Ready to take on the next challenge?`
           : `Your dedication to learning and growth is impressive. Keep up the excellent work as you continue your coaching journey!`
         }
       </p>
@@ -245,13 +245,13 @@ export function getModuleCompletionEmailTemplate(options: {
       
       <p class="email-text" style="font-size: 16px; color: #333; margin: 30px 0 0 0;">
         Best regards,<br>
-        <strong>The Coaching Amplifier Team</strong>
+        <strong>The Coach Assistant Hub Team</strong>
       </p>
     </div>
   `
 
   const footer = getEmailFooter()
-  const html = getEmailWrapper(header + bodyContent + footer, "Module Complete - Coaching Amplifier")
+  const html = getEmailWrapper(header + bodyContent + footer, "Module Complete - Coach Assistant Hub")
 
   const text = `
 Congratulations! You've completed a module!
@@ -264,7 +264,7 @@ ${hasUnlockedModule
 }
 
 ${hasUnlockedModule
-  ? `You're making incredible progress in the Coaching Amplifier Academy! Ready to take on the next challenge?`
+  ? `You're making incredible progress in the Coach Assistant Academy! Ready to take on the next challenge?`
   : `Your dedication to learning and growth is impressive. Keep up the excellent work as you continue your coaching journey!`
 }
 
@@ -279,7 +279,7 @@ ${hasUnlockedModule
 }
 
 Best regards,
-The Coaching Amplifier Team
+The Coach Assistant Hub Team
   `.trim()
 
   return { subject, html, text }
@@ -420,7 +420,7 @@ export function getHealthAssessmentEmailTemplate(options: {
   `
 
   const footer = getEmailFooter()
-  const html = getEmailWrapper(header + bodyContent + footer, "Health Assessment Results - Coaching Amplifier")
+  const html = getEmailWrapper(header + bodyContent + footer, "Health Assessment Results - Coach Assistant Hub")
 
   const text = `
 Health Assessment Call Results
@@ -443,7 +443,7 @@ Next Steps: ${options.callOutcome === "enrolled"
   : "Continue nurturing the relationship and provide value."}
 
 ---
-Coaching Amplifier
+Coach Assistant Hub
   `.trim()
 
   return { subject, html, text }

@@ -29,7 +29,7 @@ export function Onboarding({ onComplete }: OnboardingProps) {
           style={{ opacity: 0.5 }}
         />
         <div className="relative container mx-auto px-4 h-full flex flex-col items-center justify-center text-center text-white z-10">
-          <h1 className="font-heading font-bold text-2xl sm:text-3xl md:text-4xl lg:text-5xl mb-3 sm:mb-4 px-4">Welcome to Coaching Amplifier</h1>
+          <h1 className="font-heading font-bold text-2xl sm:text-3xl md:text-4xl lg:text-5xl mb-3 sm:mb-4 px-4">Welcome to Coach Assistant Hub</h1>
           <p className="text-base sm:text-lg md:text-xl max-w-2xl px-4">
             Your comprehensive resource center for coaching success, training modules, and delicious Lean & Green
             recipes

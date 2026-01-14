@@ -25,7 +25,7 @@ const disclaimerConfig: Record<DisclaimerType, {
   financial: {
     icon: DollarSign,
     defaultTitle: "Financial Disclaimer",
-    defaultContent: "The financial guidance provided here is for general informational purposes only and is based on common practices within the health coaching industry. This is not professional tax, legal, accounting, or financial advice. As an independent contractor (1099), your tax situation is unique. We strongly recommend consulting with a qualified tax professional, CPA, or financial advisor for advice specific to your situation. Coaching Amplifier is not liable for any financial decisions made based on this information.",
+    defaultContent: "The financial guidance provided here is for general informational purposes only and is based on common practices within the health coaching industry. This is not professional tax, legal, accounting, or financial advice. As an independent contractor (1099), your tax situation is unique. We strongly recommend consulting with a qualified tax professional, CPA, or financial advisor for advice specific to your situation. Coach Assistant Hub is not liable for any financial decisions made based on this information.",
     bgColor: "bg-amber-50",
     borderColor: "border-amber-400",
     textColor: "text-amber-900",

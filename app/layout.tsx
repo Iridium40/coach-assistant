@@ -19,7 +19,7 @@ const openSans = Open_Sans({
 })
 
 export const metadata: Metadata = {
-  title: "Coaching Amplifier",
+  title: "Coach Assistant Hub",
   description: "Support for coaches with resources, training modules, and Lean & Green recipes",
   generator: "v0.app",
   metadataBase: new URL("http://www.coachingamplifier.com"),
@@ -27,10 +27,10 @@ export const metadata: Metadata = {
     canonical: "/",
   },
   openGraph: {
-    title: "Coaching Amplifier",
+    title: "Coach Assistant Hub",
     description: "Support for coaches with resources, training modules, and Lean & Green recipes",
     url: "http://www.coachingamplifier.com",
-    siteName: "Coaching Amplifier",
+    siteName: "Coach Assistant Hub",
   },
   icons: {
     icon: [

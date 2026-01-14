@@ -146,7 +146,7 @@ export function ScalingYourBusinessContent() {
             <Card className="bg-gradient-to-br from-amber-50 to-amber-100 border-amber-300">
               <CardContent className="pt-5">
                 <p className="text-sm text-amber-900 italic leading-relaxed mb-2">&quot;The goal isn&apos;t to be busy. The goal is to build something that serves your life, not consumes it.&quot;</p>
-                <p className="text-xs text-amber-700 font-semibold">— Coaching Amplifier</p>
+                <p className="text-xs text-amber-700 font-semibold">— Coach Assistant Hub</p>
               </CardContent>
             </Card>
           </aside>

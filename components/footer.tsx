@@ -12,7 +12,7 @@ export function Footer() {
           <div className="flex items-center justify-center">
             <Image
               src="/branding/ca_logo_dark.png"
-              alt="Coaching Amplifier"
+              alt="Coach Assistant Hub"
               width={300}
               height={100}
               className="h-12 sm:h-16 md:h-20 w-auto"
@@ -21,7 +21,7 @@ export function Footer() {
           </div>
 
           <p className="text-center text-xs sm:text-sm text-gray-300 max-w-md px-4">
-            Amplify your coaching business with powerful resources and tools
+            Your coaching hub for training, tools, and resources
           </p>
 
           <div className="flex gap-4">
@@ -65,12 +65,12 @@ export function Footer() {
             </Link>
           </div>
 
-          <p className="text-xs text-gray-400">© {new Date().getFullYear()} Coaching Amplifier. All rights reserved.</p>
+          <p className="text-xs text-gray-400">© {new Date().getFullYear()} Coach Assistant Hub. All rights reserved.</p>
           
           {/* Disclaimer Section */}
           <div className="border-t border-gray-600 pt-4 mt-2 max-w-3xl">
             <p className="text-xs text-gray-400 text-center px-4 leading-relaxed">
-              <strong className="text-gray-300">Disclaimer:</strong> Coaching Amplifier is an independent educational resource for health coaches. 
+              <strong className="text-gray-300">Disclaimer:</strong> Coach Assistant Hub is an independent educational resource for health coaches. 
               This is not a tax, legal, financial, or medical advisory service. Individual results vary. 
               Income examples are illustrative only—see OPTAVIA's Income Disclosure Statement for typical results. 
               Health coaches are not medical professionals. This website is not affiliated with, endorsed by, 

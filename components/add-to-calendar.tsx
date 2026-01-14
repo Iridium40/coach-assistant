@@ -79,7 +79,7 @@ export function AddToCalendar({
         to: userEmail,
         toName: userName,
         fromEmail: userEmail,
-        fromName: "Coaching Amplifier",
+        fromName: "Coach Assistant Hub",
         eventTitle: event.title,
         eventDescription: buildDescription(),
         startDate: eventStartDate.toISOString(),

@@ -332,7 +332,7 @@ export function InviteManagement({ onClose }: InviteManagementProps) {
               <div className="space-y-3">
                 <p className="text-sm font-semibold text-amber-800">Important Notice</p>
                 <p className="text-sm text-amber-700">
-                  Only active <strong>OPTAVIA Health Coaches</strong> should be invited to become users of Coaching Amplifier. 
+                  Only active <strong>OPTAVIA Health Coaches</strong> should be invited to become users of Coach Assistant Hub. 
                   By sending an invite, you certify that the person you are inviting is an active OPTAVIA Coach in good standing.
                 </p>
                 <div className="p-3 bg-amber-100 rounded-lg border border-amber-300">
