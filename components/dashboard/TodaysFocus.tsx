@@ -1,6 +1,6 @@
 "use client"
 
-import { useMemo } from "react"
+import { useMemo, useState } from "react"
 import Link from "next/link"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -21,6 +21,7 @@ import {
   Circle,
   Target,
   Bell,
+  X,
 } from "lucide-react"
 import { useReminders } from "@/hooks/use-reminders"
 import { getProgramDay, getDayPhase } from "@/hooks/use-clients"
@@ -29,7 +30,7 @@ import type { Prospect } from "@/hooks/use-prospects"
 import type { ZoomCall } from "@/lib/types"
 import type { ExpandedZoomCall } from "@/lib/expand-recurring-events"
 import { ACADEMY_MODULES, ACADEMY_RESOURCE_IDS, getAcademyProgress } from "@/lib/academy-utils"
-import { isMilestoneCelebratedToday } from "@/lib/milestone-celebrations"
+import { isMilestoneCelebratedToday, markMilestoneCelebratedToday } from "@/lib/milestone-celebrations"
 
 interface TodaysFocusProps {
   user: User | null
@@ -59,6 +60,7 @@ export function TodaysFocus({
   onCelebrateClick,
 }: TodaysFocusProps) {
   const { reminders = [], completeReminder, isOverdue, isDueToday } = useReminders()
+  const [, forceRefresh] = useState(0)
 
   // Get today's reminders (due today or overdue, not completed)
   const todaysReminders = reminders.filter(r => 
@@ -103,10 +105,20 @@ export function TodaysFocus({
   ).slice(0, 3)
 
   // Get meetings today (already filtered by date in parent, use occurrence_date)
-  const meetingsToday = upcomingMeetings.filter(m => {
-    const meetingDate = new Date(m.occurrence_date)
-    return meetingDate >= todayStart && meetingDate <= todayEnd
-  }).slice(0, 3)
+  const meetingsToday = upcomingMeetings
+    .filter((m) => {
+      const start = new Date(m.occurrence_date)
+      if (start < todayStart || start > todayEnd) return false
+
+      // Hide meetings that already ended (even if status didn't update)
+      const durationMins = typeof m.duration_minutes === "number" ? m.duration_minutes : 60
+      const end = new Date(start.getTime() + durationMins * 60_000)
+      const graceMs = 15 * 60_000 // keep for 15 minutes after end
+      if (Date.now() > end.getTime() + graceMs) return false
+
+      return true
+    })
+    .slice(0, 3)
 
   // Get milestone clients
   const milestoneClients = clients
@@ -345,13 +357,28 @@ export function TodaysFocus({
                       <div className="text-xs text-yellow-600">{phase.label}</div>
                     </div>
                   </div>
-                  <Button 
-                    size="sm" 
-                    className="bg-yellow-500 hover:bg-yellow-600 text-white text-xs h-7"
-                    onClick={() => onCelebrateClick?.(client)}
-                  >
-                    🎉 Celebrate!
-                  </Button>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      size="sm"
+                      className="bg-yellow-500 hover:bg-yellow-600 text-white text-xs h-7"
+                      onClick={() => onCelebrateClick?.(client)}
+                    >
+                      🎉 Celebrate!
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="text-xs h-7 border-yellow-200 text-yellow-700 hover:bg-yellow-50"
+                      onClick={() => {
+                        markMilestoneCelebratedToday({ clientId: client.id, programDay })
+                        forceRefresh((x) => x + 1)
+                      }}
+                      title="Dismiss for today"
+                    >
+                      <X className="h-3.5 w-3.5" />
+                      <span className="ml-1 hidden sm:inline">Dismiss</span>
+                    </Button>
+                  </div>
                 </div>
               )
             })}
