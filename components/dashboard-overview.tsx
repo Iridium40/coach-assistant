@@ -43,6 +43,7 @@ import { CoachTip, PipelineSnapshot, TodaysPriorities, RankProgressCard, QuickAc
 import { TodaysFocus } from "@/components/dashboard/TodaysFocus"
 import { MilestoneActionModal } from "@/components/milestone-action-modal"
 import { getProgramDay } from "@/hooks/use-clients"
+import { markMilestoneCelebratedToday } from "@/lib/milestone-celebrations"
 
 // Coach Tools imports
 import { WaterCalculator } from "@/components/coach-tools/water-calculator"
@@ -527,8 +528,21 @@ export function DashboardOverview() {
         <MilestoneActionModal
           open={showMilestoneModal}
           onOpenChange={setShowMilestoneModal}
+          clientId={milestoneClient.id}
           clientLabel={milestoneClient.label}
           programDay={getProgramDay(milestoneClient.start_date)}
+          onMarkCelebrated={() => {
+            const day = getProgramDay(milestoneClient.start_date)
+            markMilestoneCelebratedToday({ clientId: milestoneClient.id, programDay: day })
+            setShowMilestoneModal(false)
+            setMilestoneClient(null)
+          }}
+          onTextSent={() => {
+            const day = getProgramDay(milestoneClient.start_date)
+            markMilestoneCelebratedToday({ clientId: milestoneClient.id, programDay: day })
+            setShowMilestoneModal(false)
+            setMilestoneClient(null)
+          }}
         />
       )}
 

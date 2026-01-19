@@ -20,6 +20,7 @@ import {
 import { getProgramDay, getDayPhase } from "@/hooks/use-clients"
 import type { Prospect } from "@/hooks/use-prospects"
 import type { ZoomCall } from "@/lib/types"
+import { isMilestoneCelebratedToday } from "@/lib/milestone-celebrations"
 
 interface TodaysPrioritiesProps {
   clients: any[]
@@ -54,11 +55,14 @@ export function TodaysPriorities({
     .slice(0, 2)
 
   // Get milestone clients
-  const milestoneClients = clients.filter(c => {
-    if (c.status !== "active") return false
-    const day = getProgramDay(c.start_date)
-    return [7, 14, 21, 30].includes(day)
-  }).slice(0, 2)
+  const milestoneClients = clients
+    .filter((c) => {
+      if (c.status !== "active") return false
+      const day = getProgramDay(c.start_date)
+      if (![7, 14, 21, 30].includes(day)) return false
+      return !isMilestoneCelebratedToday({ clientId: c.id, programDay: day })
+    })
+    .slice(0, 2)
 
   // Get timezone abbreviation
   const getTimezoneAbbrev = (timezone: string): string => {

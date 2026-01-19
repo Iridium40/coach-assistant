@@ -29,6 +29,7 @@ import type { Prospect } from "@/hooks/use-prospects"
 import type { ZoomCall } from "@/lib/types"
 import type { ExpandedZoomCall } from "@/lib/expand-recurring-events"
 import { ACADEMY_MODULES, ACADEMY_RESOURCE_IDS, getAcademyProgress } from "@/lib/academy-utils"
+import { isMilestoneCelebratedToday } from "@/lib/milestone-celebrations"
 
 interface TodaysFocusProps {
   user: User | null
@@ -108,11 +109,14 @@ export function TodaysFocus({
   }).slice(0, 3)
 
   // Get milestone clients
-  const milestoneClients = clients.filter(c => {
-    if (c.status !== "active") return false
-    const day = getProgramDay(c.start_date)
-    return [7, 14, 21, 30].includes(day)
-  }).slice(0, 2)
+  const milestoneClients = clients
+    .filter((c) => {
+      if (c.status !== "active") return false
+      const day = getProgramDay(c.start_date)
+      if (![7, 14, 21, 30].includes(day)) return false
+      return !isMilestoneCelebratedToday({ clientId: c.id, programDay: day })
+    })
+    .slice(0, 2)
 
   const hasActionItems = clientsNeedingAction.length > 0 || haScheduledToday.length > 0 || meetingsToday.length > 0 || milestoneClients.length > 0 || todaysReminders.length > 0
 

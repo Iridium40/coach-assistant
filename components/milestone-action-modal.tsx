@@ -25,23 +25,28 @@ import {
   Lightbulb,
 } from "lucide-react"
 import { ClientContextualResources } from "@/components/resources"
+import { CheckCircle } from "lucide-react"
 
 interface MilestoneActionModalProps {
   open: boolean
   onOpenChange: (open: boolean) => void
+  clientId?: string
   clientLabel: string
   programDay: number
   onScheduleClick?: () => void // Opens the schedule modal
   onTextSent?: () => void // Callback after text is copied
+  onMarkCelebrated?: () => void // Callback to clear the celebrate trigger
 }
 
 export function MilestoneActionModal({
   open,
   onOpenChange,
+  clientId,
   clientLabel,
   programDay,
   onScheduleClick,
   onTextSent,
+  onMarkCelebrated,
 }: MilestoneActionModalProps) {
   const { toast } = useToast()
   const { profile } = useUserData()
@@ -95,6 +100,15 @@ export function MilestoneActionModal({
         variant: "destructive",
       })
     }
+  }
+
+  const handleMarkCelebrated = () => {
+    onMarkCelebrated?.()
+    onOpenChange(false)
+    toast({
+      title: "Marked celebrated",
+      description: "This milestone will be hidden for the rest of today.",
+    })
   }
 
   if (loading) {
@@ -399,6 +413,18 @@ export function MilestoneActionModal({
         <div className="mt-4 p-3 bg-gray-100 rounded-lg text-xs text-gray-600 shrink-0">
           <strong>Tip:</strong> Copy the text, paste it into your messaging app, and personalize it before sending!
         </div>
+
+        {/* Mark celebrated */}
+        {onMarkCelebrated && (
+          <Button
+            variant="outline"
+            onClick={handleMarkCelebrated}
+            className="mt-3 w-full border-green-200 text-green-700 hover:bg-green-50"
+          >
+            <CheckCircle className="h-4 w-4 mr-2" />
+            Mark Celebrated (hide for today)
+          </Button>
+        )}
       </DialogContent>
     </Dialog>
   )
