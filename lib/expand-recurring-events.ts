@@ -17,8 +17,8 @@ export function expandRecurringEvents(events: ZoomCall[]): ExpandedZoomCall[] {
   const expandedEvents: ExpandedZoomCall[] = []
 
   for (const event of events) {
-    if (!event.is_recurring || !event.recurrence_pattern || !event.recurrence_day || !event.recurrence_end_date) {
-      // Non-recurring event or missing recurrence data - return as single occurrence
+    if (!event.is_recurring) {
+      // Non-recurring event - return as single occurrence
       expandedEvents.push({
         ...event,
         occurrence_date: event.scheduled_at,
@@ -28,8 +28,26 @@ export function expandRecurringEvents(events: ZoomCall[]): ExpandedZoomCall[] {
       continue
     }
 
+    // Recurring event: apply safe defaults so recurring calls still expand even if some fields are missing.
+    const startDate = new Date(event.scheduled_at)
+    const defaultPattern = event.recurrence_pattern || "weekly"
+    const defaultDay = event.recurrence_day || startDate.toLocaleDateString("en-US", { weekday: "long" })
+
+    // If recurrence_end_date is missing, default to 90 days after the first scheduled date.
+    // This avoids "only one occurrence" UX while keeping expansion bounded.
+    const defaultEndDate = new Date(startDate)
+    defaultEndDate.setDate(defaultEndDate.getDate() + 90)
+    const endDateStr =
+      event.recurrence_end_date ||
+      defaultEndDate.toISOString().split("T")[0]
+
     // Generate occurrences for recurring events
-    const occurrences = generateOccurrences(event)
+    const occurrences = generateOccurrences({
+      ...event,
+      recurrence_pattern: defaultPattern,
+      recurrence_day: defaultDay,
+      recurrence_end_date: endDateStr,
+    })
     expandedEvents.push(...occurrences)
   }
 
@@ -46,7 +64,9 @@ function generateOccurrences(event: ZoomCall): ExpandedZoomCall[] {
   const occurrences: ExpandedZoomCall[] = []
   
   const startDate = new Date(event.scheduled_at)
+  // recurrence_end_date is stored as a DATE in DB; treat it as inclusive (end of that day)
   const endDate = new Date(event.recurrence_end_date!)
+  endDate.setHours(23, 59, 59, 999)
   const targetDay = getDayNumber(event.recurrence_day!)
   
   // Get the time portion from the original scheduled_at
