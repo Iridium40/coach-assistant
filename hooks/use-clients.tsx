@@ -226,9 +226,59 @@ export function useClients() {
     const client = clients.find(c => c.id === id)
     if (!client) return false
 
-    return updateClient(id, { 
-      [type]: !client[type],
-      last_touchpoint_date: today
+    // When marking AM check-in as done for a scheduled check-in that's due,
+    // also clear (one-time) or auto-advance (recurring) the schedule so the "needs attention" trigger disappears.
+    const nextValue = !client[type]
+
+    const shouldHandleSchedule =
+      type === "am_done" &&
+      nextValue === true &&
+      !!client.next_scheduled_at
+
+    let scheduleUpdates: Partial<UpdateClient> = {}
+    if (shouldHandleSchedule) {
+      const now = new Date()
+      const todayStr = now.toISOString().split("T")[0]
+      const scheduledDate = new Date(client.next_scheduled_at!)
+      const scheduledDateStr = scheduledDate.toISOString().split("T")[0]
+
+      // Only auto-clear/advance if the scheduled check-in is today or in the past
+      if (scheduledDateStr <= todayStr) {
+        const freq = client.recurring_frequency
+        const isRecurring = !!freq && freq !== "none"
+
+        if (isRecurring) {
+          const next = new Date(scheduledDate)
+          if (freq === "weekly") next.setDate(next.getDate() + 7)
+          else if (freq === "biweekly") next.setDate(next.getDate() + 14)
+          else if (freq === "monthly") {
+            const nth = Math.floor((scheduledDate.getDate() - 1) / 7)
+            const weekday = scheduledDate.getDay()
+            const year = scheduledDate.getFullYear()
+            const month = scheduledDate.getMonth()
+            const firstOfNextMonth = new Date(year, month + 1, 1)
+            const delta = (weekday - firstOfNextMonth.getDay() + 7) % 7
+            let day = 1 + delta + nth * 7
+            const daysInNextMonth = new Date(year, month + 2, 0).getDate()
+            if (day > daysInNextMonth) day -= 7
+            next.setFullYear(year, month + 1, day)
+          }
+          scheduleUpdates = { next_scheduled_at: next.toISOString() }
+        } else {
+          scheduleUpdates = {
+            next_scheduled_at: null,
+            recurring_frequency: null,
+            recurring_day: null,
+            recurring_time: null,
+          }
+        }
+      }
+    }
+
+    return updateClient(id, {
+      [type]: nextValue,
+      last_touchpoint_date: today,
+      ...scheduleUpdates,
     })
   }, [clients, updateClient, today])
 

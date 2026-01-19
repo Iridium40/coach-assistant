@@ -113,6 +113,8 @@ export default function ClientTrackerPage() {
   const [milestoneCount, setMilestoneCount] = useState(0)
   const [showClearConfirm, setShowClearConfirm] = useState(false)
   const [clientToClear, setClientToClear] = useState<string | null>(null)
+  const [showCompleteConfirm, setShowCompleteConfirm] = useState(false)
+  const [clientToComplete, setClientToComplete] = useState<Client | null>(null)
   const [selectedClient, setSelectedClient] = useState<Client | null>(null)
   const [filterStatus, setFilterStatus] = useState<ClientStatus | "all">("active")
   const [searchTerm, setSearchTerm] = useState("")
@@ -153,6 +155,24 @@ export default function ClientTrackerPage() {
   ]
 
   const today = new Date().toISOString().split("T")[0]
+
+  const isScheduledDue = (client: Client) => {
+    if (!client.next_scheduled_at) return false
+    const scheduledDateStr = new Date(client.next_scheduled_at).toISOString().split("T")[0]
+    return scheduledDateStr <= today
+  }
+
+  const handleMarkCheckInDone = async (client: Client) => {
+    // This will mark AM done AND (if the scheduled check-in is due) auto-clear/auto-advance the schedule.
+    await toggleTouchpoint(client.id, "am_done")
+    toast({
+      title: "✅ Check-in Completed!",
+      description:
+        client.recurring_frequency && client.recurring_frequency !== "none"
+          ? "Recurring schedule advanced to the next check-in."
+          : "Scheduled check-in cleared.",
+    })
+  }
 
   const [newClient, setNewClient] = useState({
     label: "",
@@ -965,17 +985,7 @@ ${phase.milestone ? `\n🎉 MILESTONE: ${phase.label} - Celebrate this achieveme
                               variant="ghost"
                               size="sm"
                               onClick={() => {
-                                updateClient(client.id, { 
-                                  next_scheduled_at: null,
-                                  recurring_frequency: null,
-                                  recurring_day: null,
-                                  recurring_time: null 
-                                })
-                                toggleTouchpoint(client.id, "am_done")
-                                toast({
-                                  title: "✅ Check-in Completed!",
-                                  description: "Great job staying connected with your client!",
-                                })
+                                handleMarkCheckInDone(client)
                               }}
                               className="h-7 w-7 p-0 bg-green-100 hover:bg-green-200 rounded-full"
                               title="Mark check-in as completed"
@@ -1005,7 +1015,15 @@ ${phase.milestone ? `\n🎉 MILESTONE: ${phase.label} - Celebrate this achieveme
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => toggleTouchpoint(client.id, "am_done")}
+                          onClick={() => {
+                            // If this is a due scheduled check-in, confirm completion (clears/advances schedule)
+                            if (!client.am_done && isScheduledDue(client)) {
+                              setClientToComplete(client)
+                              setShowCompleteConfirm(true)
+                              return
+                            }
+                            toggleTouchpoint(client.id, "am_done")
+                          }}
                           className={`flex-1 ${client.am_done 
                             ? "bg-green-100 text-green-700 border-green-300 hover:bg-green-200" 
                             : "text-green-600 border-green-200 hover:bg-green-50"
@@ -1469,6 +1487,40 @@ ${phase.milestone ? `\n🎉 MILESTONE: ${phase.label} - Celebrate this achieveme
               className="bg-red-500 hover:bg-red-600"
             >
               Clear Schedule
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Complete Check-in Confirmation */}
+      <AlertDialog
+        open={showCompleteConfirm}
+        onOpenChange={(open) => {
+          setShowCompleteConfirm(open)
+          if (!open) setClientToComplete(null)
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Mark check-in as done?</AlertDialogTitle>
+            <AlertDialogDescription>
+              {clientToComplete?.recurring_frequency && clientToComplete.recurring_frequency !== "none"
+                ? "This will mark today's check-in complete and advance to the next scheduled check-in."
+                : "This will mark today's check-in complete and clear the scheduled time."}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={async () => {
+                if (!clientToComplete) return
+                await handleMarkCheckInDone(clientToComplete)
+                setClientToComplete(null)
+                setShowCompleteConfirm(false)
+              }}
+              className="bg-green-600 hover:bg-green-700"
+            >
+              Mark Done
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

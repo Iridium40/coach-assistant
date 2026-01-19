@@ -35,6 +35,16 @@ import { ReminderButton } from "@/components/reminders-panel"
 import { ProspectContextualResources } from "@/components/resources"
 import { ShareHealthAssessment } from "@/components/share-health-assessment"
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
+import {
   statusConfig,
   sourceOptions,
   actionTypeLabels,
@@ -69,6 +79,7 @@ export function ProspectCard({
 }: ProspectCardProps) {
   const [showResources, setShowResources] = useState(false)
   const [showShareAssessment, setShowShareAssessment] = useState(false)
+  const [confirmFollowUpDoneOpen, setConfirmFollowUpDoneOpen] = useState(false)
   const config = statusConfig[prospect.status]
   const isOverdue = daysUntil !== null && daysUntil < 0
 
@@ -112,6 +123,30 @@ export function ProspectCard({
       title: "✅ HA Completed!",
       description: "Scheduled HA has been cleared.",
     })
+  }
+
+  const handleConfirmFollowUpDone = async () => {
+    const today = new Date().toISOString().split("T")[0]
+    const success = await onUpdateProspect(prospect.id, {
+      last_action: today,
+      next_action: null,
+      action_type: null,
+    })
+
+    if (!success) {
+      onToast({
+        title: "Error",
+        description: "Couldn't mark this as done. Please try again.",
+        variant: "destructive",
+      })
+      return
+    }
+
+    onToast({
+      title: "Marked done",
+      description: "Follow-up cleared.",
+    })
+    setConfirmFollowUpDoneOpen(false)
   }
 
   return (
@@ -236,6 +271,15 @@ export function ProspectCard({
                       In {daysUntil} days
                     </Badge>
                   )}
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setConfirmFollowUpDoneOpen(true)}
+                    className="h-7 w-7 p-0 bg-green-100 hover:bg-green-200 rounded-full"
+                    title="Mark follow-up as done"
+                  >
+                    <CheckCircle className="h-4 w-4 text-green-600" />
+                  </Button>
                 </>
               )
             )}
@@ -364,6 +408,24 @@ export function ProspectCard({
           recipientName={prospect.label}
           initialPhone={prospect.phone || ""}
         />
+
+        {/* Confirm: mark follow-up done */}
+        <AlertDialog open={confirmFollowUpDoneOpen} onOpenChange={setConfirmFollowUpDoneOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Mark follow-up as done?</AlertDialogTitle>
+              <AlertDialogDescription>
+                This will clear the follow-up date so this card stops showing as due/overdue.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction onClick={handleConfirmFollowUpDone} className="bg-green-600 hover:bg-green-700">
+                Mark Done
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </CardContent>
     </Card>
   )

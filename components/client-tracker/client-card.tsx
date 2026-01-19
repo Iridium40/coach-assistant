@@ -59,12 +59,7 @@ export function ClientCard({
   const attention = needsAttention(client)
 
   const handleCompleteCheckIn = async () => {
-    await onUpdateClient(client.id, {
-      next_scheduled_at: null,
-      recurring_frequency: null,
-      recurring_day: null,
-      recurring_time: null,
-    })
+    // `toggleTouchpoint` now auto-clears/auto-advances schedules when a due check-in is marked done.
     await onToggleTouchpoint(client.id, "am_done")
   }
 
