@@ -503,26 +503,27 @@ ${phase.milestone ? `\n🎉 MILESTONE: ${phase.label} - Celebrate this achieveme
                 Track daily touchpoints and milestones
               </p>
             </div>
-            <div className="flex gap-3">
+            <div className="flex flex-wrap gap-2 sm:gap-3">
               <Button
-                className="bg-[#f88221] border-[#f88221] text-white hover:bg-[#e07520]"
+                className="bg-[#f88221] border-[#f88221] text-white hover:bg-[#e07520] text-xs sm:text-sm"
                 onClick={() => setShowGuideModal(true)}
               >
-                <GraduationCap className="h-4 w-4 mr-2" />
-                Learn the Client Journey
+                <GraduationCap className="h-4 w-4 sm:mr-2" />
+                <span className="hidden sm:inline">Learn the Client Journey</span>
               </Button>
               <Link href="/prospect-tracker">
-                <Button variant="outline" className="bg-white/10 border-white/30 text-white hover:bg-white/20">
-                  <Users className="h-4 w-4 mr-2" />
-                  100's List
+                <Button variant="outline" className="bg-white/10 border-white/30 text-white hover:bg-white/20 text-xs sm:text-sm">
+                  <Users className="h-4 w-4 sm:mr-2" />
+                  <span className="hidden sm:inline">100's List</span>
                 </Button>
               </Link>
               <Button
                 onClick={() => setShowAddModal(true)}
-                className="bg-white text-[hsl(var(--optavia-green))] hover:bg-white/90"
+                className="bg-white text-[hsl(var(--optavia-green))] hover:bg-white/90 text-xs sm:text-sm"
               >
-                <Plus className="h-4 w-4 mr-2" />
-                Add Client
+                <Plus className="h-4 w-4 mr-1 sm:mr-2" />
+                <span>Add</span>
+                <span className="hidden sm:inline ml-1">Client</span>
               </Button>
             </div>
           </div>
