@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef, useMemo } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { BookOpen } from 'lucide-react';
 import { ResourceCard } from './ResourceCard';
@@ -85,11 +85,22 @@ export function TrainingContextualResources({
 }: TrainingContextualResourcesProps) {
   const [resources, setResources] = useState<Resource[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const supabase = createClient();
+  const [hasFetched, setHasFetched] = useState(false);
+  const supabaseRef = useRef(createClient());
+
+  // Stabilize trainingTags to prevent re-fetching on every render
+  const stableTagsKey = useMemo(() => trainingTags.sort().join(','), [trainingTags]);
 
   useEffect(() => {
+    // Only fetch once per category/tags combination
+    setHasFetched(false);
+  }, [trainingCategory, stableTagsKey]);
+
+  useEffect(() => {
+    if (hasFetched) return;
     fetchRelevantResources();
-  }, [trainingCategory, trainingTags]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [trainingCategory, stableTagsKey, hasFetched]);
 
   const fetchRelevantResources = async () => {
     setIsLoading(true);
@@ -100,11 +111,12 @@ export function TrainingContextualResources({
       if (!mapping) {
         setResources([]);
         setIsLoading(false);
+        setHasFetched(true);
         return;
       }
 
       // Get resources from relevant categories
-      const { data, error } = await supabase
+      const { data, error } = await supabaseRef.current
         .from('external_resources')
         .select('*')
         .in('category', mapping.categories)
@@ -144,6 +156,7 @@ export function TrainingContextualResources({
       console.error('Error fetching resources:', error);
     } finally {
       setIsLoading(false);
+      setHasFetched(true);
     }
   };
 
