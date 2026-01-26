@@ -218,60 +218,69 @@ export function RankCalculator() {
       {/* Simulation Controls */}
       <div className="grid grid-cols-1 gap-4">
         {/* Active Clients Slider */}
-        <Card>
+        <Card className="border-green-200 bg-green-50">
           <CardContent className="p-4">
-            <div className="space-y-3">
+            <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <Label className="flex items-center gap-2">
-                  <Users className="h-4 w-4 text-green-500" />
+                <Label className="flex items-center gap-2 text-base font-semibold text-gray-700">
+                  <Users className="h-5 w-5 text-green-600" />
                   Active Clients
                 </Label>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-3">
                   <Button
                     size="sm"
                     variant="outline"
                     onClick={() => setSimClients(Math.max(0, simClients - 1))}
-                    className="h-7 w-7 p-0"
+                    className="h-8 w-8 p-0 border-green-300 hover:bg-green-100"
                   >
-                    <Minus className="h-3 w-3" />
+                    <Minus className="h-4 w-4 text-green-700" />
                   </Button>
-                  <span className="text-lg font-bold text-green-600 w-12 text-center">
+                  <span className="text-2xl font-bold text-green-700 w-16 text-center bg-white px-3 py-1 rounded-lg border-2 border-green-300">
                     {simClients}
                   </span>
                   <Button
                     size="sm"
                     variant="outline"
                     onClick={() => setSimClients(simClients + 1)}
-                    className="h-7 w-7 p-0"
+                    className="h-8 w-8 p-0 border-green-300 hover:bg-green-100"
                   >
-                    <Plus className="h-3 w-3" />
+                    <Plus className="h-4 w-4 text-green-700" />
                   </Button>
                 </div>
               </div>
-              <Slider
-                value={[simClients]}
-                onValueChange={(value) => setSimClients(value[0])}
-                max={30}
-                step={1}
-                className="w-full"
-              />
-              <p className="text-xs text-gray-500">
-                ~{clientQP} Qualifying Points from clients (~3-4 clients = 1 QP)
+              <div className="px-1">
+                <Slider
+                  value={[simClients]}
+                  onValueChange={(value) => setSimClients(value[0])}
+                  max={30}
+                  step={1}
+                  className="w-full [&_[role=slider]]:h-5 [&_[role=slider]]:w-5 [&_[role=slider]]:border-2 [&_[role=slider]]:border-green-600 [&_[role=slider]]:bg-white"
+                />
+              </div>
+              <div className="flex items-center justify-between text-xs text-gray-600 px-1">
+                <span>0</span>
+                <span className="font-medium text-green-700">
+                  ~{clientQP} QP from clients
+                </span>
+                <span>30</span>
+              </div>
+              <p className="text-xs text-gray-600 bg-white p-2 rounded border border-green-200">
+                💡 <span className="font-medium">Tip:</span> ~3-4 clients = 1 Qualifying Point
               </p>
             </div>
           </CardContent>
         </Card>
 
         {/* Frontline Coaches */}
-        <Card>
+        <Card className="border-purple-200 bg-purple-50">
           <CardContent className="p-4">
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <Label className="flex items-center gap-2">
-                  <Star className="h-4 w-4 text-purple-500" />
+                <Label className="flex items-center gap-2 text-base font-semibold text-gray-700">
+                  <Star className="h-5 w-5 text-purple-600" />
                   Frontline Coaches
                 </Label>
-                <Badge variant="secondary" className="text-sm">
+                <Badge variant="secondary" className="text-sm bg-white border-2 border-purple-300 text-purple-700 font-semibold">
                   {simCoaches.length} total ({scTeamsCount} SC+)
                 </Badge>
               </div>
@@ -279,7 +288,7 @@ export function RankCalculator() {
               {/* Add Coach Controls */}
               <div className="flex gap-2">
                 <Select onValueChange={(value) => addCoach(value as RankType)}>
-                  <SelectTrigger className="flex-1">
+                  <SelectTrigger className="flex-1 bg-white border-purple-300">
                     <SelectValue placeholder="Add a coach..." />
                   </SelectTrigger>
                   <SelectContent>
@@ -297,8 +306,9 @@ export function RankCalculator() {
                   variant="outline"
                   onClick={removeCoach}
                   disabled={simCoaches.length === 0}
+                  className="border-purple-300 hover:bg-purple-100"
                 >
-                  <Minus className="h-4 w-4" />
+                  <Minus className="h-4 w-4 text-purple-700" />
                 </Button>
               </div>
 
@@ -324,8 +334,8 @@ export function RankCalculator() {
                 </div>
               )}
 
-              <p className="text-xs text-gray-500">
-                {scTeamQP} Qualifying Points from SC+ teams
+              <p className="text-xs text-gray-600 bg-white p-2 rounded border border-purple-200">
+                💡 <span className="font-medium">Tip:</span> {scTeamQP} QP from SC+ teams (1 SC Team = 1 QP)
               </p>
             </div>
           </CardContent>
