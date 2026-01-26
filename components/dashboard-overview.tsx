@@ -43,7 +43,6 @@ import { CoachTip, PipelineSnapshot, TodaysPriorities, RankProgressCard, QuickAc
 import { TodaysFocus } from "@/components/dashboard/TodaysFocus"
 import { MilestoneActionModal } from "@/components/milestone-action-modal"
 import { getProgramDay } from "@/hooks/use-clients"
-import { markMilestoneCelebratedToday } from "@/lib/milestone-celebrations"
 
 // Coach Tools imports
 import { WaterCalculator } from "@/components/coach-tools/water-calculator"
@@ -531,17 +530,39 @@ export function DashboardOverview() {
           clientId={milestoneClient.id}
           clientLabel={milestoneClient.label}
           programDay={getProgramDay(milestoneClient.start_date)}
-          onMarkCelebrated={() => {
+          onMarkCelebrated={async () => {
+            // Mark this milestone day as celebrated in the database
             const day = getProgramDay(milestoneClient.start_date)
-            markMilestoneCelebratedToday({ clientId: milestoneClient.id, programDay: day })
-            setShowMilestoneModal(false)
-            setMilestoneClient(null)
+            try {
+              const { error } = await supabase
+                .from("clients")
+                .update({ last_celebrated_day: day })
+                .eq("id", milestoneClient.id)
+              
+              if (!error) {
+                setShowMilestoneModal(false)
+                setMilestoneClient(null)
+                // Refresh clients list to update the UI
+                window.location.reload()
+              }
+            } catch (err) {
+              console.error("Error marking milestone as celebrated:", err)
+            }
           }}
-          onTextSent={() => {
+          onTextSent={async () => {
+            // Also mark as celebrated when text is sent
             const day = getProgramDay(milestoneClient.start_date)
-            markMilestoneCelebratedToday({ clientId: milestoneClient.id, programDay: day })
-            setShowMilestoneModal(false)
-            setMilestoneClient(null)
+            try {
+              await supabase
+                .from("clients")
+                .update({ last_celebrated_day: day })
+                .eq("id", milestoneClient.id)
+              
+              setShowMilestoneModal(false)
+              setMilestoneClient(null)
+            } catch (err) {
+              console.error("Error marking milestone as celebrated:", err)
+            }
           }}
         />
       )}

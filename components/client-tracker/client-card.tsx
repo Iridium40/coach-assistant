@@ -204,20 +204,20 @@ export function ClientCard({
                   {client.am_done ? "Checked In" : "Check In"}
                 </span>
               </Button>
-              {/* Text Button - highlighted for milestones */}
+              {/* Text Button - highlighted for milestones that haven't been celebrated yet */}
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => onOpenTextTemplates(client)}
                 className={`flex-1 ${
-                  isMilestoneDay(programDay)
+                  isMilestoneDay(programDay) && client.last_celebrated_day !== programDay
                     ? "bg-amber-100 text-amber-700 border-amber-300 hover:bg-amber-200 animate-pulse"
                     : "text-blue-600 border-blue-200 hover:bg-blue-50"
                 }`}
               >
                 <MessageSquare className="h-4 w-4 mr-1" />
                 <span className="text-xs sm:text-sm">
-                  {isMilestoneDay(programDay) ? "Celebrate!" : "Text"}
+                  {isMilestoneDay(programDay) && client.last_celebrated_day !== programDay ? "Celebrate!" : "Text"}
                 </span>
               </Button>
               <Button

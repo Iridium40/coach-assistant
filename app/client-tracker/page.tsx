@@ -1198,6 +1198,7 @@ ${phase.milestone ? `\n🎉 MILESTONE: ${phase.label} - Celebrate this achieveme
         <MilestoneActionModal
           open={showTextModal}
           onOpenChange={setShowTextModal}
+          clientId={selectedClient.id}
           clientLabel={selectedClient.label}
           programDay={getProgramDay(selectedClient.start_date)}
           onScheduleClick={() => {
@@ -1206,6 +1207,16 @@ ${phase.milestone ? `\n🎉 MILESTONE: ${phase.label} - Celebrate this achieveme
           }}
           onTextSent={() => {
             // Mark as checked in when text is sent
+          }}
+          onMarkCelebrated={async () => {
+            // Mark this milestone day as celebrated in the database
+            const programDay = getProgramDay(selectedClient.start_date)
+            const success = await updateClient(selectedClient.id, {
+              last_celebrated_day: programDay
+            })
+            if (success) {
+              setShowTextModal(false)
+            }
           }}
         />
       )}
