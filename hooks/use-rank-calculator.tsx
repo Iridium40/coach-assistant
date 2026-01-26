@@ -4,12 +4,28 @@ import { useState, useEffect, useCallback } from "react"
 import { createClient } from "@/lib/supabase/client"
 import type { User } from "@supabase/supabase-js"
 
-// Rank order
+/**
+ * OPTAVIA Rank Calculator - Simplified Version
+ * Based on the official OPTAVIA Integrated Compensation Plan (Effective January 1, 2026)
+ * 
+ * Simplified Assumptions:
+ * - 1 Qualifying Point (QP) = ~3-4 active clients (generates ~$1,200 FQV) OR 1 Senior Coach Team
+ * - Average client order = $355 PQV / $370 PCV
+ * - Senior Coach = 3+ active clients (generates 1,200+ GQV)
+ * - We track what we can measure: Active Clients + Frontline Coaches
+ */
+
+// Simplified rank progression - focusing on key milestones
 export const RANK_ORDER = [
   'Coach',
   'Senior Coach',
+  'Manager',
+  'Associate Director',
+  'Director',
   'Executive Director',
   'FIBC',
+  'Regional Director',
+  'National Director',
   'Global Director',
   'Presidential Director',
   'IPD'
@@ -28,11 +44,11 @@ export function isQualifyingLeg(rank: string): boolean {
   return getRankIndex(rank) >= 1 // Senior Coach or higher
 }
 
-// Simplified requirements - clients, frontline coaches, and qualifying legs
+// Simplified rank requirements based on what we can track
 export const RANK_REQUIREMENTS: Record<RankType, {
-  minClients: number
-  frontlineCoaches: number
-  qualifyingLegs: number  // Coaches at Senior Coach rank or higher
+  minClients: number          // Active clients needed (~$355 PQV each)
+  frontlineCoaches: number    // Total frontline coaches
+  scTeams: number            // Senior Coach+ teams needed
   description: string
   icon: string
   note: string
@@ -40,7 +56,7 @@ export const RANK_REQUIREMENTS: Record<RankType, {
   'Coach': {
     minClients: 0,
     frontlineCoaches: 0,
-    qualifyingLegs: 0,
+    scTeams: 0,
     description: 'Starting rank - welcome to the team!',
     icon: '🌱',
     note: ''
@@ -48,60 +64,105 @@ export const RANK_REQUIREMENTS: Record<RankType, {
   'Senior Coach': {
     minClients: 3,
     frontlineCoaches: 0,
-    qualifyingLegs: 0,
-    description: '3+ active clients with qualifying orders',
+    scTeams: 0,
+    description: '3+ active clients (1,200 GQV + 5 Ordering Entities)',
     icon: '⭐',
-    note: 'Verify FQV requirements in OPTAVIA Connect'
+    note: 'First milestone - unlocks team building bonuses'
+  },
+  'Manager': {
+    minClients: 7,
+    frontlineCoaches: 0,
+    scTeams: 0,
+    description: 'SC + 2 Points (~7 clients OR mix of clients + SC teams)',
+    icon: '📊',
+    note: '1 Point = ~3-4 clients ($1,200 FQV) OR 1 SC Team'
+  },
+  'Associate Director': {
+    minClients: 10,
+    frontlineCoaches: 1,
+    scTeams: 0,
+    description: 'SC + 3 Points (~10 clients OR mix of clients + SC teams)',
+    icon: '🎯',
+    note: '1 Point = ~3-4 clients ($1,200 FQV) OR 1 SC Team'
+  },
+  'Director': {
+    minClients: 13,
+    frontlineCoaches: 2,
+    scTeams: 1,
+    description: 'SC + 4 Points (~13 clients OR mix of clients + SC teams)',
+    icon: '💼',
+    note: '1 Point = ~3-4 clients ($1,200 FQV) OR 1 SC Team'
   },
   'Executive Director': {
-    minClients: 5,
+    minClients: 17,
     frontlineCoaches: 3,
-    qualifyingLegs: 0,
-    description: '5+ clients and 3 frontline coaches',
+    scTeams: 2,
+    description: 'SC + 5 Points (~17 clients OR mix of clients + SC teams)',
     icon: '💫',
-    note: 'Verify FQV requirements in OPTAVIA Connect'
+    note: 'Major milestone - unlocks Generation Bonuses'
   },
   'FIBC': {
-    minClients: 8,
+    minClients: 17,
     frontlineCoaches: 5,
-    qualifyingLegs: 2,
-    description: '8+ clients, 5 coaches, 2 qualifying legs',
+    scTeams: 5,
+    description: 'ED + 17 clients + 5 SC Teams (6,000 FQV + 15,000 GQV)',
     icon: '🏆',
-    note: 'Qualifying leg = Senior Coach or higher'
+    note: 'Fully Integrated Business Coach - mastery of both client support and team building'
+  },
+  'Regional Director': {
+    minClients: 17,
+    frontlineCoaches: 5,
+    scTeams: 5,
+    description: 'ED + 1 ED Team (or FIBC + 1 ED Team for Integrated)',
+    icon: '🗺️',
+    note: 'ED Team = first qualified Executive Director in any leg'
+  },
+  'National Director': {
+    minClients: 17,
+    frontlineCoaches: 8,
+    scTeams: 5,
+    description: 'ED + 3 ED Teams (or FIBC + 3 ED Teams for Integrated)',
+    icon: '🇺🇸',
+    note: 'Unlocks National Elite Leadership Bonus (0.5%)'
   },
   'Global Director': {
-    minClients: 10,
-    frontlineCoaches: 6,
-    qualifyingLegs: 3,
-    description: '10+ clients, 6 coaches, 3 qualifying legs',
+    minClients: 17,
+    frontlineCoaches: 10,
+    scTeams: 5,
+    description: 'ED + 5 ED Teams (or FIBC + 5 FIBC Teams for FIBL)',
     icon: '🌍',
-    note: 'Qualifying leg = Senior Coach or higher'
+    note: 'Unlocks Global Elite Leadership Bonus (0.5%)'
   },
   'Presidential Director': {
-    minClients: 15,
-    frontlineCoaches: 8,
-    qualifyingLegs: 4,
-    description: '15+ clients, 8 coaches, 4 qualifying legs',
+    minClients: 17,
+    frontlineCoaches: 15,
+    scTeams: 5,
+    description: 'ED + 10 ED Teams (or FIBL + 10 ED Teams for IPD)',
     icon: '👑',
-    note: 'Qualifying leg = Senior Coach or higher'
+    note: 'Unlocks Presidential Elite Leadership Bonus (0.5%)'
   },
   'IPD': {
-    minClients: 20,
-    frontlineCoaches: 10,
-    qualifyingLegs: 5,
-    description: '20+ clients, 10 coaches, 5 qualifying legs',
+    minClients: 17,
+    frontlineCoaches: 15,
+    scTeams: 10,
+    description: 'FIBL + 10 ED Teams (5 must be FIBC)',
     icon: '💎',
-    note: 'Verify all requirements in OPTAVIA Connect'
+    note: 'Integrated Presidential Director - highest rank'
   }
 }
 
 export const RANK_COLORS: Record<RankType, { bg: string; text: string; accent: string }> = {
   'Coach': { bg: 'bg-gray-100', text: 'text-gray-600', accent: 'bg-gray-500' },
   'Senior Coach': { bg: 'bg-blue-50', text: 'text-blue-600', accent: 'bg-blue-500' },
+  'Manager': { bg: 'bg-cyan-50', text: 'text-cyan-600', accent: 'bg-cyan-500' },
+  'Associate Director': { bg: 'bg-teal-50', text: 'text-teal-600', accent: 'bg-teal-500' },
+  'Director': { bg: 'bg-indigo-50', text: 'text-indigo-600', accent: 'bg-indigo-500' },
   'Executive Director': { bg: 'bg-purple-50', text: 'text-purple-600', accent: 'bg-purple-500' },
   'FIBC': { bg: 'bg-green-50', text: 'text-green-600', accent: 'bg-green-600' },
-  'Global Director': { bg: 'bg-yellow-50', text: 'text-yellow-700', accent: 'bg-yellow-500' },
-  'Presidential Director': { bg: 'bg-orange-50', text: 'text-orange-600', accent: 'bg-orange-500' },
+  'Regional Director': { bg: 'bg-lime-50', text: 'text-lime-700', accent: 'bg-lime-600' },
+  'National Director': { bg: 'bg-yellow-50', text: 'text-yellow-700', accent: 'bg-yellow-600' },
+  'Global Director': { bg: 'bg-orange-50', text: 'text-orange-600', accent: 'bg-orange-500' },
+  'Presidential Director': { bg: 'bg-pink-50', text: 'text-pink-600', accent: 'bg-pink-600' },
   'IPD': { bg: 'bg-red-50', text: 'text-red-600', accent: 'bg-red-600' }
 }
 
@@ -330,12 +391,12 @@ export function useRankCalculator(user: User | null) {
     if (!nextRank) return null
 
     const nextRankReqs = RANK_REQUIREMENTS[nextRank]
-    const qualifyingCount = frontlineCoaches.filter(c => c.is_qualifying).length
+    const scTeamsCount = frontlineCoaches.filter(c => c.is_qualifying).length
 
     return {
       coaches: Math.max(0, nextRankReqs.frontlineCoaches - frontlineCoaches.length),
       clients: Math.max(0, nextRankReqs.minClients - activeClients),
-      qualifyingLegs: Math.max(0, nextRankReqs.qualifyingLegs - qualifyingCount)
+      qualifyingLegs: Math.max(0, nextRankReqs.scTeams - scTeamsCount)
     }
   }, [frontlineCoaches])
 
@@ -352,7 +413,7 @@ export function useRankCalculator(user: User | null) {
     if (!nextRank) return 100
 
     const nextRankReqs = RANK_REQUIREMENTS[nextRank]
-    const qualifyingCount = frontlineCoaches.filter(c => c.is_qualifying).length
+    const scTeamsCount = frontlineCoaches.filter(c => c.is_qualifying).length
     
     // Calculate client progress (40% weight)
     const clientProgress = nextRankReqs.minClients > 0
@@ -364,12 +425,12 @@ export function useRankCalculator(user: User | null) {
       ? Math.min((frontlineCoaches.length / nextRankReqs.frontlineCoaches) * 100, 100)
       : 100
 
-    // Calculate qualifying legs progress (30% weight)
-    const legsProgress = nextRankReqs.qualifyingLegs > 0
-      ? Math.min((qualifyingCount / nextRankReqs.qualifyingLegs) * 100, 100)
+    // Calculate SC teams progress (30% weight)
+    const scTeamsProgress = nextRankReqs.scTeams > 0
+      ? Math.min((scTeamsCount / nextRankReqs.scTeams) * 100, 100)
       : 100
 
-    return Math.round((clientProgress * 0.4) + (coachProgress * 0.3) + (legsProgress * 0.3))
+    return Math.round((clientProgress * 0.4) + (coachProgress * 0.3) + (scTeamsProgress * 0.3))
   }, [frontlineCoaches])
 
   // Generate action items

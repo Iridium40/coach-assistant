@@ -174,8 +174,8 @@ export function RankCalculator() {
         <Card>
           <CardContent className="p-3 text-center">
             <div className="text-xl font-bold text-blue-600">{qualifyingLegsCount}</div>
-            <div className="text-[10px] text-gray-500">Qualifying Legs</div>
-            {nextRank && gaps && nextRankReqs && nextRankReqs.qualifyingLegs > 0 && gaps.qualifyingLegs > 0 && (
+            <div className="text-[10px] text-gray-500">SC Teams</div>
+            {nextRank && gaps && nextRankReqs && nextRankReqs.scTeams > 0 && gaps.qualifyingLegs > 0 && (
               <Badge variant="outline" className="mt-1 text-[9px] text-orange-500 border-orange-300 px-1">
                 Need {gaps.qualifyingLegs}
               </Badge>
@@ -230,7 +230,7 @@ export function RankCalculator() {
               })}
             </div>
             <p className="text-[10px] text-gray-400 mt-2 text-center">
-              Qualifying leg = Senior Coach rank or higher
+              SC Team = Senior Coach rank or higher
             </p>
           </CardContent>
         </Card>
@@ -267,8 +267,8 @@ export function RankCalculator() {
                 <div className="text-[10px] text-gray-500">Coaches</div>
               </div>
               <div className="text-center p-2 bg-white rounded">
-                <div className="font-bold text-gray-900">{nextRankReqs.qualifyingLegs}</div>
-                <div className="text-[10px] text-gray-500">Qual. Legs</div>
+                <div className="font-bold text-gray-900">{nextRankReqs.scTeams}</div>
+                <div className="text-[10px] text-gray-500">SC Teams</div>
               </div>
             </div>
             {nextRankReqs.note && (
