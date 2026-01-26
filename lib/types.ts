@@ -73,6 +73,8 @@ export interface ZoomCall {
   end_date?: string | null
   location?: string | null
   is_virtual?: boolean
+  start_time?: string | null // HH:MM format (e.g., "09:00") for events with specific times
+  end_time?: string | null // HH:MM format (e.g., "17:00") for events with specific times
 }
 
 export interface ExternalResourceFeatures {

@@ -63,6 +63,8 @@ export function AdminZoomCalls({ onClose }: { onClose?: () => void }) {
   const [location, setLocation] = useState("")
   const [isVirtual, setIsVirtual] = useState(true)
   const [timezone, setTimezone] = useState("America/New_York") // Default to Eastern
+  const [startTime, setStartTime] = useState<string>("") // HH:MM for events with specific times
+  const [endTime, setEndTime] = useState<string>("") // HH:MM for events with specific times
 
   // US Timezone options
   const US_TIMEZONES = [
@@ -152,6 +154,8 @@ export function AdminZoomCalls({ onClose }: { onClose?: () => void }) {
     setLocation("")
     setIsVirtual(true)
     setTimezone("America/New_York")
+    setStartTime("")
+    setEndTime("")
     setEditingId(null)
     setShowForm(false)
   }
@@ -190,6 +194,8 @@ export function AdminZoomCalls({ onClose }: { onClose?: () => void }) {
     setLocation("")
     setIsVirtual(true)
     setTimezone("America/New_York")
+    setStartTime("")
+    setEndTime("")
     setEditingId(null)
     
     // Prefill zoom details from profile if available
@@ -239,6 +245,8 @@ export function AdminZoomCalls({ onClose }: { onClose?: () => void }) {
     setLocation(call.location || "")
     setIsVirtual(call.is_virtual !== false)
     setTimezone(call.timezone || "America/New_York")
+    setStartTime((call as any).start_time || "")
+    setEndTime((call as any).end_time || "")
     setEditingId(call.id)
     setShowForm(true)
     
@@ -343,6 +351,8 @@ export function AdminZoomCalls({ onClose }: { onClose?: () => void }) {
       end_date: eventType === "event" && endDate ? endDate : null,
       location: location || null,
       is_virtual: isVirtual,
+      start_time: eventType === "event" && startTime ? startTime : null,
+      end_time: eventType === "event" && endTime ? endTime : null,
     }
 
     let error
@@ -620,47 +630,79 @@ export function AdminZoomCalls({ onClose }: { onClose?: () => void }) {
                   
                   {eventType === "event" ? (
                     /* Event date range */
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="scheduledAt" className="text-optavia-dark">Start Date *</Label>
-                        <Input
-                          id="scheduledAt"
-                          type="date"
-                          value={scheduledAt ? scheduledAt.split("T")[0] : ""}
-                          onChange={(e) => setScheduledAt(e.target.value + "T00:00")}
-                          required
-                          className="border-gray-300"
-                        />
+                    <>
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div className="space-y-2">
+                          <Label htmlFor="scheduledAt" className="text-optavia-dark">Start Date *</Label>
+                          <Input
+                            id="scheduledAt"
+                            type="date"
+                            value={scheduledAt ? scheduledAt.split("T")[0] : ""}
+                            onChange={(e) => setScheduledAt(e.target.value + "T00:00")}
+                            required
+                            className="border-gray-300"
+                          />
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label htmlFor="endDate" className="text-optavia-dark">End Date *</Label>
+                          <Input
+                            id="endDate"
+                            type="date"
+                            value={endDate}
+                            onChange={(e) => setEndDate(e.target.value)}
+                            required
+                            className="border-gray-300"
+                            min={scheduledAt ? scheduledAt.split("T")[0] : undefined}
+                          />
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label htmlFor="status" className="text-optavia-dark">Status</Label>
+                          <Select value={status} onValueChange={(v) => setStatus(v as typeof status)}>
+                            <SelectTrigger className="border-gray-300">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent className="bg-white border border-gray-200 shadow-lg">
+                              <SelectItem value="upcoming">Upcoming</SelectItem>
+                              <SelectItem value="live">In Progress</SelectItem>
+                              <SelectItem value="completed">Completed</SelectItem>
+                              <SelectItem value="cancelled">Cancelled</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
                       </div>
 
-                      <div className="space-y-2">
-                        <Label htmlFor="endDate" className="text-optavia-dark">End Date *</Label>
-                        <Input
-                          id="endDate"
-                          type="date"
-                          value={endDate}
-                          onChange={(e) => setEndDate(e.target.value)}
-                          required
-                          className="border-gray-300"
-                          min={scheduledAt ? scheduledAt.split("T")[0] : undefined}
-                        />
+                      {/* Optional start/end times for events */}
+                      <div className="grid grid-cols-2 gap-4 mt-4">
+                        <div className="space-y-2">
+                          <Label htmlFor="startTime" className="text-optavia-dark">
+                            Start Time <span className="text-gray-400 text-xs">(optional)</span>
+                          </Label>
+                          <Input
+                            id="startTime"
+                            type="time"
+                            value={startTime}
+                            onChange={(e) => setStartTime(e.target.value)}
+                            className="border-gray-300"
+                          />
+                          <p className="text-xs text-optavia-gray">Leave blank for all-day event</p>
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="endTime" className="text-optavia-dark">
+                            End Time <span className="text-gray-400 text-xs">(optional)</span>
+                          </Label>
+                          <Input
+                            id="endTime"
+                            type="time"
+                            value={endTime}
+                            onChange={(e) => setEndTime(e.target.value)}
+                            className="border-gray-300"
+                          />
+                          <p className="text-xs text-optavia-gray">Leave blank for all-day event</p>
+                        </div>
                       </div>
-
-                      <div className="space-y-2">
-                        <Label htmlFor="status" className="text-optavia-dark">Status</Label>
-                        <Select value={status} onValueChange={(v) => setStatus(v as typeof status)}>
-                          <SelectTrigger className="border-gray-300">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent className="bg-white border border-gray-200 shadow-lg">
-                            <SelectItem value="upcoming">Upcoming</SelectItem>
-                            <SelectItem value="live">In Progress</SelectItem>
-                            <SelectItem value="completed">Completed</SelectItem>
-                            <SelectItem value="cancelled">Cancelled</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </div>
+                    </>
                   ) : (
                     /* Meeting date/time */
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
