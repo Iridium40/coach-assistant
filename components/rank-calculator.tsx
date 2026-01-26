@@ -37,6 +37,8 @@ import {
   RotateCcw,
   Sparkles,
   ExternalLink,
+  User,
+  X,
 } from "lucide-react"
 
 interface SimulatedCoach {
@@ -57,6 +59,7 @@ export function RankCalculator() {
   } = useRankCalculator(user)
 
   const [showRankSelector, setShowRankSelector] = useState(false)
+  const [selectedCoachRank, setSelectedCoachRank] = useState<RankType>("Senior Coach")
   
   // Current data
   const currentRank = (rankData?.current_rank || "Coach") as RankType
@@ -217,7 +220,7 @@ export function RankCalculator() {
 
       {/* Simulation Controls */}
       <div className="grid grid-cols-1 gap-4">
-        {/* Active Clients Slider */}
+        {/* Active Clients */}
         <Card className="border-green-200 bg-green-50">
           <CardContent className="p-4">
             <div className="space-y-4">
@@ -231,6 +234,7 @@ export function RankCalculator() {
                     size="sm"
                     variant="outline"
                     onClick={() => setSimClients(Math.max(0, simClients - 1))}
+                    disabled={simClients === 0}
                     className="h-8 w-8 p-0 border-green-300 hover:bg-green-100"
                   >
                     <Minus className="h-4 w-4 text-green-700" />
@@ -242,28 +246,41 @@ export function RankCalculator() {
                     size="sm"
                     variant="outline"
                     onClick={() => setSimClients(simClients + 1)}
+                    disabled={simClients >= 30}
                     className="h-8 w-8 p-0 border-green-300 hover:bg-green-100"
                   >
                     <Plus className="h-4 w-4 text-green-700" />
                   </Button>
                 </div>
               </div>
-              <div className="px-1">
-                <Slider
-                  value={[simClients]}
-                  onValueChange={(value) => setSimClients(value[0])}
-                  max={30}
-                  step={1}
-                  className="w-full [&_[role=slider]]:h-5 [&_[role=slider]]:w-5 [&_[role=slider]]:border-2 [&_[role=slider]]:border-green-600 [&_[role=slider]]:bg-white"
-                />
+
+              {/* Client Icons Grid */}
+              <div className="bg-white p-3 rounded-lg border border-green-200 min-h-[100px]">
+                <div className="flex flex-wrap gap-2">
+                  {Array.from({ length: simClients }).map((_, idx) => (
+                    <div
+                      key={idx}
+                      className="w-10 h-10 rounded-full bg-green-100 border-2 border-green-400 flex items-center justify-center text-green-700 hover:bg-green-200 transition-colors"
+                      title={`Client ${idx + 1}`}
+                    >
+                      <User className="h-5 w-5" />
+                    </div>
+                  ))}
+                  {simClients === 0 && (
+                    <div className="w-full text-center py-6 text-gray-400 text-sm">
+                      Click + to add clients
+                    </div>
+                  )}
+                </div>
               </div>
-              <div className="flex items-center justify-between text-xs text-gray-600 px-1">
-                <span>0</span>
-                <span className="font-medium text-green-700">
+
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-gray-600">Qualifying Points:</span>
+                <span className="font-bold text-green-700">
                   ~{clientQP} QP from clients
                 </span>
-                <span>30</span>
               </div>
+
               <p className="text-xs text-gray-600 bg-white p-2 rounded border border-green-200">
                 💡 <span className="font-medium">Tip:</span> ~3-4 clients = 1 Qualifying Point
               </p>
@@ -287,9 +304,9 @@ export function RankCalculator() {
 
               {/* Add Coach Controls */}
               <div className="flex gap-2">
-                <Select onValueChange={(value) => addCoach(value as RankType)}>
+                <Select value={selectedCoachRank} onValueChange={(value) => setSelectedCoachRank(value as RankType)}>
                   <SelectTrigger className="flex-1 bg-white border-purple-300">
-                    <SelectValue placeholder="Add a coach..." />
+                    <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="Coach">Coach</SelectItem>
@@ -304,38 +321,61 @@ export function RankCalculator() {
                 <Button
                   size="sm"
                   variant="outline"
-                  onClick={removeCoach}
-                  disabled={simCoaches.length === 0}
-                  className="border-purple-300 hover:bg-purple-100"
+                  onClick={() => addCoach(selectedCoachRank)}
+                  className="h-10 w-10 p-0 border-purple-300 hover:bg-purple-100"
                 >
-                  <Minus className="h-4 w-4 text-purple-700" />
+                  <Plus className="h-4 w-4 text-purple-700" />
                 </Button>
               </div>
 
               {/* Coach List */}
-              {simCoaches.length > 0 && (
-                <div className="space-y-1 max-h-40 overflow-y-auto">
+              {simCoaches.length > 0 ? (
+                <div className="space-y-1 max-h-60 overflow-y-auto bg-white p-2 rounded border border-purple-200">
                   {simCoaches.map((coach, idx) => {
                     const isSC = RANK_ORDER.indexOf(coach.rank) >= RANK_ORDER.indexOf('Senior Coach')
                     return (
                       <div
                         key={coach.id}
                         className={`flex items-center justify-between p-2 rounded text-sm ${
-                          isSC ? 'bg-green-50 border border-green-200' : 'bg-gray-50'
+                          isSC ? 'bg-green-50 border border-green-200' : 'bg-gray-50 border border-gray-200'
                         }`}
                       >
-                        <span className="text-gray-600">Coach {idx + 1}</span>
-                        <Badge variant={isSC ? "default" : "secondary"} className="text-xs">
-                          {coach.rank}
-                        </Badge>
+                        <span className="text-gray-600 font-medium">Coach {idx + 1}</span>
+                        <div className="flex items-center gap-2">
+                          <Badge variant={isSC ? "default" : "secondary"} className="text-xs">
+                            {coach.rank}
+                          </Badge>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => {
+                              const newCoaches = simCoaches.filter((_, i) => i !== idx)
+                              setSimCoaches(newCoaches)
+                            }}
+                            className="h-6 w-6 p-0 hover:bg-red-100"
+                          >
+                            <X className="h-3 w-3 text-red-600" />
+                          </Button>
+                        </div>
                       </div>
                     )
                   })}
                 </div>
+              ) : (
+                <div className="bg-white p-6 rounded border border-purple-200 text-center text-gray-400 text-sm">
+                  Select a rank and click + to add coaches
+                </div>
               )}
 
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-gray-600">Qualifying Points:</span>
+                <span className="font-bold text-purple-700">
+                  {scTeamQP} QP from SC+ teams
+                </span>
+              </div>
+
               <p className="text-xs text-gray-600 bg-white p-2 rounded border border-purple-200">
-                💡 <span className="font-medium">Tip:</span> {scTeamQP} QP from SC+ teams (1 SC Team = 1 QP)
+                💡 <span className="font-medium">Tip:</span> 1 SC Team = 1 Qualifying Point
               </p>
             </div>
           </CardContent>
