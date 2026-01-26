@@ -37,6 +37,7 @@ export function AdminZoomCalls({ onClose }: { onClose?: () => void }) {
   const [editingId, setEditingId] = useState<string | null>(null)
   const [showForm, setShowForm] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
+  const [typeFilter, setTypeFilter] = useState<"all" | "meeting" | "event">("all")
   const [copiedId, setCopiedId] = useState<string | null>(null)
 
   // Form state
@@ -1037,28 +1038,62 @@ export function AdminZoomCalls({ onClose }: { onClose?: () => void }) {
 
       {/* List of Zoom Calls */}
       <div className="space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <h2 className="font-heading font-bold text-xl text-optavia-dark">All Meetings & Events</h2>
+        <div className="flex flex-col gap-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <h2 className="font-heading font-bold text-xl text-optavia-dark">All Meetings & Events</h2>
+            {zoomCalls.length > 0 && (
+              <div className="relative w-full sm:w-64">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <Input
+                  type="text"
+                  placeholder="Search meetings..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-9 border-gray-300"
+                />
+                {searchQuery && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="absolute right-1 top-1/2 -translate-y-1/2 h-6 w-6 p-0 text-gray-400 hover:text-gray-600"
+                    onClick={() => setSearchQuery("")}
+                  >
+                    <X className="h-3 w-3" />
+                  </Button>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* Type Filter */}
           {zoomCalls.length > 0 && (
-            <div className="relative w-full sm:w-64">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-              <Input
-                type="text"
-                placeholder="Search meetings..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-9 border-gray-300"
-              />
-              {searchQuery && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="absolute right-1 top-1/2 -translate-y-1/2 h-6 w-6 p-0 text-gray-400 hover:text-gray-600"
-                  onClick={() => setSearchQuery("")}
-                >
-                  <X className="h-3 w-3" />
-                </Button>
-              )}
+            <div className="flex gap-2">
+              <Button
+                variant={typeFilter === "all" ? "default" : "outline"}
+                size="sm"
+                onClick={() => setTypeFilter("all")}
+                className={typeFilter === "all" ? "bg-[hsl(var(--optavia-green))] hover:bg-[hsl(var(--optavia-green-dark))]" : "border-gray-300"}
+              >
+                All
+              </Button>
+              <Button
+                variant={typeFilter === "meeting" ? "default" : "outline"}
+                size="sm"
+                onClick={() => setTypeFilter("meeting")}
+                className={typeFilter === "meeting" ? "bg-[hsl(var(--optavia-green))] hover:bg-[hsl(var(--optavia-green-dark))]" : "border-gray-300"}
+              >
+                <Video className="h-4 w-4 mr-1" />
+                Meetings
+              </Button>
+              <Button
+                variant={typeFilter === "event" ? "default" : "outline"}
+                size="sm"
+                onClick={() => setTypeFilter("event")}
+                className={typeFilter === "event" ? "bg-[hsl(var(--optavia-green))] hover:bg-[hsl(var(--optavia-green-dark))]" : "border-gray-300"}
+              >
+                <Calendar className="h-4 w-4 mr-1" />
+                Events
+              </Button>
             </div>
           )}
         </div>
@@ -1071,6 +1106,12 @@ export function AdminZoomCalls({ onClose }: { onClose?: () => void }) {
           </Card>
         ) : (() => {
           const filteredCalls = zoomCalls.filter((call) => {
+            // Type filter
+            if (typeFilter !== "all") {
+              const callEventType = call.event_type || "meeting"
+              if (callEventType !== typeFilter) return false
+            }
+            // Search filter
             if (!searchQuery.trim()) return true
             const query = searchQuery.toLowerCase()
             return (
