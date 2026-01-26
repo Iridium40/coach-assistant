@@ -122,6 +122,7 @@ export function AdminTouchpointTemplates() {
   // Form state
   const [templateTitle, setTemplateTitle] = useState("")
   const [templateMessage, setTemplateMessage] = useState("")
+  const [templateTriggerId, setTemplateTriggerId] = useState<string>("")
   const [triggerLabel, setTriggerLabel] = useState("")
   const [triggerKey, setTriggerKey] = useState("")
   const [triggerPhase, setTriggerPhase] = useState("attention")
@@ -198,7 +199,8 @@ export function AdminTouchpointTemplates() {
 
   // Save template
   const handleSaveTemplate = async () => {
-    if (!selectedTrigger || !templateTitle.trim() || !templateMessage.trim()) {
+    const targetTriggerId = templateTriggerId || selectedTrigger?.id
+    if (!targetTriggerId || !templateTitle.trim() || !templateMessage.trim()) {
       toast({
         title: "Please fill in all fields",
         variant: "destructive",
@@ -210,19 +212,26 @@ export function AdminTouchpointTemplates() {
       if (editingTemplate) {
         const { error } = await supabase
           .from("touchpoint_templates")
-          .update({ title: templateTitle, message: templateMessage })
+          .update({ 
+            trigger_id: targetTriggerId,
+            title: templateTitle, 
+            message: templateMessage 
+          })
           .eq("id", editingTemplate.id)
 
         if (error) throw error
         toast({ title: "Template updated!" })
         trackChange()
       } else {
+        // Count existing templates for this trigger to set sort_order
+        const existingTemplatesCount = templates.filter(t => t.trigger_id === targetTriggerId).length
+        
         const { error } = await supabase.from("touchpoint_templates").insert({
-          trigger_id: selectedTrigger.id,
+          trigger_id: targetTriggerId,
           title: templateTitle,
           message: templateMessage,
-          is_default: triggerTemplates.length === 0,
-          sort_order: triggerTemplates.length,
+          is_default: existingTemplatesCount === 0,
+          sort_order: existingTemplatesCount,
         })
 
         if (error) throw error
@@ -234,6 +243,7 @@ export function AdminTouchpointTemplates() {
       setEditingTemplate(null)
       setTemplateTitle("")
       setTemplateMessage("")
+      setTemplateTriggerId("")
       loadData()
     } catch (error) {
       console.error("Error saving template:", error)
@@ -294,6 +304,120 @@ export function AdminTouchpointTemplates() {
     }
   }
 
+  // Save trigger
+  const handleSaveTrigger = async () => {
+    if (!triggerLabel.trim() || !triggerKey.trim()) {
+      toast({
+        title: "Please fill in all required fields",
+        variant: "destructive",
+      })
+      return
+    }
+
+    try {
+      if (editingTrigger) {
+        const { error } = await supabase
+          .from("touchpoint_triggers")
+          .update({
+            trigger_label: triggerLabel,
+            trigger_key: triggerKey,
+            phase: triggerPhase,
+            action_type: triggerActionType,
+            emoji: triggerEmoji,
+            day_start: triggerDayStart ? parseInt(triggerDayStart) : null,
+            day_end: triggerDayEnd ? parseInt(triggerDayEnd) : null,
+          })
+          .eq("id", editingTrigger.id)
+
+        if (error) throw error
+        toast({ title: "Trigger updated!" })
+        trackChange()
+      } else {
+        const { error } = await supabase.from("touchpoint_triggers").insert({
+          trigger_label: triggerLabel,
+          trigger_key: triggerKey,
+          phase: triggerPhase,
+          action_type: triggerActionType,
+          emoji: triggerEmoji,
+          day_start: triggerDayStart ? parseInt(triggerDayStart) : null,
+          day_end: triggerDayEnd ? parseInt(triggerDayEnd) : null,
+          sort_order: triggers.length,
+          is_active: true,
+        })
+
+        if (error) throw error
+        toast({ title: "Trigger created!" })
+        trackChange()
+      }
+
+      setShowTriggerModal(false)
+      setEditingTrigger(null)
+      resetTriggerForm()
+      loadData()
+    } catch (error) {
+      console.error("Error saving trigger:", error)
+      toast({
+        title: "Failed to save trigger",
+        variant: "destructive",
+      })
+    }
+  }
+
+  // Delete trigger
+  const handleDeleteTrigger = async (triggerId: string) => {
+    if (!confirm("Are you sure you want to delete this trigger? All associated templates will also be deleted.")) return
+
+    try {
+      const { error } = await supabase
+        .from("touchpoint_triggers")
+        .delete()
+        .eq("id", triggerId)
+
+      if (error) throw error
+      
+      if (selectedTrigger?.id === triggerId) {
+        setSelectedTrigger(triggers[0] || null)
+      }
+      
+      loadData()
+      toast({ title: "Trigger deleted" })
+      trackChange()
+    } catch (error) {
+      toast({
+        title: "Failed to delete trigger",
+        variant: "destructive",
+      })
+    }
+  }
+
+  // Open trigger modal
+  const openTriggerModal = (trigger?: TouchpointTrigger) => {
+    if (trigger) {
+      setEditingTrigger(trigger)
+      setTriggerLabel(trigger.trigger_label)
+      setTriggerKey(trigger.trigger_key)
+      setTriggerPhase(trigger.phase)
+      setTriggerActionType(trigger.action_type)
+      setTriggerEmoji(trigger.emoji)
+      setTriggerDayStart(trigger.day_start?.toString() || "")
+      setTriggerDayEnd(trigger.day_end?.toString() || "")
+    } else {
+      setEditingTrigger(null)
+      resetTriggerForm()
+    }
+    setShowTriggerModal(true)
+  }
+
+  const resetTriggerForm = () => {
+    setTriggerLabel("")
+    setTriggerKey("")
+    setTriggerPhase("attention")
+    setTriggerActionType("text")
+    setTriggerEmoji("📱")
+    setTriggerDayStart("")
+    setTriggerDayEnd("")
+  }
+
   // Save meeting invite
   const handleSaveMeetingInvite = async () => {
     if (!selectedTrigger || !meetingSubject.trim() || !meetingBody.trim()) {
@@ -335,10 +459,12 @@ export function AdminTouchpointTemplates() {
       setEditingTemplate(template)
       setTemplateTitle(template.title)
       setTemplateMessage(template.message)
+      setTemplateTriggerId(template.trigger_id)
     } else {
       setEditingTemplate(null)
       setTemplateTitle("")
       setTemplateMessage("")
+      setTemplateTriggerId(selectedTrigger?.id || "")
     }
     setShowTemplateModal(true)
   }
@@ -378,62 +504,98 @@ export function AdminTouchpointTemplates() {
         {/* Left Sidebar - Trigger List */}
         <div className="lg:col-span-4">
           <Card>
-            <CardHeader className="pb-3">
+            <CardHeader className="pb-3 flex flex-row items-center justify-between">
               <CardTitle className="text-base">Triggers</CardTitle>
+              <Button
+                size="sm"
+                onClick={() => openTriggerModal()}
+                className="bg-[hsl(var(--optavia-green))] hover:bg-[hsl(var(--optavia-green-dark))] text-white h-8"
+              >
+                <Plus className="h-3 w-3 mr-1" />
+                New
+              </Button>
             </CardHeader>
             <CardContent className="p-0">
               <div className="divide-y divide-gray-100 max-h-[600px] overflow-y-auto">
                 {triggers.map((trigger) => (
-                  <button
+                  <div
                     key={trigger.id}
-                    onClick={() => {
-                      setSelectedTrigger(trigger)
-                      setViewMode("templates")
-                    }}
-                    className={`w-full px-4 py-3 flex items-center gap-3 text-left hover:bg-gray-50 transition-colors ${
+                    className={`group relative ${
                       selectedTrigger?.id === trigger.id
                         ? "bg-green-50 border-l-4 border-[hsl(var(--optavia-green))]"
                         : ""
                     }`}
                   >
-                    <span className="text-xl">{trigger.emoji}</span>
-                    <div className="flex-1 min-w-0">
-                      <p
-                        className={`text-sm font-medium truncate ${
-                          selectedTrigger?.id === trigger.id
-                            ? "text-[hsl(var(--optavia-green))]"
-                            : "text-gray-800"
-                        }`}
-                      >
-                        {trigger.trigger_label}
-                      </p>
-                      <div className="flex items-center gap-2 mt-0.5">
-                        <Badge
-                          variant="outline"
-                          className={`text-xs ${
-                            trigger.action_type === "call"
-                              ? "bg-purple-50 text-purple-700 border-purple-200"
-                              : "bg-blue-50 text-blue-700 border-blue-200"
+                    <button
+                      onClick={() => {
+                        setSelectedTrigger(trigger)
+                        setViewMode("templates")
+                      }}
+                      className="w-full px-4 py-3 flex items-center gap-3 text-left hover:bg-gray-50 transition-colors"
+                    >
+                      <span className="text-xl">{trigger.emoji}</span>
+                      <div className="flex-1 min-w-0">
+                        <p
+                          className={`text-sm font-medium truncate ${
+                            selectedTrigger?.id === trigger.id
+                              ? "text-[hsl(var(--optavia-green))]"
+                              : "text-gray-800"
                           }`}
                         >
-                          {trigger.action_type === "call" ? (
-                            <>
-                              <Phone className="h-3 w-3 mr-1" />
-                              Call
-                            </>
-                          ) : (
-                            <>
-                              <MessageSquare className="h-3 w-3 mr-1" />
-                              Text
-                            </>
-                          )}
-                        </Badge>
-                        <span className="text-xs text-gray-400">
-                          {templates.filter((t) => t.trigger_id === trigger.id).length} templates
-                        </span>
+                          {trigger.trigger_label}
+                        </p>
+                        <div className="flex items-center gap-2 mt-0.5">
+                          <Badge
+                            variant="outline"
+                            className={`text-xs ${
+                              trigger.action_type === "call"
+                                ? "bg-purple-50 text-purple-700 border-purple-200"
+                                : "bg-blue-50 text-blue-700 border-blue-200"
+                            }`}
+                          >
+                            {trigger.action_type === "call" ? (
+                              <>
+                                <Phone className="h-3 w-3 mr-1" />
+                                Call
+                              </>
+                            ) : (
+                              <>
+                                <MessageSquare className="h-3 w-3 mr-1" />
+                                Text
+                              </>
+                            )}
+                          </Badge>
+                          <span className="text-xs text-gray-400">
+                            {templates.filter((t) => t.trigger_id === trigger.id).length} templates
+                          </span>
+                        </div>
                       </div>
+                    </button>
+                    <div className="absolute right-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className="h-7 w-7"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          openTriggerModal(trigger)
+                        }}
+                      >
+                        <Edit2 className="h-3 w-3" />
+                      </Button>
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className="h-7 w-7 text-red-500 hover:text-red-600 hover:bg-red-50"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          handleDeleteTrigger(trigger.id)
+                        }}
+                      >
+                        <Trash2 className="h-3 w-3" />
+                      </Button>
                     </div>
-                  </button>
+                  </div>
                 ))}
               </div>
             </CardContent>
@@ -768,11 +930,29 @@ export function AdminTouchpointTemplates() {
               {editingTemplate ? "Edit Template" : "Add New Template"}
             </DialogTitle>
             <DialogDescription>
-              Create a message template for {selectedTrigger?.trigger_label}
+              Create a message template for a touchpoint trigger
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4">
+            <div>
+              <Label>Associate with Trigger</Label>
+              <Select
+                value={templateTriggerId}
+                onValueChange={setTemplateTriggerId}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a trigger" />
+                </SelectTrigger>
+                <SelectContent>
+                  {triggers.map((trigger) => (
+                    <SelectItem key={trigger.id} value={trigger.id}>
+                      {trigger.emoji} {trigger.trigger_label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
             <div>
               <Label>Template Title</Label>
               <Input
@@ -804,6 +984,121 @@ export function AdminTouchpointTemplates() {
               className="bg-[hsl(var(--optavia-green))] hover:bg-[hsl(var(--optavia-green-dark))] text-white"
             >
               {editingTemplate ? "Save Changes" : "Add Template"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add/Edit Trigger Modal */}
+      <Dialog open={showTriggerModal} onOpenChange={setShowTriggerModal}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>
+              {editingTrigger ? "Edit Trigger" : "Create New Trigger"}
+            </DialogTitle>
+            <DialogDescription>
+              Define when and how coaches should reach out to clients
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>Trigger Label *</Label>
+                <Input
+                  value={triggerLabel}
+                  onChange={(e) => setTriggerLabel(e.target.value)}
+                  placeholder="e.g., Critical Phase (Days 1-3)"
+                />
+              </div>
+              <div>
+                <Label>Trigger Key *</Label>
+                <Input
+                  value={triggerKey}
+                  onChange={(e) => setTriggerKey(e.target.value)}
+                  placeholder="e.g., critical_phase"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Unique identifier (lowercase, underscores)
+                </p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>Phase</Label>
+                <Select value={triggerPhase} onValueChange={setTriggerPhase}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="attention">Attention</SelectItem>
+                    <SelectItem value="milestone">Milestone</SelectItem>
+                    <SelectItem value="routine">Routine</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label>Action Type</Label>
+                <Select value={triggerActionType} onValueChange={(v) => setTriggerActionType(v as "text" | "call")}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="text">Text Message</SelectItem>
+                    <SelectItem value="call">Celebration Call</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div>
+              <Label>Emoji</Label>
+              <Input
+                value={triggerEmoji}
+                onChange={(e) => setTriggerEmoji(e.target.value)}
+                placeholder="e.g., 🎉"
+                maxLength={2}
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>Day Start (optional)</Label>
+                <Input
+                  type="number"
+                  value={triggerDayStart}
+                  onChange={(e) => setTriggerDayStart(e.target.value)}
+                  placeholder="e.g., 1"
+                />
+              </div>
+              <div>
+                <Label>Day End (optional)</Label>
+                <Input
+                  type="number"
+                  value={triggerDayEnd}
+                  onChange={(e) => setTriggerDayEnd(e.target.value)}
+                  placeholder="e.g., 3"
+                />
+              </div>
+            </div>
+
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+              <p className="text-sm text-blue-800">
+                <strong>Tip:</strong> Day range is optional. Use it to specify when this trigger should appear (e.g., Days 1-3, Day 7, Day 14).
+              </p>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowTriggerModal(false)}>
+              Cancel
+            </Button>
+            <Button
+              onClick={handleSaveTrigger}
+              className="bg-[hsl(var(--optavia-green))] hover:bg-[hsl(var(--optavia-green-dark))] text-white"
+            >
+              {editingTrigger ? "Save Changes" : "Create Trigger"}
             </Button>
           </DialogFooter>
         </DialogContent>
