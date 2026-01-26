@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useMemo, useCallback } from "react"
-import { useTrainingResources, typeIcons, type TrainingResource } from "@/hooks/use-training-resources"
+import { useResourceLibrary, resourceTypeIcons, TAG_TYPE_LABELS, type ResourceLibraryResource } from "@/hooks/use-resource-library"
 import { useUserData } from "@/contexts/user-data-context"
 import { useBookmarks } from "@/hooks/use-bookmarks"
 import { SearchWithHistory } from "@/components/search-with-history"
@@ -15,41 +15,52 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { Search, ExternalLink, FileText, Video, Palette, Link2, ChevronDown, ChevronRight, CheckCircle, Circle, Bookmark } from "lucide-react"
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible"
+import { Search, ExternalLink, FileText, Video, Palette, Link2, ChevronDown, ChevronRight, CheckCircle, Circle, Bookmark, Filter, X, FileIcon, FormInput } from "lucide-react"
 import { EmbeddedContentViewer } from "@/components/embedded-content-viewer"
 import { TrainingContextualResources } from "@/components/resources"
 import { useToast } from "@/hooks/use-toast"
 
 export function TrainingResourcesTab() {
-  const { user, profile } = useUserData()
-  const userRank = profile?.coach_rank || null
+  const { user } = useUserData()
   const { toast } = useToast()
   
   const {
     resources,
-    uniqueCategories,
+    categories,
+    tags,
+    tagsByType,
     loading,
     filterResources,
     getCategoryIcon,
+    getCategoryColor,
+    getCategoryById,
     isCompleted,
     toggleCompletion,
     progress,
     getCategoryProgress,
-  } = useTrainingResources(user, userRank)
+    searchSuggestions,
+  } = useResourceLibrary(user)
 
   const { isBookmarked, toggleBookmark } = useBookmarks(user)
 
   const [selectedCategory, setSelectedCategory] = useState<string>("All")
+  const [selectedTags, setSelectedTags] = useState<string[]>([])
   const [searchQuery, setSearchQuery] = useState("")
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set())
   const [viewerOpen, setViewerOpen] = useState(false)
-  const [selectedResource, setSelectedResource] = useState<TrainingResource | null>(null)
+  const [selectedResource, setSelectedResource] = useState<ResourceLibraryResource | null>(null)
+  const [showTagFilters, setShowTagFilters] = useState(false)
 
   // Types that cannot be embedded - open directly in new tab
-  const nonEmbeddableTypes = ["canva"]
+  const nonEmbeddableTypes = ["canva", "form"]
   
   // Open resource in embedded viewer or new tab - also marks as complete
-  const openResource = (resource: TrainingResource) => {
+  const openResource = (resource: ResourceLibraryResource) => {
     // Mark as complete when opening (if not already)
     if (user && !isCompleted(resource.id)) {
       toggleCompletion(resource.id)
@@ -57,7 +68,8 @@ export function TrainingResourcesTab() {
     
     // Check if resource type or URL indicates non-embeddable content
     const isCanvaUrl = resource.url.includes("canva.com")
-    const isNonEmbeddable = nonEmbeddableTypes.includes(resource.type) || isCanvaUrl
+    const isJotFormUrl = resource.url.includes("jotform.com")
+    const isNonEmbeddable = nonEmbeddableTypes.includes(resource.type) || isCanvaUrl || isJotFormUrl
     
     if (isNonEmbeddable) {
       // Open directly in new tab
@@ -89,31 +101,33 @@ export function TrainingResourcesTab() {
     }
   }
 
-  // Generate search suggestions from resource titles and categories
-  const searchSuggestions = useMemo(() => {
-    const suggestions: string[] = []
-    resources.forEach((resource) => {
-      suggestions.push(resource.title)
-      if (resource.category && !suggestions.includes(resource.category)) {
-        suggestions.push(resource.category)
-      }
-    })
-    return suggestions
-  }, [resources])
-
   // Handle search change
   const handleSearchChange = useCallback((value: string) => {
     setSearchQuery(value)
   }, [])
 
+  // Toggle tag selection
+  const toggleTag = (tagId: string) => {
+    setSelectedTags(prev => 
+      prev.includes(tagId) 
+        ? prev.filter(t => t !== tagId)
+        : [...prev, tagId]
+    )
+  }
+
+  // Clear all tag filters
+  const clearTagFilters = () => {
+    setSelectedTags([])
+  }
+
   // Toggle category expansion
-  const toggleCategory = (category: string) => {
+  const toggleCategory = (categoryId: string) => {
     setExpandedCategories(prev => {
       const newSet = new Set(prev)
-      if (newSet.has(category)) {
-        newSet.delete(category)
+      if (newSet.has(categoryId)) {
+        newSet.delete(categoryId)
       } else {
-        newSet.add(category)
+        newSet.add(categoryId)
       }
       return newSet
     })
@@ -121,7 +135,7 @@ export function TrainingResourcesTab() {
 
   // Expand all categories
   const expandAll = () => {
-    setExpandedCategories(new Set(uniqueCategories))
+    setExpandedCategories(new Set(categories.map(c => c.id)))
   }
 
   // Collapse all categories
@@ -129,38 +143,32 @@ export function TrainingResourcesTab() {
     setExpandedCategories(new Set())
   }
 
-  // Filter resources based on category and search
+  // Filter resources based on category, tags, and search
   const filteredResources = useMemo(() => {
-    return filterResources(selectedCategory, searchQuery)
-  }, [filterResources, selectedCategory, searchQuery])
+    return filterResources(selectedCategory, selectedTags, searchQuery)
+  }, [filterResources, selectedCategory, selectedTags, searchQuery])
 
-  // Group filtered resources by category for display, maintaining sort order
+  // Group filtered resources by category for display
   const groupedFiltered = useMemo(() => {
-    const grouped: Record<string, typeof resources> = {}
+    const grouped: Record<string, ResourceLibraryResource[]> = {}
     filteredResources.forEach(r => {
-      if (!grouped[r.category]) grouped[r.category] = []
-      grouped[r.category].push(r)
+      if (!grouped[r.category_id]) grouped[r.category_id] = []
+      grouped[r.category_id].push(r)
     })
     // Sort resources within each category by sort_order
-    Object.keys(grouped).forEach(cat => {
-      grouped[cat].sort((a, b) => a.sort_order - b.sort_order)
+    Object.keys(grouped).forEach(catId => {
+      grouped[catId].sort((a, b) => a.sort_order - b.sort_order)
     })
     return grouped
   }, [filteredResources])
 
-  // Get categories in correct order based on uniqueCategories
+  // Get categories in correct order based on sort_order
   const orderedCategories = useMemo(() => {
     const categoriesInResults = Object.keys(groupedFiltered)
-    // Sort by the order in uniqueCategories
-    return categoriesInResults.sort((a, b) => {
-      const aIndex = uniqueCategories.indexOf(a)
-      const bIndex = uniqueCategories.indexOf(b)
-      // If not found in uniqueCategories, put at end
-      const aOrder = aIndex === -1 ? 999 : aIndex
-      const bOrder = bIndex === -1 ? 999 : bIndex
-      return aOrder - bOrder
-    })
-  }, [groupedFiltered, uniqueCategories])
+    return categories
+      .filter(c => categoriesInResults.includes(c.id))
+      .sort((a, b) => a.sort_order - b.sort_order)
+  }, [groupedFiltered, categories])
 
   const getTypeIcon = (type: string) => {
     switch (type) {
@@ -168,12 +176,25 @@ export function TrainingResourcesTab() {
         return <Video className="h-4 w-4 text-red-500" />
       case "canva":
         return <Palette className="h-4 w-4 text-purple-500" />
+      case "doc":
       case "document":
         return <FileText className="h-4 w-4 text-blue-500" />
+      case "pdf":
+        return <FileIcon className="h-4 w-4 text-orange-500" />
+      case "form":
+        return <FormInput className="h-4 w-4 text-green-500" />
       default:
         return <Link2 className="h-4 w-4 text-gray-500" />
     }
   }
+
+  // Get selected tag names for display
+  const selectedTagNames = useMemo(() => {
+    return selectedTags.map(tagId => {
+      const tag = tags.find(t => t.id === tagId)
+      return tag?.name || tagId
+    })
+  }, [selectedTags, tags])
 
   if (loading) {
     return (
@@ -225,11 +246,11 @@ export function TrainingResourcesTab() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="All">📚 All Categories</SelectItem>
-                {uniqueCategories.map((cat) => (
-                  <SelectItem key={cat} value={cat}>
+                {categories.map((cat) => (
+                  <SelectItem key={cat.id} value={cat.id}>
                     <span className="flex items-center gap-2">
-                      <span>{getCategoryIcon(cat)}</span>
-                      <span className="truncate">{cat.length > 30 ? cat.slice(0, 30) + "..." : cat}</span>
+                      <span>{cat.icon}</span>
+                      <span className="truncate">{cat.name.length > 30 ? cat.name.slice(0, 30) + "..." : cat.name}</span>
                     </span>
                   </SelectItem>
                 ))}
@@ -252,28 +273,107 @@ export function TrainingResourcesTab() {
           >
             All
           </Button>
-          {uniqueCategories.map((cat) => (
+          {categories.map((cat) => (
             <Button
-              key={cat}
-              variant={selectedCategory === cat ? "default" : "outline"}
+              key={cat.id}
+              variant={selectedCategory === cat.id ? "default" : "outline"}
               size="sm"
-              onClick={() => setSelectedCategory(cat)}
+              onClick={() => setSelectedCategory(cat.id)}
               className={
-                selectedCategory === cat
+                selectedCategory === cat.id
                   ? "bg-[hsl(var(--optavia-green))] hover:bg-[hsl(var(--optavia-green-dark))] text-white"
                   : "border-gray-300 text-optavia-dark hover:bg-gray-100"
               }
             >
-              {getCategoryIcon(cat)} {cat.length > 25 ? cat.slice(0, 25) + "..." : cat}
+              {cat.icon} {cat.name.length > 20 ? cat.name.slice(0, 20) + "..." : cat.name}
             </Button>
           ))}
         </div>
+
+        {/* Tag Filters - Collapsible */}
+        <Collapsible open={showTagFilters} onOpenChange={setShowTagFilters}>
+          <div className="flex items-center gap-2">
+            <CollapsibleTrigger asChild>
+              <Button variant="ghost" size="sm" className="text-optavia-gray hover:text-optavia-dark">
+                <Filter className="h-4 w-4 mr-1" />
+                Filter by Tags
+                {selectedTags.length > 0 && (
+                  <Badge variant="secondary" className="ml-2 text-xs">
+                    {selectedTags.length}
+                  </Badge>
+                )}
+                <ChevronDown className={`h-4 w-4 ml-1 transition-transform ${showTagFilters ? "rotate-180" : ""}`} />
+              </Button>
+            </CollapsibleTrigger>
+            {selectedTags.length > 0 && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={clearTagFilters}
+                className="text-xs text-red-500 hover:text-red-600 hover:bg-red-50"
+              >
+                <X className="h-3 w-3 mr-1" />
+                Clear filters
+              </Button>
+            )}
+          </div>
+          
+          <CollapsibleContent className="mt-3">
+            <div className="bg-gray-50 rounded-lg p-4 space-y-4">
+              {Object.entries(tagsByType).map(([type, typeTags]) => (
+                <div key={type}>
+                  <h4 className="text-xs font-semibold text-optavia-gray uppercase tracking-wide mb-2">
+                    {TAG_TYPE_LABELS[type] || type}
+                  </h4>
+                  <div className="flex flex-wrap gap-2">
+                    {typeTags.map((tag) => {
+                      const isSelected = selectedTags.includes(tag.id)
+                      return (
+                        <button
+                          key={tag.id}
+                          onClick={() => toggleTag(tag.id)}
+                          className={`px-3 py-1 text-xs rounded-full border transition-colors ${
+                            isSelected
+                              ? "bg-[hsl(var(--optavia-green))] text-white border-[hsl(var(--optavia-green))]"
+                              : "bg-white text-optavia-dark border-gray-300 hover:border-[hsl(var(--optavia-green))] hover:text-[hsl(var(--optavia-green))]"
+                          }`}
+                        >
+                          {tag.name}
+                        </button>
+                      )
+                    })}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CollapsibleContent>
+        </Collapsible>
+
+        {/* Active filters display */}
+        {selectedTags.length > 0 && (
+          <div className="flex flex-wrap gap-2 items-center">
+            <span className="text-xs text-optavia-gray">Active filters:</span>
+            {selectedTagNames.map((name, idx) => (
+              <Badge
+                key={selectedTags[idx]}
+                variant="secondary"
+                className="text-xs cursor-pointer hover:bg-gray-200"
+                onClick={() => toggleTag(selectedTags[idx])}
+              >
+                {name}
+                <X className="h-3 w-3 ml-1" />
+              </Badge>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Results count */}
-      {searchQuery && (
+      {(searchQuery || selectedTags.length > 0) && (
         <p className="text-sm text-optavia-gray mb-3 sm:mb-4 px-1">
-          Found {filteredResources.length} result{filteredResources.length !== 1 ? "s" : ""} for "{searchQuery}"
+          Found {filteredResources.length} result{filteredResources.length !== 1 ? "s" : ""}
+          {searchQuery && ` for "${searchQuery}"`}
+          {selectedTags.length > 0 && ` with ${selectedTags.length} filter${selectedTags.length !== 1 ? "s" : ""}`}
         </p>
       )}
 
@@ -282,6 +382,18 @@ export function TrainingResourcesTab() {
         <div className="text-center py-12 text-optavia-gray">
           <Search className="h-12 w-12 mx-auto mb-4 opacity-30" />
           <p>No resources found matching your criteria.</p>
+          {(selectedTags.length > 0 || searchQuery) && (
+            <Button
+              variant="link"
+              onClick={() => {
+                clearTagFilters()
+                setSearchQuery("")
+              }}
+              className="mt-2 text-[hsl(var(--optavia-green))]"
+            >
+              Clear all filters
+            </Button>
+          )}
         </div>
       ) : (
         <div className="space-y-3 sm:space-y-4">
@@ -306,16 +418,16 @@ export function TrainingResourcesTab() {
           </div>
 
           {orderedCategories.map((category) => {
-            const catResources = groupedFiltered[category]
-            const isExpanded = expandedCategories.has(category)
-            const catProgress = getCategoryProgress(category)
+            const catResources = groupedFiltered[category.id]
+            const isExpanded = expandedCategories.has(category.id)
+            const catProgress = getCategoryProgress(category.id)
             const isComplete = catProgress.completed === catProgress.total && catProgress.total > 0
             
             return (
-              <div key={category} className="border rounded-lg overflow-hidden bg-white">
+              <div key={category.id} className="border rounded-lg overflow-hidden bg-white">
                 {/* Category Header - Clickable */}
                 <button
-                  onClick={() => toggleCategory(category)}
+                  onClick={() => toggleCategory(category.id)}
                   className="w-full flex items-center gap-2 p-3 hover:bg-gray-50 transition-colors text-left"
                 >
                   {/* Expand/Collapse Icon */}
@@ -327,9 +439,9 @@ export function TrainingResourcesTab() {
                     )}
                   </div>
                   
-                  <span className="text-lg sm:text-xl">{getCategoryIcon(category)}</span>
+                  <span className="text-lg sm:text-xl">{category.icon}</span>
                   <h3 className="font-heading font-bold text-sm sm:text-base text-optavia-dark line-clamp-1 flex-1">
-                    {category}
+                    {category.name}
                   </h3>
                   
                   {/* Category Progress */}
@@ -403,6 +515,24 @@ export function TrainingResourcesTab() {
                                 }`}>
                                   {resource.title}
                                 </h4>
+                                {/* Show tags on hover or when filtered */}
+                                {resource.tags && resource.tags.length > 0 && (
+                                  <div className="hidden group-hover:flex flex-wrap gap-1 mt-1">
+                                    {resource.tags.slice(0, 3).map((tag) => (
+                                      <span
+                                        key={tag.id}
+                                        className="text-[10px] px-1.5 py-0.5 bg-gray-100 text-gray-600 rounded"
+                                      >
+                                        {tag.name}
+                                      </span>
+                                    ))}
+                                    {resource.tags.length > 3 && (
+                                      <span className="text-[10px] px-1.5 py-0.5 text-gray-400">
+                                        +{resource.tags.length - 3}
+                                      </span>
+                                    )}
+                                  </div>
+                                )}
                               </div>
 
                               {/* Type badge + Open Icon */}
@@ -437,7 +567,7 @@ export function TrainingResourcesTab() {
                     
                     {/* Related External Resources for this category */}
                     <div className="p-3 bg-white border-t">
-                      <TrainingContextualResources trainingCategory={category} />
+                      <TrainingContextualResources trainingCategory={category.name} />
                     </div>
                   </div>
                 )}
