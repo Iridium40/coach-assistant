@@ -33,7 +33,9 @@ import {
   CheckCircle,
   Star,
   UserCheck,
+  Calculator,
 } from "lucide-react"
+import { RankSimulator } from "./rank-simulator"
 
 export function RankCalculator() {
   const { user } = useUserData()
@@ -54,6 +56,7 @@ export function RankCalculator() {
   } = useRankCalculator(user)
 
   const [showRankSelector, setShowRankSelector] = useState(false)
+  const [showSimulator, setShowSimulator] = useState(false)
 
   // Build prospect pipeline from actual data
   // New = new status prospects
@@ -123,6 +126,15 @@ export function RankCalculator() {
               <p className="text-xs text-gray-500">Current Rank</p>
               <h2 className={`text-lg font-bold ${currentRankColors.text}`}>{currentRank}</h2>
             </div>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => setShowSimulator(true)}
+              className="flex items-center gap-1.5"
+            >
+              <Calculator className="h-3.5 w-3.5" />
+              <span className="hidden sm:inline">Simulate</span>
+            </Button>
           </div>
 
           {nextRank && (
@@ -408,6 +420,17 @@ export function RankCalculator() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Rank Simulator */}
+      <RankSimulator
+        open={showSimulator}
+        onOpenChange={setShowSimulator}
+        currentClients={activeClients}
+        currentCoaches={frontlineCoaches.map(c => ({
+          id: c.id,
+          rank: c.coach_rank as RankType
+        }))}
+      />
     </div>
   )
 }
