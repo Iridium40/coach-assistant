@@ -112,9 +112,8 @@ export function RankCalculator() {
 
   // Calculate qualifying points
   // Assumption: Each client is qualified (~$300-400 volume each)
-  // ~3-4 clients = 1,200 FQV = 1 Qualifying Point
-  // Using 4 clients per point as a conservative estimate
-  const clientPoints = Math.floor(simClients / 4)
+  // 5 clients = 1 Qualifying Point (simplified for visual clarity)
+  const clientPoints = Math.floor(simClients / 5)
   
   // Each SC+ team counts as 1 Qualifying Point
   const scTeamPoints = scTeamsCount
@@ -245,7 +244,7 @@ export function RankCalculator() {
                 {projectedRank}
               </h3>
               <p className="text-xs text-gray-600 mt-0.5">
-                {totalQP} Qualifying Points ({clientQP} from clients + {scTeamQP} from SC teams)
+                {totalPoints} Qualifying Points ({clientPoints} from clients + {scTeamPoints} from SC teams)
               </p>
             </div>
             {projectedRank !== currentRank && (
@@ -285,7 +284,7 @@ export function RankCalculator() {
                     size="sm"
                     variant="outline"
                     onClick={() => setSimClients(simClients + 1)}
-                    disabled={simClients >= 30}
+                    disabled={simClients >= 50}
                     className="h-8 w-8 p-0 border-green-300 hover:bg-green-100"
                   >
                     <Plus className="h-4 w-4 text-green-700" />
@@ -293,36 +292,107 @@ export function RankCalculator() {
                 </div>
               </div>
 
-              {/* Client Icons Grid */}
-              <div className="bg-white p-3 rounded-lg border border-green-200 min-h-[100px]">
-                <div className="flex flex-wrap gap-2">
-                  {Array.from({ length: simClients }).map((_, idx) => (
-                    <div
-                      key={idx}
-                      className="w-10 h-10 rounded-full bg-green-100 border-2 border-green-400 flex items-center justify-center text-green-700 hover:bg-green-200 transition-colors"
-                      title={`Client ${idx + 1}`}
-                    >
-                      <User className="h-5 w-5" />
+              {/* Points Legend */}
+              <div className="bg-white p-3 rounded-lg border border-green-200">
+                <div className="text-xs font-medium text-gray-600 mb-2 flex items-center gap-2">
+                  <span>5 clients = 1 point</span>
+                  <span className="text-gray-400">|</span>
+                  <span className="text-green-600 font-bold">{clientPoints} point{clientPoints !== 1 ? 's' : ''} from {simClients} client{simClients !== 1 ? 's' : ''}</span>
+                </div>
+                
+                {/* Visual Points Groups */}
+                <div className="space-y-2">
+                  {/* Completed Points (groups of 5) */}
+                  {clientPoints > 0 && (
+                    <div className="space-y-2">
+                      {Array.from({ length: clientPoints }).map((_, pointIdx) => (
+                        <div key={pointIdx} className="flex items-center gap-2">
+                          <div className="flex gap-1">
+                            {Array.from({ length: 5 }).map((_, clientIdx) => (
+                              <div
+                                key={clientIdx}
+                                className="w-8 h-8 rounded-full bg-green-500 border-2 border-green-600 flex items-center justify-center text-white shadow-sm"
+                                title={`Client ${pointIdx * 5 + clientIdx + 1}`}
+                              >
+                                <User className="h-4 w-4" />
+                              </div>
+                            ))}
+                          </div>
+                          <div className="flex items-center gap-1 px-2 py-1 bg-amber-100 rounded-full border border-amber-300">
+                            <span className="text-amber-700 font-bold text-sm">= 1 PT</span>
+                            <Star className="h-3 w-3 text-amber-500 fill-amber-500" />
+                          </div>
+                        </div>
+                      ))}
                     </div>
-                  ))}
+                  )}
+                  
+                  {/* Remaining clients (not yet a full point) */}
+                  {simClients % 5 > 0 && (
+                    <div className="flex items-center gap-2">
+                      <div className="flex gap-1">
+                        {Array.from({ length: simClients % 5 }).map((_, idx) => (
+                          <div
+                            key={idx}
+                            className="w-8 h-8 rounded-full bg-green-200 border-2 border-green-400 border-dashed flex items-center justify-center text-green-600"
+                            title={`Client ${clientPoints * 5 + idx + 1}`}
+                          >
+                            <User className="h-4 w-4" />
+                          </div>
+                        ))}
+                        {/* Empty slots to show what's needed for next point */}
+                        {Array.from({ length: 5 - (simClients % 5) }).map((_, idx) => (
+                          <div
+                            key={`empty-${idx}`}
+                            className="w-8 h-8 rounded-full bg-gray-100 border-2 border-gray-300 border-dashed flex items-center justify-center text-gray-400"
+                            title={`Need ${5 - (simClients % 5)} more for next point`}
+                          >
+                            <User className="h-4 w-4" />
+                          </div>
+                        ))}
+                      </div>
+                      <div className="flex items-center gap-1 px-2 py-1 bg-gray-100 rounded-full border border-gray-300">
+                        <span className="text-gray-500 text-xs">+{5 - (simClients % 5)} for next point</span>
+                      </div>
+                    </div>
+                  )}
+                  
+                  {/* Empty state */}
                   {simClients === 0 && (
-                    <div className="w-full text-center py-6 text-gray-400 text-sm">
-                      Click + to add clients
+                    <div className="flex items-center gap-2">
+                      <div className="flex gap-1">
+                        {Array.from({ length: 5 }).map((_, idx) => (
+                          <div
+                            key={`empty-${idx}`}
+                            className="w-8 h-8 rounded-full bg-gray-100 border-2 border-gray-300 border-dashed flex items-center justify-center text-gray-400"
+                          >
+                            <User className="h-4 w-4" />
+                          </div>
+                        ))}
+                      </div>
+                      <div className="flex items-center gap-1 px-2 py-1 bg-gray-100 rounded-full border border-gray-300">
+                        <span className="text-gray-500 text-xs">Add 5 clients = 1 point</span>
+                      </div>
                     </div>
                   )}
                 </div>
               </div>
 
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-gray-600">Qualifying Points:</span>
-                <span className="font-bold text-green-700">
-                  ~{clientQP} QP from clients
-                </span>
+              {/* Quick Add Buttons */}
+              <div className="flex flex-wrap gap-2">
+                <span className="text-xs text-gray-500 self-center">Quick add:</span>
+                {[5, 10, 15, 20, 25].map((num) => (
+                  <Button
+                    key={num}
+                    size="sm"
+                    variant="outline"
+                    onClick={() => setSimClients(num)}
+                    className={`h-7 px-2 text-xs ${simClients === num ? 'bg-green-100 border-green-500 text-green-700' : 'border-green-300 text-green-600 hover:bg-green-50'}`}
+                  >
+                    {num} ({num / 5} pt{num > 5 ? 's' : ''})
+                  </Button>
+                ))}
               </div>
-
-              <p className="text-xs text-gray-600 bg-white p-2 rounded border border-green-200">
-                💡 <span className="font-medium">Tip:</span> ~3-4 clients = 1 Qualifying Point
-              </p>
             </div>
           </CardContent>
         </Card>
@@ -436,7 +506,7 @@ export function RankCalculator() {
               </div>
 
               <p className="text-xs text-gray-600 bg-white p-2 rounded border border-purple-200">
-                💡 <span className="font-medium">Tip:</span> 1 Point = ~4 clients OR 1 SC+ Team (assumes all are qualified)
+                💡 <span className="font-medium">Tip:</span> 1 Point = 5 clients OR 1 SC+ Team (assumes all are qualified)
               </p>
             </div>
           </CardContent>
@@ -464,7 +534,7 @@ export function RankCalculator() {
                   </span>
                 </div>
                 <div className="text-xs text-gray-400 mt-1">
-                  {totalPoints}/{nextRankReqs.minPoints} points (~4 clients or 1 SC+ team = 1 point)
+                  {totalPoints}/{nextRankReqs.minPoints} points (5 clients or 1 SC+ team = 1 point)
                 </div>
               </div>
             )}

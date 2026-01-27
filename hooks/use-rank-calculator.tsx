@@ -48,7 +48,7 @@ export function isQualifyingLeg(rank: string): boolean {
   return getRankIndex(rank) >= 1 // Senior Coach or higher
 }
 
-// Points system: 1 Qualifying Point = ~4 clients OR 1 SC+ Team
+// Points system: 1 Qualifying Point = 5 clients OR 1 SC+ Team
 // Assumption: All clients and coaches are qualified (no FQV/GQV data available)
 // Based on official OPTAVIA Career Path and Rank Qualifications
 export const RANK_REQUIREMENTS: Record<RankType, {
@@ -77,7 +77,7 @@ export const RANK_REQUIREMENTS: Record<RankType, {
     edTeams: 0,
     fibcTeams: 0,
     requiresFIBC: false,
-    description: '1 Qualifying Point (~4 clients)',
+    description: '1 Qualifying Point (5 clients)',
     icon: '⭐',
     note: 'First milestone - unlocks team building'
   },
@@ -87,9 +87,9 @@ export const RANK_REQUIREMENTS: Record<RankType, {
     edTeams: 0,
     fibcTeams: 0,
     requiresFIBC: false,
-    description: '2 Qualifying Points (~8 clients or mix)',
+    description: '2 Qualifying Points (10 clients or mix)',
     icon: '📊',
-    note: '1 Point = ~4 clients OR 1 SC+ Team'
+    note: '1 Point = 5 clients OR 1 SC+ Team'
   },
   'Associate Director': {
     minPoints: 3,
@@ -97,9 +97,9 @@ export const RANK_REQUIREMENTS: Record<RankType, {
     edTeams: 0,
     fibcTeams: 0,
     requiresFIBC: false,
-    description: '3 Qualifying Points (~12 clients or mix)',
+    description: '3 Qualifying Points (15 clients or mix)',
     icon: '🎯',
-    note: '1 Point = ~4 clients OR 1 SC+ Team'
+    note: '1 Point = 5 clients OR 1 SC+ Team'
   },
   'Director': {
     minPoints: 4,
@@ -107,9 +107,9 @@ export const RANK_REQUIREMENTS: Record<RankType, {
     edTeams: 0,
     fibcTeams: 0,
     requiresFIBC: false,
-    description: '4 Qualifying Points (~16 clients or mix)',
+    description: '4 Qualifying Points (20 clients or mix)',
     icon: '💼',
-    note: '1 Point = ~4 clients OR 1 SC+ Team'
+    note: '1 Point = 5 clients OR 1 SC+ Team'
   },
   'Executive Director': {
     minPoints: 5,
@@ -117,7 +117,7 @@ export const RANK_REQUIREMENTS: Record<RankType, {
     edTeams: 0,
     fibcTeams: 0,
     requiresFIBC: false,
-    description: '5 Qualifying Points (~20 clients or mix)',
+    description: '5 Qualifying Points (25 clients or mix)',
     icon: '💫',
     note: 'Major milestone - unlocks Generation Bonuses'
   },
@@ -481,8 +481,9 @@ export function useRankCalculator(user: User | null) {
     const edTeamsCount = frontlineCoaches.filter(c => ED_PLUS_RANKS.includes(c.coach_rank)).length
     const fibcTeamsCount = frontlineCoaches.filter(c => FIBC_PLUS_RANKS.includes(c.coach_rank)).length
     
-    // Calculate points: ~4 clients = 1 point, 1 SC team = 1 point
-    const clientPoints = Math.floor(activeClients / 4)
+    // Calculate points: 5 clients = 1 point, 1 SC team = 1 point
+    // 5 clients = 1 point
+    const clientPoints = Math.floor(activeClients / 5)
     const totalPoints = clientPoints + scTeamsCount
 
     return {
@@ -512,8 +513,9 @@ export function useRankCalculator(user: User | null) {
     const edTeamsCount = frontlineCoaches.filter(c => ED_PLUS_RANKS.includes(c.coach_rank)).length
     const fibcTeamsCount = frontlineCoaches.filter(c => FIBC_PLUS_RANKS.includes(c.coach_rank)).length
     
-    // Calculate points: ~4 clients = 1 point, 1 SC team = 1 point
-    const clientPoints = Math.floor(activeClients / 4)
+    // Calculate points: 5 clients = 1 point, 1 SC team = 1 point
+    // 5 clients = 1 point
+    const clientPoints = Math.floor(activeClients / 5)
     const totalPoints = clientPoints + scTeamsCount
     
     // Calculate points progress (for lower ranks, this is the main metric)

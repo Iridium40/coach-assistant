@@ -37,8 +37,9 @@ export function RankProgressCard({
   const currentReqs = RANK_REQUIREMENTS[currentRank as RankType]
   const nextReqs = nextRank ? RANK_REQUIREMENTS[nextRank as RankType] : null
 
-  // Calculate points: ~4 clients = 1 point, 1 SC team = 1 point
-  const clientPoints = Math.floor(activeClients / 4)
+  // Calculate points: 5 clients = 1 point, 1 SC team = 1 point
+  // 5 clients = 1 point
+  const clientPoints = Math.floor(activeClients / 5)
   const totalPoints = clientPoints + qualifyingLegs
 
   // Calculate progress percentage toward next rank
