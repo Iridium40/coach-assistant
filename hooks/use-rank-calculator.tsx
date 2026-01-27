@@ -45,10 +45,13 @@ export function isQualifyingLeg(rank: string): boolean {
 }
 
 // Simplified rank requirements based on what we can track
+// Note: Higher ranks (RD+) require ED/GD teams which we track separately
 export const RANK_REQUIREMENTS: Record<RankType, {
   minClients: number          // Active clients needed (~$355 PQV each)
   frontlineCoaches: number    // Total frontline coaches
   scTeams: number            // Senior Coach+ teams needed
+  edTeams: number            // Executive Director+ teams needed (for RD+)
+  gdTeams: number            // Global Director+ teams needed (for IPD)
   description: string
   icon: string
   note: string
@@ -57,6 +60,8 @@ export const RANK_REQUIREMENTS: Record<RankType, {
     minClients: 0,
     frontlineCoaches: 0,
     scTeams: 0,
+    edTeams: 0,
+    gdTeams: 0,
     description: 'Starting rank - welcome to the team!',
     icon: '🌱',
     note: ''
@@ -65,6 +70,8 @@ export const RANK_REQUIREMENTS: Record<RankType, {
     minClients: 3,
     frontlineCoaches: 0,
     scTeams: 0,
+    edTeams: 0,
+    gdTeams: 0,
     description: '3+ active clients (1,200 GQV + 5 Ordering Entities)',
     icon: '⭐',
     note: 'First milestone - unlocks team building bonuses'
@@ -73,6 +80,8 @@ export const RANK_REQUIREMENTS: Record<RankType, {
     minClients: 7,
     frontlineCoaches: 0,
     scTeams: 0,
+    edTeams: 0,
+    gdTeams: 0,
     description: 'SC + 2 Points (~7 clients OR mix of clients + SC teams)',
     icon: '📊',
     note: '1 Point = ~3-4 clients ($1,200 FQV) OR 1 SC Team'
@@ -81,6 +90,8 @@ export const RANK_REQUIREMENTS: Record<RankType, {
     minClients: 10,
     frontlineCoaches: 1,
     scTeams: 0,
+    edTeams: 0,
+    gdTeams: 0,
     description: 'SC + 3 Points (~10 clients OR mix of clients + SC teams)',
     icon: '🎯',
     note: '1 Point = ~3-4 clients ($1,200 FQV) OR 1 SC Team'
@@ -89,6 +100,8 @@ export const RANK_REQUIREMENTS: Record<RankType, {
     minClients: 13,
     frontlineCoaches: 2,
     scTeams: 1,
+    edTeams: 0,
+    gdTeams: 0,
     description: 'SC + 4 Points (~13 clients OR mix of clients + SC teams)',
     icon: '💼',
     note: '1 Point = ~3-4 clients ($1,200 FQV) OR 1 SC Team'
@@ -97,6 +110,8 @@ export const RANK_REQUIREMENTS: Record<RankType, {
     minClients: 17,
     frontlineCoaches: 3,
     scTeams: 2,
+    edTeams: 0,
+    gdTeams: 0,
     description: 'SC + 5 Points (~17 clients OR mix of clients + SC teams)',
     icon: '💫',
     note: 'Major milestone - unlocks Generation Bonuses'
@@ -105,6 +120,8 @@ export const RANK_REQUIREMENTS: Record<RankType, {
     minClients: 17,
     frontlineCoaches: 5,
     scTeams: 5,
+    edTeams: 0,
+    gdTeams: 0,
     description: 'ED + 17 clients + 5 SC Teams (6,000 FQV + 15,000 GQV)',
     icon: '🏆',
     note: 'Fully Integrated Business Coach - mastery of both client support and team building'
@@ -113,39 +130,49 @@ export const RANK_REQUIREMENTS: Record<RankType, {
     minClients: 17,
     frontlineCoaches: 5,
     scTeams: 5,
-    description: 'ED + 1 ED Team (or FIBC + 1 ED Team for Integrated)',
+    edTeams: 1,
+    gdTeams: 0,
+    description: 'ED + 1 ED Team',
     icon: '🗺️',
     note: 'ED Team = first qualified Executive Director in any leg'
   },
   'National Director': {
     minClients: 17,
-    frontlineCoaches: 8,
+    frontlineCoaches: 5,
     scTeams: 5,
-    description: 'ED + 3 ED Teams (or FIBC + 3 ED Teams for Integrated)',
+    edTeams: 3,
+    gdTeams: 0,
+    description: 'ED + 3 ED Teams',
     icon: '🇺🇸',
     note: 'Unlocks National Elite Leadership Bonus (0.5%)'
   },
   'Global Director': {
     minClients: 17,
-    frontlineCoaches: 10,
+    frontlineCoaches: 5,
     scTeams: 5,
-    description: 'ED + 5 ED Teams (or FIBC + 5 FIBC Teams for FIBL)',
+    edTeams: 5,
+    gdTeams: 0,
+    description: 'ED + 5 ED Teams',
     icon: '🌍',
     note: 'Unlocks Global Elite Leadership Bonus (0.5%)'
   },
   'Presidential Director': {
     minClients: 17,
-    frontlineCoaches: 15,
+    frontlineCoaches: 5,
     scTeams: 5,
-    description: 'ED + 10 ED Teams (or FIBL + 10 ED Teams for IPD)',
+    edTeams: 10,
+    gdTeams: 0,
+    description: 'ED + 10 ED Teams',
     icon: '👑',
     note: 'Unlocks Presidential Elite Leadership Bonus (0.5%)'
   },
   'IPD': {
     minClients: 17,
-    frontlineCoaches: 15,
-    scTeams: 10,
-    description: 'FIBL + 10 ED Teams (5 must be FIBC)',
+    frontlineCoaches: 5,
+    scTeams: 5,
+    edTeams: 10,
+    gdTeams: 5,
+    description: 'PD + 5 GD Teams (10 ED Teams + 5 GD Teams)',
     icon: '💎',
     note: 'Integrated Presidential Director - highest rank'
   }

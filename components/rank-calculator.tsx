@@ -88,6 +88,16 @@ export function RankCalculator() {
     RANK_ORDER.indexOf(c.rank) >= RANK_ORDER.indexOf('Senior Coach')
   ).length
 
+  // Calculate ED teams (Executive Director or higher)
+  const edTeamsCount = simCoaches.filter(c => 
+    RANK_ORDER.indexOf(c.rank) >= RANK_ORDER.indexOf('Executive Director')
+  ).length
+
+  // Calculate GD teams (Global Director or higher)
+  const gdTeamsCount = simCoaches.filter(c => 
+    RANK_ORDER.indexOf(c.rank) >= RANK_ORDER.indexOf('Global Director')
+  ).length
+
   // Calculate qualifying points
   const clientQP = Math.floor(simClients / 3.5) // ~3-4 clients per QP
   const scTeamQP = scTeamsCount
@@ -103,7 +113,9 @@ export function RankCalculator() {
       if (
         simClients >= reqs.minClients &&
         simCoaches.length >= reqs.frontlineCoaches &&
-        scTeamsCount >= reqs.scTeams
+        scTeamsCount >= reqs.scTeams &&
+        edTeamsCount >= reqs.edTeams &&
+        gdTeamsCount >= reqs.gdTeams
       ) {
         return rank
       }
@@ -127,6 +139,8 @@ export function RankCalculator() {
     clients: Math.max(0, nextRankReqs.minClients - simClients),
     coaches: Math.max(0, nextRankReqs.frontlineCoaches - simCoaches.length),
     scTeams: Math.max(0, nextRankReqs.scTeams - scTeamsCount),
+    edTeams: Math.max(0, nextRankReqs.edTeams - edTeamsCount),
+    gdTeams: Math.max(0, nextRankReqs.gdTeams - gdTeamsCount),
   } : null
 
   // Add a coach
@@ -298,7 +312,7 @@ export function RankCalculator() {
                   Frontline Coaches
                 </Label>
                 <Badge variant="secondary" className="text-sm bg-white border-2 border-purple-300 text-purple-700 font-semibold">
-                  {simCoaches.length} total ({scTeamsCount} SC+)
+                  {simCoaches.length} total ({scTeamsCount} SC+{edTeamsCount > 0 ? `, ${edTeamsCount} ED+` : ''}{gdTeamsCount > 0 ? `, ${gdTeamsCount} GD+` : ''})
                 </Badge>
               </div>
 
@@ -316,6 +330,11 @@ export function RankCalculator() {
                     <SelectItem value="Director">Director</SelectItem>
                     <SelectItem value="Executive Director">Executive Director</SelectItem>
                     <SelectItem value="FIBC">FIBC</SelectItem>
+                    <SelectItem value="Regional Director">Regional Director</SelectItem>
+                    <SelectItem value="National Director">National Director</SelectItem>
+                    <SelectItem value="Global Director">Global Director</SelectItem>
+                    <SelectItem value="Presidential Director">Presidential Director</SelectItem>
+                    <SelectItem value="IPD">IPD</SelectItem>
                   </SelectContent>
                 </Select>
                 <Button
@@ -333,16 +352,30 @@ export function RankCalculator() {
                 <div className="space-y-1 max-h-60 overflow-y-auto bg-white p-2 rounded border border-purple-200">
                   {simCoaches.map((coach, idx) => {
                     const isSC = RANK_ORDER.indexOf(coach.rank) >= RANK_ORDER.indexOf('Senior Coach')
+                    const isED = RANK_ORDER.indexOf(coach.rank) >= RANK_ORDER.indexOf('Executive Director')
+                    const isGD = RANK_ORDER.indexOf(coach.rank) >= RANK_ORDER.indexOf('Global Director')
+                    
+                    // Determine background color based on rank tier
+                    let bgClass = 'bg-gray-50 border border-gray-200'
+                    if (isGD) {
+                      bgClass = 'bg-orange-50 border border-orange-200'
+                    } else if (isED) {
+                      bgClass = 'bg-purple-50 border border-purple-200'
+                    } else if (isSC) {
+                      bgClass = 'bg-green-50 border border-green-200'
+                    }
+                    
                     return (
                       <div
                         key={coach.id}
-                        className={`flex items-center justify-between p-2 rounded text-sm ${
-                          isSC ? 'bg-green-50 border border-green-200' : 'bg-gray-50 border border-gray-200'
-                        }`}
+                        className={`flex items-center justify-between p-2 rounded text-sm ${bgClass}`}
                       >
                         <span className="text-gray-600 font-medium">Coach {idx + 1}</span>
                         <div className="flex items-center gap-2">
-                          <Badge variant={isSC ? "default" : "secondary"} className="text-xs">
+                          <Badge 
+                            variant={isSC ? "default" : "secondary"} 
+                            className={`text-xs ${isGD ? 'bg-orange-500' : isED ? 'bg-purple-500' : ''}`}
+                          >
                             {coach.rank}
                           </Badge>
                           <Button
@@ -393,6 +426,7 @@ export function RankCalculator() {
               </h4>
             </div>
 
+            {/* Basic requirements (Clients, Coaches, SC Teams) */}
             <div className="grid grid-cols-3 gap-2 mb-3">
               <div className="text-center p-2 bg-white rounded">
                 <div className={`text-lg font-bold ${gaps.clients > 0 ? 'text-orange-600' : 'text-green-600'}`}>
@@ -414,7 +448,31 @@ export function RankCalculator() {
               </div>
             </div>
 
-            {gaps.clients === 0 && gaps.coaches === 0 && gaps.scTeams === 0 && (
+            {/* ED/GD Team requirements (for higher ranks) */}
+            {(nextRankReqs.edTeams > 0 || nextRankReqs.gdTeams > 0) && (
+              <div className="grid grid-cols-2 gap-2 mb-3">
+                {nextRankReqs.edTeams > 0 && (
+                  <div className="text-center p-2 bg-white rounded border border-purple-200">
+                    <div className={`text-lg font-bold ${gaps.edTeams > 0 ? 'text-orange-600' : 'text-green-600'}`}>
+                      {gaps.edTeams > 0 ? `+${gaps.edTeams}` : '✓'}
+                    </div>
+                    <div className="text-[10px] text-gray-500">ED Teams</div>
+                    <div className="text-[9px] text-gray-400">({edTeamsCount}/{nextRankReqs.edTeams})</div>
+                  </div>
+                )}
+                {nextRankReqs.gdTeams > 0 && (
+                  <div className="text-center p-2 bg-white rounded border border-orange-200">
+                    <div className={`text-lg font-bold ${gaps.gdTeams > 0 ? 'text-orange-600' : 'text-green-600'}`}>
+                      {gaps.gdTeams > 0 ? `+${gaps.gdTeams}` : '✓'}
+                    </div>
+                    <div className="text-[10px] text-gray-500">GD Teams</div>
+                    <div className="text-[9px] text-gray-400">({gdTeamsCount}/{nextRankReqs.gdTeams})</div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {gaps.clients === 0 && gaps.coaches === 0 && gaps.scTeams === 0 && gaps.edTeams === 0 && gaps.gdTeams === 0 && (
               <div className="flex items-center gap-2 p-2 bg-green-100 rounded-lg border border-green-300">
                 <Sparkles className="h-4 w-4 text-green-600" />
                 <p className="text-sm text-green-700 font-medium">
