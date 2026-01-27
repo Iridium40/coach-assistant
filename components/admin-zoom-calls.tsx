@@ -680,12 +680,15 @@ export function AdminZoomCalls({ onClose }: { onClose?: () => void }) {
                           <Label htmlFor="startTime" className="text-optavia-dark">
                             Start Time <span className="text-gray-400 text-xs">(optional)</span>
                           </Label>
-                          <Select value={startTime} onValueChange={setStartTime}>
+                          <Select 
+                            value={startTime || "all-day"} 
+                            onValueChange={(val) => setStartTime(val === "all-day" ? "" : val)}
+                          >
                             <SelectTrigger className="border-gray-300">
                               <SelectValue placeholder="Select start time" />
                             </SelectTrigger>
                             <SelectContent>
-                              <SelectItem value="">All Day</SelectItem>
+                              <SelectItem value="all-day">All Day</SelectItem>
                               {Array.from({ length: 24 * 4 }, (_, i) => {
                                 const hours = Math.floor(i / 4)
                                 const minutes = (i % 4) * 15
@@ -701,18 +704,21 @@ export function AdminZoomCalls({ onClose }: { onClose?: () => void }) {
                               })}
                             </SelectContent>
                           </Select>
-                          <p className="text-xs text-optavia-gray">Leave blank for all-day event</p>
+                          <p className="text-xs text-optavia-gray">Select "All Day" for events without specific times</p>
                         </div>
                         <div className="space-y-2">
                           <Label htmlFor="endTime" className="text-optavia-dark">
                             End Time <span className="text-gray-400 text-xs">(optional)</span>
                           </Label>
-                          <Select value={endTime} onValueChange={setEndTime}>
+                          <Select 
+                            value={endTime || "all-day"} 
+                            onValueChange={(val) => setEndTime(val === "all-day" ? "" : val)}
+                          >
                             <SelectTrigger className="border-gray-300">
                               <SelectValue placeholder="Select end time" />
                             </SelectTrigger>
                             <SelectContent>
-                              <SelectItem value="">All Day</SelectItem>
+                              <SelectItem value="all-day">All Day</SelectItem>
                               {Array.from({ length: 24 * 4 }, (_, i) => {
                                 const hours = Math.floor(i / 4)
                                 const minutes = (i % 4) * 15
@@ -728,7 +734,7 @@ export function AdminZoomCalls({ onClose }: { onClose?: () => void }) {
                               })}
                             </SelectContent>
                           </Select>
-                          <p className="text-xs text-optavia-gray">Leave blank for all-day event</p>
+                          <p className="text-xs text-optavia-gray">Select "All Day" for events without specific times</p>
                         </div>
                       </div>
                     </>
