@@ -83,20 +83,19 @@ export function RankCalculator() {
     })))
   }, [activeClients, frontlineCoaches])
 
-  // Calculate current stats
-  const scTeamsCount = simCoaches.filter(c => 
-    RANK_ORDER.indexOf(c.rank) >= RANK_ORDER.indexOf('Senior Coach')
-  ).length
+  // Ranks that qualify as GD+ (Global Director or higher)
+  const GD_PLUS_RANKS = ['Global Director', 'Presidential Director', 'IPD']
+  
+  // Ranks that qualify as ED+ (Executive Director or higher)
+  const ED_PLUS_RANKS = ['Executive Director', 'FIBC', 'Regional Director', 'National Director', 'Global Director', 'Presidential Director', 'IPD']
+  
+  // Ranks that qualify as SC+ (Senior Coach or higher)
+  const SC_PLUS_RANKS = ['Senior Coach', 'Manager', 'Associate Director', 'Director', 'Executive Director', 'FIBC', 'Regional Director', 'National Director', 'Global Director', 'Presidential Director', 'IPD']
 
-  // Calculate ED teams (Executive Director or higher)
-  const edTeamsCount = simCoaches.filter(c => 
-    RANK_ORDER.indexOf(c.rank) >= RANK_ORDER.indexOf('Executive Director')
-  ).length
-
-  // Calculate GD teams (Global Director or higher)
-  const gdTeamsCount = simCoaches.filter(c => 
-    RANK_ORDER.indexOf(c.rank) >= RANK_ORDER.indexOf('Global Director')
-  ).length
+  // Calculate current stats using explicit rank lists
+  const scTeamsCount = simCoaches.filter(c => SC_PLUS_RANKS.includes(c.rank)).length
+  const edTeamsCount = simCoaches.filter(c => ED_PLUS_RANKS.includes(c.rank)).length
+  const gdTeamsCount = simCoaches.filter(c => GD_PLUS_RANKS.includes(c.rank)).length
 
   // Calculate qualifying points
   const clientQP = Math.floor(simClients / 3.5) // ~3-4 clients per QP
@@ -351,9 +350,9 @@ export function RankCalculator() {
               {simCoaches.length > 0 ? (
                 <div className="space-y-1 max-h-60 overflow-y-auto bg-white p-2 rounded border border-purple-200">
                   {simCoaches.map((coach, idx) => {
-                    const isSC = RANK_ORDER.indexOf(coach.rank) >= RANK_ORDER.indexOf('Senior Coach')
-                    const isED = RANK_ORDER.indexOf(coach.rank) >= RANK_ORDER.indexOf('Executive Director')
-                    const isGD = RANK_ORDER.indexOf(coach.rank) >= RANK_ORDER.indexOf('Global Director')
+                    const isSC = SC_PLUS_RANKS.includes(coach.rank)
+                    const isED = ED_PLUS_RANKS.includes(coach.rank)
+                    const isGD = GD_PLUS_RANKS.includes(coach.rank)
                     
                     // Determine background color based on rank tier
                     let bgClass = 'bg-gray-50 border border-gray-200'
