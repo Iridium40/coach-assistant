@@ -233,8 +233,8 @@ export function DashboardOverview() {
   useEffect(() => {
     if (!rankData || !nextRank || !gaps) return
     
-    // Check if all gaps are 0 (ready for promotion)
-    const isReadyForPromotion = gaps.points === 0 && gaps.scTeams === 0 && gaps.edTeams === 0 && gaps.fibcTeams === 0
+    // Check if all gaps are 0 (ready for promotion) - must also have minimum 5 clients
+    const isReadyForPromotion = gaps.points === 0 && gaps.scTeams === 0 && gaps.edTeams === 0 && gaps.fibcTeams === 0 && gaps.minClients === 0
     
     if (isReadyForPromotion) {
       // Check if we've already shown this celebration (using localStorage)

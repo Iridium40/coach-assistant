@@ -21,6 +21,7 @@ interface RankProgressCardProps {
     scTeams: number
     edTeams: number
     fibcTeams: number
+    minClients: number
   } | null
 }
 
@@ -97,10 +98,21 @@ export function RankProgressCard({
 
               {/* Requirements */}
               <div className="space-y-1">
-                {/* Points requirement */}
-                {gaps && gaps.points > 0 && (
+                {/* Minimum clients requirement */}
+                {gaps && gaps.minClients > 0 && (
                   <div className="flex items-center gap-2 text-sm">
-                    <Users className="h-4 w-4 text-green-500" />
+                    <Users className="h-4 w-4 text-orange-500" />
+                    <span className="text-gray-700">
+                      Need <strong className="text-orange-600">{gaps.minClients}</strong> more client{gaps.minClients > 1 ? 's' : ''} to qualify
+                    </span>
+                    <span className="text-xs text-gray-400">(min 5 required)</span>
+                  </div>
+                )}
+                
+                {/* Points requirement */}
+                {gaps && gaps.points > 0 && gaps.minClients === 0 && (
+                  <div className="flex items-center gap-2 text-sm">
+                    <Star className="h-4 w-4 text-green-500" />
                     <span className="text-gray-700">
                       Need <strong className="text-amber-700">{gaps.points}</strong> more point{gaps.points > 1 ? 's' : ''}
                     </span>
@@ -142,7 +154,7 @@ export function RankProgressCard({
                 )}
                 
                 {/* Ready for promotion */}
-                {gaps && gaps.points === 0 && gaps.scTeams === 0 && gaps.edTeams === 0 && gaps.fibcTeams === 0 && (
+                {gaps && gaps.points === 0 && gaps.scTeams === 0 && gaps.edTeams === 0 && gaps.fibcTeams === 0 && gaps.minClients === 0 && (
                   <div className="flex items-center gap-2 text-sm text-green-600 font-medium">
                     <Trophy className="h-4 w-4" />
                     Ready for promotion!

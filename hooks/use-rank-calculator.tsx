@@ -281,6 +281,7 @@ export interface Gaps {
   scTeams: number
   edTeams: number
   fibcTeams: number
+  minClients: number  // Gap to minimum 5 clients required
 }
 
 export function useRankCalculator(user: User | null) {
@@ -482,15 +483,18 @@ export function useRankCalculator(user: User | null) {
     const fibcTeamsCount = frontlineCoaches.filter(c => FIBC_PLUS_RANKS.includes(c.coach_rank)).length
     
     // Calculate points: 5 clients = 1 point, 1 SC team = 1 point
-    // 5 clients = 1 point
     const clientPoints = Math.floor(activeClients / 5)
     const totalPoints = clientPoints + scTeamsCount
+    
+    // Minimum 5 clients required to qualify for any rank above Coach
+    const minClientsGap = Math.max(0, 5 - activeClients)
 
     return {
       points: Math.max(0, nextRankReqs.minPoints - totalPoints),
       scTeams: Math.max(0, nextRankReqs.scTeams - scTeamsCount),
       edTeams: Math.max(0, nextRankReqs.edTeams - edTeamsCount),
-      fibcTeams: Math.max(0, nextRankReqs.fibcTeams - fibcTeamsCount)
+      fibcTeams: Math.max(0, nextRankReqs.fibcTeams - fibcTeamsCount),
+      minClients: minClientsGap
     }
   }, [frontlineCoaches])
 
