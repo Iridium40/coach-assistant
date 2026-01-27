@@ -15,7 +15,8 @@ import type { User } from "@supabase/supabase-js"
  * - We track what we can measure: Active Clients + Frontline Coaches
  */
 
-// Simplified rank progression - focusing on key milestones
+// Full rank progression with both regular and integrated tracks
+// Integrated ranks require FIBC qualification first
 export const RANK_ORDER = [
   'Coach',
   'Senior Coach',
@@ -23,12 +24,15 @@ export const RANK_ORDER = [
   'Associate Director',
   'Director',
   'Executive Director',
-  'FIBC',
+  'FIBC',                    // Integrated Executive Director
   'Regional Director',
+  'Integrated Regional Director',
   'National Director',
+  'Integrated National Director',
   'Global Director',
+  'FIBL',                    // Integrated Global Director
   'Presidential Director',
-  'IPD'
+  'IPD'                      // Integrated Presidential Director
 ] as const
 
 export type RankType = typeof RANK_ORDER[number]
@@ -44,135 +48,166 @@ export function isQualifyingLeg(rank: string): boolean {
   return getRankIndex(rank) >= 1 // Senior Coach or higher
 }
 
-// Simplified rank requirements based on what we can track
-// Note: Higher ranks (RD+) require ED/GD teams which we track separately
+// Points system: 1 Qualifying Point = ~4 clients OR 1 SC+ Team
+// Assumption: All clients and coaches are qualified (no FQV/GQV data available)
+// Based on official OPTAVIA Career Path and Rank Qualifications
 export const RANK_REQUIREMENTS: Record<RankType, {
-  minClients: number          // Active clients needed (~$355 PQV each)
-  frontlineCoaches: number    // Total frontline coaches
-  scTeams: number            // Senior Coach+ teams needed
+  minPoints: number           // Qualifying Points needed (from FQV or SC teams)
+  scTeams: number            // Senior Coach+ teams needed (for FIBC track)
   edTeams: number            // Executive Director+ teams needed (for RD+)
-  gdTeams: number            // Global Director+ teams needed (for IPD)
+  fibcTeams: number          // FIBC+ teams needed (for FIBL/IPD)
+  requiresFIBC: boolean      // Whether this rank requires FIBC qualification
   description: string
   icon: string
   note: string
 }> = {
   'Coach': {
-    minClients: 0,
-    frontlineCoaches: 0,
+    minPoints: 0,
     scTeams: 0,
     edTeams: 0,
-    gdTeams: 0,
-    description: 'Starting rank - welcome to the team!',
+    fibcTeams: 0,
+    requiresFIBC: false,
+    description: 'Starting rank',
     icon: '🌱',
-    note: ''
+    note: 'Welcome to the team!'
   },
   'Senior Coach': {
-    minClients: 3,
-    frontlineCoaches: 0,
+    minPoints: 1,
     scTeams: 0,
     edTeams: 0,
-    gdTeams: 0,
-    description: '3+ active clients (1,200 GQV + 5 Ordering Entities)',
+    fibcTeams: 0,
+    requiresFIBC: false,
+    description: '1 Qualifying Point (~4 clients)',
     icon: '⭐',
-    note: 'First milestone - unlocks team building bonuses'
+    note: 'First milestone - unlocks team building'
   },
   'Manager': {
-    minClients: 7,
-    frontlineCoaches: 0,
+    minPoints: 2,
     scTeams: 0,
     edTeams: 0,
-    gdTeams: 0,
-    description: 'SC + 2 Points (~7 clients OR mix of clients + SC teams)',
+    fibcTeams: 0,
+    requiresFIBC: false,
+    description: '2 Qualifying Points (~8 clients or mix)',
     icon: '📊',
-    note: '1 Point = ~3-4 clients ($1,200 FQV) OR 1 SC Team'
+    note: '1 Point = ~4 clients OR 1 SC+ Team'
   },
   'Associate Director': {
-    minClients: 10,
-    frontlineCoaches: 1,
+    minPoints: 3,
     scTeams: 0,
     edTeams: 0,
-    gdTeams: 0,
-    description: 'SC + 3 Points (~10 clients OR mix of clients + SC teams)',
+    fibcTeams: 0,
+    requiresFIBC: false,
+    description: '3 Qualifying Points (~12 clients or mix)',
     icon: '🎯',
-    note: '1 Point = ~3-4 clients ($1,200 FQV) OR 1 SC Team'
+    note: '1 Point = ~4 clients OR 1 SC+ Team'
   },
   'Director': {
-    minClients: 13,
-    frontlineCoaches: 2,
-    scTeams: 1,
+    minPoints: 4,
+    scTeams: 0,
     edTeams: 0,
-    gdTeams: 0,
-    description: 'SC + 4 Points (~13 clients OR mix of clients + SC teams)',
+    fibcTeams: 0,
+    requiresFIBC: false,
+    description: '4 Qualifying Points (~16 clients or mix)',
     icon: '💼',
-    note: '1 Point = ~3-4 clients ($1,200 FQV) OR 1 SC Team'
+    note: '1 Point = ~4 clients OR 1 SC+ Team'
   },
   'Executive Director': {
-    minClients: 17,
-    frontlineCoaches: 3,
-    scTeams: 2,
+    minPoints: 5,
+    scTeams: 0,
     edTeams: 0,
-    gdTeams: 0,
-    description: 'SC + 5 Points (~17 clients OR mix of clients + SC teams)',
+    fibcTeams: 0,
+    requiresFIBC: false,
+    description: '5 Qualifying Points (~20 clients or mix)',
     icon: '💫',
     note: 'Major milestone - unlocks Generation Bonuses'
   },
   'FIBC': {
-    minClients: 17,
-    frontlineCoaches: 5,
+    minPoints: 5,
     scTeams: 5,
     edTeams: 0,
-    gdTeams: 0,
-    description: 'ED + 17 clients + 5 SC Teams (6,000 FQV + 15,000 GQV)',
+    fibcTeams: 0,
+    requiresFIBC: false,
+    description: 'ED + 5 SC Teams',
     icon: '🏆',
-    note: 'Fully Integrated Business Coach - mastery of both client support and team building'
+    note: 'Integrated Executive Director - client support + team building mastery'
   },
   'Regional Director': {
-    minClients: 17,
-    frontlineCoaches: 5,
+    minPoints: 5,
+    scTeams: 0,
+    edTeams: 1,
+    fibcTeams: 0,
+    requiresFIBC: false,
+    description: 'Qualified ED with 1 ED Team',
+    icon: '🗺️',
+    note: 'First ED Team milestone'
+  },
+  'Integrated Regional Director': {
+    minPoints: 5,
     scTeams: 5,
     edTeams: 1,
-    gdTeams: 0,
-    description: 'ED + 1 ED Team',
+    fibcTeams: 0,
+    requiresFIBC: true,
+    description: 'Qualified FIBC with 1 ED Team',
     icon: '🗺️',
-    note: 'ED Team = first qualified Executive Director in any leg'
+    note: 'FIBC + 1 ED Team'
   },
   'National Director': {
-    minClients: 17,
-    frontlineCoaches: 5,
+    minPoints: 5,
+    scTeams: 0,
+    edTeams: 3,
+    fibcTeams: 0,
+    requiresFIBC: false,
+    description: 'Qualified ED with 3 ED Teams',
+    icon: '🇺🇸',
+    note: 'Unlocks National Elite Leadership Bonus'
+  },
+  'Integrated National Director': {
+    minPoints: 5,
     scTeams: 5,
     edTeams: 3,
-    gdTeams: 0,
-    description: 'ED + 3 ED Teams',
+    fibcTeams: 0,
+    requiresFIBC: true,
+    description: 'Qualified FIBC with 3 ED Teams',
     icon: '🇺🇸',
-    note: 'Unlocks National Elite Leadership Bonus (0.5%)'
+    note: 'FIBC + 3 ED Teams'
   },
   'Global Director': {
-    minClients: 17,
-    frontlineCoaches: 5,
-    scTeams: 5,
+    minPoints: 5,
+    scTeams: 0,
     edTeams: 5,
-    gdTeams: 0,
-    description: 'ED + 5 ED Teams',
+    fibcTeams: 0,
+    requiresFIBC: false,
+    description: 'Qualified ED with 5 ED Teams',
     icon: '🌍',
-    note: 'Unlocks Global Elite Leadership Bonus (0.5%)'
+    note: 'Unlocks Global Elite Leadership Bonus'
+  },
+  'FIBL': {
+    minPoints: 5,
+    scTeams: 5,
+    edTeams: 0,
+    fibcTeams: 5,
+    requiresFIBC: true,
+    description: 'Qualified ED with 5 FIBC Teams',
+    icon: '🌍',
+    note: 'Integrated Global Director - 5 FIBC teams required'
   },
   'Presidential Director': {
-    minClients: 17,
-    frontlineCoaches: 5,
-    scTeams: 5,
+    minPoints: 5,
+    scTeams: 0,
     edTeams: 10,
-    gdTeams: 0,
-    description: 'ED + 10 ED Teams',
+    fibcTeams: 0,
+    requiresFIBC: false,
+    description: 'Qualified ED with 10 ED Teams',
     icon: '👑',
-    note: 'Unlocks Presidential Elite Leadership Bonus (0.5%)'
+    note: 'Unlocks Presidential Elite Leadership Bonus'
   },
   'IPD': {
-    minClients: 17,
-    frontlineCoaches: 5,
+    minPoints: 5,
     scTeams: 5,
     edTeams: 10,
-    gdTeams: 5,
-    description: 'PD + 5 GD Teams (10 ED Teams + 5 GD Teams)',
+    fibcTeams: 5,
+    requiresFIBC: true,
+    description: 'Qualified FIBL with 5 additional ED Teams (10 total)',
     icon: '💎',
     note: 'Integrated Presidential Director - highest rank'
   }
@@ -187,8 +222,11 @@ export const RANK_COLORS: Record<RankType, { bg: string; text: string; accent: s
   'Executive Director': { bg: 'bg-purple-50', text: 'text-purple-600', accent: 'bg-purple-500' },
   'FIBC': { bg: 'bg-green-50', text: 'text-green-600', accent: 'bg-green-600' },
   'Regional Director': { bg: 'bg-lime-50', text: 'text-lime-700', accent: 'bg-lime-600' },
+  'Integrated Regional Director': { bg: 'bg-lime-100', text: 'text-lime-700', accent: 'bg-lime-600' },
   'National Director': { bg: 'bg-yellow-50', text: 'text-yellow-700', accent: 'bg-yellow-600' },
+  'Integrated National Director': { bg: 'bg-yellow-100', text: 'text-yellow-700', accent: 'bg-yellow-600' },
   'Global Director': { bg: 'bg-orange-50', text: 'text-orange-600', accent: 'bg-orange-500' },
+  'FIBL': { bg: 'bg-orange-100', text: 'text-orange-600', accent: 'bg-orange-500' },
   'Presidential Director': { bg: 'bg-pink-50', text: 'text-pink-600', accent: 'bg-pink-600' },
   'IPD': { bg: 'bg-red-50', text: 'text-red-600', accent: 'bg-red-600' }
 }

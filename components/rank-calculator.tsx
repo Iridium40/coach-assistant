@@ -83,24 +83,46 @@ export function RankCalculator() {
     })))
   }, [activeClients, frontlineCoaches])
 
-  // Ranks that qualify as GD+ (Global Director or higher)
-  const GD_PLUS_RANKS = ['Global Director', 'Presidential Director', 'IPD']
+  // Ranks that qualify as FIBC+ (FIBC or higher integrated ranks)
+  const FIBC_PLUS_RANKS = ['FIBC', 'Integrated Regional Director', 'Integrated National Director', 'FIBL', 'IPD']
   
-  // Ranks that qualify as ED+ (Executive Director or higher)
-  const ED_PLUS_RANKS = ['Executive Director', 'FIBC', 'Regional Director', 'National Director', 'Global Director', 'Presidential Director', 'IPD']
+  // Ranks that qualify as ED+ (Executive Director or higher - includes all integrated ranks)
+  const ED_PLUS_RANKS = [
+    'Executive Director', 'FIBC', 
+    'Regional Director', 'Integrated Regional Director',
+    'National Director', 'Integrated National Director', 
+    'Global Director', 'FIBL',
+    'Presidential Director', 'IPD'
+  ]
   
   // Ranks that qualify as SC+ (Senior Coach or higher)
-  const SC_PLUS_RANKS = ['Senior Coach', 'Manager', 'Associate Director', 'Director', 'Executive Director', 'FIBC', 'Regional Director', 'National Director', 'Global Director', 'Presidential Director', 'IPD']
+  const SC_PLUS_RANKS = [
+    'Senior Coach', 'Manager', 'Associate Director', 'Director',
+    'Executive Director', 'FIBC',
+    'Regional Director', 'Integrated Regional Director',
+    'National Director', 'Integrated National Director',
+    'Global Director', 'FIBL',
+    'Presidential Director', 'IPD'
+  ]
 
   // Calculate current stats using explicit rank lists
   const scTeamsCount = simCoaches.filter(c => SC_PLUS_RANKS.includes(c.rank)).length
   const edTeamsCount = simCoaches.filter(c => ED_PLUS_RANKS.includes(c.rank)).length
-  const gdTeamsCount = simCoaches.filter(c => GD_PLUS_RANKS.includes(c.rank)).length
+  const fibcTeamsCount = simCoaches.filter(c => FIBC_PLUS_RANKS.includes(c.rank)).length
 
   // Calculate qualifying points
-  const clientQP = Math.floor(simClients / 3.5) // ~3-4 clients per QP
-  const scTeamQP = scTeamsCount
-  const totalQP = clientQP + scTeamQP
+  // Assumption: Each client is qualified (~$300-400 volume each)
+  // ~3-4 clients = 1,200 FQV = 1 Qualifying Point
+  // Using 4 clients per point as a conservative estimate
+  const clientPoints = Math.floor(simClients / 4)
+  
+  // Each SC+ team counts as 1 Qualifying Point
+  const scTeamPoints = scTeamsCount
+  const totalPoints = clientPoints + scTeamPoints
+
+  // Check if user qualifies as FIBC (integrated track)
+  // Requires: ED qualification (5 points) + 5 SC teams
+  const isFIBCQualified = scTeamsCount >= 5 && totalPoints >= 5
 
   // Determine rank based on simulated stats
   const calculateRank = (): RankType => {
@@ -109,12 +131,17 @@ export function RankCalculator() {
       const rank = RANK_ORDER[i]
       const reqs = RANK_REQUIREMENTS[rank]
       
+      // Skip integrated ranks if not FIBC qualified
+      if (reqs.requiresFIBC && !isFIBCQualified) {
+        continue
+      }
+      
+      // Check all requirements
       if (
-        simClients >= reqs.minClients &&
-        simCoaches.length >= reqs.frontlineCoaches &&
+        totalPoints >= reqs.minPoints &&
         scTeamsCount >= reqs.scTeams &&
         edTeamsCount >= reqs.edTeams &&
-        gdTeamsCount >= reqs.gdTeams
+        fibcTeamsCount >= reqs.fibcTeams
       ) {
         return rank
       }
@@ -135,11 +162,10 @@ export function RankCalculator() {
 
   // Calculate gaps to next rank
   const gaps = nextRankReqs ? {
-    clients: Math.max(0, nextRankReqs.minClients - simClients),
-    coaches: Math.max(0, nextRankReqs.frontlineCoaches - simCoaches.length),
+    points: Math.max(0, nextRankReqs.minPoints - totalPoints),
     scTeams: Math.max(0, nextRankReqs.scTeams - scTeamsCount),
     edTeams: Math.max(0, nextRankReqs.edTeams - edTeamsCount),
-    gdTeams: Math.max(0, nextRankReqs.gdTeams - gdTeamsCount),
+    fibcTeams: Math.max(0, nextRankReqs.fibcTeams - fibcTeamsCount),
   } : null
 
   // Add a coach
@@ -311,7 +337,7 @@ export function RankCalculator() {
                   Frontline Coaches
                 </Label>
                 <Badge variant="secondary" className="text-sm bg-white border-2 border-purple-300 text-purple-700 font-semibold">
-                  {simCoaches.length} total ({scTeamsCount} SC+{edTeamsCount > 0 ? `, ${edTeamsCount} ED+` : ''}{gdTeamsCount > 0 ? `, ${gdTeamsCount} GD+` : ''})
+                  {simCoaches.length} total ({scTeamsCount} SC+{edTeamsCount > 0 ? `, ${edTeamsCount} ED+` : ''}{fibcTeamsCount > 0 ? `, ${fibcTeamsCount} FIBC+` : ''})
                 </Badge>
               </div>
 
@@ -328,12 +354,15 @@ export function RankCalculator() {
                     <SelectItem value="Associate Director">Associate Director</SelectItem>
                     <SelectItem value="Director">Director</SelectItem>
                     <SelectItem value="Executive Director">Executive Director</SelectItem>
-                    <SelectItem value="FIBC">FIBC</SelectItem>
+                    <SelectItem value="FIBC">FIBC (Integrated ED)</SelectItem>
                     <SelectItem value="Regional Director">Regional Director</SelectItem>
+                    <SelectItem value="Integrated Regional Director">Integrated Regional Director</SelectItem>
                     <SelectItem value="National Director">National Director</SelectItem>
+                    <SelectItem value="Integrated National Director">Integrated National Director</SelectItem>
                     <SelectItem value="Global Director">Global Director</SelectItem>
+                    <SelectItem value="FIBL">FIBL (Integrated GD)</SelectItem>
                     <SelectItem value="Presidential Director">Presidential Director</SelectItem>
-                    <SelectItem value="IPD">IPD</SelectItem>
+                    <SelectItem value="IPD">IPD (Integrated PD)</SelectItem>
                   </SelectContent>
                 </Select>
                 <Button
@@ -352,11 +381,11 @@ export function RankCalculator() {
                   {simCoaches.map((coach, idx) => {
                     const isSC = SC_PLUS_RANKS.includes(coach.rank)
                     const isED = ED_PLUS_RANKS.includes(coach.rank)
-                    const isGD = GD_PLUS_RANKS.includes(coach.rank)
+                    const isFIBC = FIBC_PLUS_RANKS.includes(coach.rank)
                     
                     // Determine background color based on rank tier
                     let bgClass = 'bg-gray-50 border border-gray-200'
-                    if (isGD) {
+                    if (isFIBC) {
                       bgClass = 'bg-orange-50 border border-orange-200'
                     } else if (isED) {
                       bgClass = 'bg-purple-50 border border-purple-200'
@@ -373,7 +402,7 @@ export function RankCalculator() {
                         <div className="flex items-center gap-2">
                           <Badge 
                             variant={isSC ? "default" : "secondary"} 
-                            className={`text-xs ${isGD ? 'bg-orange-500' : isED ? 'bg-purple-500' : ''}`}
+                            className={`text-xs ${isFIBC ? 'bg-orange-500' : isED ? 'bg-purple-500' : ''}`}
                           >
                             {coach.rank}
                           </Badge>
@@ -400,14 +429,14 @@ export function RankCalculator() {
               )}
 
               <div className="flex items-center justify-between text-sm">
-                <span className="text-gray-600">Qualifying Points:</span>
+                <span className="text-gray-600">Total Points:</span>
                 <span className="font-bold text-purple-700">
-                  {scTeamQP} QP from SC+ teams
+                  {totalPoints} ({clientPoints} from clients + {scTeamPoints} from SC teams)
                 </span>
               </div>
 
               <p className="text-xs text-gray-600 bg-white p-2 rounded border border-purple-200">
-                💡 <span className="font-medium">Tip:</span> 1 SC Team = 1 Qualifying Point
+                💡 <span className="font-medium">Tip:</span> 1 Point = ~4 clients OR 1 SC+ Team (assumes all are qualified)
               </p>
             </div>
           </CardContent>
@@ -425,30 +454,36 @@ export function RankCalculator() {
               </h4>
             </div>
 
-            {/* Basic requirements (Clients, Coaches, SC Teams) */}
-            <div className="grid grid-cols-3 gap-2 mb-3">
-              <div className="text-center p-2 bg-white rounded">
-                <div className={`text-lg font-bold ${gaps.clients > 0 ? 'text-orange-600' : 'text-green-600'}`}>
-                  {gaps.clients > 0 ? `+${gaps.clients}` : '✓'}
+            {/* Points requirement */}
+            {nextRankReqs.minPoints > 0 && (
+              <div className="mb-3 p-3 bg-white rounded border border-blue-200">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-gray-600">Points Needed:</span>
+                  <span className={`text-lg font-bold ${gaps.points > 0 ? 'text-orange-600' : 'text-green-600'}`}>
+                    {gaps.points > 0 ? `+${gaps.points} more` : '✓ Met'}
+                  </span>
                 </div>
-                <div className="text-[10px] text-gray-500">Clients</div>
-              </div>
-              <div className="text-center p-2 bg-white rounded">
-                <div className={`text-lg font-bold ${gaps.coaches > 0 ? 'text-orange-600' : 'text-green-600'}`}>
-                  {gaps.coaches > 0 ? `+${gaps.coaches}` : '✓'}
+                <div className="text-xs text-gray-400 mt-1">
+                  {totalPoints}/{nextRankReqs.minPoints} points (~4 clients or 1 SC+ team = 1 point)
                 </div>
-                <div className="text-[10px] text-gray-500">Coaches</div>
               </div>
-              <div className="text-center p-2 bg-white rounded">
-                <div className={`text-lg font-bold ${gaps.scTeams > 0 ? 'text-orange-600' : 'text-green-600'}`}>
-                  {gaps.scTeams > 0 ? `+${gaps.scTeams}` : '✓'}
-                </div>
-                <div className="text-[10px] text-gray-500">SC Teams</div>
-              </div>
-            </div>
+            )}
 
-            {/* ED/GD Team requirements (for higher ranks) */}
-            {(nextRankReqs.edTeams > 0 || nextRankReqs.gdTeams > 0) && (
+            {/* SC Team requirements (for FIBC track) */}
+            {nextRankReqs.scTeams > 0 && (
+              <div className="mb-3">
+                <div className="text-center p-2 bg-white rounded border border-green-200">
+                  <div className={`text-lg font-bold ${gaps.scTeams > 0 ? 'text-orange-600' : 'text-green-600'}`}>
+                    {gaps.scTeams > 0 ? `+${gaps.scTeams}` : '✓'}
+                  </div>
+                  <div className="text-[10px] text-gray-500">SC Teams</div>
+                  <div className="text-[9px] text-gray-400">({scTeamsCount}/{nextRankReqs.scTeams})</div>
+                </div>
+              </div>
+            )}
+
+            {/* ED/FIBC Team requirements (for higher ranks) */}
+            {(nextRankReqs.edTeams > 0 || nextRankReqs.fibcTeams > 0) && (
               <div className="grid grid-cols-2 gap-2 mb-3">
                 {nextRankReqs.edTeams > 0 && (
                   <div className="text-center p-2 bg-white rounded border border-purple-200">
@@ -459,19 +494,19 @@ export function RankCalculator() {
                     <div className="text-[9px] text-gray-400">({edTeamsCount}/{nextRankReqs.edTeams})</div>
                   </div>
                 )}
-                {nextRankReqs.gdTeams > 0 && (
+                {nextRankReqs.fibcTeams > 0 && (
                   <div className="text-center p-2 bg-white rounded border border-orange-200">
-                    <div className={`text-lg font-bold ${gaps.gdTeams > 0 ? 'text-orange-600' : 'text-green-600'}`}>
-                      {gaps.gdTeams > 0 ? `+${gaps.gdTeams}` : '✓'}
+                    <div className={`text-lg font-bold ${gaps.fibcTeams > 0 ? 'text-orange-600' : 'text-green-600'}`}>
+                      {gaps.fibcTeams > 0 ? `+${gaps.fibcTeams}` : '✓'}
                     </div>
-                    <div className="text-[10px] text-gray-500">GD Teams</div>
-                    <div className="text-[9px] text-gray-400">({gdTeamsCount}/{nextRankReqs.gdTeams})</div>
+                    <div className="text-[10px] text-gray-500">FIBC Teams</div>
+                    <div className="text-[9px] text-gray-400">({fibcTeamsCount}/{nextRankReqs.fibcTeams})</div>
                   </div>
                 )}
               </div>
             )}
 
-            {gaps.clients === 0 && gaps.coaches === 0 && gaps.scTeams === 0 && gaps.edTeams === 0 && gaps.gdTeams === 0 && (
+            {gaps.points === 0 && gaps.scTeams === 0 && gaps.edTeams === 0 && gaps.fibcTeams === 0 && (
               <div className="flex items-center gap-2 p-2 bg-green-100 rounded-lg border border-green-300">
                 <Sparkles className="h-4 w-4 text-green-600" />
                 <p className="text-sm text-green-700 font-medium">
