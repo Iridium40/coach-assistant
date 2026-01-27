@@ -53,6 +53,7 @@ export function isQualifyingLeg(rank: string): boolean {
 // Based on official OPTAVIA Career Path and Rank Qualifications
 export const RANK_REQUIREMENTS: Record<RankType, {
   minPoints: number           // Qualifying Points needed (from FQV or SC teams)
+  minClients: number         // Minimum clients required (FIBC requires 25)
   scTeams: number            // Senior Coach+ teams needed (for FIBC track)
   edTeams: number            // Executive Director+ teams needed (for RD+)
   fibcTeams: number          // FIBC+ teams needed (for FIBL/IPD)
@@ -63,6 +64,7 @@ export const RANK_REQUIREMENTS: Record<RankType, {
 }> = {
   'Coach': {
     minPoints: 0,
+    minClients: 0,
     scTeams: 0,
     edTeams: 0,
     fibcTeams: 0,
@@ -73,6 +75,7 @@ export const RANK_REQUIREMENTS: Record<RankType, {
   },
   'Senior Coach': {
     minPoints: 1,
+    minClients: 5,
     scTeams: 0,
     edTeams: 0,
     fibcTeams: 0,
@@ -83,6 +86,7 @@ export const RANK_REQUIREMENTS: Record<RankType, {
   },
   'Manager': {
     minPoints: 2,
+    minClients: 5,
     scTeams: 0,
     edTeams: 0,
     fibcTeams: 0,
@@ -93,6 +97,7 @@ export const RANK_REQUIREMENTS: Record<RankType, {
   },
   'Associate Director': {
     minPoints: 3,
+    minClients: 5,
     scTeams: 0,
     edTeams: 0,
     fibcTeams: 0,
@@ -103,6 +108,7 @@ export const RANK_REQUIREMENTS: Record<RankType, {
   },
   'Director': {
     minPoints: 4,
+    minClients: 5,
     scTeams: 0,
     edTeams: 0,
     fibcTeams: 0,
@@ -113,6 +119,7 @@ export const RANK_REQUIREMENTS: Record<RankType, {
   },
   'Executive Director': {
     minPoints: 5,
+    minClients: 5,
     scTeams: 0,
     edTeams: 0,
     fibcTeams: 0,
@@ -123,16 +130,18 @@ export const RANK_REQUIREMENTS: Record<RankType, {
   },
   'FIBC': {
     minPoints: 5,
+    minClients: 25,
     scTeams: 5,
     edTeams: 0,
     fibcTeams: 0,
     requiresFIBC: false,
-    description: 'ED + 5 SC Teams',
+    description: 'ED qualifications + 25 clients + 5 SC Teams',
     icon: '🏆',
-    note: 'Integrated Executive Director - client support + team building mastery'
+    note: 'Integrated Executive Director - requires 25 personal clients'
   },
   'Regional Director': {
     minPoints: 5,
+    minClients: 5,
     scTeams: 0,
     edTeams: 1,
     fibcTeams: 0,
@@ -143,16 +152,18 @@ export const RANK_REQUIREMENTS: Record<RankType, {
   },
   'Integrated Regional Director': {
     minPoints: 5,
+    minClients: 25,
     scTeams: 5,
     edTeams: 1,
     fibcTeams: 0,
     requiresFIBC: true,
     description: 'Qualified FIBC with 1 ED Team',
     icon: '🗺️',
-    note: 'FIBC + 1 ED Team'
+    note: 'FIBC (25 clients) + 1 ED Team'
   },
   'National Director': {
     minPoints: 5,
+    minClients: 5,
     scTeams: 0,
     edTeams: 3,
     fibcTeams: 0,
@@ -163,16 +174,18 @@ export const RANK_REQUIREMENTS: Record<RankType, {
   },
   'Integrated National Director': {
     minPoints: 5,
+    minClients: 25,
     scTeams: 5,
     edTeams: 3,
     fibcTeams: 0,
     requiresFIBC: true,
     description: 'Qualified FIBC with 3 ED Teams',
     icon: '🇺🇸',
-    note: 'FIBC + 3 ED Teams'
+    note: 'FIBC (25 clients) + 3 ED Teams'
   },
   'Global Director': {
     minPoints: 5,
+    minClients: 5,
     scTeams: 0,
     edTeams: 5,
     fibcTeams: 0,
@@ -183,16 +196,18 @@ export const RANK_REQUIREMENTS: Record<RankType, {
   },
   'FIBL': {
     minPoints: 5,
+    minClients: 25,
     scTeams: 5,
     edTeams: 0,
     fibcTeams: 5,
     requiresFIBC: true,
-    description: 'Qualified ED with 5 FIBC Teams',
+    description: 'Qualified FIBC with 5 FIBC Teams',
     icon: '🌍',
-    note: 'Integrated Global Director - 5 FIBC teams required'
+    note: 'Integrated Global Director - 25 clients + 5 FIBC teams'
   },
   'Presidential Director': {
     minPoints: 5,
+    minClients: 5,
     scTeams: 0,
     edTeams: 10,
     fibcTeams: 0,
@@ -203,6 +218,7 @@ export const RANK_REQUIREMENTS: Record<RankType, {
   },
   'IPD': {
     minPoints: 5,
+    minClients: 25,
     scTeams: 5,
     edTeams: 10,
     fibcTeams: 5,
@@ -486,8 +502,8 @@ export function useRankCalculator(user: User | null) {
     const clientPoints = Math.floor(activeClients / 5)
     const totalPoints = clientPoints + scTeamsCount
     
-    // Minimum 5 clients required to qualify for any rank above Coach
-    const minClientsGap = Math.max(0, 5 - activeClients)
+    // Minimum clients required for the next rank (FIBC/integrated ranks require 25)
+    const minClientsGap = Math.max(0, nextRankReqs.minClients - activeClients)
 
     return {
       points: Math.max(0, nextRankReqs.minPoints - totalPoints),

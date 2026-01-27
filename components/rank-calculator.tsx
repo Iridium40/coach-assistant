@@ -103,10 +103,13 @@ export function RankCalculator() {
   
   // Minimum 5 clients required to qualify for any rank above Coach
   const hasMinimumClients = simClients >= 5
+  
+  // FIBC requires 25 clients
+  const hasFIBCClients = simClients >= 25
 
   // Check if user qualifies as FIBC (integrated track)
-  // Requires: ED qualification (5 points) + 5 SC teams + minimum clients
-  const isFIBCQualified = hasMinimumClients && scTeamsCount >= 5 && totalPoints >= 5
+  // Requires: ED qualification (5 points) + 5 SC teams + 25 clients
+  const isFIBCQualified = hasFIBCClients && scTeamsCount >= 5 && totalPoints >= 5
 
   // Determine rank based on simulated stats
   const calculateRank = (): RankType => {
@@ -122,6 +125,11 @@ export function RankCalculator() {
       
       // Skip integrated ranks if not FIBC qualified
       if (reqs.requiresFIBC && !isFIBCQualified) {
+        continue
+      }
+      
+      // Check minimum clients requirement (FIBC/integrated ranks require 25)
+      if (simClients < reqs.minClients) {
         continue
       }
       
@@ -155,6 +163,7 @@ export function RankCalculator() {
     scTeams: Math.max(0, nextRankReqs.scTeams - scTeamsCount),
     edTeams: Math.max(0, nextRankReqs.edTeams - edTeamsCount),
     fibcTeams: Math.max(0, nextRankReqs.fibcTeams - fibcTeamsCount),
+    minClients: Math.max(0, nextRankReqs.minClients - simClients),
   } : null
 
   // Add a coach
@@ -795,6 +804,21 @@ export function RankCalculator() {
               </div>
             )}
 
+            {/* Minimum Clients requirement (for FIBC/integrated ranks) */}
+            {nextRankReqs.minClients > 5 && (
+              <div className="mb-3 p-3 bg-white rounded border border-orange-200">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-gray-600">Minimum Clients:</span>
+                  <span className={`text-lg font-bold ${gaps.minClients > 0 ? 'text-orange-600' : 'text-green-600'}`}>
+                    {gaps.minClients > 0 ? `+${gaps.minClients} more` : '✓ Met'}
+                  </span>
+                </div>
+                <div className="text-xs text-gray-400 mt-1">
+                  {simClients}/{nextRankReqs.minClients} clients (FIBC/Integrated ranks require 25 personal clients)
+                </div>
+              </div>
+            )}
+
             {/* SC Team requirements (for FIBC track) */}
             {nextRankReqs.scTeams > 0 && (
               <div className="mb-3">
@@ -832,7 +856,7 @@ export function RankCalculator() {
               </div>
             )}
 
-            {gaps.points === 0 && gaps.scTeams === 0 && gaps.edTeams === 0 && gaps.fibcTeams === 0 && (
+            {gaps.points === 0 && gaps.scTeams === 0 && gaps.edTeams === 0 && gaps.fibcTeams === 0 && gaps.minClients === 0 && (
               <div className="flex items-center gap-2 p-2 bg-green-100 rounded-lg border border-green-300">
                 <Sparkles className="h-4 w-4 text-green-600" />
                 <p className="text-sm text-green-700 font-medium">
