@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo } from "react"
+import { useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -20,7 +20,6 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { useUserData } from "@/contexts/user-data-context"
-import { useClients } from "@/hooks/use-clients"
 import {
   useRankCalculator,
   RANK_ORDER,
@@ -48,12 +47,9 @@ interface SimulatedCoach {
 
 export function RankCalculator() {
   const { user } = useUserData()
-  const { stats: clientStats } = useClients()
   
   const {
     rankData,
-    frontlineCoaches,
-    qualifyingLegsCount,
     loading,
     updateRankData,
   } = useRankCalculator(user)
@@ -61,27 +57,12 @@ export function RankCalculator() {
   const [showRankSelector, setShowRankSelector] = useState(false)
   const [selectedCoachRank, setSelectedCoachRank] = useState<RankType>("Senior Coach")
   
-  // Current data
+  // Current rank (for reference only)
   const currentRank = (rankData?.current_rank || "Coach") as RankType
-  const activeClients = clientStats.active
   
-  // Simulation state
-  const [simClients, setSimClients] = useState(activeClients)
-  const [simCoaches, setSimCoaches] = useState<SimulatedCoach[]>(
-    frontlineCoaches.map(c => ({
-      id: c.id,
-      rank: c.coach_rank as RankType
-    }))
-  )
-
-  // Update simulation when actual data changes
-  useMemo(() => {
-    setSimClients(activeClients)
-    setSimCoaches(frontlineCoaches.map(c => ({
-      id: c.id,
-      rank: c.coach_rank as RankType
-    })))
-  }, [activeClients, frontlineCoaches])
+  // Simulation state - fully manual entry (starts empty)
+  const [simClients, setSimClients] = useState(0)
+  const [simCoaches, setSimCoaches] = useState<SimulatedCoach[]>([])
 
   // Ranks that qualify as FIBC+ (FIBC or higher integrated ranks)
   const FIBC_PLUS_RANKS = ['FIBC', 'Integrated Regional Director', 'Integrated National Director', 'FIBL', 'IPD']
@@ -111,20 +92,28 @@ export function RankCalculator() {
   const fibcTeamsCount = simCoaches.filter(c => FIBC_PLUS_RANKS.includes(c.rank)).length
 
   // Calculate qualifying points
-  // Assumption: Each client is qualified (~$300-400 volume each)
-  // 5 clients = 1 Qualifying Point (simplified for visual clarity)
+  // MUST have at least 5 clients to qualify for any rank above Coach
+  // 5 clients = 1 point from clients
+  // Each SC+ frontline coach = 1 point
+  // Points add together: 5 clients (1 pt) + 4 SC coaches (4 pts) = 5 pts = ED
   const clientPoints = Math.floor(simClients / 5)
-  
-  // Each SC+ team counts as 1 Qualifying Point
   const scTeamPoints = scTeamsCount
   const totalPoints = clientPoints + scTeamPoints
+  
+  // Minimum 5 clients required to qualify for any rank above Coach
+  const hasMinimumClients = simClients >= 5
 
   // Check if user qualifies as FIBC (integrated track)
-  // Requires: ED qualification (5 points) + 5 SC teams
-  const isFIBCQualified = scTeamsCount >= 5 && totalPoints >= 5
+  // Requires: ED qualification (5 points) + 5 SC teams + minimum clients
+  const isFIBCQualified = hasMinimumClients && scTeamsCount >= 5 && totalPoints >= 5
 
   // Determine rank based on simulated stats
   const calculateRank = (): RankType => {
+    // Must have minimum 5 clients to qualify for any rank above Coach
+    if (!hasMinimumClients) {
+      return 'Coach'
+    }
+    
     // Start from highest rank and work down
     for (let i = RANK_ORDER.length - 1; i >= 0; i--) {
       const rank = RANK_ORDER[i]
@@ -179,13 +168,10 @@ export function RankCalculator() {
     }
   }
 
-  // Reset to current
+  // Reset simulation to empty
   const resetSimulation = () => {
-    setSimClients(activeClients)
-    setSimCoaches(frontlineCoaches.map(c => ({
-      id: c.id,
-      rank: c.coach_rank as RankType
-    })))
+    setSimClients(0)
+    setSimCoaches([])
   }
 
   const handleRankChange = async (newRank: RankType) => {
@@ -244,8 +230,13 @@ export function RankCalculator() {
                 {projectedRank}
               </h3>
               <p className="text-xs text-gray-600 mt-0.5">
-                {totalPoints} Qualifying Points ({clientPoints} from clients + {scTeamPoints} from SC teams)
+                {totalPoints} Qualifying Points ({clientPoints} from clients + {scTeamPoints} from SC+ coaches)
               </p>
+              {!hasMinimumClients && simClients > 0 && (
+                <p className="text-xs text-orange-600 mt-1 font-medium">
+                  ⚠️ Need {5 - simClients} more client{5 - simClients > 1 ? 's' : ''} to qualify (minimum 5 required)
+                </p>
+              )}
             </div>
             {projectedRank !== currentRank && (
               <Badge variant="secondary" className="bg-blue-100 text-blue-700">
@@ -292,12 +283,25 @@ export function RankCalculator() {
                 </div>
               </div>
 
+              {/* Minimum Clients Warning */}
+              {!hasMinimumClients && (
+                <div className={`p-2 rounded-lg border mb-3 ${simClients > 0 ? 'bg-orange-50 border-orange-300' : 'bg-gray-50 border-gray-300'}`}>
+                  <p className={`text-xs font-medium ${simClients > 0 ? 'text-orange-700' : 'text-gray-600'}`}>
+                    ⚠️ Minimum 5 clients required to qualify for any rank above Coach
+                    {simClients > 0 && ` (need ${5 - simClients} more)`}
+                  </p>
+                </div>
+              )}
+
               {/* Points Legend */}
               <div className="bg-white p-3 rounded-lg border border-green-200">
-                <div className="text-xs font-medium text-gray-600 mb-2 flex items-center gap-2">
+                <div className="text-xs font-medium text-gray-600 mb-2 flex flex-wrap items-center gap-2">
                   <span>5 clients = 1 point</span>
                   <span className="text-gray-400">|</span>
-                  <span className="text-green-600 font-bold">{clientPoints} point{clientPoints !== 1 ? 's' : ''} from {simClients} client{simClients !== 1 ? 's' : ''}</span>
+                  <span className={`font-bold ${hasMinimumClients ? 'text-green-600' : 'text-orange-600'}`}>
+                    {clientPoints} point{clientPoints !== 1 ? 's' : ''} from {simClients} client{simClients !== 1 ? 's' : ''}
+                    {hasMinimumClients && ' ✓'}
+                  </span>
                 </div>
                 
                 {/* Visual Points Groups */}
@@ -498,15 +502,37 @@ export function RankCalculator() {
                 </div>
               )}
 
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-gray-600">Total Points:</span>
-                <span className="font-bold text-purple-700">
-                  {totalPoints} ({clientPoints} from clients + {scTeamPoints} from SC teams)
-                </span>
+              {/* Points from SC+ coaches */}
+              <div className="bg-white p-3 rounded border border-purple-200">
+                <div className="flex items-center justify-between text-sm mb-2">
+                  <span className="text-gray-600">Points from SC+ Coaches:</span>
+                  <span className="font-bold text-purple-700">
+                    {scTeamPoints} point{scTeamPoints !== 1 ? 's' : ''}
+                  </span>
+                </div>
+                <div className="text-xs text-gray-500">
+                  Each SC+ frontline coach = 1 qualifying point
+                </div>
+              </div>
+
+              {/* Total Points Summary */}
+              <div className="bg-amber-50 p-3 rounded border border-amber-200">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium text-amber-800">Total Qualifying Points:</span>
+                  <div className="flex items-center gap-2">
+                    <Badge className="bg-amber-500 text-white text-lg px-3">
+                      {totalPoints}
+                    </Badge>
+                  </div>
+                </div>
+                <div className="text-xs text-amber-700 mt-1">
+                  {clientPoints} from clients + {scTeamPoints} from SC+ coaches
+                  {!hasMinimumClients && <span className="text-orange-600 font-medium"> (need 5 clients to qualify)</span>}
+                </div>
               </div>
 
               <p className="text-xs text-gray-600 bg-white p-2 rounded border border-purple-200">
-                💡 <span className="font-medium">Tip:</span> 1 Point = 5 clients OR 1 SC+ Team (assumes all are qualified)
+                💡 <span className="font-medium">Example:</span> 5 clients (1 pt) + 4 SC coaches (4 pts) = 5 pts = ED rank
               </p>
             </div>
           </CardContent>
