@@ -13,7 +13,7 @@ import {
   BookOpen, UtensilsCrossed, Wrench, ExternalLink, Award,
   CheckCircle, Sparkles, Star, GraduationCap, Link2, Pin,
   Droplets, Dumbbell, Activity, Share2, Bookmark,
-  Info, Trophy, Heart
+  Info, Trophy, Heart, ClipboardList
 } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
 import { useProspects } from "@/hooks/use-prospects"
@@ -52,9 +52,11 @@ import { ClientOnboardingDialog } from "@/components/coach-tools/client-onboardi
 import { ClientTroubleshootingDialog } from "@/components/coach-tools/client-troubleshooting-dialog"
 import { SocialMediaPromptGenerator } from "@/components/social-media-prompt-generator"
 import { OPTAVIAReferenceGuide } from "@/components/coach-tools/optavia-reference-guide"
+import { ShareHALink } from "@/components/coach-tools/share-ha-link"
 
-// Coach Tools definitions
+// Coach Tools definitions - must match IDs in external-resources-tab.tsx for pinning to work
 const COACH_TOOLS: { id: string; title: string; icon: LucideIcon; component: React.ComponentType }[] = [
+  { id: "health-assessment", title: "Health Assessment Coaching Tool", icon: ClipboardList, component: ShareHALink },
   { id: "client-onboarding", title: "Client Onboarding Tool", icon: Users, component: ClientOnboardingDialog },
   { id: "client-troubleshooting", title: "Client Troubleshooting Guide", icon: Wrench, component: ClientTroubleshootingDialog },
   { id: "water-calculator", title: "Water Intake Calculator", icon: Droplets, component: WaterCalculator },
