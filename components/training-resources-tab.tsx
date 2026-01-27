@@ -20,10 +20,70 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible"
-import { Search, ExternalLink, FileText, Video, Palette, Link2, ChevronDown, ChevronRight, CheckCircle, Circle, Bookmark, Filter, X, FileIcon, FormInput } from "lucide-react"
+import { 
+  Search, 
+  ExternalLink, 
+  FileText, 
+  Video, 
+  Palette, 
+  Link2, 
+  ChevronDown, 
+  ChevronRight, 
+  CheckCircle, 
+  Circle, 
+  Bookmark, 
+  Filter, 
+  X, 
+  FileIcon, 
+  FormInput,
+  Rocket,
+  Briefcase,
+  Share2,
+  Users,
+  Clipboard,
+  UserPlus,
+  MessageCircle,
+  Wrench,
+  BookOpen,
+  Heart,
+  UserCheck,
+  BarChart2,
+  Award,
+  TrendingUp,
+  DollarSign,
+  FolderOpen,
+  type LucideIcon,
+} from "lucide-react"
 import { EmbeddedContentViewer } from "@/components/embedded-content-viewer"
 import { TrainingContextualResources } from "@/components/resources"
 import { useToast } from "@/hooks/use-toast"
+
+// Map icon names from database to Lucide icon components
+const iconMap: Record<string, LucideIcon> = {
+  "rocket": Rocket,
+  "briefcase": Briefcase,
+  "share-2": Share2,
+  "users": Users,
+  "clipboard": Clipboard,
+  "user-plus": UserPlus,
+  "message-circle": MessageCircle,
+  "tool": Wrench,
+  "book-open": BookOpen,
+  "heart": Heart,
+  "user-check": UserCheck,
+  "bar-chart-2": BarChart2,
+  "award": Award,
+  "trending-up": TrendingUp,
+  "dollar-sign": DollarSign,
+  // Fallback
+  "folder": FolderOpen,
+}
+
+// Helper component to render category icons
+function CategoryIcon({ iconName, className }: { iconName: string; className?: string }) {
+  const IconComponent = iconMap[iconName] || FolderOpen
+  return <IconComponent className={className || "h-4 w-4"} />
+}
 
 export function TrainingResourcesTab() {
   const { user } = useUserData()
@@ -245,11 +305,16 @@ export function TrainingResourcesTab() {
                 <SelectValue placeholder="Select category" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="All">📚 All Categories</SelectItem>
+                <SelectItem value="All">
+                  <span className="flex items-center gap-2">
+                    <FolderOpen className="h-4 w-4" />
+                    <span>All Categories</span>
+                  </span>
+                </SelectItem>
                 {categories.map((cat) => (
                   <SelectItem key={cat.id} value={cat.id}>
                     <span className="flex items-center gap-2">
-                      <span>{cat.icon}</span>
+                      <CategoryIcon iconName={cat.icon} className="h-4 w-4" />
                       <span className="truncate">{cat.name.length > 30 ? cat.name.slice(0, 30) + "..." : cat.name}</span>
                     </span>
                   </SelectItem>
@@ -279,13 +344,14 @@ export function TrainingResourcesTab() {
               variant={selectedCategory === cat.id ? "default" : "outline"}
               size="sm"
               onClick={() => setSelectedCategory(cat.id)}
-              className={
+              className={`flex items-center gap-1.5 ${
                 selectedCategory === cat.id
                   ? "bg-[hsl(var(--optavia-green))] hover:bg-[hsl(var(--optavia-green-dark))] text-white"
                   : "border-gray-300 text-optavia-dark hover:bg-gray-100"
-              }
+              }`}
             >
-              {cat.icon} {cat.name.length > 20 ? cat.name.slice(0, 20) + "..." : cat.name}
+              <CategoryIcon iconName={cat.icon} className="h-4 w-4" />
+              <span>{cat.name.length > 20 ? cat.name.slice(0, 20) + "..." : cat.name}</span>
             </Button>
           ))}
         </div>
@@ -439,7 +505,9 @@ export function TrainingResourcesTab() {
                     )}
                   </div>
                   
-                  <span className="text-lg sm:text-xl">{category.icon}</span>
+                  <div className="flex-shrink-0">
+                    <CategoryIcon iconName={category.icon} className="h-5 w-5 text-[hsl(var(--optavia-green))]" />
+                  </div>
                   <h3 className="font-heading font-bold text-sm sm:text-base text-optavia-dark line-clamp-1 flex-1">
                     {category.name}
                   </h3>
