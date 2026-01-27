@@ -38,6 +38,7 @@ import {
   ExternalLink,
   User,
   X,
+  DollarSign,
 } from "lucide-react"
 
 interface SimulatedCoach {
@@ -246,6 +247,235 @@ export function RankCalculator() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Team Growth Bonus - What this rank qualifies you for */}
+      {hasMinimumClients && projectedRank !== 'Coach' && (
+        <Card className="border-amber-200 bg-gradient-to-r from-amber-50 to-yellow-50">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-semibold text-amber-800 flex items-center gap-2">
+              <DollarSign className="h-4 w-4" />
+              Team Growth Bonuses at {projectedRank}
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="pt-0">
+            <p className="text-xs text-gray-600 mb-3">
+              Earn bonuses on orders from Coaches and their Teams (Level 2 and below)
+            </p>
+            
+            {/* Bonus Table */}
+            <div className="overflow-x-auto">
+              <table className="w-full text-xs">
+                <thead>
+                  <tr className="border-b border-amber-200">
+                    <th className="text-left py-2 pr-2 text-gray-600 font-medium">Team Rank</th>
+                    <th className="text-center py-2 px-2 text-amber-700 font-bold">Your Bonus</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {(() => {
+                    // Team Growth Bonus rates based on YOUR qualified rank
+                    const bonusRates: Record<string, Record<string, string>> = {
+                      'Senior Coach': {
+                        'Coach': '4%',
+                      },
+                      'Manager': {
+                        'Coach': '6%',
+                        'Senior Coach': '2%',
+                      },
+                      'Associate Director': {
+                        'Coach': '8%',
+                        'Senior Coach': '4%',
+                        'Manager': '2%',
+                      },
+                      'Director': {
+                        'Coach': '10%',
+                        'Senior Coach': '6%',
+                        'Manager': '4%',
+                        'Associate Director': '2%',
+                      },
+                      'Executive Director': {
+                        'Coach': '12%',
+                        'Senior Coach': '8%',
+                        'Manager': '6%',
+                        'Associate Director': '4%',
+                        'Director': '2%',
+                      },
+                    }
+                    
+                    // For ranks above ED, use ED rates (ED+ has Generation Bonus instead)
+                    const getRatesForRank = (rank: string) => {
+                      if (bonusRates[rank]) return bonusRates[rank]
+                      // For FIBC, RD, ND, GD, PD, IPD - use ED rates
+                      const edPlusRanks = ['FIBC', 'Regional Director', 'Integrated Regional Director', 
+                        'National Director', 'Integrated National Director', 'Global Director', 
+                        'FIBL', 'Presidential Director', 'IPD']
+                      if (edPlusRanks.includes(rank)) return bonusRates['Executive Director']
+                      return {}
+                    }
+                    
+                    const rates = getRatesForRank(projectedRank)
+                    const teamRanks = ['Coach', 'Senior Coach', 'Manager', 'Associate Director', 'Director']
+                    
+                    return teamRanks.map(teamRank => {
+                      const bonus = rates[teamRank]
+                      if (!bonus) return null
+                      return (
+                        <tr key={teamRank} className="border-b border-amber-100 last:border-0">
+                          <td className="py-2 pr-2 text-gray-700">{teamRank}</td>
+                          <td className="py-2 px-2 text-center">
+                            <span className="inline-block bg-green-100 text-green-700 font-bold px-2 py-0.5 rounded">
+                              {bonus}
+                            </span>
+                          </td>
+                        </tr>
+                      )
+                    }).filter(Boolean)
+                  })()}
+                  
+                </tbody>
+              </table>
+            </div>
+            
+            {/* Accelerator Assist Bonus */}
+            {RANK_ORDER.indexOf(projectedRank) >= RANK_ORDER.indexOf('Senior Coach') && (
+              <div className="mt-3 p-2 bg-blue-50 rounded border border-blue-200 text-xs text-blue-800">
+                <strong>💰 Accelerator Assist Bonus:</strong> Earn $250 when you help a personally sponsored new Coach earn their first Coach Accelerator Bonus (CAB) within 3 months!
+              </div>
+            )}
+            
+            {/* ED Generation Bonus Table - for Regional Director and above */}
+            {RANK_ORDER.indexOf(projectedRank) >= RANK_ORDER.indexOf('Regional Director') && (
+              <div className="mt-4 pt-4 border-t border-amber-200">
+                <h4 className="text-sm font-semibold text-purple-800 mb-2 flex items-center gap-2">
+                  <TrendingUp className="h-4 w-4" />
+                  ED Generation Bonus (% of GCV)
+                </h4>
+                <p className="text-xs text-gray-600 mb-3">
+                  Earn on each ED Generation down to the next ED in-depth
+                </p>
+                
+                <div className="overflow-x-auto">
+                  <table className="w-full text-xs">
+                    <thead>
+                      <tr className="border-b border-purple-200 bg-purple-50">
+                        <th className="text-left py-2 pr-2 text-gray-600 font-medium">Generation</th>
+                        <th className="text-center py-2 px-1 text-purple-700 font-bold">Your Bonus</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {(() => {
+                        // Generation bonus rates by rank
+                        const genBonusRates: Record<string, Record<number, string>> = {
+                          'Regional Director': { 1: '2.5%' },
+                          'Integrated Regional Director': { 1: '2.5%', 2: '2.5%' },
+                          'National Director': { 1: '2.5%', 2: '2.5%', 3: '2%' },
+                          'Integrated National Director': { 1: '2.5%', 2: '2.5%', 3: '2%', 4: '2%' },
+                          'Global Director': { 1: '2.5%', 2: '2.5%', 3: '2%', 4: '2%', 5: '1.5%' },
+                          'FIBL': { 1: '2.5%', 2: '2.5%', 3: '2%', 4: '2%', 5: '1.5%' },
+                          'Presidential Director': { 1: '2.5%', 2: '2.5%', 3: '2%', 4: '2%', 5: '1.5%' },
+                          'IPD': { 1: '2.5%', 2: '2.5%', 3: '2%', 4: '2%', 5: '1.5%', 6: '1.5%' },
+                        }
+                        
+                        const rates = genBonusRates[projectedRank] || {}
+                        const maxGen = Math.max(...Object.keys(rates).map(Number), 0)
+                        
+                        return Array.from({ length: maxGen }, (_, i) => i + 1).map(gen => {
+                          const bonus = rates[gen]
+                          if (!bonus) return null
+                          return (
+                            <tr key={gen} className="border-b border-purple-100 last:border-0">
+                              <td className="py-2 pr-2 text-gray-700">Generation {gen}</td>
+                              <td className="py-2 px-1 text-center">
+                                <span className="inline-block bg-purple-100 text-purple-700 font-bold px-2 py-0.5 rounded">
+                                  {bonus}
+                                </span>
+                              </td>
+                            </tr>
+                          )
+                        }).filter(Boolean)
+                      })()}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+            
+            {/* Elite Leadership Bonuses - for National Director and above */}
+            {RANK_ORDER.indexOf(projectedRank) >= RANK_ORDER.indexOf('National Director') && (
+              <div className="mt-4 pt-4 border-t border-amber-200">
+                <h4 className="text-sm font-semibold text-indigo-800 mb-2 flex items-center gap-2">
+                  <Star className="h-4 w-4" />
+                  Elite Leadership Bonuses (0.5% each)
+                </h4>
+                <p className="text-xs text-gray-600 mb-3">
+                  Earn 0.5% override on your entire organization down to the next leader at or above each bonus rank. Bonuses are cumulative!
+                </p>
+                
+                <div className="flex flex-wrap gap-2">
+                  {(() => {
+                    const eliteBonuses = [
+                      { rank: 'National Director', label: 'ND', color: 'bg-blue-100 text-blue-700 border-blue-300' },
+                      { rank: 'Global Director', label: 'GD', color: 'bg-green-100 text-green-700 border-green-300' },
+                      { rank: 'Presidential Director', label: 'PD', color: 'bg-purple-100 text-purple-700 border-purple-300' },
+                    ]
+                    
+                    // Also check integrated versions
+                    const qualifiesFor = (bonusRank: string) => {
+                      const rankIndex = RANK_ORDER.indexOf(projectedRank)
+                      const bonusIndex = RANK_ORDER.indexOf(bonusRank)
+                      // Also check integrated versions
+                      const integratedVersions: Record<string, string> = {
+                        'National Director': 'Integrated National Director',
+                        'Global Director': 'FIBL',
+                        'Presidential Director': 'IPD',
+                      }
+                      const integratedIndex = RANK_ORDER.indexOf(integratedVersions[bonusRank] || '')
+                      return rankIndex >= bonusIndex || rankIndex >= integratedIndex
+                    }
+                    
+                    return eliteBonuses.map(bonus => {
+                      const qualified = qualifiesFor(bonus.rank)
+                      return (
+                        <div
+                          key={bonus.rank}
+                          className={`px-3 py-2 rounded-lg border text-xs font-medium ${
+                            qualified 
+                              ? bonus.color 
+                              : 'bg-gray-100 text-gray-400 border-gray-200'
+                          }`}
+                        >
+                          <div className="font-bold">{bonus.label} 0.5%</div>
+                          <div className="text-[10px] opacity-75">
+                            {qualified ? '✓ Qualified' : 'Not yet'}
+                          </div>
+                        </div>
+                      )
+                    })
+                  })()}
+                </div>
+                
+                {/* Total Elite Bonus */}
+                {(() => {
+                  let totalBonus = 0
+                  const rankIndex = RANK_ORDER.indexOf(projectedRank)
+                  if (rankIndex >= RANK_ORDER.indexOf('National Director') || rankIndex >= RANK_ORDER.indexOf('Integrated National Director')) totalBonus += 0.5
+                  if (rankIndex >= RANK_ORDER.indexOf('Global Director') || rankIndex >= RANK_ORDER.indexOf('FIBL')) totalBonus += 0.5
+                  if (rankIndex >= RANK_ORDER.indexOf('Presidential Director') || rankIndex >= RANK_ORDER.indexOf('IPD')) totalBonus += 0.5
+                  
+                  if (totalBonus > 0) {
+                    return (
+                      <div className="mt-3 p-2 bg-indigo-100 rounded text-xs text-indigo-800">
+                        <strong>Total Elite Leadership Bonus: {totalBonus}%</strong> on your entire organization!
+                      </div>
+                    )
+                  }
+                  return null
+                })()}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
 
       {/* Simulation Controls */}
       <div className="grid grid-cols-1 gap-4">
