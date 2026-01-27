@@ -91,7 +91,7 @@ export function DashboardOverview() {
   const { getBookmarkedIds } = useBookmarks(user)
 
   // Rank calculator
-  const { rankData, frontlineCoaches, qualifyingLegsCount, calculateGaps, getNextRank } = useRankCalculator(user)
+  const { rankData, frontlineCoaches, qualifyingLegsCount, edTeamsCount, fibcTeamsCount, calculateGaps, getNextRank } = useRankCalculator(user)
 
   const [upcomingMeetings, setUpcomingMeetings] = useState<ExpandedZoomCall[]>([])
   const [loadingMeetings, setLoadingMeetings] = useState(true)
@@ -234,7 +234,7 @@ export function DashboardOverview() {
     if (!rankData || !nextRank || !gaps) return
     
     // Check if all gaps are 0 (ready for promotion)
-    const isReadyForPromotion = gaps.clients === 0 && gaps.coaches === 0 && gaps.qualifyingLegs === 0
+    const isReadyForPromotion = gaps.points === 0 && gaps.scTeams === 0 && gaps.edTeams === 0 && gaps.fibcTeams === 0
     
     if (isReadyForPromotion) {
       // Check if we've already shown this celebration (using localStorage)
@@ -447,6 +447,8 @@ export function DashboardOverview() {
             activeClients={clientStats.active}
             frontlineCoaches={frontlineCoaches.length}
             qualifyingLegs={qualifyingLegsCount}
+            edTeams={edTeamsCount}
+            fibcTeams={fibcTeamsCount}
             gaps={gaps}
           />
         </div>

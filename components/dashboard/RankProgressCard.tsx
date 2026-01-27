@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
-import { TrendingUp, ChevronRight, Trophy, Users, Star } from "lucide-react"
+import { TrendingUp, ChevronRight, Trophy, Users, Star, Award } from "lucide-react"
 import { RANK_REQUIREMENTS, type RankType } from "@/hooks/use-rank-calculator"
 
 interface RankProgressCardProps {
@@ -13,11 +13,14 @@ interface RankProgressCardProps {
   nextRank: string | null
   activeClients: number
   frontlineCoaches: number
-  qualifyingLegs: number
+  qualifyingLegs: number // SC+ teams
+  edTeams?: number
+  fibcTeams?: number
   gaps: {
-    clients: number
-    coaches: number
-    qualifyingLegs: number
+    points: number
+    scTeams: number
+    edTeams: number
+    fibcTeams: number
   } | null
 }
 
@@ -27,19 +30,24 @@ export function RankProgressCard({
   activeClients,
   frontlineCoaches,
   qualifyingLegs,
+  edTeams = 0,
+  fibcTeams = 0,
   gaps,
 }: RankProgressCardProps) {
   const currentReqs = RANK_REQUIREMENTS[currentRank as RankType]
   const nextReqs = nextRank ? RANK_REQUIREMENTS[nextRank as RankType] : null
 
+  // Calculate points: ~4 clients = 1 point, 1 SC team = 1 point
+  const clientPoints = Math.floor(activeClients / 4)
+  const totalPoints = clientPoints + qualifyingLegs
+
   // Calculate progress percentage toward next rank
   let progressPercent = 100
   if (nextReqs && gaps) {
-    const totalNeeded = (nextReqs.clients || 0) + (nextReqs.coaches || 0) + (nextReqs.qualifyingLegs || 0)
-    const totalHave = activeClients + frontlineCoaches + qualifyingLegs
-    const totalGaps = gaps.clients + gaps.coaches + gaps.qualifyingLegs
-    if (totalNeeded > 0) {
-      progressPercent = Math.round(((totalNeeded - totalGaps) / totalNeeded) * 100)
+    const totalGaps = gaps.points + gaps.scTeams + gaps.edTeams + gaps.fibcTeams
+    const totalReqs = nextReqs.minPoints + nextReqs.scTeams + nextReqs.edTeams + nextReqs.fibcTeams
+    if (totalReqs > 0) {
+      progressPercent = Math.round(((totalReqs - totalGaps) / totalReqs) * 100)
     }
   }
 
@@ -68,6 +76,7 @@ export function RankProgressCard({
             <div>
               <div className="text-sm text-gray-600">Current Rank</div>
               <div className="text-xl font-bold text-amber-800">{currentRank}</div>
+              <div className="text-xs text-gray-500">{totalPoints} points</div>
             </div>
           </div>
 
@@ -87,34 +96,52 @@ export function RankProgressCard({
 
               {/* Requirements */}
               <div className="space-y-1">
-                {gaps && gaps.clients > 0 && (
+                {/* Points requirement */}
+                {gaps && gaps.points > 0 && (
                   <div className="flex items-center gap-2 text-sm">
                     <Users className="h-4 w-4 text-green-500" />
                     <span className="text-gray-700">
-                      Need <strong className="text-amber-700">{gaps.clients}</strong> more client{gaps.clients > 1 ? 's' : ''}
+                      Need <strong className="text-amber-700">{gaps.points}</strong> more point{gaps.points > 1 ? 's' : ''}
                     </span>
-                    <span className="text-xs text-gray-400">({activeClients}/{nextReqs.clients})</span>
+                    <span className="text-xs text-gray-400">({totalPoints}/{nextReqs.minPoints})</span>
                   </div>
                 )}
-                {gaps && gaps.coaches > 0 && (
+                
+                {/* SC Teams requirement (for FIBC track) */}
+                {gaps && gaps.scTeams > 0 && (
                   <div className="flex items-center gap-2 text-sm">
                     <Star className="h-4 w-4 text-purple-500" />
                     <span className="text-gray-700">
-                      Need <strong className="text-amber-700">{gaps.coaches}</strong> more coach{gaps.coaches > 1 ? 'es' : ''}
+                      Need <strong className="text-amber-700">{gaps.scTeams}</strong> SC+ team{gaps.scTeams > 1 ? 's' : ''}
                     </span>
-                    <span className="text-xs text-gray-400">({frontlineCoaches}/{nextReqs.coaches})</span>
+                    <span className="text-xs text-gray-400">({qualifyingLegs}/{nextReqs.scTeams})</span>
                   </div>
                 )}
-                {gaps && gaps.qualifyingLegs > 0 && (
+                
+                {/* ED Teams requirement (for higher ranks) */}
+                {gaps && gaps.edTeams > 0 && (
                   <div className="flex items-center gap-2 text-sm">
-                    <Trophy className="h-4 w-4 text-blue-500" />
+                    <Award className="h-4 w-4 text-blue-500" />
                     <span className="text-gray-700">
-                      Need <strong className="text-amber-700">{gaps.qualifyingLegs}</strong> qualifying leg{gaps.qualifyingLegs > 1 ? 's' : ''}
+                      Need <strong className="text-amber-700">{gaps.edTeams}</strong> ED+ team{gaps.edTeams > 1 ? 's' : ''}
                     </span>
-                    <span className="text-xs text-gray-400">({qualifyingLegs}/{nextReqs.qualifyingLegs})</span>
+                    <span className="text-xs text-gray-400">({edTeams}/{nextReqs.edTeams})</span>
                   </div>
                 )}
-                {gaps && gaps.clients === 0 && gaps.coaches === 0 && gaps.qualifyingLegs === 0 && (
+                
+                {/* FIBC Teams requirement (for FIBL/IPD) */}
+                {gaps && gaps.fibcTeams > 0 && (
+                  <div className="flex items-center gap-2 text-sm">
+                    <Trophy className="h-4 w-4 text-orange-500" />
+                    <span className="text-gray-700">
+                      Need <strong className="text-amber-700">{gaps.fibcTeams}</strong> FIBC+ team{gaps.fibcTeams > 1 ? 's' : ''}
+                    </span>
+                    <span className="text-xs text-gray-400">({fibcTeams}/{nextReqs.fibcTeams})</span>
+                  </div>
+                )}
+                
+                {/* Ready for promotion */}
+                {gaps && gaps.points === 0 && gaps.scTeams === 0 && gaps.edTeams === 0 && gaps.fibcTeams === 0 && (
                   <div className="flex items-center gap-2 text-sm text-green-600 font-medium">
                     <Trophy className="h-4 w-4" />
                     Ready for promotion!

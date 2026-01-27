@@ -76,27 +76,35 @@ export function ZoomCalls() {
       year: 'numeric'
     })
     
-    // Get time in the event's timezone if specified
-    let timeStr = eventDate.toLocaleTimeString(undefined, {
-      hour: 'numeric',
-      minute: '2-digit'
-    })
-    
-    // Add timezone info if event has a specific timezone
-    if (call.timezone) {
-      const eventTimeStr = eventDate.toLocaleTimeString('en-US', {
+    // Get time - use start_time/end_time if available, otherwise fall back to occurrence_date
+    let timeStr: string
+    if (call.start_time) {
+      timeStr = formatHHMMTime(call.start_time)
+      if (call.end_time) {
+        timeStr += ` - ${formatHHMMTime(call.end_time)}`
+      }
+    } else {
+      timeStr = eventDate.toLocaleTimeString(undefined, {
         hour: 'numeric',
-        minute: '2-digit',
-        timeZone: call.timezone
+        minute: '2-digit'
       })
-      const tzAbbrev = getTimezoneAbbrev(call.timezone)
-      timeStr = `${eventTimeStr} ${tzAbbrev}`
+      
+      // Add timezone info if event has a specific timezone
+      if (call.timezone) {
+        const eventTimeStr = eventDate.toLocaleTimeString('en-US', {
+          hour: 'numeric',
+          minute: '2-digit',
+          timeZone: call.timezone
+        })
+        const tzAbbrev = getTimezoneAbbrev(call.timezone)
+        timeStr = `${eventTimeStr} ${tzAbbrev}`
+      }
     }
 
     let shareText = `📅 ${call.title}\n\n`
     shareText += `🗓 ${dateStr}\n`
     shareText += `⏰ ${timeStr}`
-    if (call.duration_minutes) {
+    if (call.duration_minutes && !call.end_time) {
       shareText += ` (${call.duration_minutes} min)`
     }
     shareText += `\n`
@@ -171,7 +179,28 @@ export function ZoomCalls() {
     })
   }
 
-  const formatTime = (dateString: string, eventTimezone?: string) => {
+  // Format HH:MM time string to display format
+  const formatHHMMTime = (timeStr: string) => {
+    const [hours, minutes] = timeStr.split(':').map(Number)
+    const date = new Date()
+    date.setHours(hours, minutes, 0, 0)
+    return date.toLocaleTimeString(undefined, {
+      hour: 'numeric',
+      minute: '2-digit'
+    })
+  }
+
+  const formatTime = (dateString: string, eventTimezone?: string, startTime?: string | null, endTime?: string | null) => {
+    // If start_time is provided, use it instead of parsing from dateString
+    if (startTime) {
+      const formattedStart = formatHHMMTime(startTime)
+      if (endTime) {
+        const formattedEnd = formatHHMMTime(endTime)
+        return `${formattedStart} - ${formattedEnd}`
+      }
+      return formattedStart
+    }
+
     const date = new Date(dateString)
     // Show time in user's local timezone
     const localTime = date.toLocaleTimeString(undefined, {
@@ -264,7 +293,7 @@ export function ZoomCalls() {
                       </span>
                       <span className="flex items-center gap-1">
                         <Clock className="h-3 w-3" />
-                        {formatTime(call.occurrence_date, call.timezone)} {call.duration_minutes && `(${call.duration_minutes} min)`}
+                        {formatTime(call.occurrence_date, call.timezone, call.start_time, call.end_time)} {call.duration_minutes && !call.end_time && `(${call.duration_minutes} min)`}
                       </span>
                       {call.is_recurring && call.recurrence_pattern && (
                         <span className="text-xs text-gray-500">

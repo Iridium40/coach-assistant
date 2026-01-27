@@ -110,26 +110,34 @@ export function CalendarView() {
       year: 'numeric'
     })
     
-    // Get time in the event's timezone if specified
-    let timeStr = eventDate.toLocaleTimeString(undefined, {
-      hour: 'numeric',
-      minute: '2-digit'
-    })
-    
-    if (event.timezone) {
-      const eventTimeStr = eventDate.toLocaleTimeString('en-US', {
+    // Get time - use start_time/end_time if available, otherwise fall back to occurrence_date
+    let timeStr: string
+    if (event.start_time) {
+      timeStr = formatHHMMTime(event.start_time)
+      if (event.end_time) {
+        timeStr += ` - ${formatHHMMTime(event.end_time)}`
+      }
+    } else {
+      timeStr = eventDate.toLocaleTimeString(undefined, {
         hour: 'numeric',
-        minute: '2-digit',
-        timeZone: event.timezone
+        minute: '2-digit'
       })
-      const tzAbbrev = getTimezoneAbbrev(event.timezone)
-      timeStr = `${eventTimeStr} ${tzAbbrev}`
+      
+      if (event.timezone) {
+        const eventTimeStr = eventDate.toLocaleTimeString('en-US', {
+          hour: 'numeric',
+          minute: '2-digit',
+          timeZone: event.timezone
+        })
+        const tzAbbrev = getTimezoneAbbrev(event.timezone)
+        timeStr = `${eventTimeStr} ${tzAbbrev}`
+      }
     }
 
     let shareText = `📅 ${event.title}\n\n`
     shareText += `🗓 ${dateStr}\n`
     shareText += `⏰ ${timeStr}`
-    if (event.duration_minutes) {
+    if (event.duration_minutes && !event.end_time) {
       shareText += ` (${event.duration_minutes} min)`
     }
     shareText += `\n`
@@ -245,8 +253,30 @@ export function CalendarView() {
     })
   }
 
-  // Simple time format for compact displays
-  const formatTime = (dateString: string, eventTimezone?: string) => {
+  // Format HH:MM time string to display format
+  const formatHHMMTime = (timeStr: string) => {
+    const [hours, minutes] = timeStr.split(':').map(Number)
+    const date = new Date()
+    date.setHours(hours, minutes, 0, 0)
+    return date.toLocaleTimeString(undefined, {
+      hour: 'numeric',
+      minute: '2-digit'
+    })
+  }
+
+  // Simple time format for compact displays - uses start_time if available
+  const formatTime = (dateString: string, eventTimezone?: string, startTime?: string | null, endTime?: string | null) => {
+    // If start_time is provided, use it instead of parsing from dateString
+    if (startTime) {
+      const formattedStart = formatHHMMTime(startTime)
+      if (endTime) {
+        const formattedEnd = formatHHMMTime(endTime)
+        return `${formattedStart} - ${formattedEnd}`
+      }
+      return formattedStart
+    }
+    
+    // Fallback to parsing time from dateString
     const date = new Date(dateString)
     const localTime = date.toLocaleTimeString(undefined, {
       hour: 'numeric',
@@ -424,7 +454,7 @@ export function CalendarView() {
                         className={`w-full text-left text-[10px] sm:text-xs text-white rounded px-0.5 sm:px-1 py-0 sm:py-0.5 truncate relative ${getCallTypeColor(event.call_type)}`}
                       >
                         {getStatusIndicator(event.status)}
-                        <span className="hidden sm:inline">{formatTime(event.occurrence_date, event.timezone)} </span>
+                        <span className="hidden sm:inline">{formatTime(event.occurrence_date, event.timezone, event.start_time, event.end_time)} </span>
                         <span className="hidden sm:inline">{event.title}</span>
                         <span className="sm:hidden">{event.title.substring(0, 8)}{event.title.length > 8 ? "…" : ""}</span>
                       </button>
@@ -506,7 +536,7 @@ export function CalendarView() {
                           {/* Time */}
                           <div className="flex items-center gap-1 text-xs font-medium text-gray-600 mb-1">
                             <Clock className="h-3 w-3" />
-                            {formatTime(event.occurrence_date, event.timezone)}
+                            {formatTime(event.occurrence_date, event.timezone, event.start_time, event.end_time)}
                           </div>
                           
                           {/* Title */}
@@ -608,7 +638,7 @@ export function CalendarView() {
                 <div className="flex items-center gap-2 sm:gap-3 text-optavia-gray text-sm sm:text-base">
                   <Clock className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0" />
                   <span>
-                    {formatTime(selectedEvent.occurrence_date, selectedEvent.timezone)} {selectedEvent.duration_minutes && `(${selectedEvent.duration_minutes} min)`}
+                    {formatTime(selectedEvent.occurrence_date, selectedEvent.timezone, selectedEvent.start_time, selectedEvent.end_time)} {selectedEvent.duration_minutes && `(${selectedEvent.duration_minutes} min)`}
                   </span>
                 </div>
 

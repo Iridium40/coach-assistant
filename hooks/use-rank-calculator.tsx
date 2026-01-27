@@ -277,9 +277,10 @@ export interface Projections {
 }
 
 export interface Gaps {
-  coaches: number
-  clients: number
-  qualifyingLegs: number
+  points: number
+  scTeams: number
+  edTeams: number
+  fibcTeams: number
 }
 
 export function useRankCalculator(user: User | null) {
@@ -443,6 +444,24 @@ export function useRankCalculator(user: User | null) {
     }
   }, [frontlineCoaches.length])
 
+  // Rank tier lists for counting teams
+  const FIBC_PLUS_RANKS = ['FIBC', 'Integrated Regional Director', 'Integrated National Director', 'FIBL', 'IPD']
+  const ED_PLUS_RANKS = [
+    'Executive Director', 'FIBC', 
+    'Regional Director', 'Integrated Regional Director',
+    'National Director', 'Integrated National Director', 
+    'Global Director', 'FIBL',
+    'Presidential Director', 'IPD'
+  ]
+  const SC_PLUS_RANKS = [
+    'Senior Coach', 'Manager', 'Associate Director', 'Director',
+    'Executive Director', 'FIBC',
+    'Regional Director', 'Integrated Regional Director',
+    'National Director', 'Integrated National Director',
+    'Global Director', 'FIBL',
+    'Presidential Director', 'IPD'
+  ]
+
   // Calculate gaps to next rank
   const calculateGaps = useCallback((
     currentRank: RankType,
@@ -456,12 +475,21 @@ export function useRankCalculator(user: User | null) {
     if (!nextRank) return null
 
     const nextRankReqs = RANK_REQUIREMENTS[nextRank]
-    const scTeamsCount = frontlineCoaches.filter(c => c.is_qualifying).length
+    
+    // Count teams by tier
+    const scTeamsCount = frontlineCoaches.filter(c => SC_PLUS_RANKS.includes(c.coach_rank)).length
+    const edTeamsCount = frontlineCoaches.filter(c => ED_PLUS_RANKS.includes(c.coach_rank)).length
+    const fibcTeamsCount = frontlineCoaches.filter(c => FIBC_PLUS_RANKS.includes(c.coach_rank)).length
+    
+    // Calculate points: ~4 clients = 1 point, 1 SC team = 1 point
+    const clientPoints = Math.floor(activeClients / 4)
+    const totalPoints = clientPoints + scTeamsCount
 
     return {
-      coaches: Math.max(0, nextRankReqs.frontlineCoaches - frontlineCoaches.length),
-      clients: Math.max(0, nextRankReqs.minClients - activeClients),
-      qualifyingLegs: Math.max(0, nextRankReqs.scTeams - scTeamsCount)
+      points: Math.max(0, nextRankReqs.minPoints - totalPoints),
+      scTeams: Math.max(0, nextRankReqs.scTeams - scTeamsCount),
+      edTeams: Math.max(0, nextRankReqs.edTeams - edTeamsCount),
+      fibcTeams: Math.max(0, nextRankReqs.fibcTeams - fibcTeamsCount)
     }
   }, [frontlineCoaches])
 
@@ -478,24 +506,53 @@ export function useRankCalculator(user: User | null) {
     if (!nextRank) return 100
 
     const nextRankReqs = RANK_REQUIREMENTS[nextRank]
-    const scTeamsCount = frontlineCoaches.filter(c => c.is_qualifying).length
     
-    // Calculate client progress (40% weight)
-    const clientProgress = nextRankReqs.minClients > 0
-      ? Math.min((activeClients / nextRankReqs.minClients) * 100, 100)
+    // Count teams by tier
+    const scTeamsCount = frontlineCoaches.filter(c => SC_PLUS_RANKS.includes(c.coach_rank)).length
+    const edTeamsCount = frontlineCoaches.filter(c => ED_PLUS_RANKS.includes(c.coach_rank)).length
+    const fibcTeamsCount = frontlineCoaches.filter(c => FIBC_PLUS_RANKS.includes(c.coach_rank)).length
+    
+    // Calculate points: ~4 clients = 1 point, 1 SC team = 1 point
+    const clientPoints = Math.floor(activeClients / 4)
+    const totalPoints = clientPoints + scTeamsCount
+    
+    // Calculate points progress (for lower ranks, this is the main metric)
+    const pointsProgress = nextRankReqs.minPoints > 0
+      ? Math.min((totalPoints / nextRankReqs.minPoints) * 100, 100)
       : 100
 
-    // Calculate coach progress (30% weight)
-    const coachProgress = nextRankReqs.frontlineCoaches > 0
-      ? Math.min((frontlineCoaches.length / nextRankReqs.frontlineCoaches) * 100, 100)
-      : 100
-
-    // Calculate SC teams progress (30% weight)
+    // Calculate SC teams progress (for FIBC track)
     const scTeamsProgress = nextRankReqs.scTeams > 0
       ? Math.min((scTeamsCount / nextRankReqs.scTeams) * 100, 100)
       : 100
 
-    return Math.round((clientProgress * 0.4) + (coachProgress * 0.3) + (scTeamsProgress * 0.3))
+    // Calculate ED teams progress (for higher ranks)
+    const edTeamsProgress = nextRankReqs.edTeams > 0
+      ? Math.min((edTeamsCount / nextRankReqs.edTeams) * 100, 100)
+      : 100
+
+    // Calculate FIBC teams progress (for FIBL/IPD)
+    const fibcTeamsProgress = nextRankReqs.fibcTeams > 0
+      ? Math.min((fibcTeamsCount / nextRankReqs.fibcTeams) * 100, 100)
+      : 100
+
+    // Weight based on what requirements exist for next rank
+    const hasPointsReq = nextRankReqs.minPoints > 0
+    const hasScTeamsReq = nextRankReqs.scTeams > 0
+    const hasEdTeamsReq = nextRankReqs.edTeams > 0
+    const hasFibcTeamsReq = nextRankReqs.fibcTeams > 0
+    
+    const reqCount = [hasPointsReq, hasScTeamsReq, hasEdTeamsReq, hasFibcTeamsReq].filter(Boolean).length
+    
+    if (reqCount === 0) return 100
+    
+    let totalProgress = 0
+    if (hasPointsReq) totalProgress += pointsProgress
+    if (hasScTeamsReq) totalProgress += scTeamsProgress
+    if (hasEdTeamsReq) totalProgress += edTeamsProgress
+    if (hasFibcTeamsReq) totalProgress += fibcTeamsProgress
+    
+    return Math.round(totalProgress / reqCount)
   }, [frontlineCoaches])
 
   // Generate action items
@@ -510,43 +567,46 @@ export function useRankCalculator(user: User | null) {
 
     const items: { priority: "high" | "medium" | "low"; text: string }[] = []
 
-    // Client gaps
-    if (gaps.clients > 0) {
+    // Points gaps (clients + SC teams)
+    if (gaps.points > 0) {
       items.push({
         priority: "high",
-        text: `Need ${gaps.clients} more active clients`
+        text: `Need ${gaps.points} more qualifying points (~${gaps.points * 4} clients or ${gaps.points} SC teams)`
       })
     }
 
-    // Coach gaps
-    if (gaps.coaches > 0) {
-      if (clients.coachProspects > 0) {
+    // SC Teams gaps (for FIBC track)
+    if (gaps.scTeams > 0) {
+      const nonQualifying = frontlineCoaches.filter(c => !SC_PLUS_RANKS.includes(c.coach_rank))
+      if (nonQualifying.length > 0) {
         items.push({
           priority: "high",
-          text: `Recruit ${gaps.coaches} more coaches (${clients.coachProspects} flagged as prospects)`
+          text: `Help ${gaps.scTeams} coaches reach Senior Coach+ rank`
         })
       } else {
         items.push({
           priority: "medium",
-          text: `Need ${gaps.coaches} more frontline coaches`
+          text: `Need ${gaps.scTeams} more SC+ teams`
         })
       }
     }
 
-    // Qualifying legs gaps
-    if (gaps.qualifyingLegs > 0) {
-      const nonQualifying = frontlineCoaches.filter(c => !c.is_qualifying)
-      if (nonQualifying.length > 0) {
-        items.push({
-          priority: "high",
-          text: `Help ${gaps.qualifyingLegs} coaches reach Senior Coach rank`
-        })
-      } else {
-        items.push({
-          priority: "medium",
-          text: `Need ${gaps.qualifyingLegs} qualifying legs (Senior Coach+)`
-        })
-      }
+    // ED Teams gaps (for higher ranks)
+    if (gaps.edTeams > 0) {
+      const currentEDTeams = frontlineCoaches.filter(c => ED_PLUS_RANKS.includes(c.coach_rank)).length
+      items.push({
+        priority: "high",
+        text: `Need ${gaps.edTeams} more ED+ teams (currently have ${currentEDTeams})`
+      })
+    }
+
+    // FIBC Teams gaps (for FIBL/IPD)
+    if (gaps.fibcTeams > 0) {
+      const currentFIBCTeams = frontlineCoaches.filter(c => FIBC_PLUS_RANKS.includes(c.coach_rank)).length
+      items.push({
+        priority: "high",
+        text: `Need ${gaps.fibcTeams} more FIBC+ teams (currently have ${currentFIBCTeams})`
+      })
     }
 
     // Pipeline actions
@@ -568,13 +628,17 @@ export function useRankCalculator(user: User | null) {
       : null
   }, [])
 
-  // Computed values
-  const qualifyingLegsCount = frontlineCoaches.filter(c => c.is_qualifying).length
+  // Computed values - count SC+ teams (qualifying legs)
+  const qualifyingLegsCount = frontlineCoaches.filter(c => SC_PLUS_RANKS.includes(c.coach_rank)).length
+  const edTeamsCount = frontlineCoaches.filter(c => ED_PLUS_RANKS.includes(c.coach_rank)).length
+  const fibcTeamsCount = frontlineCoaches.filter(c => FIBC_PLUS_RANKS.includes(c.coach_rank)).length
 
   return {
     rankData,
     frontlineCoaches,
     qualifyingLegsCount,
+    edTeamsCount,
+    fibcTeamsCount,
     loading,
     error,
     updateRankData,
