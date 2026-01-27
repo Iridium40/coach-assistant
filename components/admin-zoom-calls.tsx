@@ -680,26 +680,54 @@ export function AdminZoomCalls({ onClose }: { onClose?: () => void }) {
                           <Label htmlFor="startTime" className="text-optavia-dark">
                             Start Time <span className="text-gray-400 text-xs">(optional)</span>
                           </Label>
-                          <Input
-                            id="startTime"
-                            type="time"
-                            value={startTime}
-                            onChange={(e) => setStartTime(e.target.value)}
-                            className="border-gray-300"
-                          />
+                          <Select value={startTime} onValueChange={setStartTime}>
+                            <SelectTrigger className="border-gray-300">
+                              <SelectValue placeholder="Select start time" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="">All Day</SelectItem>
+                              {Array.from({ length: 24 * 4 }, (_, i) => {
+                                const hours = Math.floor(i / 4)
+                                const minutes = (i % 4) * 15
+                                const time24 = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`
+                                const period = hours >= 12 ? 'PM' : 'AM'
+                                const displayHour = hours === 0 ? 12 : hours > 12 ? hours - 12 : hours
+                                const time12 = `${displayHour}:${minutes.toString().padStart(2, '0')} ${period}`
+                                return (
+                                  <SelectItem key={time24} value={time24}>
+                                    {time12}
+                                  </SelectItem>
+                                )
+                              })}
+                            </SelectContent>
+                          </Select>
                           <p className="text-xs text-optavia-gray">Leave blank for all-day event</p>
                         </div>
                         <div className="space-y-2">
                           <Label htmlFor="endTime" className="text-optavia-dark">
                             End Time <span className="text-gray-400 text-xs">(optional)</span>
                           </Label>
-                          <Input
-                            id="endTime"
-                            type="time"
-                            value={endTime}
-                            onChange={(e) => setEndTime(e.target.value)}
-                            className="border-gray-300"
-                          />
+                          <Select value={endTime} onValueChange={setEndTime}>
+                            <SelectTrigger className="border-gray-300">
+                              <SelectValue placeholder="Select end time" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="">All Day</SelectItem>
+                              {Array.from({ length: 24 * 4 }, (_, i) => {
+                                const hours = Math.floor(i / 4)
+                                const minutes = (i % 4) * 15
+                                const time24 = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`
+                                const period = hours >= 12 ? 'PM' : 'AM'
+                                const displayHour = hours === 0 ? 12 : hours > 12 ? hours - 12 : hours
+                                const time12 = `${displayHour}:${minutes.toString().padStart(2, '0')} ${period}`
+                                return (
+                                  <SelectItem key={time24} value={time24}>
+                                    {time12}
+                                  </SelectItem>
+                                )
+                              })}
+                            </SelectContent>
+                          </Select>
                           <p className="text-xs text-optavia-gray">Leave blank for all-day event</p>
                         </div>
                       </div>
