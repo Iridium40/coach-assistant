@@ -216,10 +216,12 @@ export async function POST(request: NextRequest) {
       )
     }
     
-    // Limit batch size to prevent timeout
-    if (entries.length > 100) {
+    // Limit batch size to prevent timeout and respect Resend rate limits
+    // Resend allows up to 100 emails/second on paid plans, but we throttle at 150ms between sends
+    // Max 500 invites = ~75 seconds processing time (within serverless timeout limits)
+    if (entries.length > 500) {
       return NextResponse.json(
-        { error: "Maximum 100 invites per batch. Please split your CSV into smaller files." },
+        { error: "Maximum 500 invites per batch. Please split your CSV into smaller files." },
         { status: 400 }
       )
     }
@@ -283,7 +285,7 @@ export async function POST(request: NextRequest) {
         // Generate invite
         const inviteKey = generateInviteKey()
         const expiresAt = new Date()
-        expiresAt.setDate(expiresAt.getDate() + 30) // 30 days expiration
+        expiresAt.setDate(expiresAt.getDate() + 14) // 14 days expiration
         
         // Create invite record (is_bulk_invite = true means no sponsor_id will be set)
         const { data: inviteData, error: insertError } = await supabase
