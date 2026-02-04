@@ -18,7 +18,8 @@ import {
   Users,
   Mail,
   AlertTriangle,
-  Trash2
+  Trash2,
+  Clock
 } from "lucide-react"
 import {
   Table,
@@ -425,9 +426,21 @@ export function BulkInviteManager() {
               Drop your CSV file here or click to browse
             </p>
             <p className="text-sm text-optavia-gray">
-              Only .csv files are accepted (max 100 entries per upload)
+              Only .csv files are accepted (max 1,000 entries per upload)
             </p>
           </div>
+          
+          {/* Important Notes */}
+          <Alert className="mt-4 bg-blue-50 border-blue-200">
+            <Clock className="h-4 w-4 text-blue-600" />
+            <AlertTitle className="text-blue-800">Important Information</AlertTitle>
+            <AlertDescription className="text-blue-700">
+              <ul className="list-disc list-inside mt-1 space-y-1">
+                <li>Maximum of <strong>1,000 email invites</strong> can be uploaded per CSV file</li>
+                <li>All invites will <strong>expire in 14 days</strong> from the date sent</li>
+              </ul>
+            </AlertDescription>
+          </Alert>
         </CardContent>
       </Card>
 

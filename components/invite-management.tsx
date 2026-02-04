@@ -441,6 +441,14 @@ export function InviteManagement({ onClose }: InviteManagementProps) {
                 </Link>.
               </p>
             </div>
+            
+            {/* Expiration Note */}
+            <div className="flex items-center gap-2 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+              <Clock className="h-4 w-4 text-blue-600 flex-shrink-0" />
+              <p className="text-sm text-blue-700">
+                Invite links will <strong>expire in 14 days</strong> from the date generated.
+              </p>
+            </div>
 
             <Button
               onClick={handleGenerateInvite}
