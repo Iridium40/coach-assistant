@@ -334,13 +334,14 @@ export function SetPasswordForm({ onSuccess, inviteKey }: SetPasswordFormProps) 
             <Input
               id="password"
               type="password"
-              placeholder="••••••••"
+              placeholder=""
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
               minLength={6}
               disabled={loading}
-              className="bg-white border-gray-300 text-optavia-dark"
+              autoComplete="new-password"
+              className="bg-white border-gray-300 text-optavia-dark focus:border-[hsl(var(--optavia-green))] focus:ring-[hsl(var(--optavia-green))]"
             />
             <p className="text-xs text-optavia-gray">Must be at least 6 characters</p>
           </div>
@@ -350,13 +351,14 @@ export function SetPasswordForm({ onSuccess, inviteKey }: SetPasswordFormProps) 
             <Input
               id="confirmPassword"
               type="password"
-              placeholder="••••••••"
+              placeholder=""
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               required
               minLength={6}
               disabled={loading}
-              className="bg-white border-gray-300 text-optavia-dark"
+              autoComplete="new-password"
+              className="bg-white border-gray-300 text-optavia-dark focus:border-[hsl(var(--optavia-green))] focus:ring-[hsl(var(--optavia-green))]"
             />
           </div>
 
