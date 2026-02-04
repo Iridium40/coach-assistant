@@ -12,6 +12,9 @@ const RESEND_SEGMENT_ID = process.env.RESEND_SEGMENT_ID
 // Default coach rank for all invited coaches
 const DEFAULT_COACH_RANK = "IPD"
 
+// Resend batch API limit is 100 emails per call
+const BATCH_SIZE = 100
+
 interface BulkInviteEntry {
   full_name: string
   email: string
@@ -23,13 +26,27 @@ interface InviteResult {
   full_name: string
   success: boolean
   error?: string
+  inviteId?: string
 }
 
-// Throttle delay between emails (ms) to respect Resend rate limits
-const EMAIL_THROTTLE_DELAY = 150
+interface PreparedInvite {
+  email: string
+  fullName: string
+  coachRank: string
+  inviteKey: string
+  inviteId: string
+  inviteLink: string
+  emailPayload: {
+    from: string
+    to: string[]
+    subject: string
+    html: string
+    text: string
+  }
+}
 
 /**
- * Sleep helper for throttling
+ * Sleep helper for throttling between batch calls
  */
 function sleep(ms: number): Promise<void> {
   return new Promise(resolve => setTimeout(resolve, ms))
@@ -216,19 +233,21 @@ export async function POST(request: NextRequest) {
       )
     }
     
-    // Limit batch size to prevent timeout and respect Resend rate limits
-    // Resend allows up to 100 emails/second on paid plans, but we throttle at 150ms between sends
-    // Max 500 invites = ~75 seconds processing time (within serverless timeout limits)
-    if (entries.length > 500) {
+    // Limit batch size - with Resend batch API (100 emails per call), we can handle many more
+    // 1000 invites = 10 batch calls, very fast processing
+    if (entries.length > 1000) {
       return NextResponse.json(
-        { error: "Maximum 500 invites per batch. Please split your CSV into smaller files." },
+        { error: "Maximum 1000 invites per batch. Please split your CSV into smaller files." },
         { status: 400 }
       )
     }
     
     const results: InviteResult[] = []
+    const preparedInvites: PreparedInvite[] = []
     
-    // Process each entry sequentially with throttling
+    // Phase 1: Validate all entries and create invite records in database
+    console.log(`Processing ${entries.length} invite entries...`)
+    
     for (const entry of entries) {
       const fullName = entry.full_name?.trim() || ""
       const email = entry.email?.trim().toLowerCase() || ""
@@ -298,7 +317,7 @@ export async function POST(request: NextRequest) {
             coach_rank: coachRank,
             expires_at: expiresAt.toISOString(),
             is_active: true,
-            email_status: "sent",
+            email_status: "pending",
             is_bulk_invite: true,
           })
           .select("id")
@@ -323,43 +342,22 @@ export async function POST(request: NextRequest) {
           invitedByName
         )
         
-        // Send email
-        const { data: emailData, error: emailError } = await resend.emails.send({
-          from: "Coaching Amplifier <onboarding@coachingamplifier.com>",
-          to: [email],
-          subject,
-          html,
-          text,
-        })
-        
-        if (emailError) {
-          results.push({
-            email,
-            full_name: fullName,
-            success: false,
-            error: `Email failed: ${emailError.message}`
-          })
-        } else {
-          // Store Resend message ID for webhook correlation
-          if (emailData?.id && inviteData?.id) {
-            await supabase
-              .from("invites")
-              .update({ resend_message_id: emailData.id })
-              .eq("id", inviteData.id)
+        // Prepare email for batch sending
+        preparedInvites.push({
+          email,
+          fullName,
+          coachRank,
+          inviteKey,
+          inviteId: inviteData.id,
+          inviteLink,
+          emailPayload: {
+            from: "Coaching Amplifier <onboarding@coachingamplifier.com>",
+            to: [email],
+            subject,
+            html,
+            text,
           }
-          
-          // Add contact to Resend segment for marketing/audience tracking
-          await addContactToResendSegment(email)
-          
-          results.push({
-            email,
-            full_name: fullName,
-            success: true
-          })
-        }
-        
-        // Throttle to respect rate limits
-        await sleep(EMAIL_THROTTLE_DELAY)
+        })
         
       } catch (error: any) {
         results.push({
@@ -371,9 +369,107 @@ export async function POST(request: NextRequest) {
       }
     }
     
+    // Phase 2: Send emails in batches using Resend batch API
+    console.log(`Sending ${preparedInvites.length} emails in batches of ${BATCH_SIZE}...`)
+    
+    for (let i = 0; i < preparedInvites.length; i += BATCH_SIZE) {
+      const batch = preparedInvites.slice(i, i + BATCH_SIZE)
+      const batchNumber = Math.floor(i / BATCH_SIZE) + 1
+      const totalBatches = Math.ceil(preparedInvites.length / BATCH_SIZE)
+      
+      console.log(`Sending batch ${batchNumber}/${totalBatches} (${batch.length} emails)...`)
+      
+      try {
+        // Use Resend batch API - each email is individually addressed
+        const { data: batchData, error: batchError } = await resend.batch.send(
+          batch.map(invite => invite.emailPayload)
+        )
+        
+        if (batchError) {
+          // If batch fails, mark all in this batch as failed
+          console.error(`Batch ${batchNumber} failed:`, batchError.message)
+          for (const invite of batch) {
+            results.push({
+              email: invite.email,
+              full_name: invite.fullName,
+              success: false,
+              error: `Batch email failed: ${batchError.message}`
+            })
+            // Update invite status to failed
+            await supabase
+              .from("invites")
+              .update({ email_status: "failed" })
+              .eq("id", invite.inviteId)
+          }
+        } else {
+          // Process individual results from batch
+          const batchResults = batchData?.data || []
+          
+          for (let j = 0; j < batch.length; j++) {
+            const invite = batch[j]
+            const emailResult = batchResults[j]
+            
+            if (emailResult?.id) {
+              // Email sent successfully
+              await supabase
+                .from("invites")
+                .update({ 
+                  resend_message_id: emailResult.id,
+                  email_status: "sent"
+                })
+                .eq("id", invite.inviteId)
+              
+              // Add contact to Resend segment (non-blocking)
+              addContactToResendSegment(invite.email).catch(err => 
+                console.warn(`Failed to add ${invite.email} to segment:`, err)
+              )
+              
+              results.push({
+                email: invite.email,
+                full_name: invite.fullName,
+                success: true,
+                inviteId: invite.inviteId
+              })
+            } else {
+              // Individual email failed
+              results.push({
+                email: invite.email,
+                full_name: invite.fullName,
+                success: false,
+                error: "Email delivery failed"
+              })
+              await supabase
+                .from("invites")
+                .update({ email_status: "failed" })
+                .eq("id", invite.inviteId)
+            }
+          }
+        }
+        
+        // Small delay between batches to be respectful of rate limits
+        if (i + BATCH_SIZE < preparedInvites.length) {
+          await sleep(500)
+        }
+        
+      } catch (error: any) {
+        console.error(`Batch ${batchNumber} error:`, error)
+        // Mark all in failed batch
+        for (const invite of batch) {
+          results.push({
+            email: invite.email,
+            full_name: invite.fullName,
+            success: false,
+            error: error.message || "Batch send error"
+          })
+        }
+      }
+    }
+    
     // Calculate summary
     const successCount = results.filter(r => r.success).length
     const failureCount = results.filter(r => !r.success).length
+    
+    console.log(`Bulk invite complete: ${successCount} successful, ${failureCount} failed`)
     
     return NextResponse.json({
       success: true,
