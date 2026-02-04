@@ -18,6 +18,7 @@ import { expandRecurringEvents, type ExpandedZoomCall } from "@/lib/expand-recur
 import type { ZoomCall } from "@/lib/types"
 
 type ViewMode = "month" | "week"
+type EventFilter = "all" | "meetings" | "events"
 
 export function CalendarView() {
   const { user } = useAuth()
@@ -30,6 +31,7 @@ export function CalendarView() {
   const [copiedId, setCopiedId] = useState<string | null>(null)
   const [sharedId, setSharedId] = useState<string | null>(null)
   const [selectedEvent, setSelectedEvent] = useState<ExpandedZoomCall | null>(null)
+  const [eventFilter, setEventFilter] = useState<EventFilter>("all")
   const supabase = createClient()
 
   useEffect(() => {
