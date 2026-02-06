@@ -184,9 +184,9 @@ function ClientRecipesContent() {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <picture>
-                <source srcSet="/branding/ca_logo_large.svg" type="image/svg+xml" />
+                <source srcSet="/branding/ca_hub_logo.svg" type="image/svg+xml" />
                 <img
-                  src="/branding/ca_logo_large.png"
+                  src="/branding/ca_hub_logo.png"
                   alt="Coaching Amplifier"
                   className="h-10 w-auto"
                 />
@@ -404,9 +404,9 @@ function ClientRecipesContent() {
         <div className="container mx-auto px-4 text-center">
           <div className="flex justify-center mb-4">
             <picture>
-              <source srcSet="/branding/ca_logo_large.svg" type="image/svg+xml" />
+              <source srcSet="/branding/ca_hub_logo.svg" type="image/svg+xml" />
               <img
-                src="/branding/ca_logo_large.png"
+                src="/branding/ca_hub_logo.png"
                 alt="Coaching Amplifier"
                 className="h-8 w-auto brightness-0 invert"
               />

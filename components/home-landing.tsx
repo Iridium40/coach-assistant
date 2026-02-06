@@ -13,9 +13,9 @@ export function HomeLanding() {
           <div className="text-center max-w-4xl mx-auto">
             <div className="mb-8">
               <picture>
-                <source srcSet="/branding/ca_logo_large.svg" type="image/svg+xml" />
+                <source srcSet="/branding/ca_hub_logo.svg" type="image/svg+xml" />
                 <img
-                  src="/branding/ca_logo_large.png"
+                  src="/branding/ca_hub_logo.png"
                   alt="Coach Assistant Hub"
                   className="h-20 sm:h-24 md:h-32 w-auto mx-auto"
                 />

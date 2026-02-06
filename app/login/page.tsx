@@ -19,9 +19,9 @@ export default function LoginPage() {
         {/* Logo */}
         <div className="mb-8 sm:mb-12">
           <picture>
-            <source srcSet="/branding/ca_logo_large.svg" type="image/svg+xml" />
+            <source srcSet="/branding/ca_hub_logo.svg" type="image/svg+xml" />
             <img
-              src="/branding/ca_logo_large.png"
+              src="/branding/ca_hub_logo.png"
               alt="Coach Assistant Hub"
               className="h-16 sm:h-20 md:h-24 w-auto mx-auto"
             />
