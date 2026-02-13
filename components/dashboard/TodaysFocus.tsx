@@ -1,14 +1,10 @@
 "use client"
 
-import { useMemo, useState } from "react"
+import { useState } from "react"
 import Link from "next/link"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { Progress } from "@/components/ui/progress"
 import {
-  GraduationCap,
-  ChevronRight,
   CheckCircle,
   BookOpen,
   Calendar,
@@ -29,14 +25,12 @@ import type { User } from "@supabase/supabase-js"
 import type { Prospect } from "@/hooks/use-prospects"
 import type { ZoomCall } from "@/lib/types"
 import type { ExpandedZoomCall } from "@/lib/expand-recurring-events"
-import { ACADEMY_MODULES, ACADEMY_RESOURCE_IDS, getAcademyProgress } from "@/lib/academy-utils"
 import { isMilestoneCelebratedToday, markMilestoneCelebratedToday } from "@/lib/milestone-celebrations"
 
 interface TodaysFocusProps {
   user: User | null
   userRank: string | null
   isNewCoach?: boolean
-  completedResources: string[]
   clients: any[]
   prospects: Prospect[]
   upcomingMeetings: ExpandedZoomCall[]
@@ -50,7 +44,6 @@ export function TodaysFocus({
   user,
   userRank,
   isNewCoach,
-  completedResources,
   clients,
   prospects,
   upcomingMeetings,
@@ -72,25 +65,6 @@ export function TodaysFocus({
   todayStart.setHours(0, 0, 0, 0)
   const todayEnd = new Date()
   todayEnd.setHours(23, 59, 59, 999)
-
-  // Academy progress + next module (based on academy-resource-* completions)
-  const academyProgress = useMemo(() => {
-    return getAcademyProgress(completedResources || [])
-  }, [completedResources])
-
-  const nextAcademyResourceId = useMemo(() => {
-    return ACADEMY_RESOURCE_IDS.find((id) => !completedResources.includes(id)) || null
-  }, [completedResources])
-
-  const nextAcademyModule = useMemo(() => {
-    if (!nextAcademyResourceId) return null
-    const num = nextAcademyResourceId.split("-").pop() // "1".."6"
-    const moduleId = num ? `module-${num}` : null
-    if (!moduleId) return null
-    return ACADEMY_MODULES.find((m) => m.id === moduleId) || { id: moduleId, title: "Academy Module", requiredRank: null }
-  }, [nextAcademyResourceId])
-
-  const isAcademyComplete = academyProgress.total > 0 && academyProgress.completed >= academyProgress.total
 
   // Get clients needing touchpoints (limited)
   const clientsNeedingAction = clients
@@ -173,65 +147,9 @@ export function TodaysFocus({
             <Target className="h-5 w-5 text-[hsl(var(--optavia-green))]" />
             Today's Focus
           </CardTitle>
-          {!isAcademyComplete && academyProgress.total > 0 && (
-            <Badge variant="secondary" className="bg-white">
-              Academy: {academyProgress.completed}/{academyProgress.total}
-            </Badge>
-          )}
         </div>
       </CardHeader>
       <CardContent className="pt-0 space-y-4">
-        {/* Academy Section */}
-        {isAcademyComplete ? (
-          <div className="flex items-center gap-3 p-3 bg-orange-50 rounded-lg border border-orange-200">
-            <CheckCircle className="h-6 w-6 text-orange-600 flex-shrink-0" />
-            <div className="flex-1">
-              <p className="font-semibold text-orange-800 text-sm">Academy Complete! 🎉</p>
-              <p className="text-xs text-orange-700">
-                {academyProgress.total} modules completed
-              </p>
-            </div>
-            <Link href="/training">
-              <Button variant="outline" size="sm" className="text-xs">
-                Review
-              </Button>
-            </Link>
-          </div>
-        ) : nextAcademyModule ? (
-          <div className="bg-white rounded-lg p-3 border border-gray-200">
-            <div className="flex items-center justify-between mb-2">
-              <div className="flex items-center gap-2">
-                <GraduationCap className="h-4 w-4 text-[hsl(var(--optavia-accent))]" />
-                <span className="text-sm font-medium text-gray-700">Continue Academy</span>
-              </div>
-              <span className="text-xs text-[hsl(var(--optavia-accent))] font-bold">
-                {academyProgress.percentage}%
-              </span>
-            </div>
-            <Progress value={academyProgress.percentage} className="h-1.5 mb-2 [&>div]:bg-[hsl(var(--optavia-accent))]" />
-            <div className="flex items-center gap-2 p-2 bg-orange-50 rounded border border-orange-200">
-              <span className="text-lg">🧡</span>
-              <div className="flex-1 min-w-0">
-                <p className="text-xs text-gray-500">Up Next</p>
-                <p className="text-sm font-medium text-gray-900 truncate">
-                  {nextAcademyModule.title}
-                </p>
-              </div>
-              <Link href={`/academy/${nextAcademyModule.id}`}>
-                <Button size="sm" className="bg-[hsl(var(--optavia-accent))] hover:bg-[hsl(var(--optavia-accent))]/90 text-white text-xs">
-                  Start
-                  <ChevronRight className="h-3 w-3 ml-1" />
-                </Button>
-              </Link>
-            </div>
-          </div>
-        ) : null}
-
-        {/* Divider if we have both sections */}
-        {(isAcademyComplete || nextAcademyModule) && (hasActionItems || !hasActionItems) && (
-          <div className="border-t border-green-200" />
-        )}
-
         {/* Today's Tasks Section */}
         {hasActionItems ? (
           <div className="space-y-2">

@@ -272,7 +272,6 @@ export function DashboardOverview() {
           user={user}
           userRank={profile?.coach_rank || null}
           isNewCoach={profile?.is_new_coach}
-          completedResources={completedResources}
           clients={clients}
           prospects={prospects}
           upcomingMeetings={upcomingMeetings}

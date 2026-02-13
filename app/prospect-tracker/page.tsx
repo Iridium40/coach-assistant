@@ -568,7 +568,7 @@ Talking Points:
                   </TooltipTrigger>
                   <TooltipContent side="bottom" className="max-w-xs p-3 bg-white/95 backdrop-blur-sm shadow-lg border border-gray-200">
                     <p className="font-semibold text-green-700 mb-1">Active Prospects</p>
-                    <p className="text-sm text-gray-600">Total prospects in your 100's List who haven't been converted to clients yet.</p>
+                    <p className="text-sm text-gray-600">Prospects with New or Interested status — your active pipeline.</p>
                   </TooltipContent>
                 </Tooltip>
                 <div className="text-3xl font-bold text-[hsl(var(--optavia-green))]">{stats.total}</div>

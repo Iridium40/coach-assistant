@@ -15,7 +15,7 @@ import {
 import { canAccessModule, isAcademyModule, ACADEMY_MODULES, getAcademyProgress } from "@/lib/academy-utils"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { GraduationCap, Lock, CheckCircle2, ArrowRight } from "lucide-react"
+import { GraduationCap, Lock, CheckCircle2, ArrowRight, LayoutGrid } from "lucide-react"
 import Link from "next/link"
 import { useUserData } from "@/contexts/user-data-context"
 
@@ -127,7 +127,7 @@ export const TrainingTab = memo(function TrainingTab({ userData, setUserData, on
   return (
     <div>
       {/* Title and Description */}
-      <div className="text-center py-4 sm:py-8 mb-6">
+      <div className="text-center py-4 sm:py-8 mb-2">
         <h2 className="font-heading font-bold text-2xl sm:text-3xl text-optavia-dark mb-3 sm:mb-4">
           Training
         </h2>
@@ -136,9 +136,55 @@ export const TrainingTab = memo(function TrainingTab({ userData, setUserData, on
         </p>
       </div>
 
+      {/* Choose Your Learning Path */}
+      {!isTrainingOnly && (
+        <div className="mb-8">
+          <p className="text-center text-sm text-optavia-gray mb-4">Choose how you learn best</p>
+          <div className="grid sm:grid-cols-2 gap-4 max-w-3xl mx-auto">
+            {/* Option 1: Guided Path */}
+            <a
+              href="#academy-section"
+              className="group flex items-start gap-4 p-4 sm:p-5 rounded-xl border-2 border-[hsl(var(--optavia-green))] bg-[hsl(var(--optavia-green-light))]/40 hover:bg-[hsl(var(--optavia-green-light))] transition-all hover:shadow-md"
+            >
+              <div className="p-2.5 rounded-lg bg-[hsl(var(--optavia-green))]/10 flex-shrink-0">
+                <GraduationCap className="h-6 w-6 text-[hsl(var(--optavia-green-dark))]" />
+              </div>
+              <div className="flex-1">
+                <h3 className="font-bold text-base text-optavia-dark mb-1 flex items-center gap-2">
+                  Guided Path
+                  <ArrowRight className="h-4 w-4 opacity-0 group-hover:opacity-100 transition-opacity text-[hsl(var(--optavia-green))]" />
+                </h3>
+                <p className="text-sm text-optavia-gray leading-relaxed">
+                  Follow the Coach Academy — a step-by-step curriculum that takes you from foundations to advanced leadership, unlocking modules as you grow.
+                </p>
+              </div>
+            </a>
+
+            {/* Option 2: Browse by Category */}
+            <a
+              href="#resources-section"
+              className="group flex items-start gap-4 p-4 sm:p-5 rounded-xl border-2 border-gray-200 bg-gray-50/60 hover:bg-gray-50 hover:border-gray-300 transition-all hover:shadow-md"
+            >
+              <div className="p-2.5 rounded-lg bg-gray-100 flex-shrink-0">
+                <LayoutGrid className="h-6 w-6 text-gray-600" />
+              </div>
+              <div className="flex-1">
+                <h3 className="font-bold text-base text-optavia-dark mb-1 flex items-center gap-2">
+                  Browse by Category
+                  <ArrowRight className="h-4 w-4 opacity-0 group-hover:opacity-100 transition-opacity text-gray-500" />
+                </h3>
+                <p className="text-sm text-optavia-gray leading-relaxed">
+                  Explore training resources grouped by topic — jump into any category at your own pace with no set order required.
+                </p>
+              </div>
+            </a>
+          </div>
+        </div>
+      )}
+
       {/* Coach Assistant Academy - Prominent Section (Hidden for training-only orgs) */}
       {academyModules.length > 0 && !isTrainingOnly && (
-        <div className="mb-8 sm:mb-12">
+        <div id="academy-section" className="mb-8 sm:mb-12 scroll-mt-24">
           <Card className="bg-gradient-to-br from-[hsl(var(--optavia-green))] to-[hsl(var(--optavia-green-dark))] border-0 shadow-xl">
             <CardHeader className="pb-4">
               <div className="flex items-center gap-3 mb-2">
@@ -266,12 +312,12 @@ export const TrainingTab = memo(function TrainingTab({ userData, setUserData, on
       )}
 
       {/* Training Documents Section */}
-      <div className="mb-6">
+      <div id="resources-section" className="mb-6 scroll-mt-24">
         <h3 className="font-heading font-bold text-xl sm:text-2xl text-optavia-dark mb-2">
-          Training Documents & Resources
+          Training Resources
         </h3>
         <p className="text-optavia-gray text-sm sm:text-base mb-4">
-          Browse training materials, guides, and resources
+          Browse materials by category at your own pace — no set order, learn what you need when you need it
         </p>
       </div>
 

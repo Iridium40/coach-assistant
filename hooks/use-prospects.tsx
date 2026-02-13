@@ -214,7 +214,7 @@ export function useProspects() {
 
   // Get stats
   const stats = {
-    total: prospects.filter(p => !['not_interested', 'not_closed'].includes(p.status)).length,
+    total: prospects.filter(p => ['new', 'interested'].includes(p.status)).length,
     new: prospects.filter(p => p.status === 'new').length,
     interested: prospects.filter(p => p.status === 'interested').length,
     haScheduled: prospects.filter(p => p.status === 'ha_scheduled').length,
