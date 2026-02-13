@@ -41,7 +41,7 @@ interface Resource {
 const COACH_TOOLS = [
   {
     id: "health-assessment",
-    title: "Health Assessment Coaching Tool",
+    title: "Share Health Assessment",
     description: "Share your personalized Health Assessment link with prospects and review submissions via email.",
     icon: ClipboardList,
     component: ShareHALink,

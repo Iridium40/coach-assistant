@@ -56,7 +56,7 @@ import { ShareHALink } from "@/components/coach-tools/share-ha-link"
 
 // Coach Tools definitions - must match IDs in external-resources-tab.tsx for pinning to work
 const COACH_TOOLS: { id: string; title: string; icon: LucideIcon; component: React.ComponentType }[] = [
-  { id: "health-assessment", title: "Health Assessment Coaching Tool", icon: ClipboardList, component: ShareHALink },
+  { id: "health-assessment", title: "Share Health Assessment", icon: ClipboardList, component: ShareHALink },
   { id: "client-onboarding", title: "Client Onboarding Tool", icon: Users, component: ClientOnboardingDialog },
   { id: "client-troubleshooting", title: "Client Troubleshooting Guide", icon: Wrench, component: ClientTroubleshootingDialog },
   { id: "water-calculator", title: "Water Intake Calculator", icon: Droplets, component: WaterCalculator },
