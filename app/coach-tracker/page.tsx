@@ -55,11 +55,7 @@ import {
   Trash2,
   Download,
   CheckCircle,
-  MessageSquare,
-  CalendarPlus,
   Rocket,
-  ChevronUp,
-  ChevronDown,
   Award,
   Check,
 } from "lucide-react"
@@ -116,12 +112,12 @@ function CoachCard({
   return (
     <Card className="transition-shadow hover:shadow-md">
       <CardContent className="p-4">
-        {/* Top Row: Day Badge + Info + Stats */}
-        <div className="flex items-start gap-4">
+        {/* Header Row: Day Badge + Info */}
+        <div className="flex items-start gap-3">
           {/* Day Badge */}
           <div
-            className="w-14 h-14 rounded-xl flex flex-col items-center justify-center flex-shrink-0 border-2"
-            style={{ borderColor: stage.color, backgroundColor: `${stage.color}08` }}
+            className="w-12 h-12 rounded-xl flex flex-col items-center justify-center flex-shrink-0"
+            style={{ backgroundColor: `${stage.color}15`, border: `2px solid ${stage.color}` }}
           >
             <div className="text-[10px] font-bold tracking-wider" style={{ color: stage.color }}>
               DAY
@@ -142,37 +138,107 @@ function CoachCard({
               >
                 {stage.icon} {stage.label}
               </Badge>
+              {/* Rank Badge inline */}
+              <button
+                onClick={() => onRank(coach)}
+                className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-purple-50 hover:bg-purple-100 transition-colors cursor-pointer"
+              >
+                <span className="text-xs">🏅</span>
+                <span className="text-xs font-semibold text-purple-700">{rankTitle}</span>
+              </button>
             </div>
-            <div className="text-sm text-gray-500 mt-0.5">
-              Week {weeks} · Launched{" "}
-              {new Date(coach.launch_date).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+            <div className="flex items-center gap-3 text-sm text-gray-500 mt-1">
+              <span>
+                Week {weeks} · Launched{" "}
+                {new Date(coach.launch_date).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+              </span>
+              {coach.last_check_in && (
+                <span className="text-xs text-gray-400">
+                  Last check-in: {new Date(coach.last_check_in).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+                </span>
+              )}
             </div>
-            {/* Rank Badge */}
-            <button
-              onClick={() => onRank(coach)}
-              className="inline-flex items-center gap-1.5 mt-1.5 px-2.5 py-0.5 rounded-md bg-purple-50 hover:bg-purple-100 transition-colors cursor-pointer"
-            >
-              <span className="text-xs">🏅</span>
-              <span className="text-xs font-semibold text-purple-700">{rankTitle}</span>
-              <span className="text-[10px] text-gray-400">›</span>
-            </button>
-          </div>
-
-          {/* Stats */}
-          <div className="flex gap-4 flex-shrink-0">
-            <div className="text-center">
-              <div className="text-lg font-bold text-[hsl(var(--optavia-green))]">{coach.clients_count}</div>
-              <div className="text-[10px] font-semibold text-gray-500 uppercase tracking-wide">Clients</div>
-            </div>
-            <div className="text-center">
-              <div className="text-lg font-bold text-blue-500">{coach.prospects_count}</div>
-              <div className="text-[10px] font-semibold text-gray-500 uppercase tracking-wide">Prospects</div>
+            {/* Stats inline */}
+            <div className="flex items-center gap-3 mt-1">
+              <span className="text-xs font-semibold text-[hsl(var(--optavia-green))]">
+                {coach.clients_count} Clients
+              </span>
+              <span className="text-xs font-semibold text-blue-500">
+                {coach.prospects_count} Prospects
+              </span>
             </div>
           </div>
         </div>
 
-        {/* Notes - inline editable */}
-        <div className="mt-3 ml-[72px]">
+        {/* Primary Actions - Status + Check In + Schedule (matching prospect/client layout) */}
+        <div className="mt-4 flex flex-col sm:flex-row gap-2">
+          {/* Stage Select (prominent, like prospect/client status dropdown) */}
+          <Select
+            value={coach.stage}
+            onValueChange={(value) => onMoveStage(coach.id, value as CoachStage)}
+          >
+            <SelectTrigger className="flex-1 min-w-0">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {COACH_STAGES.map((s) => (
+                <SelectItem key={s.id} value={s.id}>
+                  {s.icon} {s.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          {/* Check In Button */}
+          <Button
+            variant="outline"
+            size="sm"
+            className="flex-1 border-[hsl(var(--optavia-green))]/50 text-[hsl(var(--optavia-green))] hover:bg-[hsl(var(--optavia-green-light))]"
+            onClick={() => onCheckIn(coach)}
+          >
+            <CheckCircle className="h-4 w-4 mr-1" />
+            <span className="text-xs sm:text-sm">Check In</span>
+          </Button>
+
+          {/* Rank Button */}
+          <Button
+            variant="outline"
+            size="sm"
+            className="flex-1 text-purple-600 border-purple-200 hover:bg-purple-50"
+            onClick={() => onRank(coach)}
+          >
+            <Award className="h-4 w-4 mr-1" />
+            <span className="text-xs sm:text-sm">Rank</span>
+          </Button>
+        </div>
+
+        {/* Secondary Actions: Edit, Remind, Delete (grid like prospect/client card) */}
+        <div className="mt-3 pt-3 border-t grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-2">
+          <Button variant="outline" size="sm" onClick={() => onEdit(coach)}>
+            <Edit2 className="h-4 w-4 mr-1" />
+            <span className="text-xs sm:text-sm">Edit</span>
+          </Button>
+
+          <ReminderButton
+            entityType="client"
+            entityId={coach.id}
+            entityName={coach.label}
+            variant="outline"
+          />
+
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => onDelete(coach)}
+            className="text-red-500 hover:text-red-700 hover:bg-red-50"
+          >
+            <Trash2 className="h-4 w-4 mr-1" />
+            <span className="text-xs sm:text-sm">Remove</span>
+          </Button>
+        </div>
+
+        {/* Notes - inline editable (matching prospect/client layout) */}
+        <div className="mt-3 pt-3 border-t">
           {editingNotes ? (
             <div className="space-y-2">
               <Textarea
@@ -207,7 +273,7 @@ function CoachCard({
               onClick={() => setEditingNotes(true)}
               className="w-full text-left group flex items-start gap-1.5 hover:bg-gray-50 rounded p-1 -m-1 transition-colors"
             >
-              <span className="text-sm text-gray-600 flex-1 leading-relaxed">
+              <span className="text-sm text-gray-600 flex-1">
                 {coach.notes ? (
                   <>📝 {coach.notes}</>
                 ) : (
@@ -217,77 +283,6 @@ function CoachCard({
               <Edit2 className="h-3.5 w-3.5 text-gray-300 group-hover:text-gray-500 flex-shrink-0 mt-0.5" />
             </button>
           )}
-        </div>
-
-        {/* Last Check-in */}
-        {coach.last_check_in && (
-          <div className="text-xs text-gray-400 mt-2 ml-[72px]">
-            Last check-in: {new Date(coach.last_check_in).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
-          </div>
-        )}
-
-        {/* Primary Actions */}
-        <div className="flex gap-2 mt-3 ml-[72px]">
-          <Button
-            variant="outline"
-            size="sm"
-            className="flex-1 border-[hsl(var(--optavia-green))]/50 text-[hsl(var(--optavia-green))] hover:bg-[hsl(var(--optavia-green-light))]"
-            onClick={() => onCheckIn(coach)}
-          >
-            <CheckCircle className="h-4 w-4 mr-1" />
-            Check In
-          </Button>
-          <Button variant="outline" size="sm" className="flex-1" onClick={() => onEdit(coach)}>
-            <MessageSquare className="h-4 w-4 mr-1" />
-            Notes
-          </Button>
-          <ReminderButton
-            entityType="client"
-            entityId={coach.id}
-            entityName={coach.label}
-            variant="outline"
-          />
-        </div>
-
-        {/* Secondary Actions */}
-        <div className="flex gap-2 mt-2 ml-[72px] flex-wrap">
-          <Button variant="outline" size="sm" className="h-7 text-xs" onClick={() => onEdit(coach)}>
-            <Edit2 className="h-3 w-3 mr-1" /> Edit
-          </Button>
-          <Button variant="outline" size="sm" className="h-7 text-xs" onClick={() => onRank(coach)}>
-            <Award className="h-3 w-3 mr-1" /> Rank
-          </Button>
-          {stageIdx < COACH_STAGES.length - 1 && (
-            <Button
-              variant="outline"
-              size="sm"
-              className="h-7 text-xs"
-              style={{ borderColor: `${COACH_STAGES[stageIdx + 1].color}50`, color: COACH_STAGES[stageIdx + 1].color }}
-              onClick={() => onMoveStage(coach.id, COACH_STAGES[stageIdx + 1].id)}
-            >
-              <ChevronUp className="h-3 w-3 mr-1" />
-              {COACH_STAGES[stageIdx + 1].label}
-            </Button>
-          )}
-          {stageIdx > 0 && (
-            <Button
-              variant="outline"
-              size="sm"
-              className="h-7 text-xs"
-              onClick={() => onMoveStage(coach.id, COACH_STAGES[stageIdx - 1].id)}
-            >
-              <ChevronDown className="h-3 w-3 mr-1" />
-              {COACH_STAGES[stageIdx - 1].label}
-            </Button>
-          )}
-          <Button
-            variant="outline"
-            size="sm"
-            className="h-7 text-xs text-red-500 hover:text-red-700 hover:bg-red-50"
-            onClick={() => onDelete(coach)}
-          >
-            <Trash2 className="h-3 w-3 mr-1" /> Remove
-          </Button>
         </div>
       </CardContent>
     </Card>
