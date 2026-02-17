@@ -159,7 +159,7 @@ export function ClientCard({
               {client.status === "completed" && (
                 <Badge className="bg-green-100 text-green-700">✅ Completed</Badge>
               )}
-              {client.is_coach_prospect && client.status === "active" && (
+              {client.is_coach_prospect && client.status !== "paused" && (
                 <Badge className="bg-orange-100 text-orange-700 flex items-center gap-1">
                   <Star className="h-3 w-3" />
                   Coach Prospect
@@ -191,7 +191,7 @@ export function ClientCard({
         </div>
 
         {/* Scheduled Time Row */}
-        {client.status === "active" && client.next_scheduled_at && (
+        {client.status !== "paused" && client.next_scheduled_at && (
           <div className="mt-3 flex items-center gap-2 flex-wrap">
             <Badge
               className={`flex items-center gap-1.5 px-2.5 py-1 text-sm font-medium ${
@@ -269,7 +269,7 @@ export function ClientCard({
             </SelectContent>
           </Select>
 
-          {client.status === "active" && (
+          {client.status !== "paused" && (
             <>
               {/* Check-in Button */}
               <Button
@@ -311,7 +311,7 @@ export function ClientCard({
 
         {/* Secondary Actions: Text, Coach?, Remind (grid like prospect card) */}
         <div className="mt-3 pt-3 border-t grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-2">
-          {client.status === "active" && (
+          {client.status !== "paused" && (
             <Button
               variant="outline"
               size="sm"

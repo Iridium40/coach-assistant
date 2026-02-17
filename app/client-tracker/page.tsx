@@ -107,7 +107,7 @@ export default function ClientTrackerPage() {
   const [showCompleteConfirm, setShowCompleteConfirm] = useState(false)
   const [clientToComplete, setClientToComplete] = useState<Client | null>(null)
   const [selectedClient, setSelectedClient] = useState<Client | null>(null)
-  const [filterStatus, setFilterStatus] = useState<ClientStatus | "all">("active")
+  const [filterStatus, setFilterStatus] = useState<ClientStatus | "all">("all")
   const [searchTerm, setSearchTerm] = useState("")
   const [viewMode, setViewMode] = useState<"list" | "week">("list")
   const [weekOffset, setWeekOffset] = useState(0) // 0 = current week, 1 = next week, etc.
