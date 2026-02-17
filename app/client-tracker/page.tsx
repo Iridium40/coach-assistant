@@ -606,12 +606,13 @@ ${phase.milestone ? `\n🎉 MILESTONE: ${phase.label} - Celebrate this achieveme
         <ErrorBoundary>
         {/* Stats */}
         {/* Pipeline Stages */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 mb-4">
+        <div className="grid grid-cols-3 sm:grid-cols-5 gap-2 sm:gap-3 mb-4">
           {[
             { id: "active" as ClientStatus, label: "Client", color: "#37B6AE", icon: "⭐", count: stats.active },
             { id: "goal_achieved" as ClientStatus, label: "Goal Achieved", color: "#ffd700", icon: "🏆", count: stats.goalAchieved },
             { id: "future_coach" as ClientStatus, label: "Future Coach", color: "#e91e63", icon: "🌟", count: stats.futureCoach },
             { id: "coach_launched" as ClientStatus, label: "Coach Launched", color: "#00bcd4", icon: "🚀", count: stats.coachLaunched },
+            { id: "completed" as ClientStatus, label: "Completed", color: "#4caf50", icon: "✅", count: stats.completed },
           ].map((stage) => (
             <button
               key={stage.id}
@@ -687,6 +688,7 @@ ${phase.milestone ? `\n🎉 MILESTONE: ${phase.label} - Celebrate this achieveme
                 { value: "goal_achieved" as const, label: "Goal Achieved" },
                 { value: "future_coach" as const, label: "Future Coach" },
                 { value: "coach_launched" as const, label: "Launched" },
+                { value: "completed" as const, label: "Completed" },
                 { value: "paused" as const, label: "Paused" },
               ]).map(({ value, label }) => (
                 <Button

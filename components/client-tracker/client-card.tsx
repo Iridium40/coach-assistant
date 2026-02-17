@@ -156,6 +156,9 @@ export function ClientCard({
               {client.status === "coach_launched" && (
                 <Badge className="bg-cyan-100 text-cyan-700">🚀 Coach Launched</Badge>
               )}
+              {client.status === "completed" && (
+                <Badge className="bg-green-100 text-green-700">✅ Completed</Badge>
+              )}
               {client.is_coach_prospect && client.status === "active" && (
                 <Badge className="bg-orange-100 text-orange-700 flex items-center gap-1">
                   <Star className="h-3 w-3" />
@@ -261,6 +264,7 @@ export function ClientCard({
               <SelectItem value="goal_achieved">🏆 Goal Achieved</SelectItem>
               <SelectItem value="future_coach">🌟 Future Coach</SelectItem>
               <SelectItem value="coach_launched">🚀 Launched</SelectItem>
+              <SelectItem value="completed">✅ Completed</SelectItem>
               <SelectItem value="paused">⏸️ Paused</SelectItem>
             </SelectContent>
           </Select>

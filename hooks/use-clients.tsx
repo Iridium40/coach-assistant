@@ -5,7 +5,7 @@ import { createClient } from "@/lib/supabase/client"
 import { useAuth } from "@/hooks/use-auth"
 
 // Types
-export type ClientStatus = 'active' | 'goal_achieved' | 'future_coach' | 'coach_launched' | 'paused' | 'churned'
+export type ClientStatus = 'active' | 'goal_achieved' | 'future_coach' | 'coach_launched' | 'completed' | 'paused' | 'churned'
 
 export type RecurringFrequency = 'none' | 'weekly' | 'biweekly' | 'monthly'
 
@@ -339,6 +339,7 @@ export function useClients() {
     goalAchieved: clients.filter(c => c.status === 'goal_achieved').length,
     futureCoach: clients.filter(c => c.status === 'future_coach').length,
     coachLaunched: clients.filter(c => c.status === 'coach_launched').length,
+    completed: clients.filter(c => c.status === 'completed').length,
     paused: clients.filter(c => c.status === 'paused').length,
     needsAttention: clients.filter(c => c.status === 'active' && needsAttention(c)).length,
     coachProspects: clients.filter(c => c.is_coach_prospect && c.status === 'active').length,

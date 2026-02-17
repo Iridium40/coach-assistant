@@ -21,6 +21,7 @@ const STATUS_LABELS: Record<string, string> = {
   'goal_achieved': 'Goal Achieved',
   'future_coach': 'Future Coach',
   'coach_launched': 'Coach Launched',
+  'completed': 'Completed',
 }
 
 const STATUS_TIPS: Record<string, string> = {
@@ -28,6 +29,7 @@ const STATUS_TIPS: Record<string, string> = {
   'goal_achieved': 'Client has hit their primary health goal! Time to celebrate and plan next steps.',
   'future_coach': 'Has expressed interest in becoming a coach. Start mentorship conversations.',
   'coach_launched': 'Officially an OPTAVIA coach! Support their first 30-day game plan.',
+  'completed': 'Client has finished their program journey. Stay connected and celebrate their transformation!',
 }
 
 const STATUS_COACHING_ACTIONS: Record<string, string[]> = {
@@ -50,6 +52,11 @@ const STATUS_COACHING_ACTIONS: Record<string, string[]> = {
     'Onboard them into your team',
     'Create first 30-day game plan',
     'Connect with upline resources and training',
+  ],
+  'completed': [
+    'Celebrate their full transformation journey',
+    'Stay connected for ongoing support',
+    'Ask for testimonial or referral',
   ],
 }
 
