@@ -151,16 +151,12 @@ export default function ProspectTrackerPage() {
   
   // Meeting type state (Phone vs Zoom)
   const [haMeetingType, setHaMeetingType] = useState<"phone" | "zoom">("phone")
-  const [haZoomLink, setHaZoomLink] = useState("")
-  const [haZoomMeetingId, setHaZoomMeetingId] = useState("")
-  const [haZoomPasscode, setHaZoomPasscode] = useState("")
   
-  // Prefill zoom details from profile when meeting type changes to Zoom
-  const prefillZoomDetails = () => {
-    if (profile?.zoom_link && !haZoomLink) setHaZoomLink(profile.zoom_link)
-    if (profile?.zoom_meeting_id && !haZoomMeetingId) setHaZoomMeetingId(profile.zoom_meeting_id)
-    if (profile?.zoom_passcode && !haZoomPasscode) setHaZoomPasscode(profile.zoom_passcode)
-  }
+  // Zoom details are read-only from profile (managed in My Settings -> Zoom)
+  const haZoomLink = profile?.zoom_link || ""
+  const haZoomMeetingId = profile?.zoom_meeting_id || ""
+  const haZoomPasscode = profile?.zoom_passcode || ""
+  const hasZoomConfigured = !!profile?.zoom_link
 
   // Delete confirmation state
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
@@ -343,11 +339,7 @@ Talking Points:
       
       setShowHAScheduleModal(false)
       setSchedulingProspect(null)
-      // Reset zoom fields
       setHaMeetingType("phone")
-      setHaZoomLink("")
-      setHaZoomMeetingId("")
-      setHaZoomPasscode("")
     } else {
       toast({
         title: "Failed to schedule HA",
@@ -1265,10 +1257,7 @@ Talking Points:
                   </button>
                   <button
                     type="button"
-                    onClick={() => {
-                      setHaMeetingType("zoom")
-                      prefillZoomDetails()
-                    }}
+                    onClick={() => setHaMeetingType("zoom")}
                     className={`flex items-center justify-center gap-2 p-3 rounded-lg border-2 transition-all ${
                       haMeetingType === "zoom"
                         ? "border-blue-600 bg-blue-50 text-blue-700"
@@ -1281,39 +1270,48 @@ Talking Points:
                 </div>
               </div>
 
-              {/* Zoom Details (shown when Zoom is selected) */}
+              {/* Zoom Details (shown when Zoom is selected) - Read-only from profile */}
               {haMeetingType === "zoom" && (
                 <div className="space-y-3 bg-blue-50 border border-blue-200 rounded-lg p-4">
                   <div className="flex items-center gap-2 text-blue-700 text-sm font-medium">
                     <Video className="h-4 w-4" />
                     Zoom Meeting Details
                   </div>
-                  <div className="space-y-2">
-                    <Input
-                      placeholder="Zoom Link (e.g., https://zoom.us/j/...)"
-                      value={haZoomLink}
-                      onChange={(e) => setHaZoomLink(e.target.value)}
-                      className="bg-white"
-                    />
-                    <div className="grid grid-cols-2 gap-2">
+                  {hasZoomConfigured ? (
+                    <div className="space-y-2">
                       <Input
-                        placeholder="Meeting ID"
-                        value={haZoomMeetingId}
-                        onChange={(e) => setHaZoomMeetingId(e.target.value)}
-                        className="bg-white"
+                        value={haZoomLink}
+                        readOnly
+                        className="bg-gray-50 text-gray-700 cursor-default"
                       />
-                      <Input
-                        placeholder="Passcode"
-                        value={haZoomPasscode}
-                        onChange={(e) => setHaZoomPasscode(e.target.value)}
-                        className="bg-white"
-                      />
+                      <div className="grid grid-cols-2 gap-2">
+                        <Input
+                          value={haZoomMeetingId || "—"}
+                          readOnly
+                          className="bg-gray-50 text-gray-700 cursor-default"
+                        />
+                        <Input
+                          value={haZoomPasscode || "—"}
+                          readOnly
+                          className="bg-gray-50 text-gray-700 cursor-default"
+                        />
+                      </div>
+                      <p className="text-xs text-blue-600">
+                        Managed in <Link href="/settings" className="underline font-medium">My Settings</Link> → Zoom tab
+                      </p>
                     </div>
-                  </div>
-                  {!profile?.zoom_link && (
-                    <p className="text-xs text-blue-600">
-                      💡 Tip: Save your default Zoom details in Settings → Zoom Room to auto-fill
-                    </p>
+                  ) : (
+                    <div className="text-center py-3">
+                      <p className="text-sm text-blue-700 mb-2">
+                        No Zoom details configured yet.
+                      </p>
+                      <Link
+                        href="/settings"
+                        className="inline-flex items-center gap-1 text-sm font-medium text-blue-700 underline hover:text-blue-900"
+                      >
+                        Go to My Settings → Zoom tab to set it up
+                      </Link>
+                    </div>
                   )}
                 </div>
               )}
@@ -1339,11 +1337,7 @@ Talking Points:
               onClick={() => {
                 setShowHAScheduleModal(false)
                 setSchedulingProspect(null)
-                // Reset zoom fields
                 setHaMeetingType("phone")
-                setHaZoomLink("")
-                setHaZoomMeetingId("")
-                setHaZoomPasscode("")
               }}
             >
               Cancel

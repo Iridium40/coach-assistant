@@ -123,16 +123,12 @@ export default function ClientTrackerPage() {
   
   // Meeting type state (Phone vs Zoom)
   const [meetingType, setMeetingType] = useState<"phone" | "zoom">("phone")
-  const [zoomLink, setZoomLink] = useState("")
-  const [zoomMeetingId, setZoomMeetingId] = useState("")
-  const [zoomPasscode, setZoomPasscode] = useState("")
   
-  // Prefill zoom details from profile when meeting type changes to Zoom
-  const prefillZoomDetails = () => {
-    if (profile?.zoom_link && !zoomLink) setZoomLink(profile.zoom_link)
-    if (profile?.zoom_meeting_id && !zoomMeetingId) setZoomMeetingId(profile.zoom_meeting_id)
-    if (profile?.zoom_passcode && !zoomPasscode) setZoomPasscode(profile.zoom_passcode)
-  }
+  // Zoom details are read-only from profile (managed in My Settings -> Zoom)
+  const zoomLink = profile?.zoom_link || ""
+  const zoomMeetingId = profile?.zoom_meeting_id || ""
+  const zoomPasscode = profile?.zoom_passcode || ""
+  const hasZoomConfigured = !!profile?.zoom_link
   
   // Debounce search term for better performance
   const debouncedSearchTerm = useDebounce(searchTerm, 300)
@@ -416,12 +412,7 @@ ${phase.milestone ? `\n🎉 MILESTONE: ${phase.label} - Celebrate this achieveme
     }
 
     setShowScheduleModal(false)
-    
-    // Reset zoom fields
     setMeetingType("phone")
-    setZoomLink("")
-    setZoomMeetingId("")
-    setZoomPasscode("")
     
     const recurringLabel = recurringFrequency !== "none" 
       ? ` (${RECURRING_OPTIONS.find(r => r.value === recurringFrequency)?.label})`
@@ -1197,10 +1188,7 @@ ${phase.milestone ? `\n🎉 MILESTONE: ${phase.label} - Celebrate this achieveme
                   </button>
                   <button
                     type="button"
-                    onClick={() => {
-                      setMeetingType("zoom")
-                      prefillZoomDetails()
-                    }}
+                    onClick={() => setMeetingType("zoom")}
                     className={`flex items-center justify-center gap-2 p-3 rounded-lg border-2 transition-all ${
                       meetingType === "zoom"
                         ? "border-purple-600 bg-purple-50 text-purple-700"
@@ -1213,39 +1201,48 @@ ${phase.milestone ? `\n🎉 MILESTONE: ${phase.label} - Celebrate this achieveme
                 </div>
               </div>
 
-              {/* Zoom Details (shown when Zoom is selected) */}
+              {/* Zoom Details (shown when Zoom is selected) - Read-only from profile */}
               {meetingType === "zoom" && (
                 <div className="space-y-3 bg-purple-50 border border-purple-200 rounded-lg p-4">
                   <div className="flex items-center gap-2 text-purple-700 text-sm font-medium">
                     <Video className="h-4 w-4" />
                     Zoom Meeting Details
                   </div>
-                  <div className="space-y-2">
-                    <Input
-                      placeholder="Zoom Link (e.g., https://zoom.us/j/...)"
-                      value={zoomLink}
-                      onChange={(e) => setZoomLink(e.target.value)}
-                      className="bg-white"
-                    />
-                    <div className="grid grid-cols-2 gap-2">
+                  {hasZoomConfigured ? (
+                    <div className="space-y-2">
                       <Input
-                        placeholder="Meeting ID"
-                        value={zoomMeetingId}
-                        onChange={(e) => setZoomMeetingId(e.target.value)}
-                        className="bg-white"
+                        value={zoomLink}
+                        readOnly
+                        className="bg-gray-50 text-gray-700 cursor-default"
                       />
-                      <Input
-                        placeholder="Passcode"
-                        value={zoomPasscode}
-                        onChange={(e) => setZoomPasscode(e.target.value)}
-                        className="bg-white"
-                      />
+                      <div className="grid grid-cols-2 gap-2">
+                        <Input
+                          value={zoomMeetingId || "—"}
+                          readOnly
+                          className="bg-gray-50 text-gray-700 cursor-default"
+                        />
+                        <Input
+                          value={zoomPasscode || "—"}
+                          readOnly
+                          className="bg-gray-50 text-gray-700 cursor-default"
+                        />
+                      </div>
+                      <p className="text-xs text-purple-600">
+                        Managed in <Link href="/settings" className="underline font-medium">My Settings</Link> → Zoom tab
+                      </p>
                     </div>
-                  </div>
-                  {!profile?.zoom_link && (
-                    <p className="text-xs text-purple-600">
-                      💡 Tip: Save your default Zoom details in Settings → Zoom Room to auto-fill
-                    </p>
+                  ) : (
+                    <div className="text-center py-3">
+                      <p className="text-sm text-purple-700 mb-2">
+                        No Zoom details configured yet.
+                      </p>
+                      <Link
+                        href="/settings"
+                        className="inline-flex items-center gap-1 text-sm font-medium text-purple-700 underline hover:text-purple-900"
+                      >
+                        Go to My Settings → Zoom tab to set it up
+                      </Link>
+                    </div>
                   )}
                 </div>
               )}
@@ -1279,11 +1276,7 @@ ${phase.milestone ? `\n🎉 MILESTONE: ${phase.label} - Celebrate this achieveme
           <DialogFooter>
             <Button variant="outline" onClick={() => {
               setShowScheduleModal(false)
-              // Reset zoom fields
               setMeetingType("phone")
-              setZoomLink("")
-              setZoomMeetingId("")
-              setZoomPasscode("")
             }}>
               Cancel
             </Button>
