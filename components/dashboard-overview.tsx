@@ -302,8 +302,8 @@ export function DashboardOverview() {
         />
       </div>
 
-      {/* Main Grid: Quick Links + Quick Actions */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+      {/* Quick Links + Quick Actions */}
+      <div className="grid grid-cols-1 gap-6 mt-6">
         {/* Quick Links Card */}
         <Card className="bg-white border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
           <CardHeader className="pb-3">
