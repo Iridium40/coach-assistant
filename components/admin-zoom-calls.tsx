@@ -391,7 +391,7 @@ export function AdminZoomCalls({ onClose }: { onClose?: () => void }) {
         // Get all users with email notifications enabled
         const { data: usersData, error: usersError } = await supabase
           .from("profiles")
-          .select("id, email, full_name")
+          .select("id, email, full_name, notification_email")
           .not("email", "is", null)
 
         if (!usersError && usersData) {
@@ -406,9 +406,9 @@ export function AdminZoomCalls({ onClose }: { onClose?: () => void }) {
             notificationSettings?.map((ns) => ns.user_id) || []
           )
 
-          // Filter users with email notifications enabled
+          // Filter users with email notifications enabled - prefer notification_email
           const usersToEmail = usersData.filter(
-            (u) => userIdsWithEmailEnabled.has(u.id) && u.email
+            (u) => userIdsWithEmailEnabled.has(u.id) && (u.notification_email || u.email)
           )
 
           // Format date and time for email
@@ -430,7 +430,7 @@ export function AdminZoomCalls({ onClose }: { onClose?: () => void }) {
           for (const u of usersToEmail) {
             try {
               await sendMeetingEmail({
-                to: u.email!,
+                to: u.notification_email || u.email!,
                 fullName: u.full_name || "Coach",
                 meetingTitle: title,
                 meetingDescription: description || undefined,

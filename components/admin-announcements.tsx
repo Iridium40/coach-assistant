@@ -188,7 +188,7 @@ export function AdminAnnouncements({ onClose }: { onClose?: () => void }) {
       // Send email notifications
       const { data: usersData, error: usersError } = await supabase
         .from("profiles")
-        .select("id, email, full_name")
+        .select("id, email, full_name, notification_email")
         .not("email", "is", null)
 
       if (!usersError && usersData) {
@@ -205,7 +205,7 @@ export function AdminAnnouncements({ onClose }: { onClose?: () => void }) {
 
         // Filter users with email notifications enabled
         const usersToEmail = usersData.filter(
-          (u) => userIdsWithEmailEnabled.has(u.id) && u.email
+          (u) => userIdsWithEmailEnabled.has(u.id) && (u.notification_email || u.email)
         )
 
         // Send emails with throttling
@@ -215,7 +215,7 @@ export function AdminAnnouncements({ onClose }: { onClose?: () => void }) {
         for (const u of usersToEmail) {
           try {
             await sendAnnouncementEmail({
-              to: u.email!,
+              to: u.notification_email || u.email!,
               fullName: u.full_name || "Coach",
               announcementTitle: announcement.title,
               announcementContent: announcement.content,
@@ -325,7 +325,7 @@ export function AdminAnnouncements({ onClose }: { onClose?: () => void }) {
           // Get all users with email notifications enabled
           const { data: usersData, error: usersError } = await supabase
             .from("profiles")
-            .select("id, email, full_name")
+            .select("id, email, full_name, notification_email")
             .not("email", "is", null)
 
           if (!usersError && usersData) {
@@ -342,7 +342,7 @@ export function AdminAnnouncements({ onClose }: { onClose?: () => void }) {
 
             // Filter users with email notifications enabled
             const usersToEmail = usersData.filter(
-              (user) => userIdsWithEmailEnabled.has(user.id) && user.email
+              (user) => userIdsWithEmailEnabled.has(user.id) && (user.notification_email || user.email)
             )
 
             // Send emails with throttling (1 per second to stay under rate limit)
@@ -351,7 +351,7 @@ export function AdminAnnouncements({ onClose }: { onClose?: () => void }) {
             for (const user of usersToEmail) {
               try {
                 await sendAnnouncementEmail({
-                  to: user.email!,
+                  to: user.notification_email || user.email!,
                   fullName: user.full_name || "Coach",
                   announcementTitle: title,
                   announcementContent: content,
