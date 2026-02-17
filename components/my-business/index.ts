@@ -1,3 +1,2 @@
-export { PipelineView } from "./PipelineView"
-export { PipelineStage } from "./PipelineStage"
-export { ActivityFeed } from "./ActivityFeed"
+// Pipeline components removed — pipeline stages are now embedded
+// directly in the prospect tracker and client tracker pages.
