@@ -302,8 +302,11 @@ export function DashboardOverview() {
         />
       </div>
 
-      {/* Quick Links + Quick Actions */}
+      {/* Quick Actions + Quick Links */}
       <div className="grid grid-cols-1 gap-6 mt-6">
+        {/* Quick Actions - driven by dashboard_buttons table */}
+        <QuickActions />
+
         {/* Quick Links Card */}
         <Card className="bg-white border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
           <CardHeader className="pb-3">
@@ -407,9 +410,6 @@ export function DashboardOverview() {
             )}
           </CardContent>
         </Card>
-
-        {/* Quick Actions - driven by dashboard_buttons table */}
-        <QuickActions />
       </div>
 
       {/* Popular Recipes */}
