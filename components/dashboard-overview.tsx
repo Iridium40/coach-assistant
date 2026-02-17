@@ -268,6 +268,11 @@ export function DashboardOverview() {
       {/* Announcements */}
       <Announcements />
 
+      {/* Coach Tip of the Day */}
+      <div className="mt-6">
+        <CoachTip />
+      </div>
+
       {/* Today's Focus - Combined Training + Today's Tasks */}
       <div className="mt-6">
         <TodaysFocus
@@ -285,11 +290,6 @@ export function DashboardOverview() {
             setShowMilestoneModal(true)
           }}
         />
-      </div>
-
-      {/* Coach Tip of the Day */}
-      <div className="mt-6">
-        <CoachTip />
       </div>
 
       {/* Section 2: Pipeline Snapshot (4 stat cards) */}
