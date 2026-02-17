@@ -2,32 +2,53 @@
 
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { ChevronDown, ChevronUp, Target } from 'lucide-react'
+import { ChevronDown, ChevronUp, Target, Lightbulb } from 'lucide-react'
 import { ResourceCard } from './ResourceCard'
 import { Button } from '@/components/ui/button'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import type { ExternalResource } from '@/lib/types'
 
 interface ProspectContextualResourcesProps {
-  stage: string // 'contact_made' | 'engaged' | 'interested' | 'ha_scheduled'
+  stage: string
   prospectName?: string
   compact?: boolean
 }
 
 const STAGE_LABELS: Record<string, string> = {
-  'contact_made': 'Initial Contact',
-  'engaged': 'Engaged',
+  'new': 'New',
   'interested': 'Interested',
   'ha_scheduled': 'HA Scheduled',
-  'converted': 'Converted'
+  'converted': 'Client Won',
+}
+
+const STAGE_COACHING_ACTIONS: Record<string, string[]> = {
+  'new': [
+    'Initial outreach — share your story',
+    'Invite them to learn more about optimal health',
+    'Build rapport through genuine connection',
+  ],
+  'interested': [
+    'Deeper conversation — identify their "why"',
+    'Build rapport and address early questions',
+    'Introduce the Health Assessment',
+  ],
+  'ha_scheduled': [
+    'Send a confirmation/reminder before the call',
+    'Prepare for the HA — have program materials ready',
+    'Follow up consistently if they need time',
+  ],
+  'converted': [
+    'Onboarding — help with first order placement',
+    'Welcome them to the community',
+    'Set clear expectations for their first week',
+  ],
 }
 
 const STAGE_TIPS: Record<string, string> = {
-  'contact_made': 'Focus on building rapport and starting meaningful conversations.',
-  'engaged': 'Share your story and understand their health goals.',
-  'interested': 'Address objections and schedule a Health Assessment.',
-  'ha_scheduled': 'Prepare for a great HA call and follow up consistently.',
-  'converted': 'Congratulations! Time to onboard your new client.'
+  'new': 'First contact made — social media, referral, or warm market. Focus on starting a meaningful conversation.',
+  'interested': 'They\'ve engaged back positively. Time to deepen the conversation and understand their health goals.',
+  'ha_scheduled': 'This is the critical conversion point. A well-prepared HA can change their life!',
+  'converted': 'They said yes! Time to set them up for success on their journey.',
 }
 
 export function ProspectContextualResources({ 
@@ -36,7 +57,6 @@ export function ProspectContextualResources({
   compact = false 
 }: ProspectContextualResourcesProps) {
   const [resources, setResources] = useState<ExternalResource[]>([])
-  const [isExpanded, setIsExpanded] = useState(true)
   const [isLoading, setIsLoading] = useState(true)
   const supabase = createClient()
 
@@ -48,49 +68,33 @@ export function ProspectContextualResources({
     setIsLoading(true)
     
     try {
-      // Get resources relevant to prospect tracking
       const { data, error } = await supabase
         .from('external_resources')
         .select('*')
         .eq('is_active', true)
-        .or('show_condition.eq.prospect_tracker_view,show_condition.eq.prospect_early_stage,show_condition.eq.prospect_interested_stage')
+        .or('show_condition.eq.prospect_tracker_view,show_condition.eq.prospect_new_stage,show_condition.eq.prospect_interested_stage,show_condition.eq.prospect_ha_stage,show_condition.eq.prospect_converted_stage')
         .order('sort_order')
 
       if (error) throw error
 
-      // Filter by relevant stages and show_in
       const filtered = (data || []).filter((resource) => {
         const features = resource.features as ExternalResource['features']
-        
-        // Ensure arrays are actually arrays
         const showIn = Array.isArray(features?.show_in) ? features.show_in : []
         const relevantStages = Array.isArray(features?.relevant_stages) ? features.relevant_stages : []
-        
-        // If features has show_in, check if it includes prospect_tracker
+
         if (showIn.length > 0 && !showIn.includes('prospect_tracker')) {
           return false
         }
 
-        // Check if relevant_stages includes current stage
         if (relevantStages.length > 0) {
           return relevantStages.includes(stage)
         }
 
-        // Check show_condition for general prospect resources
-        if (resource.show_condition === 'prospect_tracker_view') {
-          return true
-        }
-
-        // Early stage resources for contact_made and engaged
-        if (resource.show_condition === 'prospect_early_stage' && 
-            (stage === 'contact_made' || stage === 'engaged')) {
-          return true
-        }
-
-        // Interested stage resources
-        if (resource.show_condition === 'prospect_interested_stage' && stage === 'interested') {
-          return true
-        }
+        if (resource.show_condition === 'prospect_tracker_view') return true
+        if (resource.show_condition === 'prospect_new_stage' && stage === 'new') return true
+        if (resource.show_condition === 'prospect_interested_stage' && stage === 'interested') return true
+        if (resource.show_condition === 'prospect_ha_stage' && stage === 'ha_scheduled') return true
+        if (resource.show_condition === 'prospect_converted_stage' && stage === 'converted') return true
 
         return false
       })
@@ -104,6 +108,10 @@ export function ProspectContextualResources({
     }
   }
 
+  const stageLabel = STAGE_LABELS[stage] || stage
+  const stageTip = STAGE_TIPS[stage]
+  const coachingActions = STAGE_COACHING_ACTIONS[stage] || []
+
   if (isLoading) {
     return (
       <div className="animate-pulse space-y-2">
@@ -113,46 +121,43 @@ export function ProspectContextualResources({
     )
   }
 
-  if (resources.length === 0) {
-    return null
-  }
-
   return (
     <div className="space-y-3">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Target className="h-5 w-5 text-[hsl(var(--optavia-green))]" />
-          <h3 className="font-semibold text-optavia-dark">
-            Resources for {STAGE_LABELS[stage] || stage}
-          </h3>
-          <span className="text-sm text-optavia-gray">({resources.length})</span>
+      {/* Coaching tip — always visible */}
+      {stageTip && (
+        <Alert className="bg-blue-50 border-blue-200">
+          <Lightbulb className="h-4 w-4 text-amber-500" />
+          <AlertDescription className="text-sm text-gray-700">
+            <span className="font-semibold text-gray-900">{stageLabel} Stage: </span>
+            {stageTip}
+          </AlertDescription>
+        </Alert>
+      )}
+
+      {/* Coach actions checklist */}
+      {coachingActions.length > 0 && (
+        <div className="rounded-lg border bg-white p-3">
+          <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Coach Actions</p>
+          <ul className="space-y-1.5">
+            {coachingActions.map((action, i) => (
+              <li key={i} className="flex items-start gap-2 text-sm text-gray-700">
+                <span className="text-[hsl(var(--optavia-green))] mt-0.5 flex-shrink-0">•</span>
+                {action}
+              </li>
+            ))}
+          </ul>
         </div>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => setIsExpanded(!isExpanded)}
-          className="h-8 text-optavia-gray hover:text-optavia-dark"
-        >
-          {isExpanded ? (
-            <ChevronUp className="h-4 w-4" />
-          ) : (
-            <ChevronDown className="h-4 w-4" />
-          )}
-        </Button>
-      </div>
+      )}
 
-      {isExpanded && (
-        <>
-          <Alert className="bg-blue-50 border-blue-200">
-            <AlertDescription className="text-sm text-gray-700">
-              {prospectName 
-                ? `Resources to help move ${prospectName} forward. `
-                : `Resources to help move this prospect forward. `
-              }
-              <span className="font-medium">{STAGE_TIPS[stage] || ''}</span>
-            </AlertDescription>
-          </Alert>
-
+      {/* Database resources if any */}
+      {resources.length > 0 && (
+        <div className="space-y-2">
+          <div className="flex items-center gap-2">
+            <Target className="h-4 w-4 text-[hsl(var(--optavia-green))]" />
+            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+              Resources ({resources.length})
+            </p>
+          </div>
           <div className={compact ? "space-y-2" : "grid grid-cols-1 md:grid-cols-2 gap-4"}>
             {resources.map((resource) => (
               <ResourceCard
@@ -167,7 +172,7 @@ export function ProspectContextualResources({
               />
             ))}
           </div>
-        </>
+        </div>
       )}
     </div>
   )

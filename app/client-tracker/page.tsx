@@ -30,12 +30,6 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip"
-import {
   Users,
   Plus,
   Calendar,
@@ -57,7 +51,6 @@ import {
   CheckCircle,
   Circle,
   Search,
-  Info,
   Video,
 } from "lucide-react"
 import { Header } from "@/components/header"
@@ -582,88 +575,65 @@ ${phase.milestone ? `\n🎉 MILESTONE: ${phase.label} - Celebrate this achieveme
       <div className="container mx-auto px-4 py-6">
         <ErrorBoundary>
         {/* Stats */}
-        <TooltipProvider>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
-            <Card>
-              <CardContent className="p-4 text-center relative">
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <button className="absolute top-2 right-2 text-gray-400 hover:text-gray-600">
-                      <Info className="h-4 w-4" />
-                    </button>
-                  </TooltipTrigger>
-                  <TooltipContent side="bottom" className="max-w-xs p-3 bg-white/95 backdrop-blur-sm shadow-lg border border-gray-200">
-                    <p className="font-semibold text-green-700 mb-1">Active Clients</p>
-                    <p className="text-sm text-gray-600">Clients currently on program with "Active" status.</p>
-                  </TooltipContent>
-                </Tooltip>
-                <div className="text-3xl font-bold text-[hsl(var(--optavia-green))]">{stats.active}</div>
-                <div className="text-sm text-gray-500">Active</div>
-              </CardContent>
-            </Card>
-            <Card className={stats.needsAttention > 0 ? "border-orange-300 bg-orange-50" : ""}>
-              <CardContent className="p-4 text-center relative">
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <button className="absolute top-2 right-2 text-gray-400 hover:text-gray-600">
-                      <Info className="h-4 w-4" />
-                    </button>
-                  </TooltipTrigger>
-                  <TooltipContent side="bottom" className="max-w-xs p-3 bg-white/95 backdrop-blur-sm shadow-lg border border-gray-200">
-                    <p className="font-semibold text-orange-700 mb-2">🚨 "Needs Attention" Triggers</p>
-                    <ol className="text-sm text-gray-600 space-y-1.5 list-decimal list-inside">
-                      <li><strong>Scheduled check-in is due</strong> — Meeting date is today or past</li>
-                      <li><strong>10+ days since last check-in</strong> — Time to reach out!</li>
-                      <li><strong>Never checked in</strong> — New client needs first touchpoint</li>
-                    </ol>
-                  </TooltipContent>
-                </Tooltip>
-                <div className="text-3xl font-bold text-orange-500">{stats.needsAttention}</div>
-                <div className="text-sm text-gray-500">Need Attention</div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="p-4 text-center relative">
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <button className="absolute top-2 right-2 text-gray-400 hover:text-gray-600">
-                      <Info className="h-4 w-4" />
-                    </button>
-                  </TooltipTrigger>
-                  <TooltipContent side="bottom" className="max-w-xs p-3 bg-white/95 backdrop-blur-sm shadow-lg border border-gray-200">
-                    <p className="font-semibold text-purple-700 mb-1">Coach Prospects</p>
-                    <p className="text-sm text-gray-600">Active clients you've marked as potential future coaches. Keep nurturing these relationships!</p>
-                  </TooltipContent>
-                </Tooltip>
-                <div className="text-3xl font-bold text-purple-500">{stats.coachProspects}</div>
-                <div className="text-sm text-gray-500">Coach Prospects</div>
-              </CardContent>
-            </Card>
-            <Card className={stats.milestonesToday > 0 ? "border-yellow-300 bg-yellow-50" : ""}>
-              <CardContent className="p-4 text-center relative">
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <button className="absolute top-2 right-2 text-gray-400 hover:text-gray-600">
-                      <Info className="h-4 w-4" />
-                    </button>
-                  </TooltipTrigger>
-                  <TooltipContent side="bottom" className="max-w-xs p-3 bg-white/95 backdrop-blur-sm shadow-lg border border-gray-200">
-                    <p className="font-semibold text-yellow-700 mb-1">🎉 Milestones Today</p>
-                    <p className="text-sm text-gray-600">Clients hitting key milestones today:</p>
-                    <ul className="text-sm text-gray-600 mt-1 space-y-0.5">
-                      <li>• <strong>Day 7</strong> — Week 1 Complete!</li>
-                      <li>• <strong>Day 14</strong> — 2 Weeks!</li>
-                      <li>• <strong>Day 21</strong> — Habit Formed!</li>
-                      <li>• <strong>Day 30</strong> — ONE MONTH!</li>
-                    </ul>
-                  </TooltipContent>
-                </Tooltip>
-                <div className="text-3xl font-bold text-yellow-600">{stats.milestonesToday}</div>
-                <div className="text-sm text-gray-500">Milestones Today</div>
-              </CardContent>
-            </Card>
-          </div>
-        </TooltipProvider>
+        {/* Pipeline Stages */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 mb-4">
+          {[
+            { id: "active" as ClientStatus, label: "Client", color: "#37B6AE", icon: "⭐", count: stats.active },
+            { id: "goal_achieved" as ClientStatus, label: "Goal Achieved", color: "#ffd700", icon: "🏆", count: stats.goalAchieved },
+            { id: "future_coach" as ClientStatus, label: "Future Coach", color: "#e91e63", icon: "🌟", count: stats.futureCoach },
+            { id: "coach_launched" as ClientStatus, label: "Coach Launched", color: "#00bcd4", icon: "🚀", count: stats.coachLaunched },
+          ].map((stage) => (
+            <button
+              key={stage.id}
+              onClick={() => setFilterStatus(filterStatus === stage.id ? "all" : stage.id)}
+              className="rounded-lg border-2 p-3 sm:p-4 text-center transition-all hover:shadow-md hover:scale-[1.02] cursor-pointer"
+              style={{
+                borderColor: filterStatus === stage.id ? stage.color : `${stage.color}50`,
+                backgroundColor: filterStatus === stage.id ? stage.color : `${stage.color}08`,
+              }}
+            >
+              <div className="text-lg sm:text-xl mb-0.5">{stage.icon}</div>
+              <div
+                className="text-2xl sm:text-3xl font-bold"
+                style={{ color: filterStatus === stage.id ? "white" : stage.color }}
+              >
+                {stage.count}
+              </div>
+              <div
+                className="text-xs sm:text-sm font-medium mt-0.5 truncate"
+                style={{ color: filterStatus === stage.id ? "white" : "#6b7280" }}
+              >
+                {stage.label}
+              </div>
+            </button>
+          ))}
+        </div>
+
+        {/* Quick Stats Row */}
+        <div className="flex flex-wrap items-center gap-3 mb-6 text-sm">
+          {stats.needsAttention > 0 && (
+            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-orange-50 border border-orange-200 text-orange-700 font-medium">
+              🚨 {stats.needsAttention} Need Attention
+            </span>
+          )}
+          {stats.milestonesToday > 0 && (
+            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-yellow-50 border border-yellow-200 text-yellow-700 font-medium">
+              🎉 {stats.milestonesToday} Milestones Today
+            </span>
+          )}
+          {stats.paused > 0 && (
+            <button
+              onClick={() => setFilterStatus(filterStatus === "paused" ? "all" : "paused")}
+              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border font-medium transition-colors ${
+                filterStatus === "paused"
+                  ? "bg-gray-700 border-gray-700 text-white"
+                  : "bg-gray-50 border-gray-200 text-gray-600 hover:bg-gray-100"
+              }`}
+            >
+              ⏸️ {stats.paused} Paused
+            </button>
+          )}
+        </div>
 
         {/* Search, Filter and View Toggle */}
         <div className="flex flex-col gap-4 mb-6">
@@ -680,16 +650,23 @@ ${phase.milestone ? `\n🎉 MILESTONE: ${phase.label} - Celebrate this achieveme
           
           <div className="flex items-center justify-between gap-2">
             {/* Filter Tabs */}
-            <div className="flex gap-2">
-              {(["active", "paused", "all"] as const).map((status) => (
+            <div className="flex gap-2 flex-wrap">
+              {([
+                { value: "all" as const, label: "All" },
+                { value: "active" as const, label: "Active" },
+                { value: "goal_achieved" as const, label: "Goal Achieved" },
+                { value: "future_coach" as const, label: "Future Coach" },
+                { value: "coach_launched" as const, label: "Launched" },
+                { value: "paused" as const, label: "Paused" },
+              ]).map(({ value, label }) => (
                 <Button
-                  key={status}
-                  variant={filterStatus === status ? "default" : "outline"}
+                  key={value}
+                  variant={filterStatus === value ? "default" : "outline"}
                   size="sm"
-                  onClick={() => setFilterStatus(status)}
-                  className={filterStatus === status ? "bg-[hsl(var(--optavia-green))]" : ""}
+                  onClick={() => setFilterStatus(value)}
+                  className={filterStatus === value ? "bg-[hsl(var(--optavia-green))]" : ""}
                 >
-                  {status.charAt(0).toUpperCase() + status.slice(1)}
+                  {label}
                 </Button>
               ))}
             </div>

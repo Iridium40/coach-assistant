@@ -49,13 +49,18 @@ export function usePipeline() {
 
   const loading = prospectsLoading || clientsLoading
 
-  // Build pipeline stages - Simplified flow: NEW → INTERESTED → HA_SCHEDULED → CLIENT
+  // Build pipeline stages
+  // Prospect: NEW → INTERESTED → HA_SCHEDULED → CLIENT WON
+  // Client: CLIENT → GOAL ACHIEVED → FUTURE COACH → COACH LAUNCHED
   const stages = useMemo((): PipelineStage[] => {
     const newProspects = prospects.filter(p => p.status === "new")
     const interested = prospects.filter(p => p.status === "interested")
     const haScheduled = prospects.filter(p => p.status === "ha_scheduled")
+    const clientWon = prospects.filter(p => ["converted", "coach"].includes(p.status))
     const activeClients = clients.filter(c => c.status === "active")
-    const coachProspects = clients.filter(c => c.is_coach_prospect)
+    const goalAchieved = clients.filter(c => c.status === "goal_achieved")
+    const futureCoach = clients.filter(c => c.status === "future_coach")
+    const coachLaunched = clients.filter(c => c.status === "coach_launched")
 
     return [
       {
@@ -86,6 +91,15 @@ export function usePipeline() {
         count: haScheduled.length,
       },
       {
+        id: "client_won",
+        label: "Client Won",
+        color: "#4caf50",
+        bgColor: "#e8f5e9",
+        icon: "🎉",
+        items: clientWon,
+        count: clientWon.length,
+      },
+      {
         id: "client",
         label: "Client",
         color: "#37B6AE",
@@ -95,13 +109,31 @@ export function usePipeline() {
         count: activeClients.length,
       },
       {
-        id: "coach_prospect",
+        id: "goal_achieved",
+        label: "Goal Achieved",
+        color: "#ffd700",
+        bgColor: "#fffde7",
+        icon: "🏆",
+        items: goalAchieved,
+        count: goalAchieved.length,
+      },
+      {
+        id: "future_coach",
         label: "Future Coach",
         color: "#e91e63",
         bgColor: "#fce4ec",
+        icon: "🌟",
+        items: futureCoach,
+        count: futureCoach.length,
+      },
+      {
+        id: "coach_launched",
+        label: "Coach Launched",
+        color: "#00bcd4",
+        bgColor: "#e0f7fa",
         icon: "🚀",
-        items: coachProspects,
-        count: coachProspects.length,
+        items: coachLaunched,
+        count: coachLaunched.length,
       },
     ]
   }, [prospects, clients])
@@ -148,7 +180,7 @@ export function usePipeline() {
   const totals = useMemo(() => ({
     prospects: prospectStats.total,
     clients: clientStats.active,
-    futureCoaches: clientStats.coachProspects,
+    futureCoaches: clientStats.futureCoach + clientStats.coachLaunched,
   }), [prospectStats, clientStats])
 
   // Priority items that need attention
@@ -260,9 +292,12 @@ function getProspectAction(status: string): string {
 
 function getClientAction(status: string): string {
   switch (status) {
-    case "active": return "Started program"
+    case "active": return "Active on program"
+    case "goal_achieved": return "Reached their goal!"
+    case "future_coach": return "Interested in coaching"
+    case "coach_launched": return "Launched as coach!"
     case "paused": return "Paused program"
-    case "completed": return "Completed program"
+    case "churned": return "Left program"
     default: return "Updated"
   }
 }

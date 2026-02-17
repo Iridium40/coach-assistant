@@ -5,6 +5,13 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
@@ -117,14 +124,23 @@ export function ClientCard({
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
               <span className="font-semibold text-gray-900">{client.label}</span>
-              {client.is_coach_prospect && (
+              {client.status === "goal_achieved" && (
+                <Badge className="bg-yellow-100 text-yellow-800">🏆 Goal Achieved</Badge>
+              )}
+              {client.status === "future_coach" && (
+                <Badge className="bg-pink-100 text-pink-700">🌟 Future Coach</Badge>
+              )}
+              {client.status === "coach_launched" && (
+                <Badge className="bg-cyan-100 text-cyan-700">🚀 Coach Launched</Badge>
+              )}
+              {client.is_coach_prospect && client.status === "active" && (
                 <Badge className="bg-orange-100 text-orange-700 flex items-center gap-1">
                   <Star className="h-3 w-3" />
                   Coach Prospect
                 </Badge>
               )}
               {client.status === "paused" && (
-                <Badge variant="secondary">Paused</Badge>
+                <Badge variant="secondary">⏸️ Paused</Badge>
               )}
               {phase.milestone && (
                 <Badge style={{ backgroundColor: phase.bg, color: phase.color }}>
@@ -282,24 +298,21 @@ export function ClientCard({
             entityName={client.label}
             variant="outline"
           />
-          {client.status === "active" ? (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => onUpdateStatus(client.id, "paused")}
-            >
-              Pause
-            </Button>
-          ) : (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => onUpdateStatus(client.id, "active")}
-              className="text-green-600"
-            >
-              Resume
-            </Button>
-          )}
+          <Select
+            value={client.status}
+            onValueChange={(value) => onUpdateStatus(client.id, value as ClientStatus)}
+          >
+            <SelectTrigger className="h-8 w-auto min-w-[110px] text-xs">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="active">⭐ Client</SelectItem>
+              <SelectItem value="goal_achieved">🏆 Goal Achieved</SelectItem>
+              <SelectItem value="future_coach">🌟 Future Coach</SelectItem>
+              <SelectItem value="coach_launched">🚀 Launched</SelectItem>
+              <SelectItem value="paused">⏸️ Paused</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
 
         {client.notes && (
@@ -317,7 +330,7 @@ export function ClientCard({
               className="w-full mt-3 pt-3 border-t flex items-center justify-center gap-2 text-gray-500 hover:text-gray-700 hover:bg-gray-50"
             >
               <Lightbulb className="h-4 w-4 text-amber-500" />
-              <span className="text-xs">Day {programDay} Resources</span>
+              <span className="text-xs">Coaching Guide & Resources</span>
               {showResources ? (
                 <ChevronUp className="h-4 w-4" />
               ) : (
@@ -328,6 +341,7 @@ export function ClientCard({
           <CollapsibleContent className="mt-3">
             <ClientContextualResources
               programDay={programDay}
+              clientStatus={client.status}
               clientName={client.label}
               compact
             />

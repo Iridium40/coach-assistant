@@ -119,7 +119,7 @@ export default function ProspectTrackerPage() {
     { id: "new", label: "New", color: "#2196f3", icon: "🆕", count: prospects.filter(p => p.status === "new").length },
     { id: "interested", label: "Interested", color: "#ff9800", icon: "🔥", count: prospects.filter(p => p.status === "interested").length },
     { id: "ha_scheduled", label: "HA Scheduled", color: "#9c27b0", icon: "📅", count: prospects.filter(p => p.status === "ha_scheduled").length },
-    { id: "converted", label: "Converted", color: "#4caf50", icon: "🎉", count: prospects.filter(p => ["converted", "coach"].includes(p.status)).length },
+    { id: "converted", label: "Client Won", color: "#4caf50", icon: "🎉", count: prospects.filter(p => ["converted", "coach"].includes(p.status)).length },
   ], [prospects])
 
   const [showAddModal, setShowAddModal] = useState(false)
