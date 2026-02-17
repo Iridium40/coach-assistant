@@ -119,8 +119,7 @@ export default function ProspectTrackerPage() {
     { id: "new", label: "New", color: "#2196f3", icon: "🆕", count: prospects.filter(p => p.status === "new").length },
     { id: "interested", label: "Interested", color: "#ff9800", icon: "🔥", count: prospects.filter(p => p.status === "interested").length },
     { id: "ha_scheduled", label: "HA Scheduled", color: "#9c27b0", icon: "📅", count: prospects.filter(p => p.status === "ha_scheduled").length },
-    { id: "converted", label: "Converted", color: "#4caf50", icon: "🎉", count: prospects.filter(p => ["converted", "coach"].includes(p.status)).length },
-    { id: "client", label: "Client", color: "#37B6AE", icon: "⭐", count: allClients.filter(c => c.status === "active").length },
+    { id: "client", label: "Client", color: "#4caf50", icon: "⭐", count: allClients.filter(c => c.status === "active").length },
     { id: "coach", label: "Future Coach", color: "#e91e63", icon: "🚀", count: allClients.filter(c => c.is_coach_prospect).length },
   ], [prospects, allClients])
 
@@ -593,15 +592,13 @@ Talking Points:
       <div className="container mx-auto px-4 py-6">
         <ErrorBoundary>
         {/* Pipeline Stages */}
-        <div className="grid grid-cols-3 sm:grid-cols-6 gap-2 sm:gap-3 mb-6">
+        <div className="grid grid-cols-3 sm:grid-cols-5 gap-2 sm:gap-3 mb-6">
           {pipelineStages.map((stage) => (
             <button
               key={stage.id}
               onClick={() => {
                 if (stage.id === "client" || stage.id === "coach") {
                   window.location.href = "/client-tracker"
-                } else if (stage.id === "converted") {
-                  setFilterStatus(filterStatus === "converted" ? "all" : "converted" as any)
                 } else {
                   setFilterStatus(filterStatus === stage.id ? "all" : stage.id as any)
                 }
