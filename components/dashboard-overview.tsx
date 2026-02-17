@@ -340,11 +340,6 @@ export function DashboardOverview() {
                   </Tooltip>
                 </TooltipProvider>
               </div>
-              <Link href="/resources">
-                <Button variant="ghost" size="sm" className="text-[hsl(var(--optavia-green))] hover:bg-green-50 -mr-2 text-xs">
-                  Manage
-                </Button>
-              </Link>
             </div>
           </CardHeader>
           <CardContent className="pt-0">
