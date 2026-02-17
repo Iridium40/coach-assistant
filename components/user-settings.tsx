@@ -412,46 +412,6 @@ export function UserSettings({ onClose }: UserSettingsProps) {
               )}
             </div>
 
-            {/* Sponsoring Coach Section */}
-            <div className="space-y-2">
-              <Label className="text-optavia-dark flex items-center gap-2">
-                <UserCheck className="h-4 w-4 text-[hsl(var(--optavia-green))]" />
-                Sponsoring Coach
-              </Label>
-              {loadingSponsor ? (
-                <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
-                  <div className="animate-pulse flex items-center gap-3">
-                    <div className="w-10 h-10 bg-gray-200 rounded-full"></div>
-                    <div className="space-y-2">
-                      <div className="h-4 w-24 bg-gray-200 rounded"></div>
-                      <div className="h-3 w-32 bg-gray-200 rounded"></div>
-                    </div>
-                  </div>
-                </div>
-              ) : sponsorInfo ? (
-                <div className="p-4 bg-gradient-to-br from-green-50 to-emerald-50 rounded-lg border border-green-200">
-                  <div className="flex items-center gap-3">
-                    <Avatar className="h-10 w-10 border-2 border-[hsl(var(--optavia-green))]">
-                      <AvatarImage src={sponsorInfo.avatar_url || undefined} alt={sponsorInfo.full_name || "Sponsor"} />
-                      <AvatarFallback className="bg-[hsl(var(--optavia-green))] text-white text-sm">
-                        {sponsorInfo.full_name?.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2) || "SC"}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1">
-                      <div className="font-semibold text-optavia-dark">{sponsorInfo.full_name || "Unknown"}</div>
-                      <div className="text-sm text-optavia-gray">{sponsorInfo.email}</div>
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
-                  <p className="text-sm text-optavia-gray">
-                    No sponsoring coach linked to your account.
-                  </p>
-                </div>
-              )}
-            </div>
-
             <Button 
               onClick={handleSaveProfile}
               className="bg-[hsl(var(--optavia-green))] hover:bg-[hsl(var(--optavia-green-dark))] text-white"
@@ -461,33 +421,6 @@ export function UserSettings({ onClose }: UserSettingsProps) {
           </CardContent>
         </Card>
 
-        {/* Progress Summary */}
-        <Card className="bg-white border border-gray-200 shadow-lg">
-          <CardHeader>
-            <CardTitle className="text-optavia-dark">Your Progress</CardTitle>
-            <CardDescription className="text-optavia-gray">Overview of your activity</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div>
-              <div className="flex justify-between items-center mb-2">
-                <span className="text-sm font-medium text-optavia-dark">Completed Training</span>
-                <span className="text-sm text-optavia-gray font-semibold">{completedResources.length}</span>
-              </div>
-            </div>
-            <div>
-              <div className="flex justify-between items-center mb-2">
-                <span className="text-sm font-medium text-optavia-dark">Bookmarks</span>
-                <span className="text-sm text-optavia-gray font-semibold">{bookmarks.length}</span>
-              </div>
-            </div>
-            <div>
-              <div className="flex justify-between items-center mb-2">
-                <span className="text-sm font-medium text-optavia-dark">Favorite Recipes</span>
-                <span className="text-sm text-optavia-gray font-semibold">{favoriteRecipes.length}</span>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
 
       </div>
     </div>
