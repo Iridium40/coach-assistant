@@ -112,9 +112,18 @@ export default function ProspectTrackerPage() {
     getDaysUntil,
   } = useProspects()
 
-  const { addClient } = useClients()
+  const { addClient, clients: allClients } = useClients()
   const { user, profile } = useUserData()
   const { toast } = useToast()
+
+  // Pipeline stage counts for compact pipeline strip
+  const pipelineStages = useMemo(() => [
+    { id: "new", label: "New", color: "#2196f3", icon: "🆕", count: prospects.filter(p => p.status === "new").length },
+    { id: "interested", label: "Interested", color: "#ff9800", icon: "🔥", count: prospects.filter(p => p.status === "interested").length },
+    { id: "ha_scheduled", label: "HA Scheduled", color: "#9c27b0", icon: "📅", count: prospects.filter(p => p.status === "ha_scheduled").length },
+    { id: "client", label: "Client", color: "#37B6AE", icon: "⭐", count: allClients.filter(c => c.status === "active").length },
+    { id: "coach", label: "Future Coach", color: "#e91e63", icon: "🚀", count: allClients.filter(c => c.is_coach_prospect).length },
+  ], [prospects, allClients])
 
   const [showAddModal, setShowAddModal] = useState(false)
   const [showEditModal, setShowEditModal] = useState(false)
@@ -659,6 +668,36 @@ Talking Points:
             </Card>
           </div>
         </TooltipProvider>
+
+        {/* Compact Pipeline Stages */}
+        <div className="flex items-center gap-1 sm:gap-2 overflow-x-auto pb-1 mb-2">
+          {pipelineStages.map((stage, idx) => (
+            <div key={stage.id} className="flex items-center">
+              <button
+                onClick={() => {
+                  if (stage.id === "client" || stage.id === "coach") {
+                    window.location.href = "/client-tracker"
+                  } else {
+                    setFilterStatus(filterStatus === stage.id ? "all" : stage.id as any)
+                  }
+                }}
+                className="flex items-center gap-1.5 sm:gap-2 px-3 py-1.5 rounded-full border transition-all hover:shadow-sm hover:scale-105 text-xs sm:text-sm whitespace-nowrap"
+                style={{
+                  borderColor: stage.color,
+                  backgroundColor: filterStatus === stage.id ? stage.color : `${stage.color}10`,
+                  color: filterStatus === stage.id ? "white" : stage.color,
+                }}
+              >
+                <span className="text-sm">{stage.icon}</span>
+                <span className="font-bold">{stage.count}</span>
+                <span className="font-medium hidden sm:inline">{stage.label}</span>
+              </button>
+              {idx < pipelineStages.length - 1 && (
+                <ChevronRight className="h-3.5 w-3.5 text-gray-300 mx-0.5 flex-shrink-0" />
+              )}
+            </div>
+          ))}
+        </div>
 
         {/* Search, Filter and View Toggle */}
         <div className="flex flex-col gap-4 mb-6">
