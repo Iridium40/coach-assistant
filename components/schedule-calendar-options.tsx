@@ -121,12 +121,35 @@ ${organizerName || "Your Coach"}`
     }
   }
 
-  // Send via Email
+  // Parse comma-separated emails into a clean array
+  const parseEmails = (input: string): string[] => {
+    return input
+      .split(",")
+      .map((e) => e.trim())
+      .filter((e) => e.length > 0)
+  }
+
+  // Basic email format check
+  const isEmailValid = (e: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e)
+
+  // Send via Email (supports comma-separated addresses)
   const handleEmailInvite = async () => {
-    if (!email) {
+    const emails = parseEmails(email)
+
+    if (emails.length === 0) {
       toast({
         title: "Email required",
-        description: "Please enter the client/prospect email address",
+        description: "Please enter at least one email address",
+        variant: "destructive",
+      })
+      return
+    }
+
+    const invalid = emails.filter((e) => !isEmailValid(e))
+    if (invalid.length > 0) {
+      toast({
+        title: "Invalid email address",
+        description: `Please fix: ${invalid.join(", ")}`,
         variant: "destructive",
       })
       return
@@ -145,7 +168,7 @@ ${organizerName || "Your Coach"}`
 
     try {
       const result = await sendCalendarInviteEmail({
-        to: email,
+        to: emails.join(", "),
         toName: recipientName,
         fromEmail: organizerEmail,
         fromName: organizerName,
@@ -159,9 +182,10 @@ ${organizerName || "Your Coach"}`
       if (result.success) {
         setSent(true)
         
+        const countLabel = emails.length > 1 ? `${emails.length} recipients` : emails[0]
         toast({
           title: "📧 Calendar invite sent!",
-          description: `${recipientName || "They"} will receive the invite at ${email}`,
+          description: `Invite sent to ${countLabel}`,
         })
 
         setTimeout(() => setSent(false), 3000)
@@ -183,7 +207,9 @@ ${organizerName || "Your Coach"}`
     }
   }
 
-  const isValidEmail = email && organizerEmail
+  const parsedEmails = parseEmails(email)
+  const hasValidEmails = parsedEmails.length > 0 && parsedEmails.every(isEmailValid)
+  const isValidEmail = hasValidEmails && organizerEmail
 
   return (
     <div className={`space-y-4 ${className}`}>
@@ -212,13 +238,13 @@ ${organizerName || "Your Coach"}`
             Send Calendar Invite by Email
           </Label>
           <Input
-            type="email"
-            placeholder="email@example.com"
+            type="text"
+            placeholder="email@example.com, another@example.com"
             value={email}
             onChange={(e) => handleEmailChange(e.target.value)}
           />
           <p className="text-xs text-gray-500">
-            They'll receive an email with a calendar invite attached
+            Separate multiple email addresses with commas. Each will receive a calendar invite.
           </p>
           {!organizerEmail && (
             <p className="text-xs text-amber-600">

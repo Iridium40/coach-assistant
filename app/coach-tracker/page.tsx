@@ -15,6 +15,7 @@ import {
 } from "@/hooks/use-coaches"
 import { useDebounce } from "@/hooks/use-debounce"
 import { useToast } from "@/hooks/use-toast"
+import { useUserData } from "@/contexts/user-data-context"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -47,7 +48,6 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import {
-  Users,
   Plus,
   Search,
   AlertCircle,
@@ -58,11 +58,34 @@ import {
   Rocket,
   Award,
   Check,
+  CalendarPlus,
+  Calendar,
+  X,
+  Phone,
+  Video,
 } from "lucide-react"
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
 import { ReminderButton } from "@/components/reminders-panel"
+import { ScheduleCalendarOptions } from "@/components/schedule-calendar-options"
+import { sendCalendarInviteEmail } from "@/lib/email"
 import { ErrorBoundary } from "@/components/ui/error-boundary"
+import type { CalendarEvent } from "@/lib/calendar-utils"
+
+// Days of the week
+const DAYS_OF_WEEK = [
+  { short: "Sun", full: "Sunday", value: 0 },
+  { short: "Mon", full: "Monday", value: 1 },
+  { short: "Tue", full: "Tuesday", value: 2 },
+  { short: "Wed", full: "Wednesday", value: 3 },
+  { short: "Thu", full: "Thursday", value: 4 },
+  { short: "Fri", full: "Friday", value: 5 },
+  { short: "Sat", full: "Saturday", value: 6 },
+]
+
+// Time options for picker
+const HOUR_OPTIONS = Array.from({ length: 12 }, (_, i) => i + 1)
+const MINUTE_OPTIONS = ["00", "15", "30", "45"]
 
 // ─── Coach Card ───
 function CoachCard({
@@ -73,6 +96,9 @@ function CoachCard({
   onMoveStage,
   onDelete,
   onUpdateCoach,
+  onOpenScheduleModal,
+  onSendSMS,
+  onClearSchedule,
 }: {
   coach: Coach
   onEdit: (coach: Coach) => void
@@ -81,6 +107,9 @@ function CoachCard({
   onMoveStage: (coachId: string, newStage: CoachStage) => void
   onDelete: (coach: Coach) => void
   onUpdateCoach: (id: string, updates: UpdateCoach) => Promise<boolean>
+  onOpenScheduleModal: (coach: Coach) => void
+  onSendSMS: (coach: Coach) => void
+  onClearSchedule: (coachId: string) => void
 }) {
   const stage = COACH_STAGES.find(s => s.id === coach.stage) || COACH_STAGES[0]
   const stageIdx = COACH_STAGES.findIndex(s => s.id === coach.stage)
@@ -170,6 +199,39 @@ function CoachCard({
           </div>
         </div>
 
+        {/* Scheduled Time Row */}
+        {coach.next_scheduled_at && (
+          <div className="mt-3 flex items-center gap-2 flex-wrap">
+            <Badge
+              className={`flex items-center gap-1.5 px-2.5 py-1 text-sm font-medium ${
+                new Date(coach.next_scheduled_at) < new Date()
+                  ? "bg-red-100 text-red-700 border border-red-200"
+                  : "bg-purple-100 text-purple-700 border border-purple-200"
+              }`}
+            >
+              <Calendar className="h-3.5 w-3.5" />
+              {new Date(coach.next_scheduled_at).toLocaleDateString("en-US", {
+                weekday: "short",
+                month: "short",
+                day: "numeric",
+              })}{" "}
+              {new Date(coach.next_scheduled_at).toLocaleTimeString("en-US", {
+                hour: "numeric",
+                minute: "2-digit",
+              })}
+            </Badge>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => onClearSchedule(coach.id)}
+              className="h-7 w-7 p-0 bg-red-100 hover:bg-red-200 rounded-full"
+              title="Cancel scheduled call"
+            >
+              <X className="h-4 w-4 text-red-600" />
+            </Button>
+          </div>
+        )}
+
         {/* Primary Actions - Status + Check In + Schedule (matching prospect/client layout) */}
         <div className="mt-4 flex flex-col sm:flex-row gap-2">
           {/* Stage Select (prominent, like prospect/client status dropdown) */}
@@ -200,23 +262,33 @@ function CoachCard({
             <span className="text-xs sm:text-sm">Check In</span>
           </Button>
 
-          {/* Rank Button */}
+          {/* Schedule Button */}
           <Button
             variant="outline"
             size="sm"
+            onClick={() => onOpenScheduleModal(coach)}
             className="flex-1 text-purple-600 border-purple-200 hover:bg-purple-50"
-            onClick={() => onRank(coach)}
           >
-            <Award className="h-4 w-4 mr-1" />
-            <span className="text-xs sm:text-sm">Rank</span>
+            <CalendarPlus className="h-4 w-4 mr-1" />
+            <span className="text-xs sm:text-sm">Schedule</span>
           </Button>
         </div>
 
-        {/* Secondary Actions: Edit, Remind, Delete (grid like prospect/client card) */}
+        {/* Secondary Actions: Edit, Rank, Remind, Delete (grid like prospect/client card) */}
         <div className="mt-3 pt-3 border-t grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-2">
           <Button variant="outline" size="sm" onClick={() => onEdit(coach)}>
             <Edit2 className="h-4 w-4 mr-1" />
             <span className="text-xs sm:text-sm">Edit</span>
+          </Button>
+
+          <Button
+            variant="outline"
+            size="sm"
+            className="text-purple-600 border-purple-200 hover:bg-purple-50"
+            onClick={() => onRank(coach)}
+          >
+            <Award className="h-4 w-4 mr-1" />
+            <span className="text-xs sm:text-sm">Rank</span>
           </Button>
 
           <ReminderButton
@@ -303,6 +375,7 @@ export default function CoachTrackerPage() {
   } = useCoaches()
 
   const { toast } = useToast()
+  const { profile } = useUserData()
 
   const [filterStage, setFilterStage] = useState<CoachStage | "all">("all")
   const [searchTerm, setSearchTerm] = useState("")
@@ -310,9 +383,13 @@ export default function CoachTrackerPage() {
 
   // Modals
   const [showAddModal, setShowAddModal] = useState(false)
+  const [showScheduleModal, setShowScheduleModal] = useState(false)
+  const [showClearConfirm, setShowClearConfirm] = useState(false)
+  const [coachToClear, setCoachToClear] = useState<string | null>(null)
   const [editingCoach, setEditingCoach] = useState<Coach | null>(null)
   const [rankCoach, setRankCoach] = useState<Coach | null>(null)
   const [deletingCoach, setDeletingCoach] = useState<Coach | null>(null)
+  const [selectedCoach, setSelectedCoach] = useState<Coach | null>(null)
 
   // Add/Edit form state
   const [formName, setFormName] = useState("")
@@ -322,6 +399,22 @@ export default function CoachTrackerPage() {
   const [formClients, setFormClients] = useState(0)
   const [formProspects, setFormProspects] = useState(0)
   const [formNotes, setFormNotes] = useState("")
+
+  // Schedule state
+  const [scheduleDay, setScheduleDay] = useState<number>(new Date().getDay())
+  const [scheduleHour, setScheduleHour] = useState<number>(9)
+  const [scheduleMinute, setScheduleMinute] = useState<string>("00")
+  const [scheduleAmPm, setScheduleAmPm] = useState<"AM" | "PM">("AM")
+  const [meetingType, setMeetingType] = useState<"phone" | "zoom">("phone")
+  const [zoomLink, setZoomLink] = useState("")
+  const [zoomMeetingId, setZoomMeetingId] = useState("")
+  const [zoomPasscode, setZoomPasscode] = useState("")
+
+  const prefillZoomDetails = () => {
+    if (profile?.zoom_link && !zoomLink) setZoomLink(profile.zoom_link)
+    if (profile?.zoom_meeting_id && !zoomMeetingId) setZoomMeetingId(profile.zoom_meeting_id)
+    if (profile?.zoom_passcode && !zoomPasscode) setZoomPasscode(profile.zoom_passcode)
+  }
 
   const filteredCoaches = useMemo(
     () => getFilteredCoaches(filterStage, debouncedSearch),
@@ -355,6 +448,158 @@ export default function CoachTrackerPage() {
     setFormProspects(coach.prospects_count)
     setFormNotes(coach.notes || "")
     setEditingCoach(coach)
+  }
+
+  // Get next occurrence of a day of the week
+  const getNextDayDate = (dayOfWeek: number): Date => {
+    const today = new Date()
+    const currentDay = today.getDay()
+    let daysAhead = dayOfWeek - currentDay
+    if (daysAhead <= 0) daysAhead += 7
+    const nextDate = new Date(today)
+    nextDate.setDate(today.getDate() + daysAhead)
+    return nextDate
+  }
+
+  // Convert 12-hour to 24-hour format
+  const get24Hour = (hour: number, ampm: "AM" | "PM"): number => {
+    if (ampm === "AM") return hour === 12 ? 0 : hour
+    return hour === 12 ? 12 : hour + 12
+  }
+
+  // Open schedule modal
+  const openScheduleModal = (coach: Coach) => {
+    setSelectedCoach(coach)
+    setScheduleDay(new Date().getDay())
+    setScheduleHour(9)
+    setScheduleMinute("00")
+    setScheduleAmPm("AM")
+    setMeetingType("phone")
+    setZoomLink("")
+    setZoomMeetingId("")
+    setZoomPasscode("")
+    setShowScheduleModal(true)
+  }
+
+  // Generate calendar event from schedule settings
+  const generateCalendarEvent = (): CalendarEvent | null => {
+    if (!selectedCoach) return null
+
+    const targetDate = getNextDayDate(scheduleDay)
+    const hour24 = get24Hour(scheduleHour, scheduleAmPm)
+    targetDate.setHours(hour24, parseInt(scheduleMinute), 0, 0)
+
+    const endDate = new Date(targetDate)
+    endDate.setMinutes(endDate.getMinutes() + 30)
+
+    const stage = COACH_STAGES.find(s => s.id === selectedCoach.stage)
+    const rankTitle = getRankTitle(selectedCoach.rank)
+
+    let meetingDetails = ""
+    let location = ""
+
+    if (meetingType === "zoom" && zoomLink) {
+      meetingDetails = `\n\n📹 Zoom Meeting:\n${zoomLink}`
+      if (zoomMeetingId) meetingDetails += `\nMeeting ID: ${zoomMeetingId}`
+      if (zoomPasscode) meetingDetails += `\nPasscode: ${zoomPasscode}`
+      location = zoomLink
+    } else if (meetingType === "phone") {
+      meetingDetails = "\n\n📱 Phone Call"
+    }
+
+    return {
+      title: `Coach Call: ${selectedCoach.label}`,
+      description: `Coach: ${selectedCoach.label}
+Stage: ${stage?.label || selectedCoach.stage}
+Rank: ${rankTitle}
+${meetingDetails}
+
+Suggested talking points:
+- How is business building going?
+- Client/prospect pipeline review
+- Goals and next steps
+- Celebrate wins!`,
+      startDate: targetDate,
+      endDate: endDate,
+      location: location || undefined,
+      uid: `coach-${selectedCoach.id}-${Date.now()}@coachingamplifier.com`,
+    }
+  }
+
+  // Save schedule
+  const handleSaveSchedule = async () => {
+    if (!selectedCoach) return
+
+    const targetDate = getNextDayDate(scheduleDay)
+    const hour24 = get24Hour(scheduleHour, scheduleAmPm)
+    targetDate.setHours(hour24, parseInt(scheduleMinute), 0, 0)
+
+    const success = await updateCoach(selectedCoach.id, {
+      next_scheduled_at: targetDate.toISOString(),
+    })
+
+    if (!success) {
+      toast({
+        title: "Failed to save schedule",
+        description: "Please try again",
+        variant: "destructive",
+      })
+      return
+    }
+
+    // Send calendar invite to coach (the user)
+    const coachEmail = profile?.notification_email
+    if (coachEmail) {
+      const calendarEvent = generateCalendarEvent()
+      if (calendarEvent) {
+        sendCalendarInviteEmail({
+          to: coachEmail,
+          toName: profile?.full_name || undefined,
+          fromEmail: coachEmail,
+          fromName: profile?.full_name || undefined,
+          eventTitle: calendarEvent.title,
+          eventDescription: calendarEvent.description,
+          startDate: calendarEvent.startDate.toISOString(),
+          endDate: calendarEvent.endDate.toISOString(),
+          eventType: "check-in",
+        }).then((result) => {
+          if (result.success) {
+            toast({
+              title: "📧 Calendar invite sent!",
+              description: `Check ${coachEmail} to add this to your calendar`,
+            })
+          }
+        }).catch(() => {})
+      }
+    }
+
+    setShowScheduleModal(false)
+    setMeetingType("phone")
+    setZoomLink("")
+    setZoomMeetingId("")
+    setZoomPasscode("")
+
+    toast({
+      title: "📅 Call Scheduled",
+      description: `${scheduleHour}:${scheduleMinute} ${scheduleAmPm} on ${DAYS_OF_WEEK[scheduleDay].full}`,
+    })
+  }
+
+  // Send SMS reminder
+  const handleSendSMS = (coach: Coach) => {
+    // Placeholder for SMS sending — coach tracker doesn't store phone yet
+    toast({ title: "SMS", description: "SMS not configured for coach contacts yet." })
+  }
+
+  // Clear schedule
+  const handleClearSchedule = async () => {
+    if (!coachToClear) return
+    const success = await updateCoach(coachToClear, { next_scheduled_at: null })
+    if (success) {
+      toast({ title: "Schedule cleared", description: "The scheduled call has been removed." })
+    }
+    setCoachToClear(null)
+    setShowClearConfirm(false)
   }
 
   // Save (add or edit)
@@ -620,6 +865,12 @@ export default function CoachTrackerPage() {
                   onMoveStage={handleMoveStage}
                   onDelete={(c) => setDeletingCoach(c)}
                   onUpdateCoach={updateCoach}
+                  onOpenScheduleModal={openScheduleModal}
+                  onSendSMS={handleSendSMS}
+                  onClearSchedule={(id) => {
+                    setCoachToClear(id)
+                    setShowClearConfirm(true)
+                  }}
                 />
               ))}
             </div>
@@ -847,6 +1098,215 @@ export default function CoachTrackerPage() {
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction onClick={handleDelete} className="bg-red-600 hover:bg-red-700">
               Remove
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* ─── Schedule Call Modal ─── */}
+      <Dialog open={showScheduleModal} onOpenChange={setShowScheduleModal}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <CalendarPlus className="h-5 w-5 text-purple-600" />
+              Schedule Call
+            </DialogTitle>
+            <DialogDescription>Set a day and time for a coaching call.</DialogDescription>
+          </DialogHeader>
+          {selectedCoach && (
+            <div className="space-y-6">
+              {/* Coach Info */}
+              <div className="bg-gray-50 rounded-lg p-3">
+                <div className="font-medium text-gray-900">{selectedCoach.label}</div>
+                <div className="text-sm text-gray-500">
+                  {COACH_STAGES.find(s => s.id === selectedCoach.stage)?.icon}{" "}
+                  {COACH_STAGES.find(s => s.id === selectedCoach.stage)?.label} · {getRankTitle(selectedCoach.rank)}
+                </div>
+              </div>
+
+              {/* Day Picker */}
+              <div>
+                <Label className="text-sm font-medium mb-3 block">Select Day</Label>
+                <div className="grid grid-cols-7 gap-1">
+                  {DAYS_OF_WEEK.map((day) => (
+                    <button
+                      key={day.value}
+                      onClick={() => setScheduleDay(day.value)}
+                      className={`p-2 rounded-lg text-center transition-colors ${
+                        scheduleDay === day.value
+                          ? "bg-purple-600 text-white"
+                          : "bg-gray-100 hover:bg-gray-200 text-gray-700"
+                      }`}
+                    >
+                      <div className="text-xs font-medium">{day.short}</div>
+                    </button>
+                  ))}
+                </div>
+                <p className="text-xs text-gray-500 mt-2">
+                  Next {DAYS_OF_WEEK[scheduleDay].full}: {getNextDayDate(scheduleDay).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+                </p>
+              </div>
+
+              {/* Time Picker */}
+              <div>
+                <Label className="text-sm font-medium mb-3 block">Select Time</Label>
+                <div className="flex items-center gap-2 justify-center">
+                  <select
+                    value={scheduleHour}
+                    onChange={(e) => setScheduleHour(parseInt(e.target.value))}
+                    className="w-16 h-12 text-center text-lg font-medium border rounded-lg bg-white focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                  >
+                    {HOUR_OPTIONS.map((h) => (
+                      <option key={h} value={h}>{h}</option>
+                    ))}
+                  </select>
+                  <span className="text-2xl font-bold text-gray-400">:</span>
+                  <select
+                    value={scheduleMinute}
+                    onChange={(e) => setScheduleMinute(e.target.value)}
+                    className="w-16 h-12 text-center text-lg font-medium border rounded-lg bg-white focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                  >
+                    {MINUTE_OPTIONS.map((m) => (
+                      <option key={m} value={m}>{m}</option>
+                    ))}
+                  </select>
+                  <div className="flex rounded-lg border overflow-hidden">
+                    <button
+                      onClick={() => setScheduleAmPm("AM")}
+                      className={`px-4 h-12 font-medium transition-colors ${
+                        scheduleAmPm === "AM"
+                          ? "bg-purple-600 text-white"
+                          : "bg-white text-gray-700 hover:bg-gray-100"
+                      }`}
+                    >
+                      AM
+                    </button>
+                    <button
+                      onClick={() => setScheduleAmPm("PM")}
+                      className={`px-4 h-12 font-medium transition-colors ${
+                        scheduleAmPm === "PM"
+                          ? "bg-purple-600 text-white"
+                          : "bg-white text-gray-700 hover:bg-gray-100"
+                      }`}
+                    >
+                      PM
+                    </button>
+                  </div>
+                </div>
+                <p className="text-xs text-gray-500 text-center mt-2">30 minute coaching call</p>
+              </div>
+
+              {/* Meeting Type Selector */}
+              <div>
+                <Label className="text-sm font-medium mb-3 block">Meeting Type</Label>
+                <div className="grid grid-cols-2 gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setMeetingType("phone")}
+                    className={`flex items-center justify-center gap-2 p-3 rounded-lg border-2 transition-all ${
+                      meetingType === "phone"
+                        ? "border-purple-600 bg-purple-50 text-purple-700"
+                        : "border-gray-200 hover:border-gray-300 text-gray-700"
+                    }`}
+                  >
+                    <Phone className="h-5 w-5" />
+                    <span className="font-medium">Phone</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMeetingType("zoom")
+                      prefillZoomDetails()
+                    }}
+                    className={`flex items-center justify-center gap-2 p-3 rounded-lg border-2 transition-all ${
+                      meetingType === "zoom"
+                        ? "border-purple-600 bg-purple-50 text-purple-700"
+                        : "border-gray-200 hover:border-gray-300 text-gray-700"
+                    }`}
+                  >
+                    <Video className="h-5 w-5" />
+                    <span className="font-medium">Zoom</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Zoom Details (shown when Zoom is selected) */}
+              {meetingType === "zoom" && (
+                <div className="space-y-3 bg-purple-50 border border-purple-200 rounded-lg p-4">
+                  <div className="flex items-center gap-2 text-purple-700 text-sm font-medium">
+                    <Video className="h-4 w-4" />
+                    Zoom Meeting Details
+                  </div>
+                  <div className="space-y-2">
+                    <Input
+                      placeholder="Zoom Link (e.g., https://zoom.us/j/...)"
+                      value={zoomLink}
+                      onChange={(e) => setZoomLink(e.target.value)}
+                      className="bg-white"
+                    />
+                    <div className="grid grid-cols-2 gap-2">
+                      <Input
+                        placeholder="Meeting ID"
+                        value={zoomMeetingId}
+                        onChange={(e) => setZoomMeetingId(e.target.value)}
+                        className="bg-white"
+                      />
+                      <Input
+                        placeholder="Passcode"
+                        value={zoomPasscode}
+                        onChange={(e) => setZoomPasscode(e.target.value)}
+                        className="bg-white"
+                      />
+                    </div>
+                  </div>
+                  {!profile?.zoom_link && (
+                    <p className="text-xs text-purple-600">
+                      💡 Tip: Save your default Zoom details in Settings → Zoom Room to auto-fill
+                    </p>
+                  )}
+                </div>
+              )}
+
+              {/* Calendar Options */}
+              {generateCalendarEvent() && (
+                <ScheduleCalendarOptions
+                  event={generateCalendarEvent()!}
+                  recipientName={selectedCoach.label}
+                  onScheduleComplete={handleSaveSchedule}
+                  eventType="check-in"
+                />
+              )}
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => {
+              setShowScheduleModal(false)
+              setMeetingType("phone")
+              setZoomLink("")
+              setZoomMeetingId("")
+              setZoomPasscode("")
+            }}>
+              Cancel
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* ─── Clear Schedule Confirmation ─── */}
+      <AlertDialog open={showClearConfirm} onOpenChange={setShowClearConfirm}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Clear Scheduled Call?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will remove the scheduled call time. You can always schedule a new one.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => { setCoachToClear(null); setShowClearConfirm(false) }}>
+              Keep
+            </AlertDialogCancel>
+            <AlertDialogAction onClick={handleClearSchedule} className="bg-red-600 hover:bg-red-700">
+              Clear Schedule
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

@@ -76,6 +76,11 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Parse comma-separated emails into an array
+    const toEmails: string[] = typeof to === "string"
+      ? to.split(",").map((e: string) => e.trim()).filter((e: string) => e.length > 0)
+      : Array.isArray(to) ? to : [to]
+
     // Format dates for display
     const startDateTime = new Date(startDate)
     const dateStr = startDateTime.toLocaleDateString("en-US", {
@@ -93,7 +98,8 @@ export async function POST(request: NextRequest) {
     const endDateTime = new Date(endDate)
     const durationMins = Math.round((endDateTime.getTime() - startDateTime.getTime()) / 60000)
 
-    // Generate ICS content
+    // Generate ICS content (use first email as attendee for ICS, all get the email)
+    const primaryEmail = toEmails[0]
     const icsContent = generateICSContent(
       eventTitle,
       eventDescription || "",
@@ -101,8 +107,8 @@ export async function POST(request: NextRequest) {
       endDate,
       fromEmail,
       fromName || "Coach",
-      to,
-      toName || to.split("@")[0]
+      primaryEmail,
+      toName || primaryEmail.split("@")[0]
     )
 
     // Create email content
@@ -205,11 +211,11 @@ Best regards,
 ${fromName || "Your Coach"}
     `
 
-    // Send email with ICS attachment using Resend
+    // Send email with ICS attachment using Resend (supports multiple recipients)
     const { data, error } = await resend.emails.send({
       from: `Coaching Amplifier <onboarding@coachingamplifier.com>`,
       replyTo: fromEmail,
-      to: [to],
+      to: toEmails,
       subject: subject,
       html: htmlContent,
       text: textContent,
