@@ -311,19 +311,19 @@ export function DashboardOverview() {
         />
       </div>
 
-      {/* Quick Actions + Quick Links */}
+      {/* Quick Actions + Pinned Links */}
       <div className="grid grid-cols-1 gap-6 mt-6">
         {/* Quick Actions - driven by dashboard_buttons table */}
         <QuickActions />
 
-        {/* Quick Links Card */}
+        {/* Pinned Links Card */}
         <Card className="bg-white border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <CardTitle className="text-lg flex items-center gap-2 text-optavia-dark">
                   <Pin className="h-5 w-5 text-[hsl(var(--optavia-green))]" />
-                  Quick Links
+                  Pinned Links
                 </CardTitle>
                 <TooltipProvider>
                   <Tooltip>
@@ -333,7 +333,7 @@ export function DashboardOverview() {
                       </button>
                     </TooltipTrigger>
                     <TooltipContent side="bottom" className="max-w-xs p-3 bg-white/95 backdrop-blur-sm shadow-lg border border-gray-200">
-                      <p className="font-semibold text-gray-700 mb-1">Quick Links</p>
+                      <p className="font-semibold text-gray-700 mb-1">Pinned Links</p>
                       <p className="text-sm text-gray-600">
                         Your pinned coach tools, external resource links, and bookmarked training resources from the Coach Tools, External Resources, and Training pages.
                       </p>

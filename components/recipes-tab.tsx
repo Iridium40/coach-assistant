@@ -82,7 +82,7 @@ export const RecipesTab = memo(function RecipesTab({ userData, setUserData, togg
       {/* Title */}
       <div className="text-center pt-4 sm:pt-8 mb-6">
         <h2 className="font-heading font-bold text-2xl sm:text-3xl text-optavia-dark mb-2">
-          Lean & Green Recipes
+          Meal Planner
         </h2>
         <p className="text-optavia-gray text-base sm:text-lg max-w-2xl mx-auto px-4">
           Discover delicious Lean & Green meal recipes to share with your clients and support their health journey.
