@@ -3,6 +3,7 @@
 import { useState, useMemo } from "react"
 import Link from "next/link"
 import { useClients, getDayPhase, getProgramDay, type ClientStatus, type RecurringFrequency, type Client } from "@/hooks/use-clients"
+import { useCoaches } from "@/hooks/use-coaches"
 import { useDebounce } from "@/hooks/use-debounce"
 import { useToast } from "@/hooks/use-toast"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -11,6 +12,13 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
 import { Textarea } from "@/components/ui/textarea"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import {
   Dialog,
   DialogContent,
@@ -96,6 +104,7 @@ export default function ClientTrackerPage() {
     needsAttention,
     getFilteredClients,
   } = useClients()
+  const { coaches: trackedCoaches, addCoach } = useCoaches()
   const { toast } = useToast()
   const { profile } = useUserData()
 
@@ -166,6 +175,39 @@ export default function ClientTrackerPage() {
           ? "Recurring schedule advanced to the next check-in."
           : "Scheduled check-in cleared.",
     })
+  }
+
+  // Handle client status change with auto-add to Coach Tracker
+  const handleStatusChange = async (clientId: string, newStatus: ClientStatus) => {
+    const client = clients.find(c => c.id === clientId)
+    if (!client) return
+
+    const success = await updateStatus(clientId, newStatus)
+    if (!success) return
+
+    // When a client is moved to "coach_launched", auto-create a Coach Tracker entry
+    if (newStatus === "coach_launched" && client.status !== "coach_launched") {
+      const alreadyTracked = trackedCoaches.some(
+        c => c.label.toLowerCase().trim() === client.label.toLowerCase().trim()
+      )
+      if (!alreadyTracked) {
+        await addCoach({
+          label: client.label,
+          stage: "new_coach",
+          rank: 1,
+          launch_date: new Date().toISOString().split("T")[0],
+        })
+        toast({
+          title: "🚀 Coach Launched!",
+          description: `${client.label} has been added to your Coach Tracker.`,
+        })
+      } else {
+        toast({
+          title: "🚀 Coach Launched!",
+          description: `${client.label} is already on your Coach Tracker.`,
+        })
+      }
+    }
   }
 
   const [newClient, setNewClient] = useState({
@@ -920,14 +962,23 @@ ${phase.milestone ? `\n🎉 MILESTONE: ${phase.label} - Celebrate this achieveme
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
                         <span className="font-semibold text-gray-900">{client.label}</span>
-                        {client.is_coach_prospect && (
+                        {client.status === "goal_achieved" && (
+                          <Badge className="bg-yellow-100 text-yellow-800">🏆 Goal Achieved</Badge>
+                        )}
+                        {client.status === "future_coach" && (
+                          <Badge className="bg-pink-100 text-pink-700">🌟 Future Coach</Badge>
+                        )}
+                        {client.status === "coach_launched" && (
+                          <Badge className="bg-cyan-100 text-cyan-700">🚀 Coach Launched</Badge>
+                        )}
+                        {client.is_coach_prospect && client.status === "active" && (
                           <Badge className="bg-orange-100 text-orange-700 flex items-center gap-1">
                             <Star className="h-3 w-3" />
                             Coach Prospect
                           </Badge>
                         )}
                         {client.status === "paused" && (
-                          <Badge variant="secondary">Paused</Badge>
+                          <Badge variant="secondary">⏸️ Paused</Badge>
                         )}
                         {phase.milestone && (
                           <Badge
@@ -1069,7 +1120,7 @@ ${phase.milestone ? `\n🎉 MILESTONE: ${phase.label} - Celebrate this achieveme
                     </div>
                   )}
 
-                  {/* Secondary Actions: Coach, Remind & Pause/Resume */}
+                  {/* Secondary Actions: Coach, Remind & Status */}
                   <div className="mt-3 pt-3 border-t flex items-center gap-2">
                     <Button
                       variant="outline"
@@ -1086,24 +1137,21 @@ ${phase.milestone ? `\n🎉 MILESTONE: ${phase.label} - Celebrate this achieveme
                       entityName={client.label}
                       variant="outline"
                     />
-                    {client.status === "active" ? (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => updateStatus(client.id, "paused")}
-                      >
-                        Pause
-                      </Button>
-                    ) : (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => updateStatus(client.id, "active")}
-                        className="text-green-600"
-                      >
-                        Resume
-                      </Button>
-                    )}
+                    <Select
+                      value={client.status}
+                      onValueChange={(value) => handleStatusChange(client.id, value as ClientStatus)}
+                    >
+                      <SelectTrigger className="h-8 w-auto min-w-[110px] text-xs">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="active">⭐ Client</SelectItem>
+                        <SelectItem value="goal_achieved">🏆 Goal Achieved</SelectItem>
+                        <SelectItem value="future_coach">🌟 Future Coach</SelectItem>
+                        <SelectItem value="coach_launched">🚀 Launched</SelectItem>
+                        <SelectItem value="paused">⏸️ Paused</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
 
                   {client.notes && (
