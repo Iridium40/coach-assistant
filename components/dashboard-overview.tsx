@@ -346,16 +346,38 @@ export function DashboardOverview() {
           <CardContent className="pt-0">
             {hasPinnedItems ? (
               <div className="space-y-2">
+                {/* Color Legend */}
+                <div className="flex flex-wrap gap-3 text-xs text-gray-500 mb-1">
+                  {pinnedTools.length > 0 && (
+                    <span className="flex items-center gap-1">
+                      <span className="w-2.5 h-2.5 rounded-full bg-teal-400" />
+                      Coach Tools
+                    </span>
+                  )}
+                  {pinnedResources.length > 0 && (
+                    <span className="flex items-center gap-1">
+                      <span className="w-2.5 h-2.5 rounded-full bg-blue-400" />
+                      External Resources
+                    </span>
+                  )}
+                  {bookmarkedTrainingResources.length > 0 && (
+                    <span className="flex items-center gap-1">
+                      <span className="w-2.5 h-2.5 rounded-full bg-amber-400" />
+                      Training
+                    </span>
+                  )}
+                </div>
+                {/* Coach Tools - Teal/Green */}
                 {pinnedTools.map((tool) => {
                   const IconComponent = tool.icon
                   return (
                     <button
                       key={tool.id}
                       onClick={() => setOpenToolId(tool.id)}
-                      className="w-full flex items-center gap-2 p-2.5 rounded-lg border-2 border-[hsl(var(--optavia-green))] bg-[hsl(var(--optavia-green-light))] hover:bg-green-100 transition-colors cursor-pointer group text-left"
+                      className="w-full flex items-center gap-2 p-2.5 rounded-lg border-2 border-teal-400 bg-teal-50 hover:bg-teal-100 transition-colors cursor-pointer group text-left"
                     >
-                      <IconComponent className="h-4 w-4 text-[hsl(var(--optavia-green))] flex-shrink-0" />
-                      <span className="font-medium text-sm text-optavia-dark group-hover:text-[hsl(var(--optavia-green))] flex-1 truncate">
+                      <IconComponent className="h-4 w-4 text-teal-600 flex-shrink-0" />
+                      <span className="font-medium text-sm text-optavia-dark group-hover:text-teal-700 flex-1 truncate">
                         {tool.title}
                       </span>
                       <ChevronRight className="h-3 w-3 text-optavia-gray flex-shrink-0" />
@@ -363,16 +385,17 @@ export function DashboardOverview() {
                   )
                 })}
 
+                {/* External Resources - Blue */}
                 {pinnedResources.map((resource) => (
                   <a
                     key={resource.id}
                     href={resource.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-2 p-2.5 rounded-lg border-2 border-[hsl(var(--optavia-green))] bg-[hsl(var(--optavia-green-light))] hover:bg-green-100 transition-colors cursor-pointer group"
+                    className="flex items-center gap-2 p-2.5 rounded-lg border-2 border-blue-400 bg-blue-50 hover:bg-blue-100 transition-colors cursor-pointer group"
                   >
-                    <Link2 className="h-4 w-4 text-[hsl(var(--optavia-green))] flex-shrink-0" />
-                    <span className="font-medium text-sm text-optavia-dark group-hover:text-[hsl(var(--optavia-green))] flex-1 truncate">
+                    <Link2 className="h-4 w-4 text-blue-600 flex-shrink-0" />
+                    <span className="font-medium text-sm text-optavia-dark group-hover:text-blue-700 flex-1 truncate">
                       {resource.title}
                     </span>
                     <ExternalLink className="h-3 w-3 text-optavia-gray flex-shrink-0" />
