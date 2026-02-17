@@ -75,7 +75,7 @@ export function Header({ onSettingsClick, onHomeClick, onAnnouncementsClick, onR
     { id: "training" as const, label: "Training", href: "/training", fullAccessOnly: false },
     { id: "coach-tools" as const, label: "Coach Tools", href: "/coach-tools", fullAccessOnly: true },
     { id: "resources" as const, label: "External Resources", href: "/resources", fullAccessOnly: true },
-    { id: "recipes" as const, label: "Recipes", href: "/recipes", fullAccessOnly: true },
+    { id: "recipes" as const, label: "Meal Planner", href: "/recipes", fullAccessOnly: true },
   ]
   
   // Filter nav items based on org access
