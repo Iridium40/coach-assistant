@@ -68,15 +68,7 @@ const COACH_TOOLS: { id: string; title: string; icon: LucideIcon; component: Rea
   { id: "optavia-reference", title: "Condiments Quick Reference Guide", icon: BookOpen, component: OPTAVIAReferenceGuide },
 ]
 
-// External Resources definitions
-const EXTERNAL_RESOURCES: { id: string; title: string; url: string }[] = [
-  { id: "optavia-strong-fb", title: "Optavia Strong Facebook Group", url: "https://www.facebook.com/groups/810104670912639" },
-  { id: "healthy-edge-team", title: "Healthy Edge 3.0 Team Page", url: "https://www.facebook.com/groups/2156291101444241" },
-  { id: "healthy-edge-client", title: "Healthy Edge 3.0 Client Page", url: "https://www.facebook.com/groups/778947831962215" },
-  { id: "optavia-connect", title: "OPTAVIA Connect", url: "https://optaviaconnect.com/login" },
-  { id: "optavia-blog", title: "OPTAVIA Blog", url: "https://www.optaviablog.com" },
-  { id: "habits-of-health", title: "Habits of Health", url: "https://www.habitsofhealth.com/" },
-]
+// External Resources are now fetched from the database based on pinned IDs
 
 export function DashboardOverview() {
   const { user, profile, badges, recipes, favoriteRecipes, completedResources } = useUserData()
@@ -100,6 +92,7 @@ export function DashboardOverview() {
   const [onboardingProgress, setOnboardingProgress] = useState<{ completed: number; total: number; percentage: number }>({ completed: 0, total: 3, percentage: 0 })
   const [pinnedToolIds, setPinnedToolIds] = useState<string[]>([])
   const [pinnedResourceIds, setPinnedResourceIds] = useState<string[]>([])
+  const [pinnedResources, setPinnedResources] = useState<{ id: string; title: string; url: string }[]>([])
   const [openToolId, setOpenToolId] = useState<string | null>(null)
   const [milestoneClient, setMilestoneClient] = useState<any | null>(null)
   const [showMilestoneModal, setShowMilestoneModal] = useState(false)
@@ -155,9 +148,24 @@ export function DashboardOverview() {
     return COACH_TOOLS.filter(t => pinnedToolIds.includes(t.id))
   }, [pinnedToolIds])
 
-  const pinnedResources = useMemo(() => {
-    return EXTERNAL_RESOURCES.filter(r => pinnedResourceIds.includes(r.id))
-  }, [pinnedResourceIds])
+  // Fetch pinned resources from the database
+  useEffect(() => {
+    if (pinnedResourceIds.length === 0) {
+      setPinnedResources([])
+      return
+    }
+    const fetchPinnedResources = async () => {
+      const { data, error } = await supabase
+        .from("external_resources")
+        .select("id, title, url")
+        .in("id", pinnedResourceIds)
+        .eq("is_active", true)
+      if (!error && data) {
+        setPinnedResources(data)
+      }
+    }
+    fetchPinnedResources()
+  }, [pinnedResourceIds, supabase])
 
   // Get bookmarked training resources
   const bookmarkedTrainingResources = useMemo(() => {

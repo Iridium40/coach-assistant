@@ -227,7 +227,7 @@ export function ExternalResourcesTab() {
       {/* Title and Description */}
       <div className="text-center py-4 sm:py-8 mb-6">
         <h2 className="font-heading font-bold text-2xl sm:text-3xl text-optavia-dark mb-3 sm:mb-4">
-          Resources
+          External Resources
         </h2>
         <p className="text-optavia-gray text-base sm:text-lg max-w-2xl mx-auto px-4">
           Access external resources and communities to support your coaching journey and help your clients succeed.
