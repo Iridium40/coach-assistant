@@ -53,7 +53,6 @@ export function Header({ onSettingsClick, onHomeClick, onAnnouncementsClick, onR
     if (pathname?.startsWith("/dashboard") || pathname === "/") return "dashboard"
     if (pathname?.startsWith("/prospect-tracker") || 
         pathname?.startsWith("/client-tracker") || 
-        pathname?.startsWith("/prospect-pipeline") ||
         pathname?.startsWith("/coach/downline") ||
         pathname?.startsWith("/my-business")) return "my-business"
     if (pathname?.startsWith("/training")) return "training"
@@ -70,7 +69,7 @@ export function Header({ onSettingsClick, onHomeClick, onAnnouncementsClick, onR
   // Order: Dashboard, My Business, Calendar, Training, Resources, Recipes
   const allNavItems = [
     { id: "dashboard" as const, label: "Dashboard", href: "/dashboard", fullAccessOnly: true },
-    { id: "my-business" as const, label: "My Business", href: "/prospect-pipeline", fullAccessOnly: true },
+    { id: "my-business" as const, label: "My Business", href: "/prospect-tracker", fullAccessOnly: true },
     { id: "calendar" as const, label: "Calendar", href: "/calendar", fullAccessOnly: true },
     { id: "training" as const, label: "Training", href: "/training", fullAccessOnly: false },
     { id: "coach-tools" as const, label: "Coach Tools", href: "/coach-tools", fullAccessOnly: true },
@@ -85,8 +84,7 @@ export function Header({ onSettingsClick, onHomeClick, onAnnouncementsClick, onR
 
   // Updated My Business items per Phase 5 UX redesign
   const businessItems = [
-    { label: "Pipeline", href: "/prospect-pipeline", description: "Overview of your journey" },
-    { label: "100's List Tracker", href: "/prospect-tracker", description: "Track your pipeline" },
+    { label: "100's List Tracker", href: "/prospect-tracker", description: "Track your prospect pipeline" },
     { label: "Client Tracker", href: "/client-tracker", description: "Touchpoints & milestones" },
     { label: "Downline Overview", href: "/coach/downline", description: "Track your team's progress" },
     { label: "Rank Calculator", href: "/my-business", description: "Track rank progress" },

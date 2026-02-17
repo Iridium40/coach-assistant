@@ -91,7 +91,7 @@ export default function NewCoachLaunchpad() {
       tasks: [
         { title: "Complete 100s List Training", type: "training", duration: "20 min", link: "/training/building-your-100s-list", description: "Learn the art of building your prospect list" },
         { title: "Brainstorm 50 Names", type: "exercise", duration: "30 min", description: "Everyone you know - don't prejudge! Use the categories method" },
-        { title: "Add 20 Prospects to Pipeline", type: "action", duration: "20 min", link: "/prospect-pipeline", description: "Enter your top 20 prospects into the tracking system" },
+        { title: "Add 20 Prospects to Pipeline", type: "action", duration: "20 min", link: "/prospect-tracker", description: "Enter your top 20 prospects into the tracking system" },
         { title: "Identify Your Top 5", type: "exercise", duration: "10 min", description: "Who are the 5 people most likely to say yes?" }
       ]
     },
@@ -134,7 +134,7 @@ export default function NewCoachLaunchpad() {
         { title: "Post Your Launch Announcement", type: "action", duration: "10 min", description: "Share your news with the world!" },
         { title: "Reach Out to 5 Warm Contacts", type: "action", duration: "30 min", description: "Message your warmest prospects from your list" },
         { title: "Schedule 2 Coffee Chats", type: "action", duration: "15 min", description: "Get face-to-face or video call time on the calendar" },
-        { title: "Log All Contacts in Pipeline", type: "action", duration: "10 min", link: "/prospect-pipeline", description: "Track every conversation" }
+        { title: "Log All Contacts in Pipeline", type: "action", duration: "10 min", link: "/prospect-tracker", description: "Track every conversation" }
       ]
     },
     {
@@ -146,7 +146,7 @@ export default function NewCoachLaunchpad() {
       milestone: "🏆 WEEK 1 COMPLETE!",
       tasks: [
         { title: "Weekly Review with Sponsor", type: "call", duration: "30 min", description: "Celebrate wins, troubleshoot challenges, set Week 2 goals" },
-        { title: "Update Pipeline Status", type: "action", duration: "15 min", link: "/prospect-pipeline", description: "Move prospects through stages, add notes" },
+        { title: "Update Pipeline Status", type: "action", duration: "15 min", link: "/prospect-tracker", description: "Move prospects through stages, add notes" },
         { title: "Set 3 Goals for Week 2", type: "exercise", duration: "15 min", description: "Specific, measurable goals for the coming week" },
         { title: "Reward Yourself!", type: "celebration", duration: "As needed", description: "You completed Week 1! Do something nice for yourself" }
       ]
@@ -295,7 +295,7 @@ export default function NewCoachLaunchpad() {
           { title: "Daily Prospect Outreach (5 people)", type: "action", duration: "30 min", description: "Consistent daily action builds results" },
           { title: "Follow Up on Pending", type: "action", duration: "20 min", description: "Check in with everyone in your pipeline" },
           { title: "Post Content", type: "action", duration: "10 min", description: "Stay visible and provide value" },
-          { title: "Log Activity in Pipeline", type: "action", duration: "10 min", link: "/prospect-pipeline", description: "Track all your conversations" }
+          { title: "Log Activity in Pipeline", type: "action", duration: "10 min", link: "/prospect-tracker", description: "Track all your conversations" }
         ]
       });
     }
@@ -468,7 +468,7 @@ export default function NewCoachLaunchpad() {
 
         {/* Quick Links */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16, marginBottom: 24 }}>
-          <Link href="/prospect-pipeline" style={{ textDecoration: 'none' }}>
+          <Link href="/prospect-tracker" style={{ textDecoration: 'none' }}>
             <div style={{ background: 'white', borderRadius: 12, padding: 20, boxShadow: '0 2px 8px rgba(0,0,0,0.06)', display: 'flex', alignItems: 'center', gap: 12, cursor: 'pointer', border: '2px solid transparent', transition: 'border 0.2s' }}>
               <div style={{ padding: 10, background: '#e3f2fd', borderRadius: 10 }}>
                 <Users size={20} color="#1565c0" />
