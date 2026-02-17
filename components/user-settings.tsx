@@ -272,17 +272,7 @@ export function UserSettings({ onClose }: UserSettingsProps) {
   const isCoach = profile?.user_role?.toLowerCase() !== "admin"
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-4xl">
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="font-heading font-bold text-2xl sm:text-3xl text-optavia-dark">Settings</h1>
-        {onClose && (
-          <Button variant="ghost" size="icon" onClick={onClose}>
-            <X className="h-4 w-4" />
-          </Button>
-        )}
-      </div>
-
-      <div className="space-y-6">
+    <div className="space-y-6">
         {/* Profile Section */}
         <Card className="bg-white border border-gray-200 shadow-lg">
           <CardHeader>
@@ -422,7 +412,6 @@ export function UserSettings({ onClose }: UserSettingsProps) {
         </Card>
 
 
-      </div>
     </div>
   )
 }

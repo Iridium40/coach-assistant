@@ -387,11 +387,9 @@ export function DashboardOverview() {
 
                 {/* External Resources - Blue */}
                 {pinnedResources.map((resource) => (
-                  <a
+                  <Link
                     key={resource.id}
-                    href={resource.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
+                    href={`/view?url=${encodeURIComponent(resource.url)}&title=${encodeURIComponent(resource.title)}`}
                     className="flex items-center gap-2 p-2.5 rounded-lg border-2 border-blue-400 bg-blue-50 hover:bg-blue-100 transition-colors cursor-pointer group"
                   >
                     <Link2 className="h-4 w-4 text-blue-600 flex-shrink-0" />
@@ -399,16 +397,14 @@ export function DashboardOverview() {
                       {resource.title}
                     </span>
                     <ExternalLink className="h-3 w-3 text-optavia-gray flex-shrink-0" />
-                  </a>
+                  </Link>
                 ))}
 
                 {/* Bookmarked Training Resources */}
                 {bookmarkedTrainingResources.map((resource) => (
-                  <a
+                  <Link
                     key={`bookmark-${resource.id}`}
-                    href={resource.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
+                    href={`/view?url=${encodeURIComponent(resource.url)}&title=${encodeURIComponent(resource.title)}`}
                     className="flex items-center gap-2 p-2.5 rounded-lg border-2 border-amber-400 bg-amber-50 hover:bg-amber-100 transition-colors cursor-pointer group"
                   >
                     <Bookmark className="h-4 w-4 text-amber-500 fill-amber-400 flex-shrink-0" />
@@ -416,7 +412,7 @@ export function DashboardOverview() {
                       {resource.title}
                     </span>
                     <ExternalLink className="h-3 w-3 text-optavia-gray flex-shrink-0" />
-                  </a>
+                  </Link>
                 ))}
               </div>
             ) : (

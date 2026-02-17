@@ -8,8 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { useUserData } from "@/contexts/user-data-context"
 import { useToast } from "@/hooks/use-toast"
 import { createClient } from "@/lib/supabase/client"
-import { Video, ArrowLeft, Save, ExternalLink, Copy, Check } from "lucide-react"
-import Link from "next/link"
+import { Video, Save, ExternalLink, Copy, Check } from "lucide-react"
 
 interface ZoomSettingsProps {
   onClose?: () => void
@@ -104,23 +103,7 @@ export function ZoomSettings({ onClose }: ZoomSettingsProps) {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-2xl">
-      {/* Header */}
-      <div className="flex items-center gap-4 mb-6">
-        <Link href="/dashboard">
-          <Button variant="ghost" size="icon" className="text-optavia-gray hover:text-optavia-dark">
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
-        </Link>
-        <div>
-          <h1 className="font-heading font-bold text-2xl sm:text-3xl text-optavia-dark">
-            Zoom Room Settings
-          </h1>
-          <p className="text-optavia-gray text-sm">
-            Save your personal Zoom room details for easy sharing
-          </p>
-        </div>
-      </div>
+    <div className="space-y-6">
 
       {/* Main Form Card */}
       <Card className="bg-white border border-gray-200 shadow-sm mb-6">
