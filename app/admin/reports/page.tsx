@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { useUserData } from "@/contexts/user-data-context"
 import { createClient } from "@/lib/supabase/client"
-import { ArrowLeft, Users, BookOpen, Award, TrendingUp, UserCheck, Calendar } from "lucide-react"
+import { ArrowLeft, Users, TrendingUp, UserCheck, Calendar, Target } from "lucide-react"
 
 interface ReportStats {
   totalUsers: number
@@ -18,8 +18,7 @@ interface ReportStats {
   activePercent30Days: number
   newCoaches: number
   experiencedCoaches: number
-  totalCompletedResources: number
-  totalBadgesEarned: number
+  totalActiveProspects: number
   totalActiveClients: number
   totalHAScheduled: number
   haScheduledToday: number
@@ -82,15 +81,11 @@ export default function AdminReportsPage() {
       const activePercent7Days = Math.round(((activeUsers7Days || 0) / total) * 100)
       const activePercent30Days = Math.round(((activeUsers30Days || 0) / total) * 100)
 
-      // Get total completed resources
-      const { count: totalCompletedResources } = await supabase
-        .from("user_progress")
+      // Get total active prospects (status = new or interested) across all coaches
+      const { count: totalActiveProspects } = await supabase
+        .from("prospects")
         .select("*", { count: "exact", head: true })
-
-      // Get total badges earned
-      const { count: totalBadgesEarned } = await supabase
-        .from("user_badges")
-        .select("*", { count: "exact", head: true })
+        .in("status", ["new", "interested"])
 
       // Get total active clients across all coaches
       const { count: totalActiveClients } = await supabase
@@ -123,8 +118,7 @@ export default function AdminReportsPage() {
         activePercent30Days,
         newCoaches,
         experiencedCoaches,
-        totalCompletedResources: totalCompletedResources || 0,
-        totalBadgesEarned: totalBadgesEarned || 0,
+        totalActiveProspects: totalActiveProspects || 0,
         totalActiveClients: totalActiveClients || 0,
         totalHAScheduled: totalHAScheduled || 0,
         haScheduledToday: haScheduledToday || 0,
@@ -240,26 +234,13 @@ export default function AdminReportsPage() {
 
               <Card className="bg-white border border-gray-200">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium text-optavia-gray">Resources Completed</CardTitle>
-                  <BookOpen className="h-5 w-5 text-[hsl(var(--optavia-green))]" />
+                  <CardTitle className="text-sm font-medium text-optavia-gray">Active Prospects</CardTitle>
+                  <Target className="h-5 w-5 text-teal-500" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-3xl font-bold text-optavia-dark">{stats.totalCompletedResources}</div>
+                  <div className="text-3xl font-bold text-optavia-dark">{stats.totalActiveProspects}</div>
                   <p className="text-xs text-optavia-gray mt-1">
-                    Total across all coaches
-                  </p>
-                </CardContent>
-              </Card>
-
-              <Card className="bg-white border border-gray-200">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium text-optavia-gray">Badges Earned</CardTitle>
-                  <Award className="h-5 w-5 text-[hsl(var(--optavia-green))]" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-3xl font-bold text-optavia-dark">{stats.totalBadgesEarned}</div>
-                  <p className="text-xs text-optavia-gray mt-1">
-                    Total badges earned by coaches
+                    New or interested across all coaches
                   </p>
                 </CardContent>
               </Card>
