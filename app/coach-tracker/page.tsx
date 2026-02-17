@@ -55,7 +55,6 @@ import {
   Edit2,
   Trash2,
   Download,
-  CheckCircle,
   Rocket,
   Award,
   Check,
@@ -93,7 +92,6 @@ function CoachCard({
   coach,
   onEdit,
   onRank,
-  onCheckIn,
   onMoveStage,
   onDelete,
   onUpdateCoach,
@@ -104,7 +102,6 @@ function CoachCard({
   coach: Coach
   onEdit: (coach: Coach) => void
   onRank: (coach: Coach) => void
-  onCheckIn: (coach: Coach) => void
   onMoveStage: (coachId: string, newStage: CoachStage) => void
   onDelete: (coach: Coach) => void
   onUpdateCoach: (id: string, updates: UpdateCoach) => Promise<boolean>
@@ -233,7 +230,7 @@ function CoachCard({
           </div>
         )}
 
-        {/* Primary Actions - Status full-width, then Check In + Schedule share a row */}
+        {/* Primary Actions - Status full-width, then Schedule beside it */}
         <div className="mt-4 space-y-2 sm:space-y-0 sm:flex sm:gap-2">
           {/* Stage Select - full width on mobile */}
           <Select
@@ -252,30 +249,16 @@ function CoachCard({
             </SelectContent>
           </Select>
 
-          {/* Check In + Schedule share a row on mobile */}
-          <div className="grid grid-cols-2 gap-2 sm:contents">
-            {/* Check In Button */}
-            <Button
-              variant="outline"
-              size="sm"
-              className="w-full sm:flex-1 border-[hsl(var(--optavia-green))]/50 text-[hsl(var(--optavia-green))] hover:bg-[hsl(var(--optavia-green-light))]"
-              onClick={() => onCheckIn(coach)}
-            >
-              <CheckCircle className="h-4 w-4 mr-1" />
-              <span className="text-xs sm:text-sm">Check In</span>
-            </Button>
-
-            {/* Schedule Button */}
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => onOpenScheduleModal(coach)}
-              className="w-full sm:flex-1 text-purple-600 border-purple-200 hover:bg-purple-50"
-            >
-              <CalendarPlus className="h-4 w-4 mr-1" />
-              <span className="text-xs sm:text-sm">Schedule</span>
-            </Button>
-          </div>
+          {/* Schedule Button */}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => onOpenScheduleModal(coach)}
+            className="w-full sm:flex-1 text-purple-600 border-purple-200 hover:bg-purple-50"
+          >
+            <CalendarPlus className="h-4 w-4 mr-1" />
+            <span className="text-xs sm:text-sm">Schedule</span>
+          </Button>
         </div>
 
         {/* Secondary Actions: Edit, Rank, Remind, Delete (grid like prospect/client card) */}
@@ -374,7 +357,6 @@ export default function CoachTrackerPage() {
     addCoach,
     updateCoach,
     deleteCoach,
-    checkIn,
     getFilteredCoaches,
   } = useCoaches()
 
@@ -641,14 +623,6 @@ Suggested talking points:
     }
   }
 
-  // Check in
-  const handleCheckIn = async (coach: Coach) => {
-    const success = await checkIn(coach.id)
-    if (success) {
-      toast({ title: "✅ Check-in logged", description: `Checked in with ${coach.label}` })
-    }
-  }
-
   // Update rank
   const handleUpdateRank = async (coachId: string, newRank: number) => {
     const success = await updateCoach(coachId, { rank: newRank })
@@ -856,7 +830,6 @@ Suggested talking points:
                   coach={coach}
                   onEdit={openEditModal}
                   onRank={(c) => setRankCoach(c)}
-                  onCheckIn={handleCheckIn}
                   onMoveStage={handleMoveStage}
                   onDelete={(c) => setDeletingCoach(c)}
                   onUpdateCoach={updateCoach}
