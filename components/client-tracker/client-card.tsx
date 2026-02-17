@@ -39,12 +39,13 @@ interface ClientCardProps {
   client: Client
   onToggleTouchpoint: (id: string, type: "am_done" | "pm_done") => Promise<boolean>
   onToggleCoachProspect: (id: string) => Promise<boolean>
-  onUpdateStatus: (id: string, status: ClientStatus) => Promise<boolean>
-  onUpdateClient: (id: string, updates: Partial<Client>) => Promise<boolean>
+  onStatusChange: (id: string, status: ClientStatus) => void
   onOpenTextTemplates: (client: Client) => void
   onOpenScheduleModal: (client: Client) => void
   onSendSMS: (client: Client) => void
   onClearSchedule: (clientId: string) => void
+  onCompleteCheckIn: (client: Client) => void
+  isScheduledDue: (client: Client) => boolean
   needsAttention: (client: Client) => boolean
 }
 
@@ -52,12 +53,13 @@ export function ClientCard({
   client,
   onToggleTouchpoint,
   onToggleCoachProspect,
-  onUpdateStatus,
-  onUpdateClient,
+  onStatusChange,
   onOpenTextTemplates,
   onOpenScheduleModal,
   onSendSMS,
   onClearSchedule,
+  onCompleteCheckIn,
+  isScheduledDue,
   needsAttention,
 }: ClientCardProps) {
   const [showResources, setShowResources] = useState(false)
@@ -89,11 +91,6 @@ export function ClientCard({
     return "Needs attention"
   })()
 
-  const handleCompleteCheckIn = async () => {
-    // `toggleTouchpoint` now auto-clears/auto-advances schedules when a due check-in is marked done.
-    await onToggleTouchpoint(client.id, "am_done")
-  }
-
   return (
     <Card
       className={`transition-shadow hover:shadow-md ${
@@ -106,13 +103,13 @@ export function ClientCard({
     >
       <CardContent className="p-4">
         {/* Header Row: Day Badge + Client Info */}
-        <div className="flex items-start gap-4">
+        <div className="flex items-start gap-3">
           {/* Day Badge */}
           <div
-            className="w-14 h-14 rounded-xl flex flex-col items-center justify-center flex-shrink-0"
+            className="w-12 h-12 rounded-xl flex flex-col items-center justify-center flex-shrink-0"
             style={{ backgroundColor: phase.bg }}
           >
-            <div className="text-xs font-semibold" style={{ color: phase.color }}>
+            <div className="text-[10px] font-semibold" style={{ color: phase.color }}>
               DAY
             </div>
             <div className="text-xl font-bold" style={{ color: phase.color }}>
@@ -164,77 +161,97 @@ export function ClientCard({
           </div>
         </div>
 
-        {/* Scheduled Time & Action Buttons */}
-        {client.status === "active" && (
-          <div className="mt-4 space-y-3">
-            {/* Scheduled Time Display */}
-            {client.next_scheduled_at && (
-              <div className="flex items-center gap-1 flex-wrap">
-                <Badge
-                  className={`flex items-center gap-1 ${
-                    new Date(client.next_scheduled_at) < new Date()
-                      ? "bg-red-100 text-red-700"
-                      : "bg-green-100 text-green-700"
-                  }`}
-                >
-                  <Calendar className="h-3 w-3" />
-                  {new Date(client.next_scheduled_at).toLocaleDateString("en-US", {
-                    weekday: "short",
-                    month: "short",
-                    day: "numeric",
-                  })}{" "}
-                  {new Date(client.next_scheduled_at).toLocaleTimeString("en-US", {
-                    hour: "numeric",
-                    minute: "2-digit",
-                  })}
-                  {client.recurring_frequency && client.recurring_frequency !== "none" && (
-                    <Repeat className="h-3 w-3 ml-1" />
-                  )}
-                </Badge>
-                {client.phone && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => onSendSMS(client)}
-                    className="h-7 w-7 p-0 text-green-500 hover:text-green-700 hover:bg-green-50"
-                    title="Send SMS reminder"
-                  >
-                    <Send className="h-3 w-3" />
-                  </Button>
-                )}
-                {/* Complete Check-in Button - only show if date is today or past */}
-                {new Date(client.next_scheduled_at!).setHours(0, 0, 0, 0) <=
-                  new Date().setHours(0, 0, 0, 0) && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={handleCompleteCheckIn}
-                    className="h-7 w-7 p-0 bg-green-100 hover:bg-green-200 rounded-full"
-                    title="Mark check-in as completed"
-                  >
-                    <CheckCircle className="h-4 w-4 text-green-600" />
-                  </Button>
-                )}
-                {/* Cancel Check-in Button */}
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => onClearSchedule(client.id)}
-                  className="h-7 w-7 p-0 bg-red-100 hover:bg-red-200 rounded-full"
-                  title="Cancel scheduled check-in"
-                >
-                  <X className="h-4 w-4 text-red-600" />
-                </Button>
-              </div>
+        {/* Scheduled Time Row */}
+        {client.status === "active" && client.next_scheduled_at && (
+          <div className="mt-3 flex items-center gap-2 flex-wrap">
+            <Badge
+              className={`flex items-center gap-1.5 px-2.5 py-1 text-sm font-medium ${
+                new Date(client.next_scheduled_at) < new Date()
+                  ? "bg-red-100 text-red-700 border border-red-200"
+                  : "bg-green-100 text-green-700 border border-green-200"
+              }`}
+            >
+              <Calendar className="h-3.5 w-3.5" />
+              {new Date(client.next_scheduled_at).toLocaleDateString("en-US", {
+                weekday: "short",
+                month: "short",
+                day: "numeric",
+              })}{" "}
+              {new Date(client.next_scheduled_at).toLocaleTimeString("en-US", {
+                hour: "numeric",
+                minute: "2-digit",
+              })}
+              {client.recurring_frequency && client.recurring_frequency !== "none" && (
+                <Repeat className="h-3 w-3 ml-1" />
+              )}
+            </Badge>
+            {client.phone && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => onSendSMS(client)}
+                className="h-7 w-7 p-0 text-green-500 hover:text-green-700 hover:bg-green-50"
+                title="Send SMS reminder"
+              >
+                <Send className="h-3 w-3" />
+              </Button>
             )}
+            {new Date(client.next_scheduled_at!).setHours(0, 0, 0, 0) <=
+              new Date().setHours(0, 0, 0, 0) && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => onCompleteCheckIn(client)}
+                className="h-7 w-7 p-0 bg-green-100 hover:bg-green-200 rounded-full"
+                title="Mark check-in as completed"
+              >
+                <CheckCircle className="h-4 w-4 text-green-600" />
+              </Button>
+            )}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => onClearSchedule(client.id)}
+              className="h-7 w-7 p-0 bg-red-100 hover:bg-red-200 rounded-full"
+              title="Cancel scheduled check-in"
+            >
+              <X className="h-4 w-4 text-red-600" />
+            </Button>
+          </div>
+        )}
 
-            {/* Action Buttons - All 3 on same row */}
-            <div className="flex gap-2">
+        {/* Action Buttons - Status + Check In + Schedule (matching prospect card layout) */}
+        <div className="mt-4 flex flex-col sm:flex-row gap-2">
+          {/* Status Select (prominent, like prospect card) */}
+          <Select
+            value={client.status}
+            onValueChange={(value) => onStatusChange(client.id, value as ClientStatus)}
+          >
+            <SelectTrigger className="flex-1 min-w-0">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="active">⭐ Client</SelectItem>
+              <SelectItem value="goal_achieved">🏆 Goal Achieved</SelectItem>
+              <SelectItem value="future_coach">🌟 Future Coach</SelectItem>
+              <SelectItem value="coach_launched">🚀 Launched</SelectItem>
+              <SelectItem value="paused">⏸️ Paused</SelectItem>
+            </SelectContent>
+          </Select>
+
+          {client.status === "active" && (
+            <>
               {/* Check-in Button */}
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => onToggleTouchpoint(client.id, "am_done")}
+                onClick={() => {
+                  if (!client.am_done && isScheduledDue(client)) {
+                    onCompleteCheckIn(client)
+                    return
+                  }
+                  onToggleTouchpoint(client.id, "am_done")
+                }}
                 className={`flex-1 ${
                   client.am_done
                     ? "bg-green-100 text-green-700 border-green-300 hover:bg-green-200"
@@ -246,26 +263,9 @@ export function ClientCard({
                 ) : (
                   <Circle className="h-4 w-4 mr-1" />
                 )}
-                <span className="text-xs sm:text-sm">
-                  {client.am_done ? "Checked In" : "Check In"}
-                </span>
+                <span className="text-xs sm:text-sm">{client.am_done ? "Checked In" : "Check In"}</span>
               </Button>
-              {/* Text Button - highlighted for milestones that haven't been celebrated yet */}
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => onOpenTextTemplates(client)}
-                className={`flex-1 ${
-                  isMilestoneDay(programDay) && client.last_celebrated_day !== programDay
-                    ? "bg-amber-100 text-amber-700 border-amber-300 hover:bg-amber-200 animate-pulse"
-                    : "text-blue-600 border-blue-200 hover:bg-blue-50"
-                }`}
-              >
-                <MessageSquare className="h-4 w-4 mr-1" />
-                <span className="text-xs sm:text-sm">
-                  {isMilestoneDay(programDay) && client.last_celebrated_day !== programDay ? "Celebrate!" : "Text"}
-                </span>
-              </Button>
+              {/* Schedule Button */}
               <Button
                 variant="outline"
                 size="sm"
@@ -275,44 +275,46 @@ export function ClientCard({
                 <CalendarPlus className="h-4 w-4 mr-1" />
                 <span className="text-xs sm:text-sm">Schedule</span>
               </Button>
-            </div>
-          </div>
-        )}
+            </>
+          )}
+        </div>
 
-        {/* Secondary Actions: Coach, Remind & Pause/Resume */}
-        <div className="mt-3 pt-3 border-t flex items-center gap-2">
+        {/* Secondary Actions: Text, Coach?, Remind (grid like prospect card) */}
+        <div className="mt-3 pt-3 border-t grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-2">
+          {client.status === "active" && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => onOpenTextTemplates(client)}
+              className={
+                isMilestoneDay(programDay) && client.last_celebrated_day !== programDay
+                  ? "bg-amber-100 text-amber-700 border-amber-300 hover:bg-amber-200 animate-pulse"
+                  : "text-blue-600 border-blue-200 hover:bg-blue-50"
+              }
+            >
+              <MessageSquare className="h-4 w-4 mr-1" />
+              <span className="text-xs sm:text-sm">
+                {isMilestoneDay(programDay) && client.last_celebrated_day !== programDay ? "Celebrate!" : "Text"}
+              </span>
+            </Button>
+          )}
+
           <Button
             variant="outline"
             size="sm"
             onClick={() => onToggleCoachProspect(client.id)}
             className={client.is_coach_prospect ? "bg-orange-50 text-orange-700" : ""}
           >
-            <Star className="h-4 w-4 sm:mr-1" />
-            <span className="hidden sm:inline">
-              {client.is_coach_prospect ? "Coach" : "Coach?"}
-            </span>
+            <Star className="h-4 w-4 mr-1" />
+            <span className="text-xs sm:text-sm">{client.is_coach_prospect ? "Coach" : "Coach?"}</span>
           </Button>
+
           <ReminderButton
             entityType="client"
             entityId={client.id}
             entityName={client.label}
             variant="outline"
           />
-          <Select
-            value={client.status}
-            onValueChange={(value) => onUpdateStatus(client.id, value as ClientStatus)}
-          >
-            <SelectTrigger className="h-8 w-auto min-w-[110px] text-xs">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="active">⭐ Client</SelectItem>
-              <SelectItem value="goal_achieved">🏆 Goal Achieved</SelectItem>
-              <SelectItem value="future_coach">🌟 Future Coach</SelectItem>
-              <SelectItem value="coach_launched">🚀 Launched</SelectItem>
-              <SelectItem value="paused">⏸️ Paused</SelectItem>
-            </SelectContent>
-          </Select>
         </div>
 
         {client.notes && (
