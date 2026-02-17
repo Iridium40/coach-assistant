@@ -182,11 +182,12 @@ export function DashboardOverview() {
     const loadMeetings = async () => {
       const today = new Date()
 
-      // Fetch all upcoming/live meetings to expand recurring ones
+      // Fetch all meetings (including completed) to expand recurring ones
+      // Recurring events may have a "completed" parent but still have valid future occurrences
       const { data, error } = await supabase
         .from("zoom_calls")
         .select("*")
-        .in("status", ["upcoming", "live"])
+        .in("status", ["upcoming", "live", "completed"])
         .order("scheduled_at", { ascending: true })
 
       if (!error && data) {
