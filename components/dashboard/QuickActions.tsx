@@ -1,151 +1,73 @@
 "use client"
 
-import React from "react"
+import React, { useState, useEffect } from "react"
 import Link from "next/link"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import {
-  Users, Calendar, BookOpen, UtensilsCrossed, UserPlus, Heart,
-  Clock, Target, Sparkles, ChevronRight
-} from "lucide-react"
+import { Sparkles } from "lucide-react"
+import { createClient } from "@/lib/supabase/client"
+import type { DashboardButton } from "@/lib/types"
 
-interface QuickActionsProps {
-  overdueProspects: number
-  clientsNeedingCheckIn: number
-  haScheduledToday: number
-  trainingPercentage: number
+const COLOR_STYLES: Record<string, { bg: string; text: string }> = {
+  green: {
+    bg: "bg-gradient-to-br from-green-50 to-emerald-50 border-green-200 hover:from-green-100 hover:to-emerald-100",
+    text: "text-green-600",
+  },
+  blue: {
+    bg: "bg-gradient-to-br from-blue-50 to-indigo-50 border-blue-200 hover:from-blue-100 hover:to-indigo-100",
+    text: "text-blue-600",
+  },
+  purple: {
+    bg: "bg-gradient-to-br from-purple-50 to-violet-50 border-purple-200 hover:from-purple-100 hover:to-violet-100",
+    text: "text-purple-600",
+  },
+  orange: {
+    bg: "bg-gradient-to-br from-orange-50 to-amber-50 border-orange-200 hover:from-orange-100 hover:to-amber-100",
+    text: "text-orange-600",
+  },
+  red: {
+    bg: "bg-gradient-to-br from-red-50 to-rose-50 border-red-200 hover:from-red-100 hover:to-rose-100",
+    text: "text-red-600",
+  },
+  pink: {
+    bg: "bg-gradient-to-br from-pink-50 to-fuchsia-50 border-pink-200 hover:from-pink-100 hover:to-fuchsia-100",
+    text: "text-pink-600",
+  },
+  teal: {
+    bg: "bg-gradient-to-br from-teal-50 to-cyan-50 border-teal-200 hover:from-teal-100 hover:to-cyan-100",
+    text: "text-teal-600",
+  },
+  amber: {
+    bg: "bg-gradient-to-br from-amber-50 to-yellow-50 border-amber-200 hover:from-amber-100 hover:to-yellow-100",
+    text: "text-amber-600",
+  },
 }
 
-export function QuickActions({
-  overdueProspects,
-  clientsNeedingCheckIn,
-  haScheduledToday,
-  trainingPercentage,
-}: QuickActionsProps) {
-  // Determine which actions to show based on current state
-  const actions: Array<{
-    id: string
-    label: string
-    description: string
-    href: string
-    icon: React.ReactNode
-    priority: "high" | "medium" | "normal"
-    bgClass: string
-    iconClass: string
-  }> = []
+const DEFAULT_COLOR = COLOR_STYLES.green
 
-  // High priority: Overdue 100's list follow-ups
-  if (overdueProspects > 0) {
-    actions.push({
-      id: "overdue-prospects",
-      label: "Follow Up on 100's List",
-      description: `${overdueProspects} overdue`,
-      href: "/prospect-tracker",
-      icon: <Clock className="h-5 w-5" />,
-      priority: "high",
-      bgClass: "bg-gradient-to-br from-red-50 to-orange-50 border-red-200 hover:from-red-100 hover:to-orange-100",
-      iconClass: "text-red-500",
-    })
-  }
+function isExternalUrl(url: string): boolean {
+  return url.startsWith("http://") || url.startsWith("https://")
+}
 
-  // High priority: Clients needing check-ins
-  if (clientsNeedingCheckIn > 0) {
-    actions.push({
-      id: "client-checkins",
-      label: "Client Check-ins Needed",
-      description: `${clientsNeedingCheckIn} client${clientsNeedingCheckIn > 1 ? 's' : ''}`,
-      href: "/client-tracker",
-      icon: <Heart className="h-5 w-5" />,
-      priority: "high",
-      bgClass: "bg-gradient-to-br from-orange-50 to-amber-50 border-orange-200 hover:from-orange-100 hover:to-amber-100",
-      iconClass: "text-orange-500",
-    })
-  }
+export function QuickActions() {
+  const [buttons, setButtons] = useState<DashboardButton[]>([])
+  const [loading, setLoading] = useState(true)
 
-  // Medium priority: HA scheduled today
-  if (haScheduledToday > 0) {
-    actions.push({
-      id: "ha-today",
-      label: "Prepare for Health Assessment",
-      description: `${haScheduledToday} scheduled today`,
-      href: "/prospect-tracker?status=ha_scheduled",
-      icon: <Target className="h-5 w-5" />,
-      priority: "medium",
-      bgClass: "bg-gradient-to-br from-purple-50 to-violet-50 border-purple-200 hover:from-purple-100 hover:to-violet-100",
-      iconClass: "text-purple-500",
-    })
-  }
+  useEffect(() => {
+    const fetchButtons = async () => {
+      const supabase = createClient()
+      const { data, error } = await supabase
+        .from("dashboard_buttons")
+        .select("*")
+        .order("sort_order", { ascending: true })
 
-  // Medium priority: Training not complete
-  if (trainingPercentage < 50) {
-    actions.push({
-      id: "continue-training",
-      label: "Continue Training",
-      description: `${trainingPercentage}% complete`,
-      href: "/training",
-      icon: <BookOpen className="h-5 w-5" />,
-      priority: "medium",
-      bgClass: "bg-gradient-to-br from-blue-50 to-indigo-50 border-blue-200 hover:from-blue-100 hover:to-indigo-100",
-      iconClass: "text-blue-500",
-    })
-  }
-
-  // Default actions if no urgent items
-  if (actions.length < 4) {
-    const defaultActions = [
-      {
-        id: "add-prospect",
-        label: "Add to 100's List",
-        description: "Grow your pipeline",
-        href: "/prospect-tracker",
-        icon: <UserPlus className="h-5 w-5" />,
-        priority: "normal" as const,
-        bgClass: "bg-gradient-to-br from-blue-50 to-indigo-50 border-blue-200 hover:from-blue-100 hover:to-indigo-100",
-        iconClass: "text-blue-500",
-      },
-      {
-        id: "add-client",
-        label: "Add Client",
-        description: "New client onboarding",
-        href: "/client-tracker",
-        icon: <Users className="h-5 w-5" />,
-        priority: "normal" as const,
-        bgClass: "bg-gradient-to-br from-green-50 to-emerald-50 border-green-200 hover:from-green-100 hover:to-emerald-100",
-        iconClass: "text-green-500",
-      },
-      {
-        id: "view-calendar",
-        label: "View Calendar",
-        description: "Check your schedule",
-        href: "/calendar",
-        icon: <Calendar className="h-5 w-5" />,
-        priority: "normal" as const,
-        bgClass: "bg-gradient-to-br from-purple-50 to-violet-50 border-purple-200 hover:from-purple-100 hover:to-violet-100",
-        iconClass: "text-purple-500",
-      },
-      {
-        id: "meal-plan",
-        label: "Create Meal Plan",
-        description: "Help clients succeed",
-        href: "/meal-planner",
-        icon: <UtensilsCrossed className="h-5 w-5" />,
-        priority: "normal" as const,
-        bgClass: "bg-gradient-to-br from-orange-50 to-amber-50 border-orange-200 hover:from-orange-100 hover:to-amber-100",
-        iconClass: "text-orange-500",
-      },
-    ]
-
-    // Add default actions until we have 4
-    for (const action of defaultActions) {
-      if (actions.length >= 4) break
-      if (!actions.find(a => a.id === action.id)) {
-        actions.push(action)
+      if (!error && data) {
+        setButtons(data)
       }
+      setLoading(false)
     }
-  }
 
-  // Only show first 4 actions
-  const displayActions = actions.slice(0, 4)
+    fetchButtons()
+  }, [])
 
   return (
     <Card className="bg-white border border-gray-200 shadow-sm h-full">
@@ -156,21 +78,57 @@ export function QuickActions({
         </CardTitle>
       </CardHeader>
       <CardContent className="pt-0 flex-1">
-        <div className="grid grid-cols-2 gap-3 h-full">
-          {displayActions.map((action) => (
-            <Link key={action.id} href={action.href} className="flex h-full">
+        {loading ? (
+          <div className="grid grid-cols-2 gap-3">
+            {[1, 2, 3, 4].map((i) => (
               <div
-                className={`w-full min-h-[120px] p-4 rounded-lg border transition-all cursor-pointer flex flex-col justify-center items-center text-center ${action.bgClass}`}
-              >
-                <div className={`${action.iconClass} mb-2`}>
-                  {React.cloneElement(action.icon as React.ReactElement, { className: "h-8 w-8" })}
+                key={i}
+                className="min-h-[80px] rounded-lg border border-gray-200 bg-gray-50 animate-pulse"
+              />
+            ))}
+          </div>
+        ) : buttons.length === 0 ? (
+          <div className="text-center py-8 text-optavia-gray text-sm">
+            No quick actions configured.
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 gap-3 h-full">
+            {buttons.map((button) => {
+              const colorStyle = COLOR_STYLES[button.color] || DEFAULT_COLOR
+              const external = isExternalUrl(button.url)
+
+              const content = (
+                <div
+                  className={`w-full min-h-[80px] p-4 rounded-lg border transition-all cursor-pointer flex items-center justify-center text-center ${colorStyle.bg}`}
+                >
+                  <p className="text-sm font-medium text-optavia-dark leading-tight">
+                    {button.label}
+                  </p>
                 </div>
-                <p className="text-sm font-medium text-optavia-dark leading-tight">{action.label}</p>
-                <p className="text-xs text-gray-500 mt-1">{action.description}</p>
-              </div>
-            </Link>
-          ))}
-        </div>
+              )
+
+              if (external) {
+                return (
+                  <a
+                    key={button.id}
+                    href={button.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex h-full"
+                  >
+                    {content}
+                  </a>
+                )
+              }
+
+              return (
+                <Link key={button.id} href={button.url} className="flex h-full">
+                  {content}
+                </Link>
+              )
+            })}
+          </div>
+        )}
       </CardContent>
     </Card>
   )

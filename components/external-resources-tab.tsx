@@ -13,17 +13,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { Pin, X, ExternalLink, Droplets, Dumbbell, Activity, Users, Wrench, Share2, BookOpen, Search, ClipboardList } from "lucide-react"
+import { Pin, X, ExternalLink, Users, BookOpen, Search } from "lucide-react"
 import { SearchWithHistory } from "@/components/search-with-history"
-import { ToolCard } from "@/components/coach-tools/tool-card"
-import { WaterCalculator } from "@/components/coach-tools/water-calculator"
-import { ExerciseGuide } from "@/components/coach-tools/exercise-guide"
-import { MetabolicHealthInfo } from "@/components/coach-tools/metabolic-health-info"
-import { ClientOnboardingDialog } from "@/components/coach-tools/client-onboarding-dialog"
-import { ClientTroubleshootingDialog } from "@/components/coach-tools/client-troubleshooting-dialog"
-import { ShareHALink } from "@/components/coach-tools/share-ha-link"
-import { SocialMediaPromptGenerator } from "@/components/social-media-prompt-generator"
-import { OPTAVIAReferenceGuide } from "@/components/coach-tools/optavia-reference-guide"
 import { createClient } from "@/lib/supabase/client"
 import type { ExternalResource as DBExternalResource } from "@/lib/types"
 
@@ -37,78 +28,12 @@ interface Resource {
   features: string[] | { tags?: string[]; type?: string; [key: string]: any } | null
 }
 
-// Coach Tools definitions
-const COACH_TOOLS = [
-  {
-    id: "health-assessment",
-    title: "Share Health Assessment",
-    description: "Share your personalized Health Assessment link with prospects and review submissions via email.",
-    icon: ClipboardList,
-    component: ShareHALink,
-    expandMode: "dialog" as const,
-  },
-  {
-    id: "client-onboarding",
-    title: "Client Onboarding Tool",
-    description: "Streamline new client onboarding with templates, checklists, and quick-copy messages.",
-    icon: Users,
-    component: ClientOnboardingDialog,
-    expandMode: "dialog" as const,
-  },
-  {
-    id: "client-troubleshooting",
-    title: "Client Troubleshooting Guide",
-    description: "Quick solutions and scripts for common client issues and challenges.",
-    icon: Wrench,
-    component: ClientTroubleshootingDialog,
-    expandMode: "dialog" as const,
-  },
-  {
-    id: "social-media-generator",
-    title: "Social Media Post Generator",
-    description: "Build prompts for ChatGPT to generate 3 unique social media post ideas instantly.",
-    icon: Share2,
-    component: SocialMediaPromptGenerator,
-    expandMode: "dialog" as const,
-  },
-  {
-    id: "optavia-reference",
-    title: "Condiments Quick Reference Guide",
-    description: "Comprehensive guide to healthy fats, salad dressings, condiments, and portion sizes for the 5 & 1 Plan.",
-    icon: BookOpen,
-    component: OPTAVIAReferenceGuide,
-    expandMode: "dialog" as const,
-  },
-  {
-    id: "water-calculator",
-    title: "Water Intake Calculator",
-    description: "Calculate personalized daily water intake goals for your clients based on weight and activity level.",
-    icon: Droplets,
-    component: WaterCalculator,
-  },
-  {
-    id: "exercise-guide",
-    title: "Exercise & Motion Guide",
-    description: "Weekly workout plans, OPTAVIA ACTIVE products, and motion tips for all fitness levels.",
-    icon: Dumbbell,
-    component: ExerciseGuide,
-  },
-  {
-    id: "metabolic-health",
-    title: "Metabolic Health Education",
-    description: "Key information about metabolic health, talking points, and how OPTAVIA supports wellness.",
-    icon: Activity,
-    component: MetabolicHealthInfo,
-  },
-]
-
 export function ExternalResourcesTab() {
   const { profile } = useUserData()
   const searchParams = useSearchParams()
   const categoryParam = searchParams.get("category")
   const [selectedCategory, setSelectedCategory] = useState<string>(categoryParam || "All")
   const [pinnedIds, setPinnedIds] = useState<string[]>([])
-  const [pinnedToolIds, setPinnedToolIds] = useState<string[]>([])
   const [dbResources, setDbResources] = useState<DBExternalResource[]>([])
   const [loadingResources, setLoadingResources] = useState(true)
   const [searchQuery, setSearchQuery] = useState("")
@@ -121,7 +46,6 @@ export function ExternalResourcesTab() {
         .from("external_resources")
         .select("*")
         .eq("is_active", true)
-        .order("category", { ascending: true })
         .order("sort_order", { ascending: true })
 
       if (!error && data) {
@@ -170,18 +94,6 @@ export function ExternalResourcesTab() {
     } catch (e) {
       console.error("Failed to parse pinned resources:", e)
     }
-    
-    try {
-      const savedTools = localStorage.getItem("pinnedTools")
-      if (savedTools) {
-        const parsed = JSON.parse(savedTools)
-        if (Array.isArray(parsed)) {
-          setPinnedToolIds(parsed)
-        }
-      }
-    } catch (e) {
-      console.error("Failed to parse pinned tools:", e)
-    }
   }, [])
 
   // Toggle pin status for resources (Safari-safe)
@@ -194,19 +106,6 @@ export function ExternalResourcesTab() {
       localStorage.setItem("pinnedResources", JSON.stringify(newPinned))
     } catch (e) {
       console.warn("Failed to save pinned resources to localStorage:", e)
-    }
-  }
-
-  // Toggle pin status for tools (Safari-safe)
-  const toggleToolPin = (toolId: string) => {
-    const newPinned = pinnedToolIds.includes(toolId)
-      ? pinnedToolIds.filter((id) => id !== toolId)
-      : [...pinnedToolIds, toolId]
-    setPinnedToolIds(newPinned)
-    try {
-      localStorage.setItem("pinnedTools", JSON.stringify(newPinned))
-    } catch (e) {
-      console.warn("Failed to save pinned tools to localStorage:", e)
     }
   }
 
@@ -231,13 +130,7 @@ export function ExternalResourcesTab() {
         return false
       }
       return true
-    }).sort((a, b) => {
-      // Sort by category, then by sort_order
-      if (a.category !== b.category) {
-        return a.category.localeCompare(b.category)
-      }
-      return a.sort_order - b.sort_order
-    })
+    }).sort((a, b) => a.sort_order - b.sort_order)
   }, [dbResources, profile?.optavia_id])
 
   // Get pinned resources
@@ -245,15 +138,9 @@ export function ExternalResourcesTab() {
     return resources.filter((r) => pinnedIds.includes(r.id))
   }, [resources, pinnedIds])
 
-  // Get pinned tools
-  const pinnedTools = useMemo(() => {
-    return COACH_TOOLS.filter((t) => pinnedToolIds.includes(t.id))
-  }, [pinnedToolIds])
-
-  // Resource categories - includes all database categories plus Coach Tools
+  // Resource categories
   const categories = [
     "All",
-    "Coach Tools",
     // Getting Started & Business
     "Getting Started",
     "Tax & Finance",
@@ -279,7 +166,6 @@ export function ExternalResourcesTab() {
 
   // Memoize filtered resources with search
   const filteredResources = useMemo(() => {
-    if (selectedCategory === "Coach Tools") return []
     const filtered = resources.filter((resource) => {
       // Apply search filter
       if (searchQuery) {
@@ -307,17 +193,7 @@ export function ExternalResourcesTab() {
     return filtered.sort((a, b) => a.sort_order - b.sort_order)
   }, [resources, selectedCategory, searchQuery])
 
-  // Filter coach tools by search query
-  const filteredCoachTools = useMemo(() => {
-    if (!searchQuery) return COACH_TOOLS
-    const query = searchQuery.toLowerCase()
-    return COACH_TOOLS.filter(tool => 
-      tool.title.toLowerCase().includes(query) ||
-      tool.description.toLowerCase().includes(query)
-    )
-  }, [searchQuery])
-
-  // Generate search suggestions from resource titles, descriptions, and tool names
+  // Generate search suggestions from resource titles and descriptions
   const searchSuggestions = useMemo(() => {
     const suggestions: Set<string> = new Set()
     
@@ -331,20 +207,12 @@ export function ExternalResourcesTab() {
       }
     })
     
-    // Add coach tool titles
-    COACH_TOOLS.forEach((tool) => {
-      suggestions.add(tool.title)
-    })
-    
     // Add common keywords
     suggestions.add("OPTAVIA")
     suggestions.add("Facebook")
     suggestions.add("Instagram")
     suggestions.add("YouTube")
     suggestions.add("Training")
-    suggestions.add("Calculator")
-    suggestions.add("Health")
-    suggestions.add("Coach")
     
     return Array.from(suggestions)
   }, [resources])
@@ -354,9 +222,6 @@ export function ExternalResourcesTab() {
     setSearchQuery(value)
   }, [])
 
-  // Check if we should show coach tools
-  const showCoachTools = selectedCategory === "All" || selectedCategory === "Coach Tools"
-
   return (
     <div>
       {/* Title and Description */}
@@ -365,7 +230,7 @@ export function ExternalResourcesTab() {
           Resources
         </h2>
         <p className="text-optavia-gray text-base sm:text-lg max-w-2xl mx-auto px-4">
-          Access external resources, tools, and communities to support your coaching journey and help your clients succeed.
+          Access external resources and communities to support your coaching journey and help your clients succeed.
         </p>
       </div>
 
@@ -375,7 +240,7 @@ export function ExternalResourcesTab() {
           <SearchWithHistory
             value={searchQuery}
             onChange={handleSearchChange}
-            placeholder="Search resources and tools..."
+            placeholder="Search resources..."
             suggestions={searchSuggestions}
             storageKey="resources"
           />
@@ -383,10 +248,7 @@ export function ExternalResourcesTab() {
         {/* Search Results Summary */}
         {searchQuery && (
           <div className="mt-2 text-sm text-optavia-gray">
-            Found {filteredCoachTools.length + filteredResources.length} results for "{searchQuery}"
-            {filteredCoachTools.length > 0 && filteredResources.length > 0 && (
-              <span> ({filteredCoachTools.length} tools, {filteredResources.length} resources)</span>
-            )}
+            Found {filteredResources.length} result{filteredResources.length !== 1 ? "s" : ""} for &quot;{searchQuery}&quot;
           </div>
         )}
       </div>
@@ -425,42 +287,6 @@ export function ExternalResourcesTab() {
           </Button>
         ))}
       </div>
-
-      {/* Coach Tools Section */}
-      {showCoachTools && filteredCoachTools.length > 0 && (
-        <div className="mb-8">
-          {selectedCategory === "All" && (
-            <h3 className="font-heading font-semibold text-lg text-optavia-dark mb-4 flex items-center gap-2">
-              <Wrench className="h-5 w-5 text-[hsl(var(--optavia-green))]" />
-              Coach Tools
-              {searchQuery && <span className="text-sm font-normal text-optavia-gray">({filteredCoachTools.length} results)</span>}
-            </h3>
-          )}
-          {selectedCategory === "Coach Tools" && (
-            <h3 className="font-heading font-semibold text-lg text-optavia-dark mb-4 flex items-center gap-2">
-              <Wrench className="h-5 w-5 text-[hsl(var(--optavia-green))]" />
-              Coach Tools
-              {searchQuery && <span className="text-sm font-normal text-optavia-gray">({filteredCoachTools.length} results)</span>}
-            </h3>
-          )}
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {filteredCoachTools.map((tool) => (
-              <ToolCard
-                key={tool.id}
-                id={tool.id}
-                title={tool.title}
-                description={tool.description}
-                icon={tool.icon}
-                expandMode={tool.expandMode || "dialog"}
-                isPinned={pinnedToolIds.includes(tool.id)}
-                onTogglePin={() => toggleToolPin(tool.id)}
-              >
-                {tool.component && <tool.component />}
-              </ToolCard>
-            ))}
-          </div>
-        </div>
-      )}
 
       {/* OPTAVIA & Community Resources */}
       {filteredResources.length > 0 && (
@@ -515,15 +341,15 @@ export function ExternalResourcesTab() {
       )}
 
       {/* No Results Message */}
-      {filteredResources.length === 0 && filteredCoachTools.length === 0 && searchQuery && (
+      {filteredResources.length === 0 && searchQuery && (
         <div className="text-center py-12">
           <Search className="h-12 w-12 text-optavia-gray mx-auto mb-4 opacity-50" />
-          <p className="text-optavia-gray text-lg">No results found for "{searchQuery}"</p>
+          <p className="text-optavia-gray text-lg">No results found for &quot;{searchQuery}&quot;</p>
           <p className="text-optavia-gray text-sm mt-2">Try adjusting your search terms or clear the search</p>
         </div>
       )}
 
-      {filteredResources.length === 0 && !searchQuery && selectedCategory !== "All" && selectedCategory !== "Coach Tools" && (
+      {filteredResources.length === 0 && !searchQuery && selectedCategory !== "All" && (
         <div className="text-center py-12 text-optavia-gray">No resources found in this category.</div>
       )}
     </div>

@@ -13,7 +13,7 @@ import {
   BookOpen, UtensilsCrossed, Wrench, ExternalLink, Award,
   CheckCircle, Sparkles, Star, GraduationCap, Link2, Pin,
   Droplets, Dumbbell, Activity, Share2, Bookmark,
-  Info, Trophy, Heart, ClipboardList
+  Info, Trophy, Heart, ClipboardList, Compass
 } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
 import { useProspects } from "@/hooks/use-prospects"
@@ -53,8 +53,9 @@ import { ClientTroubleshootingDialog } from "@/components/coach-tools/client-tro
 import { SocialMediaPromptGenerator } from "@/components/social-media-prompt-generator"
 import { OPTAVIAReferenceGuide } from "@/components/coach-tools/optavia-reference-guide"
 import { ShareHALink } from "@/components/coach-tools/share-ha-link"
+import { ObjectionNavigator } from "@/components/coach-tools/objection-navigator"
 
-// Coach Tools definitions - must match IDs in external-resources-tab.tsx for pinning to work
+// Coach Tools definitions - must match IDs in coach-tools-tab.tsx for pinning to work
 const COACH_TOOLS: { id: string; title: string; icon: LucideIcon; component: React.ComponentType }[] = [
   { id: "health-assessment", title: "Share Health Assessment", icon: ClipboardList, component: ShareHALink },
   { id: "client-onboarding", title: "Client Onboarding Tool", icon: Users, component: ClientOnboardingDialog },
@@ -63,6 +64,7 @@ const COACH_TOOLS: { id: string; title: string; icon: LucideIcon; component: Rea
   { id: "exercise-guide", title: "Exercise & Motion Guide", icon: Dumbbell, component: ExerciseGuide },
   { id: "metabolic-health", title: "Metabolic Health Education", icon: Activity, component: MetabolicHealthInfo },
   { id: "social-media-generator", title: "Social Media Post Generator", icon: Share2, component: SocialMediaPromptGenerator },
+  { id: "objection-navigator", title: "Objection Navigator", icon: Compass, component: ObjectionNavigator },
   { id: "optavia-reference", title: "Condiments Quick Reference Guide", icon: BookOpen, component: OPTAVIAReferenceGuide },
 ]
 
@@ -321,7 +323,7 @@ export function DashboardOverview() {
                     <TooltipContent side="bottom" className="max-w-xs p-3 bg-white/95 backdrop-blur-sm shadow-lg border border-gray-200">
                       <p className="font-semibold text-gray-700 mb-1">Quick Links</p>
                       <p className="text-sm text-gray-600">
-                        Your pinned coach tools, external resource links, and bookmarked training resources from the Resources and Training pages.
+                        Your pinned coach tools, external resource links, and bookmarked training resources from the Coach Tools, External Resources, and Training pages.
                       </p>
                     </TooltipContent>
                   </Tooltip>
@@ -406,35 +408,8 @@ export function DashboardOverview() {
           </CardContent>
         </Card>
 
-        {/* Smart Quick Actions - contextual based on current state */}
-        {(() => {
-          const today = new Date().toISOString().split("T")[0]
-          const todayStart = new Date()
-          todayStart.setHours(0, 0, 0, 0)
-          const todayEnd = new Date()
-          todayEnd.setHours(23, 59, 59, 999)
-          
-          const overdueProspects = prospects.filter(p => {
-            if (!p.next_action || ["converted", "coach", "not_interested"].includes(p.status)) return false
-            return new Date(p.next_action) < new Date(today)
-          }).length
-          
-          const haScheduledToday = prospects.filter(p => 
-            p.status === "ha_scheduled" && 
-            p.ha_scheduled_at && 
-            new Date(p.ha_scheduled_at) >= todayStart && 
-            new Date(p.ha_scheduled_at) <= todayEnd
-          ).length
-          
-          return (
-            <QuickActions
-              overdueProspects={overdueProspects}
-              clientsNeedingCheckIn={clientStats.needsAttention}
-              haScheduledToday={haScheduledToday}
-              trainingPercentage={trainingProgress.percentage}
-            />
-          )
-        })()}
+        {/* Quick Actions - driven by dashboard_buttons table */}
+        <QuickActions />
       </div>
 
       {/* Business Growth (Rank Progress) */}

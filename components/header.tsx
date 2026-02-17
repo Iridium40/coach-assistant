@@ -24,8 +24,8 @@ interface HeaderProps {
   onAnnouncementsClick?: () => void
   onReportsClick?: () => void
   onInviteClick?: () => void
-  activeTab?: "dashboard" | "my-business" | "training" | "resources" | "recipes" | "calendar"
-  onTabChange?: (tab: "dashboard" | "my-business" | "training" | "resources" | "recipes" | "calendar") => void
+  activeTab?: "dashboard" | "my-business" | "training" | "resources" | "coach-tools" | "recipes" | "calendar"
+  onTabChange?: (tab: "dashboard" | "my-business" | "training" | "resources" | "coach-tools" | "recipes" | "calendar") => void
 }
 
 export function Header({ onSettingsClick, onHomeClick, onAnnouncementsClick, onReportsClick, onInviteClick, activeTab, onTabChange }: HeaderProps) {
@@ -48,7 +48,7 @@ export function Header({ onSettingsClick, onHomeClick, onAnnouncementsClick, onR
   }
 
   // Determine active tab from pathname if not provided
-  const getActiveTab = (): "dashboard" | "my-business" | "training" | "resources" | "recipes" | "calendar" => {
+  const getActiveTab = (): "dashboard" | "my-business" | "training" | "resources" | "coach-tools" | "recipes" | "calendar" => {
     if (activeTab) return activeTab
     if (pathname?.startsWith("/dashboard") || pathname === "/") return "dashboard"
     if (pathname?.startsWith("/prospect-tracker") || 
@@ -57,6 +57,7 @@ export function Header({ onSettingsClick, onHomeClick, onAnnouncementsClick, onR
         pathname?.startsWith("/coach/downline") ||
         pathname?.startsWith("/my-business")) return "my-business"
     if (pathname?.startsWith("/training")) return "training"
+    if (pathname?.startsWith("/coach-tools")) return "coach-tools"
     if (pathname?.startsWith("/resources")) return "resources"
     if (pathname?.startsWith("/recipes")) return "recipes"
     if (pathname?.startsWith("/calendar")) return "calendar"
@@ -72,7 +73,8 @@ export function Header({ onSettingsClick, onHomeClick, onAnnouncementsClick, onR
     { id: "my-business" as const, label: "My Business", href: "/prospect-pipeline", fullAccessOnly: true },
     { id: "calendar" as const, label: "Calendar", href: "/calendar", fullAccessOnly: true },
     { id: "training" as const, label: "Training", href: "/training", fullAccessOnly: false },
-    { id: "resources" as const, label: "Resources", href: "/resources", fullAccessOnly: true },
+    { id: "coach-tools" as const, label: "Coach Tools", href: "/coach-tools", fullAccessOnly: true },
+    { id: "resources" as const, label: "External Resources", href: "/resources", fullAccessOnly: true },
     { id: "recipes" as const, label: "Recipes", href: "/recipes", fullAccessOnly: true },
   ]
   

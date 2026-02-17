@@ -102,3 +102,13 @@ export interface ExternalResource {
   created_at: string
   updated_at: string
 }
+
+export interface DashboardButton {
+  id: string
+  sort_order: number
+  label: string
+  url: string
+  color: string
+  created_at: string
+  updated_at: string
+}
