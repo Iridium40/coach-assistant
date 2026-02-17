@@ -54,7 +54,6 @@ export function Header({ onSettingsClick, onHomeClick, onAnnouncementsClick, onR
     if (pathname?.startsWith("/prospect-tracker") || 
         pathname?.startsWith("/client-tracker") || 
         pathname?.startsWith("/coach-tracker") ||
-        pathname?.startsWith("/coach/downline") ||
         pathname?.startsWith("/my-business")) return "my-business"
     if (pathname?.startsWith("/training")) return "training"
     if (pathname?.startsWith("/coach-tools")) return "coach-tools"
@@ -88,7 +87,6 @@ export function Header({ onSettingsClick, onHomeClick, onAnnouncementsClick, onR
     { label: "100's List Tracker", href: "/prospect-tracker", description: "Track your prospect pipeline" },
     { label: "Client Tracker", href: "/client-tracker", description: "Touchpoints & milestones" },
     { label: "Coach Tracker", href: "/coach-tracker", description: "Track team development & ranks" },
-    { label: "Downline Overview", href: "/coach/downline", description: "Track your team's progress" },
     { label: "Rank Calculator", href: "/my-business", description: "Track rank progress" },
   ]
 
