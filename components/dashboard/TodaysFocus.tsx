@@ -104,7 +104,9 @@ export function TodaysFocus({
     })
     .slice(0, 2)
 
-  const hasActionItems = clientsNeedingAction.length > 0 || haScheduledToday.length > 0 || meetingsToday.length > 0 || milestoneClients.length > 0 || todaysReminders.length > 0
+  // Separate coaching actions from calendar events
+  const hasCoachingActions = clientsNeedingAction.length > 0 || haScheduledToday.length > 0 || milestoneClients.length > 0 || todaysReminders.length > 0
+  const hasCalendarEvents = meetingsToday.length > 0
 
   // Get timezone abbreviation
   const getTimezoneAbbrev = (timezone: string): string => {
@@ -150,37 +152,13 @@ export function TodaysFocus({
         </div>
       </CardHeader>
       <CardContent className="pt-0 space-y-4">
-        {/* Today's Tasks Section */}
-        {hasActionItems ? (
+        {/* Today's Schedule - Calendar Events */}
+        {hasCalendarEvents && (
           <div className="space-y-2">
-            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Today's Tasks</p>
-            
-            {/* HAs Scheduled Today */}
-            {haScheduledToday.map(prospect => (
-              <div
-                key={`ha-${prospect.id}`}
-                className="flex items-center justify-between p-2.5 bg-white rounded-lg border border-purple-200"
-              >
-                <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-lg bg-purple-100 flex items-center justify-center">
-                    <Calendar className="h-4 w-4 text-purple-600" />
-                  </div>
-                  <div>
-                    <div className="font-medium text-sm text-gray-900">{prospect.label}</div>
-                    <div className="text-xs text-purple-600">
-                      HA at {formatTime(prospect.ha_scheduled_at!)}
-                    </div>
-                  </div>
-                </div>
-                <Link href="/prospect-tracker">
-                  <Button size="sm" className="bg-purple-500 hover:bg-purple-600 text-white text-xs h-7">
-                    View
-                  </Button>
-                </Link>
-              </div>
-            ))}
-
-            {/* Meetings Today */}
+            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide flex items-center gap-1.5">
+              <Calendar className="h-3.5 w-3.5" />
+              Today's Schedule
+            </p>
             {meetingsToday.map((meeting, idx) => (
               <div
                 key={`${meeting.id}-${idx}`}
@@ -215,136 +193,178 @@ export function TodaysFocus({
                 )}
               </div>
             ))}
+          </div>
+        )}
 
-            {/* Client Check-ins */}
-            {clientsNeedingAction.map(client => {
-              const programDay = getProgramDay(client.start_date)
-              const phase = getDayPhase(programDay)
-              return (
+        {/* Divider when both sections have content */}
+        {hasCalendarEvents && <div className="border-t border-gray-200" />}
+
+        {/* Coaching Actions Section */}
+        <div className="space-y-2">
+          <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide flex items-center gap-1.5">
+            <Users className="h-3.5 w-3.5" />
+            Coaching Actions
+          </p>
+
+          {hasCoachingActions ? (
+            <div className="space-y-2">
+              {/* HAs Scheduled Today */}
+              {haScheduledToday.map(prospect => (
                 <div
-                  key={client.id}
-                  className="flex items-center justify-between p-2.5 bg-white rounded-lg border border-orange-200"
+                  key={`ha-${prospect.id}`}
+                  className="flex items-center justify-between p-2.5 bg-white rounded-lg border border-purple-200"
                 >
                   <div className="flex items-center gap-2">
-                    <div
-                      className="w-8 h-8 rounded-lg flex flex-col items-center justify-center text-xs font-bold"
-                      style={{ backgroundColor: phase.bg, color: phase.color }}
-                    >
-                      <span className="text-[7px]">D</span>
-                      <span className="text-xs -mt-0.5">{programDay}</span>
+                    <div className="w-8 h-8 rounded-lg bg-purple-100 flex items-center justify-center">
+                      <Calendar className="h-4 w-4 text-purple-600" />
                     </div>
                     <div>
-                      <div className="font-medium text-sm text-gray-900">{client.label}</div>
-                      <div className="text-xs text-orange-600">Check-in needed</div>
-                    </div>
-                  </div>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => toggleTouchpoint(client.id, "am_done")}
-                    className={`h-7 text-xs px-3 ${client.am_done ? "bg-green-100 text-green-700 border-green-300" : "text-green-600 border-green-200"}`}
-                  >
-                    {client.am_done ? (
-                      <>
-                        <CheckCircle className="h-3 w-3 mr-1" />
-                        Done
-                      </>
-                    ) : (
-                      "Check In"
-                    )}
-                  </Button>
-                </div>
-              )
-            })}
-
-            {/* Milestone Celebrations */}
-            {milestoneClients.map(client => {
-              const programDay = getProgramDay(client.start_date)
-              const phase = getDayPhase(programDay)
-              return (
-                <div
-                  key={`milestone-${client.id}`}
-                  className="flex items-center justify-between p-2.5 bg-white rounded-lg border border-yellow-200 animate-pulse"
-                >
-                  <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-lg bg-yellow-100 flex items-center justify-center">
-                      <Trophy className="h-4 w-4 text-yellow-600" />
-                    </div>
-                    <div>
-                      <div className="font-medium text-sm text-gray-900">{client.label}</div>
-                      <div className="text-xs text-yellow-600">{phase.label}</div>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Button
-                      size="sm"
-                      className="bg-yellow-500 hover:bg-yellow-600 text-white text-xs h-7"
-                      onClick={() => onCelebrateClick?.(client)}
-                    >
-                      🎉 Celebrate!
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="text-xs h-7 border-yellow-200 text-yellow-700 hover:bg-yellow-50"
-                      onClick={() => {
-                        markMilestoneCelebratedToday({ clientId: client.id, programDay })
-                        forceRefresh((x) => x + 1)
-                      }}
-                      title="Dismiss for today"
-                    >
-                      <X className="h-3.5 w-3.5" />
-                      <span className="ml-1 hidden sm:inline">Dismiss</span>
-                    </Button>
-                  </div>
-                </div>
-              )
-            })}
-
-            {/* Today's Reminders */}
-            {todaysReminders.map(reminder => {
-              const reminderIsOverdue = isOverdue?.(reminder)
-              return (
-                <div
-                  key={`reminder-${reminder.id}`}
-                  className={`flex items-center justify-between p-2.5 bg-white rounded-lg border ${
-                    reminderIsOverdue ? "border-red-200" : "border-amber-200"
-                  }`}
-                >
-                  <div className="flex items-center gap-2">
-                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
-                      reminderIsOverdue ? "bg-red-100" : "bg-amber-100"
-                    }`}>
-                      <Bell className={`h-4 w-4 ${reminderIsOverdue ? "text-red-600" : "text-amber-600"}`} />
-                    </div>
-                    <div>
-                      <div className="font-medium text-sm text-gray-900">{reminder.title}</div>
-                      <div className={`text-xs ${reminderIsOverdue ? "text-red-600" : "text-amber-600"}`}>
-                        {reminderIsOverdue ? "Overdue" : "Due today"}
-                        {reminder.entity_name && ` • ${reminder.entity_name}`}
+                      <div className="font-medium text-sm text-gray-900">{prospect.label}</div>
+                      <div className="text-xs text-purple-600">
+                        HA at {formatTime(prospect.ha_scheduled_at!)}
                       </div>
                     </div>
                   </div>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => completeReminder?.(reminder.id)}
-                    className="h-7 text-xs px-3 text-green-600 border-green-200 hover:bg-green-50"
-                  >
-                    <CheckCircle className="h-3 w-3 mr-1" />
-                    Done
-                  </Button>
+                  <Link href="/prospect-tracker">
+                    <Button size="sm" className="bg-purple-500 hover:bg-purple-600 text-white text-xs h-7">
+                      View
+                    </Button>
+                  </Link>
                 </div>
-              )
-            })}
-          </div>
-        ) : (
-          <div className="text-center py-4">
-            <CheckCircle className="h-10 w-10 mx-auto mb-2 text-green-500" />
-            <p className="font-medium text-green-700 text-sm">All caught up for today!</p>
-            <p className="text-xs text-gray-500 mt-0.5">Great job staying on top of your business.</p>
-          </div>
-        )}
+              ))}
+
+              {/* Client Check-ins */}
+              {clientsNeedingAction.map(client => {
+                const programDay = getProgramDay(client.start_date)
+                const phase = getDayPhase(programDay)
+                return (
+                  <div
+                    key={client.id}
+                    className="flex items-center justify-between p-2.5 bg-white rounded-lg border border-orange-200"
+                  >
+                    <div className="flex items-center gap-2">
+                      <div
+                        className="w-8 h-8 rounded-lg flex flex-col items-center justify-center text-xs font-bold"
+                        style={{ backgroundColor: phase.bg, color: phase.color }}
+                      >
+                        <span className="text-[7px]">D</span>
+                        <span className="text-xs -mt-0.5">{programDay}</span>
+                      </div>
+                      <div>
+                        <div className="font-medium text-sm text-gray-900">{client.label}</div>
+                        <div className="text-xs text-orange-600">Check-in needed</div>
+                      </div>
+                    </div>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => toggleTouchpoint(client.id, "am_done")}
+                      className={`h-7 text-xs px-3 ${client.am_done ? "bg-green-100 text-green-700 border-green-300" : "text-green-600 border-green-200"}`}
+                    >
+                      {client.am_done ? (
+                        <>
+                          <CheckCircle className="h-3 w-3 mr-1" />
+                          Done
+                        </>
+                      ) : (
+                        "Check In"
+                      )}
+                    </Button>
+                  </div>
+                )
+              })}
+
+              {/* Milestone Celebrations */}
+              {milestoneClients.map(client => {
+                const programDay = getProgramDay(client.start_date)
+                const phase = getDayPhase(programDay)
+                return (
+                  <div
+                    key={`milestone-${client.id}`}
+                    className="flex items-center justify-between p-2.5 bg-white rounded-lg border border-yellow-200 animate-pulse"
+                  >
+                    <div className="flex items-center gap-2">
+                      <div className="w-8 h-8 rounded-lg bg-yellow-100 flex items-center justify-center">
+                        <Trophy className="h-4 w-4 text-yellow-600" />
+                      </div>
+                      <div>
+                        <div className="font-medium text-sm text-gray-900">{client.label}</div>
+                        <div className="text-xs text-yellow-600">{phase.label}</div>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        size="sm"
+                        className="bg-yellow-500 hover:bg-yellow-600 text-white text-xs h-7"
+                        onClick={() => onCelebrateClick?.(client)}
+                      >
+                        🎉 Celebrate!
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="text-xs h-7 border-yellow-200 text-yellow-700 hover:bg-yellow-50"
+                        onClick={() => {
+                          markMilestoneCelebratedToday({ clientId: client.id, programDay })
+                          forceRefresh((x) => x + 1)
+                        }}
+                        title="Dismiss for today"
+                      >
+                        <X className="h-3.5 w-3.5" />
+                        <span className="ml-1 hidden sm:inline">Dismiss</span>
+                      </Button>
+                    </div>
+                  </div>
+                )
+              })}
+
+              {/* Today's Reminders */}
+              {todaysReminders.map(reminder => {
+                const reminderIsOverdue = isOverdue?.(reminder)
+                return (
+                  <div
+                    key={`reminder-${reminder.id}`}
+                    className={`flex items-center justify-between p-2.5 bg-white rounded-lg border ${
+                      reminderIsOverdue ? "border-red-200" : "border-amber-200"
+                    }`}
+                  >
+                    <div className="flex items-center gap-2">
+                      <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
+                        reminderIsOverdue ? "bg-red-100" : "bg-amber-100"
+                      }`}>
+                        <Bell className={`h-4 w-4 ${reminderIsOverdue ? "text-red-600" : "text-amber-600"}`} />
+                      </div>
+                      <div>
+                        <div className="font-medium text-sm text-gray-900">{reminder.title}</div>
+                        <div className={`text-xs ${reminderIsOverdue ? "text-red-600" : "text-amber-600"}`}>
+                          {reminderIsOverdue ? "Overdue" : "Due today"}
+                          {reminder.entity_name && ` • ${reminder.entity_name}`}
+                        </div>
+                      </div>
+                    </div>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => completeReminder?.(reminder.id)}
+                      className="h-7 text-xs px-3 text-green-600 border-green-200 hover:bg-green-50"
+                    >
+                      <CheckCircle className="h-3 w-3 mr-1" />
+                      Done
+                    </Button>
+                  </div>
+                )
+              })}
+            </div>
+          ) : (
+            <div className="flex items-center gap-3 p-3 bg-green-50 rounded-lg border border-green-200">
+              <CheckCircle className="h-6 w-6 text-green-500 flex-shrink-0" />
+              <div>
+                <p className="font-medium text-green-700 text-sm">All coaching actions complete</p>
+                <p className="text-xs text-green-600/70 mt-0.5">No client check-ins, health assessments, milestones, or reminders pending.</p>
+              </div>
+            </div>
+          )}
+        </div>
       </CardContent>
     </Card>
   )
