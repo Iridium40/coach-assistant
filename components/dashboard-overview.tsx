@@ -412,22 +412,6 @@ export function DashboardOverview() {
         <QuickActions />
       </div>
 
-      {/* Business Growth (Rank Progress) */}
-      {rankData && (
-        <div className="mt-6">
-          <RankProgressCard
-            currentRank={rankData.current_rank}
-            nextRank={nextRank}
-            activeClients={clientStats.active}
-            frontlineCoaches={frontlineCoaches.length}
-            qualifyingLegs={qualifyingLegsCount}
-            edTeams={edTeamsCount}
-            fibcTeams={fibcTeamsCount}
-            gaps={gaps}
-          />
-        </div>
-      )}
-
       {/* Popular Recipes */}
       {popularRecipes.length > 0 && (
         <Card className="mt-6 bg-white border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
