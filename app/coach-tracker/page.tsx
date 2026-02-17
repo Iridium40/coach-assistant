@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo, useCallback } from "react"
+import { useState, useMemo, useCallback, useRef, useEffect } from "react"
 import {
   useCoaches,
   COACH_STAGES,
@@ -61,6 +61,7 @@ import {
   ChevronUp,
   ChevronDown,
   Award,
+  Check,
 } from "lucide-react"
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
@@ -75,6 +76,7 @@ function CoachCard({
   onCheckIn,
   onMoveStage,
   onDelete,
+  onUpdateCoach,
 }: {
   coach: Coach
   onEdit: (coach: Coach) => void
@@ -82,12 +84,34 @@ function CoachCard({
   onCheckIn: (coach: Coach) => void
   onMoveStage: (coachId: string, newStage: CoachStage) => void
   onDelete: (coach: Coach) => void
+  onUpdateCoach: (id: string, updates: UpdateCoach) => Promise<boolean>
 }) {
   const stage = COACH_STAGES.find(s => s.id === coach.stage) || COACH_STAGES[0]
   const stageIdx = COACH_STAGES.findIndex(s => s.id === coach.stage)
   const rankTitle = getRankTitle(coach.rank)
   const days = daysSinceLaunch(coach.launch_date)
   const weeks = weekNumber(coach.launch_date)
+
+  const [editingNotes, setEditingNotes] = useState(false)
+  const [notesValue, setNotesValue] = useState(coach.notes || "")
+  const notesRef = useRef<HTMLTextAreaElement>(null)
+
+  useEffect(() => {
+    if (!editingNotes) {
+      setNotesValue(coach.notes || "")
+    }
+  }, [coach.notes, editingNotes])
+
+  const handleSaveNotes = async () => {
+    const trimmed = notesValue.trim()
+    await onUpdateCoach(coach.id, { notes: trimmed || null })
+    setEditingNotes(false)
+  }
+
+  const handleCancelNotes = () => {
+    setNotesValue(coach.notes || "")
+    setEditingNotes(false)
+  }
 
   return (
     <Card className="transition-shadow hover:shadow-md">
@@ -147,12 +171,53 @@ function CoachCard({
           </div>
         </div>
 
-        {/* Notes */}
-        {coach.notes && (
-          <div className="text-sm text-gray-600 mt-3 ml-[72px] leading-relaxed">
-            📝 {coach.notes}
-          </div>
-        )}
+        {/* Notes - inline editable */}
+        <div className="mt-3 ml-[72px]">
+          {editingNotes ? (
+            <div className="space-y-2">
+              <Textarea
+                ref={notesRef}
+                value={notesValue}
+                onChange={(e) => setNotesValue(e.target.value)}
+                placeholder="Add notes about this coach..."
+                className="text-sm min-h-[60px] resize-none"
+                autoFocus
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
+                    handleSaveNotes()
+                  }
+                  if (e.key === "Escape") {
+                    handleCancelNotes()
+                  }
+                }}
+              />
+              <div className="flex items-center gap-2">
+                <Button size="sm" onClick={handleSaveNotes} className="h-7 text-xs bg-[hsl(var(--optavia-green))]">
+                  <Check className="h-3 w-3 mr-1" />
+                  Save
+                </Button>
+                <Button size="sm" variant="ghost" onClick={handleCancelNotes} className="h-7 text-xs">
+                  Cancel
+                </Button>
+                <span className="text-[10px] text-gray-400 ml-auto">⌘+Enter to save</span>
+              </div>
+            </div>
+          ) : (
+            <button
+              onClick={() => setEditingNotes(true)}
+              className="w-full text-left group flex items-start gap-1.5 hover:bg-gray-50 rounded p-1 -m-1 transition-colors"
+            >
+              <span className="text-sm text-gray-600 flex-1 leading-relaxed">
+                {coach.notes ? (
+                  <>📝 {coach.notes}</>
+                ) : (
+                  <span className="text-gray-400 italic">Add notes...</span>
+                )}
+              </span>
+              <Edit2 className="h-3.5 w-3.5 text-gray-300 group-hover:text-gray-500 flex-shrink-0 mt-0.5" />
+            </button>
+          )}
+        </div>
 
         {/* Last Check-in */}
         {coach.last_check_in && (
@@ -559,6 +624,7 @@ export default function CoachTrackerPage() {
                   onCheckIn={handleCheckIn}
                   onMoveStage={handleMoveStage}
                   onDelete={(c) => setDeletingCoach(c)}
+                  onUpdateCoach={updateCoach}
                 />
               ))}
             </div>
