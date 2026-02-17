@@ -75,6 +75,7 @@ import {
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
 import { ScheduleCalendarOptions } from "@/components/schedule-calendar-options"
+import { sendCalendarInviteEmail } from "@/lib/email"
 import { ShareHealthAssessment } from "@/components/share-health-assessment"
 import { PipelineProgressionGuide } from "@/components/pipeline-progression-guide"
 import { ReminderButton } from "@/components/reminders-panel"
@@ -304,6 +305,34 @@ Talking Points:
         title: "📅 HA Scheduled!",
         description: `${haHour}:${haMinute} ${haAmPm} on ${targetDate.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })}`,
       })
+
+      // Send calendar invite to the coach so they can save it to their local calendar
+      const coachEmail = profile?.notification_email
+      if (coachEmail) {
+        const calendarEvent = generateHACalendarEvent()
+        if (calendarEvent) {
+          sendCalendarInviteEmail({
+            to: coachEmail,
+            toName: profile?.full_name || undefined,
+            fromEmail: coachEmail,
+            fromName: profile?.full_name || undefined,
+            eventTitle: calendarEvent.title,
+            eventDescription: calendarEvent.description,
+            startDate: calendarEvent.startDate.toISOString(),
+            endDate: calendarEvent.endDate.toISOString(),
+            eventType: "ha",
+          }).then((result) => {
+            if (result.success) {
+              toast({
+                title: "📧 Calendar invite sent to you!",
+                description: `Check ${coachEmail} to add this HA to your calendar`,
+              })
+            }
+          }).catch(() => {
+            // Silent fail - the HA is already saved
+          })
+        }
+      }
       
       setShowHAScheduleModal(false)
       setSchedulingProspect(null)

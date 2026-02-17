@@ -158,7 +158,6 @@ ${organizerName || "Your Coach"}`
 
       if (result.success) {
         setSent(true)
-        onScheduleComplete?.()
         
         toast({
           title: "📧 Calendar invite sent!",
@@ -188,73 +187,90 @@ ${organizerName || "Your Coach"}`
 
   return (
     <div className={`space-y-4 ${className}`}>
-      {/* Email Section */}
-      <div className="space-y-2">
-        <Label className="text-sm font-medium flex items-center gap-2">
-          <Mail className="h-4 w-4 text-purple-500" />
-          Send Calendar Invite by Email
-        </Label>
-        <Input
-          type="email"
-          placeholder="email@example.com"
-          value={email}
-          onChange={(e) => handleEmailChange(e.target.value)}
-        />
-        <p className="text-xs text-gray-500">
-          They'll receive an email with a calendar invite attached
-        </p>
-        {!organizerEmail && (
-          <p className="text-xs text-amber-600">
-            ⚠️ Set your notification email in Settings → Notifications
-          </p>
-        )}
+      {/* Primary Save Button */}
+      {onScheduleComplete && (
         <Button
           type="button"
-          onClick={handleEmailInvite}
-          disabled={!isValidEmail || sending}
-          className="w-full bg-purple-600 hover:bg-purple-700 text-white"
+          onClick={onScheduleComplete}
+          className="w-full bg-[hsl(var(--optavia-green))] hover:bg-[hsl(var(--optavia-green-dark))] text-white font-medium h-11"
         >
-          {sending ? (
-            <>
-              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-              Sending...
-            </>
-          ) : sent ? (
-            <>
-              <Check className="h-4 w-4 mr-2" />
-              Invite Sent!
-            </>
-          ) : (
-            <>
-              <Mail className="h-4 w-4 mr-2" />
-              Send Email Invite
-            </>
-          )}
+          <Check className="h-4 w-4 mr-2" />
+          Save & Schedule
         </Button>
-      </div>
+      )}
 
-      {/* Divider */}
-      <div className="flex items-center gap-3">
-        <div className="flex-1 border-t border-gray-200" />
-        <span className="text-xs text-gray-400 uppercase">or</span>
-        <div className="flex-1 border-t border-gray-200" />
-      </div>
-
-      {/* Copy for Text Section */}
-      <div className="space-y-2">
-        <Label className="text-sm font-medium flex items-center gap-2">
-          <MessageSquare className="h-4 w-4 text-teal-500" />
-          Copy Invite for Text Message
-        </Label>
-        <p className="text-xs text-gray-500">
-          Copy the invite message and paste it into your favorite texting app
+      {/* Optional: Notify Prospect/Client */}
+      <div className="border border-gray-200 rounded-lg p-4 space-y-4">
+        <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+          Optional: Send Invite to Prospect
         </p>
-        <div className="flex gap-2">
+
+        {/* Email Section */}
+        <div className="space-y-2">
+          <Label className="text-sm font-medium flex items-center gap-2">
+            <Mail className="h-4 w-4 text-purple-500" />
+            Send Calendar Invite by Email
+          </Label>
+          <Input
+            type="email"
+            placeholder="email@example.com"
+            value={email}
+            onChange={(e) => handleEmailChange(e.target.value)}
+          />
+          <p className="text-xs text-gray-500">
+            They'll receive an email with a calendar invite attached
+          </p>
+          {!organizerEmail && (
+            <p className="text-xs text-amber-600">
+              ⚠️ Set your notification email in Settings → Notifications
+            </p>
+          )}
+          <Button
+            type="button"
+            onClick={handleEmailInvite}
+            disabled={!isValidEmail || sending}
+            className="w-full bg-purple-600 hover:bg-purple-700 text-white"
+          >
+            {sending ? (
+              <>
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                Sending...
+              </>
+            ) : sent ? (
+              <>
+                <Check className="h-4 w-4 mr-2" />
+                Invite Sent!
+              </>
+            ) : (
+              <>
+                <Mail className="h-4 w-4 mr-2" />
+                Send Email Invite
+              </>
+            )}
+          </Button>
+        </div>
+
+        {/* Divider */}
+        <div className="flex items-center gap-3">
+          <div className="flex-1 border-t border-gray-200" />
+          <span className="text-xs text-gray-400 uppercase">or</span>
+          <div className="flex-1 border-t border-gray-200" />
+        </div>
+
+        {/* Copy for Text Section */}
+        <div className="space-y-2">
+          <Label className="text-sm font-medium flex items-center gap-2">
+            <MessageSquare className="h-4 w-4 text-teal-500" />
+            Copy Invite for Text Message
+          </Label>
+          <p className="text-xs text-gray-500">
+            Copy the invite message and paste it into your favorite texting app
+          </p>
           <Button
             type="button"
             onClick={handleCopyTextInvite}
             variant="outline"
-            className={`flex-1 ${copied ? "bg-teal-50 border-teal-300 text-teal-700" : "border-teal-200 text-teal-600 hover:bg-teal-50"}`}
+            className={`w-full ${copied ? "bg-teal-50 border-teal-300 text-teal-700" : "border-teal-200 text-teal-600 hover:bg-teal-50"}`}
           >
             {copied ? (
               <>
@@ -268,16 +284,6 @@ ${organizerName || "Your Coach"}`
               </>
             )}
           </Button>
-          {copied && onScheduleComplete && (
-            <Button
-              type="button"
-              onClick={onScheduleComplete}
-              className="bg-green-600 hover:bg-green-700 text-white"
-            >
-              <Check className="h-4 w-4 mr-2" />
-              Save
-            </Button>
-          )}
         </div>
       </div>
     </div>

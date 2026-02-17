@@ -67,6 +67,7 @@ import { ClientJourneyGuide } from "@/components/client-journey-guide"
 import { ReminderButton } from "@/components/reminders-panel"
 import { GraduationCap, Trophy, Heart, Download } from "lucide-react"
 import { ScheduleCalendarOptions } from "@/components/schedule-calendar-options"
+import { sendCalendarInviteEmail } from "@/lib/email"
 import { isMilestoneDay } from "@/hooks/use-touchpoint-templates"
 import { useUserData } from "@/contexts/user-data-context"
 import { ErrorBoundary } from "@/components/ui/error-boundary"
@@ -363,6 +364,34 @@ ${phase.milestone ? `\n🎉 MILESTONE: ${phase.label} - Celebrate this achieveme
       return
     }
     
+    // Send calendar invite to the coach so they can save it to their local calendar
+    const coachEmail = profile?.notification_email
+    if (coachEmail) {
+      const calendarEvent = generateCalendarEvent()
+      if (calendarEvent) {
+        sendCalendarInviteEmail({
+          to: coachEmail,
+          toName: profile?.full_name || undefined,
+          fromEmail: coachEmail,
+          fromName: profile?.full_name || undefined,
+          eventTitle: calendarEvent.title,
+          eventDescription: calendarEvent.description,
+          startDate: calendarEvent.startDate.toISOString(),
+          endDate: calendarEvent.endDate.toISOString(),
+          eventType: "check-in",
+        }).then((result) => {
+          if (result.success) {
+            toast({
+              title: "📧 Calendar invite sent to you!",
+              description: `Check ${coachEmail} to add this to your calendar`,
+            })
+          }
+        }).catch(() => {
+          // Silent fail - the schedule is already saved
+        })
+      }
+    }
+
     setShowScheduleModal(false)
     
     // Reset zoom fields
