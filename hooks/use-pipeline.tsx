@@ -158,7 +158,8 @@ export function usePipeline() {
     today.setHours(0, 0, 0, 0)
 
     // Check prospects for overdue follow-ups and upcoming HAs
-    prospects.forEach(p => {
+    // Skip converted/coach prospects — they're now tracked as clients
+    prospects.filter(p => !["converted", "coach"].includes(p.status)).forEach(p => {
       // Overdue follow-up
       if (p.follow_up_date) {
         const followUpDate = new Date(p.follow_up_date)

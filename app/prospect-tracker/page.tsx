@@ -65,7 +65,6 @@ import {
   Send,
   List,
   CalendarDays,
-  Info,
   GraduationCap,
   Download,
   CheckCircle,
@@ -104,7 +103,6 @@ export default function ProspectTrackerPage() {
   const {
     prospects,
     loading,
-    stats,
     addProspect,
     updateProspect,
     deleteProspect,
@@ -121,6 +119,7 @@ export default function ProspectTrackerPage() {
     { id: "new", label: "New", color: "#2196f3", icon: "🆕", count: prospects.filter(p => p.status === "new").length },
     { id: "interested", label: "Interested", color: "#ff9800", icon: "🔥", count: prospects.filter(p => p.status === "interested").length },
     { id: "ha_scheduled", label: "HA Scheduled", color: "#9c27b0", icon: "📅", count: prospects.filter(p => p.status === "ha_scheduled").length },
+    { id: "converted", label: "Converted", color: "#4caf50", icon: "🎉", count: prospects.filter(p => ["converted", "coach"].includes(p.status)).length },
     { id: "client", label: "Client", color: "#37B6AE", icon: "⭐", count: allClients.filter(c => c.status === "active").length },
     { id: "coach", label: "Future Coach", color: "#e91e63", icon: "🚀", count: allClients.filter(c => c.is_coach_prospect).length },
   ], [prospects, allClients])
@@ -593,109 +592,40 @@ Talking Points:
 
       <div className="container mx-auto px-4 py-6">
         <ErrorBoundary>
-        {/* Stats */}
-        <TooltipProvider>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
-            <Card>
-              <CardContent className="p-4 text-center relative">
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <button className="absolute top-2 right-2 text-gray-400 hover:text-gray-600">
-                      <Info className="h-4 w-4" />
-                    </button>
-                  </TooltipTrigger>
-                  <TooltipContent side="bottom" className="max-w-xs p-3 bg-white/95 backdrop-blur-sm shadow-lg border border-gray-200">
-                    <p className="font-semibold text-green-700 mb-1">Active Prospects</p>
-                    <p className="text-sm text-gray-600">Prospects with New or Interested status — your active pipeline.</p>
-                  </TooltipContent>
-                </Tooltip>
-                <div className="text-3xl font-bold text-[hsl(var(--optavia-green))]">{stats.total}</div>
-                <div className="text-sm text-gray-500">Active Prospects</div>
-              </CardContent>
-            </Card>
-            <Card className={stats.overdue > 0 ? "border-orange-300 bg-orange-50" : ""}>
-              <CardContent className="p-4 text-center relative">
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <button className="absolute top-2 right-2 text-gray-400 hover:text-gray-600">
-                      <Info className="h-4 w-4" />
-                    </button>
-                  </TooltipTrigger>
-                  <TooltipContent side="bottom" className="max-w-xs p-3 bg-white/95 backdrop-blur-sm shadow-lg border border-gray-200">
-                    <p className="font-semibold text-orange-700 mb-2">⏰ Overdue Follow-ups</p>
-                    <p className="text-sm text-gray-600">Prospects with a follow-up date that has passed. Time to reach out!</p>
-                  </TooltipContent>
-                </Tooltip>
-                <div className="text-3xl font-bold text-orange-500">{stats.overdue}</div>
-                <div className="text-sm text-gray-500">Overdue</div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="p-4 text-center relative">
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <button className="absolute top-2 right-2 text-gray-400 hover:text-gray-600">
-                      <Info className="h-4 w-4" />
-                    </button>
-                  </TooltipTrigger>
-                  <TooltipContent side="bottom" className="max-w-xs p-3 bg-white/95 backdrop-blur-sm shadow-lg border border-gray-200">
-                    <p className="font-semibold text-purple-700 mb-1">📅 HA Scheduled</p>
-                    <p className="text-sm text-gray-600">Prospects who have a Health Assessment scheduled. These are your hot leads!</p>
-                  </TooltipContent>
-                </Tooltip>
-                <div className="text-3xl font-bold text-purple-500">
-                  {prospects.filter(p => p.ha_scheduled_at && !["converted", "coach"].includes(p.status)).length}
-                </div>
-                <div className="text-sm text-gray-500">HA Scheduled</div>
-              </CardContent>
-            </Card>
-            <Card className="bg-green-50 border-green-200">
-              <CardContent className="p-4 text-center relative">
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <button className="absolute top-2 right-2 text-gray-400 hover:text-gray-600">
-                      <Info className="h-4 w-4" />
-                    </button>
-                  </TooltipTrigger>
-                  <TooltipContent side="bottom" className="max-w-xs p-3 bg-white/95 backdrop-blur-sm shadow-lg border border-gray-200">
-                    <p className="font-semibold text-green-700 mb-1">🎉 Converted</p>
-                    <p className="text-sm text-gray-600">Prospects who have become clients! These are your wins from the 100's List.</p>
-                  </TooltipContent>
-                </Tooltip>
-                <div className="text-3xl font-bold text-green-600">{stats.converted}</div>
-                <div className="text-sm text-gray-500">Converted</div>
-              </CardContent>
-            </Card>
-          </div>
-        </TooltipProvider>
-
-        {/* Compact Pipeline Stages */}
-        <div className="flex items-center gap-1 sm:gap-2 overflow-x-auto pb-1 mb-2">
-          {pipelineStages.map((stage, idx) => (
-            <div key={stage.id} className="flex items-center">
-              <button
-                onClick={() => {
-                  if (stage.id === "client" || stage.id === "coach") {
-                    window.location.href = "/client-tracker"
-                  } else {
-                    setFilterStatus(filterStatus === stage.id ? "all" : stage.id as any)
-                  }
-                }}
-                className="flex items-center gap-1.5 sm:gap-2 px-3 py-1.5 rounded-full border transition-all hover:shadow-sm hover:scale-105 text-xs sm:text-sm whitespace-nowrap"
-                style={{
-                  borderColor: stage.color,
-                  backgroundColor: filterStatus === stage.id ? stage.color : `${stage.color}10`,
-                  color: filterStatus === stage.id ? "white" : stage.color,
-                }}
+        {/* Pipeline Stages */}
+        <div className="grid grid-cols-3 sm:grid-cols-6 gap-2 sm:gap-3 mb-6">
+          {pipelineStages.map((stage) => (
+            <button
+              key={stage.id}
+              onClick={() => {
+                if (stage.id === "client" || stage.id === "coach") {
+                  window.location.href = "/client-tracker"
+                } else if (stage.id === "converted") {
+                  setFilterStatus(filterStatus === "converted" ? "all" : "converted" as any)
+                } else {
+                  setFilterStatus(filterStatus === stage.id ? "all" : stage.id as any)
+                }
+              }}
+              className="rounded-lg border-2 p-3 sm:p-4 text-center transition-all hover:shadow-md hover:scale-[1.02] cursor-pointer"
+              style={{
+                borderColor: filterStatus === stage.id ? stage.color : `${stage.color}50`,
+                backgroundColor: filterStatus === stage.id ? stage.color : `${stage.color}08`,
+              }}
+            >
+              <div className="text-lg sm:text-xl mb-0.5">{stage.icon}</div>
+              <div
+                className="text-2xl sm:text-3xl font-bold"
+                style={{ color: filterStatus === stage.id ? "white" : stage.color }}
               >
-                <span className="text-sm">{stage.icon}</span>
-                <span className="font-bold">{stage.count}</span>
-                <span className="font-medium hidden sm:inline">{stage.label}</span>
-              </button>
-              {idx < pipelineStages.length - 1 && (
-                <ChevronRight className="h-3.5 w-3.5 text-gray-300 mx-0.5 flex-shrink-0" />
-              )}
-            </div>
+                {stage.count}
+              </div>
+              <div
+                className="text-xs sm:text-sm font-medium mt-0.5 truncate"
+                style={{ color: filterStatus === stage.id ? "white" : "#6b7280" }}
+              >
+                {stage.label}
+              </div>
+            </button>
           ))}
         </div>
 

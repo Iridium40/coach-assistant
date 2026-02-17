@@ -58,6 +58,30 @@ export function ClientCard({
   const phase = getDayPhase(programDay)
   const attention = needsAttention(client)
 
+  // Compute attention reason for display
+  const attentionReason = (() => {
+    if (!attention) return null
+    const now = new Date()
+    const todayStr = now.toISOString().split("T")[0]
+
+    if (client.next_scheduled_at) {
+      const scheduledDate = new Date(client.next_scheduled_at)
+      const scheduledDateStr = scheduledDate.toISOString().split("T")[0]
+      if (scheduledDateStr < todayStr) return "Overdue check-in"
+      if (scheduledDateStr === todayStr) return "Check-in due today"
+    }
+
+    if (client.last_touchpoint_date) {
+      const lastCheckIn = new Date(client.last_touchpoint_date)
+      const daysSince = Math.floor((now.getTime() - lastCheckIn.getTime()) / (1000 * 60 * 60 * 24))
+      if (daysSince >= 10) return `No check-in for ${daysSince} days`
+    } else {
+      return "No check-in recorded"
+    }
+
+    return "Needs attention"
+  })()
+
   const handleCompleteCheckIn = async () => {
     // `toggleTouchpoint` now auto-clears/auto-advances schedules when a due check-in is marked done.
     await onToggleTouchpoint(client.id, "am_done")
@@ -105,6 +129,12 @@ export function ClientCard({
               {phase.milestone && (
                 <Badge style={{ backgroundColor: phase.bg, color: phase.color }}>
                   {phase.label}
+                </Badge>
+              )}
+              {attention && attentionReason && (
+                <Badge className="bg-orange-200 text-orange-800 flex items-center gap-1">
+                  <Circle className="h-2 w-2 fill-orange-500 text-orange-500" />
+                  {attentionReason}
                 </Badge>
               )}
             </div>
