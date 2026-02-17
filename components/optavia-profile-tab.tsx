@@ -9,7 +9,7 @@ interface OptaviaProfileTabProps {
 }
 
 export function OptaviaProfileTab({ optaviaId }: OptaviaProfileTabProps) {
-  const profileUrl = `https://www.optavia.com/us/en/coach/${optaviaId}`
+  const profileUrl = optaviaId
 
   return (
     <div className="space-y-4 sm:space-y-6">

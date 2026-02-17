@@ -55,7 +55,6 @@ export function InviteManagement({ onClose }: InviteManagementProps) {
 
   const [fullName, setFullName] = useState("")
   const [email, setEmail] = useState("")
-  const [optaviaId, setOptaviaId] = useState("")
   const [loading, setLoading] = useState(false)
   
   const [assignedCoachRank, setAssignedCoachRank] = useState<CoachRank>(
@@ -208,7 +207,7 @@ export function InviteManagement({ onClose }: InviteManagementProps) {
           invited_email: email,
           invited_full_name: fullName,
           coach_rank: assignedCoachRank,
-          optavia_id: optaviaId || null,
+          optavia_id: null,
           expires_at: expiresAt.toISOString(),
           is_active: true,
         })
@@ -258,7 +257,6 @@ export function InviteManagement({ onClose }: InviteManagementProps) {
       // Reset form
       setFullName("")
       setEmail("")
-      setOptaviaId("")
       trackChange()
 
       // Reload history to show the new invite
@@ -416,18 +414,6 @@ export function InviteManagement({ onClose }: InviteManagementProps) {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="bg-white border-gray-300 text-optavia-dark focus:border-[hsl(var(--optavia-green))] focus:ring-[hsl(var(--optavia-green-light))]"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="optaviaId" className="text-optavia-dark">Optavia ID <span className="text-gray-400 font-normal">(optional)</span></Label>
-              <Input
-                id="optaviaId"
-                type="text"
-                placeholder="Enter Optavia ID"
-                value={optaviaId}
-                onChange={(e) => setOptaviaId(e.target.value)}
                 className="bg-white border-gray-300 text-optavia-dark focus:border-[hsl(var(--optavia-green))] focus:ring-[hsl(var(--optavia-green-light))]"
               />
             </div>

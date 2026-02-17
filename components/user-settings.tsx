@@ -393,12 +393,12 @@ export function UserSettings({ onClose }: UserSettingsProps) {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="optaviaId" className="text-optavia-dark">Optavia ID</Label>
+              <Label htmlFor="optaviaId" className="text-optavia-dark">Your Optavia Coach Website Link</Label>
               <Input
                 id="optaviaId"
                 value={optaviaId}
                 onChange={(e) => setOptaviaId(e.target.value)}
-                placeholder="Enter your Optavia ID"
+                placeholder="https://www.optavia.com/us/en/coach/yourname"
                 disabled={isCoach}
                 readOnly={isCoach}
                 className={`${
@@ -408,7 +408,7 @@ export function UserSettings({ onClose }: UserSettingsProps) {
                 } text-optavia-dark`}
               />
               {isCoach && (
-                <p className="text-xs text-optavia-gray">Contact an admin to update your Optavia ID</p>
+                <p className="text-xs text-optavia-gray">Contact an admin to update your Optavia Coach Website Link</p>
               )}
             </div>
 
