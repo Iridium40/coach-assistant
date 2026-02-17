@@ -1,9 +1,10 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useRef, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
+import { Textarea } from "@/components/ui/textarea"
 import {
   Select,
   SelectContent,
@@ -29,6 +30,8 @@ import {
   Lightbulb,
   ChevronDown,
   ChevronUp,
+  Edit2,
+  Check,
 } from "lucide-react"
 import { ReminderButton } from "@/components/reminders-panel"
 import { ClientContextualResources } from "@/components/resources"
@@ -40,6 +43,7 @@ interface ClientCardProps {
   onToggleTouchpoint: (id: string, type: "am_done" | "pm_done") => Promise<boolean>
   onToggleCoachProspect: (id: string) => Promise<boolean>
   onStatusChange: (id: string, status: ClientStatus) => void
+  onUpdateClient: (id: string, updates: Partial<Client>) => Promise<boolean>
   onOpenTextTemplates: (client: Client) => void
   onOpenScheduleModal: (client: Client) => void
   onSendSMS: (client: Client) => void
@@ -54,6 +58,7 @@ export function ClientCard({
   onToggleTouchpoint,
   onToggleCoachProspect,
   onStatusChange,
+  onUpdateClient,
   onOpenTextTemplates,
   onOpenScheduleModal,
   onSendSMS,
@@ -63,9 +68,30 @@ export function ClientCard({
   needsAttention,
 }: ClientCardProps) {
   const [showResources, setShowResources] = useState(false)
+  const [editingNotes, setEditingNotes] = useState(false)
+  const [notesValue, setNotesValue] = useState(client.notes || "")
+  const notesRef = useRef<HTMLTextAreaElement>(null)
   const programDay = getProgramDay(client.start_date)
   const phase = getDayPhase(programDay)
   const attention = needsAttention(client)
+
+  // Sync notes value when client data changes externally
+  useEffect(() => {
+    if (!editingNotes) {
+      setNotesValue(client.notes || "")
+    }
+  }, [client.notes, editingNotes])
+
+  const handleSaveNotes = async () => {
+    const trimmed = notesValue.trim()
+    await onUpdateClient(client.id, { notes: trimmed || null })
+    setEditingNotes(false)
+  }
+
+  const handleCancelNotes = () => {
+    setNotesValue(client.notes || "")
+    setEditingNotes(false)
+  }
 
   // Compute attention reason for display
   const attentionReason = (() => {
@@ -317,11 +343,53 @@ export function ClientCard({
           />
         </div>
 
-        {client.notes && (
-          <div className="mt-3 pt-3 border-t text-sm text-gray-600">
-            📝 {client.notes}
-          </div>
-        )}
+        {/* Notes Section - always visible, click to edit */}
+        <div className="mt-3 pt-3 border-t">
+          {editingNotes ? (
+            <div className="space-y-2">
+              <Textarea
+                ref={notesRef}
+                value={notesValue}
+                onChange={(e) => setNotesValue(e.target.value)}
+                placeholder="Add notes about this client..."
+                className="text-sm min-h-[60px] resize-none"
+                autoFocus
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
+                    handleSaveNotes()
+                  }
+                  if (e.key === "Escape") {
+                    handleCancelNotes()
+                  }
+                }}
+              />
+              <div className="flex items-center gap-2">
+                <Button size="sm" onClick={handleSaveNotes} className="h-7 text-xs bg-[hsl(var(--optavia-green))]">
+                  <Check className="h-3 w-3 mr-1" />
+                  Save
+                </Button>
+                <Button size="sm" variant="ghost" onClick={handleCancelNotes} className="h-7 text-xs">
+                  Cancel
+                </Button>
+                <span className="text-[10px] text-gray-400 ml-auto">⌘+Enter to save</span>
+              </div>
+            </div>
+          ) : (
+            <button
+              onClick={() => setEditingNotes(true)}
+              className="w-full text-left group flex items-start gap-1.5 hover:bg-gray-50 rounded p-1 -m-1 transition-colors"
+            >
+              <span className="text-sm text-gray-600 flex-1">
+                {client.notes ? (
+                  <>📝 {client.notes}</>
+                ) : (
+                  <span className="text-gray-400 italic">Add notes...</span>
+                )}
+              </span>
+              <Edit2 className="h-3.5 w-3.5 text-gray-300 group-hover:text-gray-500 flex-shrink-0 mt-0.5" />
+            </button>
+          )}
+        </div>
 
         {/* Contextual Resources Section */}
         <Collapsible open={showResources} onOpenChange={setShowResources}>
