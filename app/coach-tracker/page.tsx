@@ -232,14 +232,14 @@ function CoachCard({
           </div>
         )}
 
-        {/* Primary Actions - Status + Check In + Schedule (matching prospect/client layout) */}
-        <div className="mt-4 flex flex-col sm:flex-row gap-2">
-          {/* Stage Select (prominent, like prospect/client status dropdown) */}
+        {/* Primary Actions - Status full-width, then Check In + Schedule share a row */}
+        <div className="mt-4 space-y-2 sm:space-y-0 sm:flex sm:gap-2">
+          {/* Stage Select - full width on mobile */}
           <Select
             value={coach.stage}
             onValueChange={(value) => onMoveStage(coach.id, value as CoachStage)}
           >
-            <SelectTrigger className="flex-1 min-w-0">
+            <SelectTrigger className="w-full sm:flex-1 sm:min-w-0">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -251,27 +251,30 @@ function CoachCard({
             </SelectContent>
           </Select>
 
-          {/* Check In Button */}
-          <Button
-            variant="outline"
-            size="sm"
-            className="flex-1 border-[hsl(var(--optavia-green))]/50 text-[hsl(var(--optavia-green))] hover:bg-[hsl(var(--optavia-green-light))]"
-            onClick={() => onCheckIn(coach)}
-          >
-            <CheckCircle className="h-4 w-4 mr-1" />
-            <span className="text-xs sm:text-sm">Check In</span>
-          </Button>
+          {/* Check In + Schedule share a row on mobile */}
+          <div className="grid grid-cols-2 gap-2 sm:contents">
+            {/* Check In Button */}
+            <Button
+              variant="outline"
+              size="sm"
+              className="w-full sm:flex-1 border-[hsl(var(--optavia-green))]/50 text-[hsl(var(--optavia-green))] hover:bg-[hsl(var(--optavia-green-light))]"
+              onClick={() => onCheckIn(coach)}
+            >
+              <CheckCircle className="h-4 w-4 mr-1" />
+              <span className="text-xs sm:text-sm">Check In</span>
+            </Button>
 
-          {/* Schedule Button */}
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => onOpenScheduleModal(coach)}
-            className="flex-1 text-purple-600 border-purple-200 hover:bg-purple-50"
-          >
-            <CalendarPlus className="h-4 w-4 mr-1" />
-            <span className="text-xs sm:text-sm">Schedule</span>
-          </Button>
+            {/* Schedule Button */}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => onOpenScheduleModal(coach)}
+              className="w-full sm:flex-1 text-purple-600 border-purple-200 hover:bg-purple-50"
+            >
+              <CalendarPlus className="h-4 w-4 mr-1" />
+              <span className="text-xs sm:text-sm">Schedule</span>
+            </Button>
+          </div>
         </div>
 
         {/* Secondary Actions: Edit, Rank, Remind, Delete (grid like prospect/client card) */}

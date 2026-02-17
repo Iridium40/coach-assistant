@@ -249,14 +249,14 @@ export function ClientCard({
           </div>
         )}
 
-        {/* Action Buttons - Status + Check In + Schedule (matching prospect card layout) */}
-        <div className="mt-4 flex flex-col sm:flex-row gap-2">
-          {/* Status Select (prominent, like prospect card) */}
+        {/* Action Buttons - Status full-width, then Check In + Schedule share a row */}
+        <div className="mt-4 space-y-2 sm:space-y-0 sm:flex sm:gap-2">
+          {/* Status Select - full width on mobile */}
           <Select
             value={client.status}
             onValueChange={(value) => onStatusChange(client.id, value as ClientStatus)}
           >
-            <SelectTrigger className="flex-1 min-w-0">
+            <SelectTrigger className="w-full sm:flex-1 sm:min-w-0">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -270,7 +270,7 @@ export function ClientCard({
           </Select>
 
           {client.status !== "paused" && (
-            <>
+            <div className="grid grid-cols-2 gap-2 sm:contents">
               {/* Check-in Button */}
               <Button
                 variant="outline"
@@ -282,7 +282,7 @@ export function ClientCard({
                   }
                   onToggleTouchpoint(client.id, "am_done")
                 }}
-                className={`flex-1 ${
+                className={`w-full sm:flex-1 ${
                   client.am_done
                     ? "bg-green-100 text-green-700 border-green-300 hover:bg-green-200"
                     : "text-green-600 border-green-200 hover:bg-green-50"
@@ -300,27 +300,27 @@ export function ClientCard({
                 variant="outline"
                 size="sm"
                 onClick={() => onOpenScheduleModal(client)}
-                className="flex-1 text-purple-600 border-purple-200 hover:bg-purple-50"
+                className="w-full sm:flex-1 text-purple-600 border-purple-200 hover:bg-purple-50"
               >
                 <CalendarPlus className="h-4 w-4 mr-1" />
                 <span className="text-xs sm:text-sm">Schedule</span>
               </Button>
-            </>
+            </div>
           )}
         </div>
 
-        {/* Secondary Actions: Text, Coach?, Remind (grid like prospect card) */}
-        <div className="mt-3 pt-3 border-t grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-2">
+        {/* Secondary Actions: Text, Coach?, Remind */}
+        <div className={`mt-3 pt-3 border-t grid ${client.status !== "paused" ? "grid-cols-3" : "grid-cols-2"} sm:flex sm:flex-wrap items-center gap-2`}>
           {client.status !== "paused" && (
             <Button
               variant="outline"
               size="sm"
               onClick={() => onOpenTextTemplates(client)}
-              className={
+              className={`w-full ${
                 isMilestoneDay(programDay) && client.last_celebrated_day !== programDay
                   ? "bg-amber-100 text-amber-700 border-amber-300 hover:bg-amber-200 animate-pulse"
                   : "text-blue-600 border-blue-200 hover:bg-blue-50"
-              }
+              }`}
             >
               <MessageSquare className="h-4 w-4 mr-1" />
               <span className="text-xs sm:text-sm">
@@ -332,8 +332,8 @@ export function ClientCard({
           <Button
             variant="outline"
             size="sm"
+            className={`w-full ${client.is_coach_prospect ? "bg-orange-50 text-orange-700" : ""}`}
             onClick={() => onToggleCoachProspect(client.id)}
-            className={client.is_coach_prospect ? "bg-orange-50 text-orange-700" : ""}
           >
             <Star className="h-4 w-4 mr-1" />
             <span className="text-xs sm:text-sm">{client.is_coach_prospect ? "Coach" : "Coach?"}</span>

@@ -106,6 +106,7 @@ export default function ProspectTrackerPage() {
     addProspect,
     updateProspect,
     deleteProspect,
+    logAction,
     getFilteredProspects,
     getDaysUntil,
   } = useProspects()
@@ -365,6 +366,22 @@ Talking Points:
     })
     setNewProspect({ label: "", source: "social", notes: "" })
     setShowAddModal(false)
+  }
+
+  const handleCheckIn = async (prospect: Prospect) => {
+    const success = await logAction(prospect.id, 3)
+    if (success) {
+      toast({
+        title: "Checked In",
+        description: `Contact logged for ${prospect.label}. Next follow-up in 3 days.`,
+      })
+    } else {
+      toast({
+        title: "Error",
+        description: "Failed to log check-in. Please try again.",
+        variant: "destructive",
+      })
+    }
   }
 
   const handleUpdateStatus = async (id: string, newStatus: ProspectStatus) => {
@@ -898,6 +915,7 @@ Talking Points:
                 daysUntil={getDaysUntil(prospect.next_action)}
                 onUpdateStatus={handleUpdateStatus}
                 onUpdateProspect={updateProspect}
+                onCheckIn={handleCheckIn}
                 onDelete={handleDelete}
                 onEdit={(p) => {
                   setEditingProspect(p)

@@ -28,6 +28,7 @@ import {
   Send,
   Share2,
   CheckCircle,
+  Circle,
   Lightbulb,
   ChevronDown,
   ChevronUp,
@@ -59,6 +60,7 @@ interface ProspectCardProps {
   daysUntil: number | null
   onUpdateStatus: (id: string, status: ProspectStatus) => void
   onUpdateProspect: (id: string, updates: Partial<Prospect>) => Promise<boolean>
+  onCheckIn: (prospect: Prospect) => void
   onDelete: (id: string) => void
   onEdit: (prospect: Prospect) => void
   onScheduleHA: (prospect: Prospect) => void
@@ -72,6 +74,7 @@ export function ProspectCard({
   daysUntil,
   onUpdateStatus,
   onUpdateProspect,
+  onCheckIn,
   onDelete,
   onEdit,
   onScheduleHA,
@@ -87,6 +90,8 @@ export function ProspectCard({
   const notesRef = useRef<HTMLTextAreaElement>(null)
   const config = statusConfig[prospect.status]
   const isOverdue = daysUntil !== null && daysUntil < 0
+  const todayStr = new Date().toISOString().split("T")[0]
+  const checkedInToday = prospect.last_action === todayStr
 
   useEffect(() => {
     if (!editingNotes) {
@@ -308,16 +313,16 @@ export function ProspectCard({
           </div>
         )}
 
-        {/* Action Buttons - All on same row */}
-        <div className="mt-4 flex flex-col sm:flex-row gap-2">
-          {/* Status Select */}
+        {/* Action Buttons - Status full-width, then Check In + Schedule share a row */}
+        <div className="mt-4 space-y-2 sm:space-y-0 sm:flex sm:gap-2">
+          {/* Status Select - full width on mobile */}
           <Select
             value={prospect.status}
             onValueChange={(value) =>
               onUpdateStatus(prospect.id, value as ProspectStatus)
             }
           >
-            <SelectTrigger className="flex-1 min-w-0">
+            <SelectTrigger className="w-full sm:flex-1 sm:min-w-0">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -334,18 +339,40 @@ export function ProspectCard({
             </SelectContent>
           </Select>
 
-          {/* Schedule HA Button */}
+          {/* Check In + Schedule share a row on mobile */}
           {prospect.status !== "converted" && prospect.status !== "coach" && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => onScheduleHA(prospect)}
-              className="flex-1 text-green-600 border-green-200 hover:bg-green-50"
-              title="Schedule HA"
-            >
-              <CalendarPlus className="h-4 w-4 mr-1" />
-              <span className="text-xs sm:text-sm">Schedule</span>
-            </Button>
+            <div className="grid grid-cols-2 gap-2 sm:contents">
+              {/* Check In Button */}
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => onCheckIn(prospect)}
+                className={`w-full sm:flex-1 ${
+                  checkedInToday
+                    ? "bg-green-100 text-green-700 border-green-300 hover:bg-green-200"
+                    : "text-green-600 border-green-200 hover:bg-green-50"
+                }`}
+                title={checkedInToday ? "Already checked in today" : "Log a check-in / contact attempt"}
+              >
+                {checkedInToday ? (
+                  <CheckCircle className="h-4 w-4 mr-1" />
+                ) : (
+                  <Circle className="h-4 w-4 mr-1" />
+                )}
+                <span className="text-xs sm:text-sm">{checkedInToday ? "Checked In" : "Check In"}</span>
+              </Button>
+              {/* Schedule HA Button */}
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => onScheduleHA(prospect)}
+                className="w-full sm:flex-1 text-green-600 border-green-200 hover:bg-green-50"
+                title="Schedule HA"
+              >
+                <CalendarPlus className="h-4 w-4 mr-1" />
+                <span className="text-xs sm:text-sm">Schedule</span>
+              </Button>
+            </div>
           )}
         </div>
 
