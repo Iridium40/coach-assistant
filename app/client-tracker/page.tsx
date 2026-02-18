@@ -97,6 +97,8 @@ export default function ClientTrackerPage() {
   const { profile } = useUserData()
 
   const [showAddModal, setShowAddModal] = useState(false)
+  const [showEditModal, setShowEditModal] = useState(false)
+  const [editingClient, setEditingClient] = useState<Client | null>(null)
   const [showTextModal, setShowTextModal] = useState(false)
   const [showScheduleModal, setShowScheduleModal] = useState(false)
   const [showGuideModal, setShowGuideModal] = useState(false)
@@ -915,6 +917,10 @@ ${phase.milestone ? `\n🎉 MILESTONE: ${phase.label} - Celebrate this achieveme
               onToggleCoachProspect={toggleCoachProspect}
               onStatusChange={handleStatusChange}
               onUpdateClient={updateClient}
+              onEdit={(c) => {
+                setEditingClient({ ...c })
+                setShowEditModal(true)
+              }}
               onOpenTextTemplates={openTextTemplates}
               onOpenScheduleModal={openScheduleModal}
               onSendSMS={sendSMS}
@@ -973,22 +979,6 @@ ${phase.milestone ? `\n🎉 MILESTONE: ${phase.label} - Celebrate this achieveme
               </p>
             </div>
             <div>
-              <Label>Phone Number (optional)</Label>
-              <div className="relative">
-                <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                <Input
-                  value={newClient.phone}
-                  onChange={(e) => setNewClient({ ...newClient, phone: e.target.value })}
-                  placeholder="e.g., 555-123-4567"
-                  className="pl-10"
-                  type="tel"
-                />
-              </div>
-              <p className="text-xs text-gray-500 mt-1">
-                For sending SMS reminders about scheduled check-ins
-              </p>
-            </div>
-            <div>
               <Label>Start Date *</Label>
               <Input
                 type="date"
@@ -1013,6 +1003,84 @@ ${phase.milestone ? `\n🎉 MILESTONE: ${phase.label} - Celebrate this achieveme
               className="bg-[hsl(var(--optavia-green))]"
             >
               Add Client
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Client Modal */}
+      <Dialog open={showEditModal} onOpenChange={setShowEditModal}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit Client</DialogTitle>
+            <DialogDescription>Update client information.</DialogDescription>
+          </DialogHeader>
+          {editingClient && (
+            <div className="space-y-4">
+              <div>
+                <Label>Label / Nickname</Label>
+                <Input
+                  value={editingClient.label}
+                  onChange={(e) => setEditingClient({ ...editingClient, label: e.target.value })}
+                  maxLength={50}
+                />
+              </div>
+              <div>
+                <Label>Phone Number</Label>
+                <div className="relative">
+                  <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <Input
+                    value={editingClient.phone || ""}
+                    onChange={(e) => setEditingClient({ ...editingClient, phone: e.target.value })}
+                    placeholder="e.g., 555-123-4567"
+                    className="pl-10"
+                    type="tel"
+                  />
+                </div>
+              </div>
+              <div>
+                <Label>Start Date</Label>
+                <Input
+                  type="date"
+                  value={editingClient.start_date}
+                  onChange={(e) => setEditingClient({ ...editingClient, start_date: e.target.value })}
+                />
+              </div>
+              <div>
+                <Label>Notes</Label>
+                <Textarea
+                  value={editingClient.notes || ""}
+                  onChange={(e) => setEditingClient({ ...editingClient, notes: e.target.value })}
+                  placeholder="Notes about this client..."
+                />
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => { setShowEditModal(false); setEditingClient(null) }}>
+              Cancel
+            </Button>
+            <Button
+              disabled={!editingClient?.label.trim()}
+              className="bg-[hsl(var(--optavia-green))]"
+              onClick={async () => {
+                if (!editingClient) return
+                const success = await updateClient(editingClient.id, {
+                  label: editingClient.label.trim(),
+                  phone: editingClient.phone || null,
+                  start_date: editingClient.start_date,
+                  notes: editingClient.notes || null,
+                })
+                if (success) {
+                  toast({ title: "Client updated", description: `${editingClient.label} has been updated.` })
+                  setShowEditModal(false)
+                  setEditingClient(null)
+                } else {
+                  toast({ title: "Error", description: "Failed to update client.", variant: "destructive" })
+                }
+              }}
+            >
+              Save Changes
             </Button>
           </DialogFooter>
         </DialogContent>

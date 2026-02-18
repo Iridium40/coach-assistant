@@ -44,6 +44,7 @@ interface ClientCardProps {
   onToggleCoachProspect: (id: string) => Promise<boolean>
   onStatusChange: (id: string, status: ClientStatus) => void
   onUpdateClient: (id: string, updates: Partial<Client>) => Promise<boolean>
+  onEdit: (client: Client) => void
   onOpenTextTemplates: (client: Client) => void
   onOpenScheduleModal: (client: Client) => void
   onSendSMS: (client: Client) => void
@@ -59,6 +60,7 @@ export function ClientCard({
   onToggleCoachProspect,
   onStatusChange,
   onUpdateClient,
+  onEdit,
   onOpenTextTemplates,
   onOpenScheduleModal,
   onSendSMS,
@@ -309,8 +311,8 @@ export function ClientCard({
           )}
         </div>
 
-        {/* Secondary Actions: Text, Coach?, Remind */}
-        <div className={`mt-3 pt-3 border-t grid ${client.status !== "paused" ? "grid-cols-3" : "grid-cols-2"} sm:flex sm:flex-wrap items-center gap-2`}>
+        {/* Secondary Actions: Text, Coach?, Edit, Remind */}
+        <div className="mt-3 pt-3 border-t grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-2">
           {client.status !== "paused" && (
             <Button
               variant="outline"
@@ -337,6 +339,15 @@ export function ClientCard({
           >
             <Star className="h-4 w-4 mr-1" />
             <span className="text-xs sm:text-sm">{client.is_coach_prospect ? "Coach" : "Coach?"}</span>
+          </Button>
+
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => onEdit(client)}
+          >
+            <Edit2 className="h-4 w-4 mr-1" />
+            <span className="text-xs sm:text-sm">Edit</span>
           </Button>
 
           <ReminderButton
