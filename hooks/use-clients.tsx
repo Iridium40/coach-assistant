@@ -348,13 +348,15 @@ export function useClients() {
 
   // Get filtered and sorted clients
   // "active" filter shows all non-paused clients (clients are active unless paused)
+  // "needs_attention" filter shows only clients that need attention
   const getFilteredClients = useCallback((
-    filterStatus: ClientStatus | 'all' = 'all'
+    filterStatus: ClientStatus | 'all' | 'needs_attention' = 'all'
   ): Client[] => {
     return clients
       .filter(c => {
         if (filterStatus === 'all') return true
         if (filterStatus === 'active') return c.status !== 'paused'
+        if (filterStatus === 'needs_attention') return c.status === 'active' && needsAttention(c)
         return c.status === filterStatus
       })
       .sort((a, b) => {

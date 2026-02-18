@@ -109,7 +109,7 @@ export default function ClientTrackerPage() {
   const [showCompleteConfirm, setShowCompleteConfirm] = useState(false)
   const [clientToComplete, setClientToComplete] = useState<Client | null>(null)
   const [selectedClient, setSelectedClient] = useState<Client | null>(null)
-  const [filterStatus, setFilterStatus] = useState<ClientStatus | "all">("all")
+  const [filterStatus, setFilterStatus] = useState<ClientStatus | "all" | "needs_attention">("all")
   const [searchTerm, setSearchTerm] = useState("")
   const [viewMode, setViewMode] = useState<"list" | "week">("list")
   const [weekOffset, setWeekOffset] = useState(0) // 0 = current week, 1 = next week, etc.
@@ -636,9 +636,16 @@ ${phase.milestone ? `\n🎉 MILESTONE: ${phase.label} - Celebrate this achieveme
         {/* Quick Stats Row */}
         <div className="flex flex-wrap items-center gap-3 mb-6 text-sm">
           {stats.needsAttention > 0 && (
-            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-orange-50 border border-orange-200 text-orange-700 font-medium">
+            <button
+              onClick={() => setFilterStatus(filterStatus === "needs_attention" ? "all" : "needs_attention")}
+              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border font-medium transition-colors ${
+                filterStatus === "needs_attention"
+                  ? "bg-orange-600 border-orange-600 text-white"
+                  : "bg-orange-50 border-orange-200 text-orange-700 hover:bg-orange-100"
+              }`}
+            >
               🚨 {stats.needsAttention} Need Attention
-            </span>
+            </button>
           )}
           {stats.milestonesToday > 0 && (
             <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-yellow-50 border border-yellow-200 text-yellow-700 font-medium">
