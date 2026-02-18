@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo } from "react"
+import { useState, useMemo, useCallback } from "react"
 import { Droplets, Dumbbell, Activity, Users, Wrench, Share2, BookOpen, Search, ClipboardList, Compass } from "lucide-react"
 import { SearchWithHistory } from "@/components/search-with-history"
 import { ToolCard } from "@/components/coach-tools/tool-card"
