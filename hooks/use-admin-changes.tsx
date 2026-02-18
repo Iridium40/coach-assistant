@@ -32,8 +32,6 @@ export function useAdminChanges(options: UseAdminChangesOptions = {}) {
     
     // Common cache keys used across the app
     const defaultCacheKeys = [
-      "pinnedTools",
-      "pinnedResources",
       "training-resources-search-history",
       "resources-search-history",
       "recipes-search-history",

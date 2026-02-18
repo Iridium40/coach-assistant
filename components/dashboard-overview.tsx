@@ -90,8 +90,6 @@ export function DashboardOverview() {
   const [upcomingMeetings, setUpcomingMeetings] = useState<ExpandedZoomCall[]>([])
   const [loadingMeetings, setLoadingMeetings] = useState(true)
   const [onboardingProgress, setOnboardingProgress] = useState<{ completed: number; total: number; percentage: number }>({ completed: 0, total: 3, percentage: 0 })
-  const [pinnedToolIds, setPinnedToolIds] = useState<string[]>([])
-  const [pinnedResourceIds, setPinnedResourceIds] = useState<string[]>([])
   const [pinnedResources, setPinnedResources] = useState<{ id: string; title: string; url: string }[]>([])
   const [openToolId, setOpenToolId] = useState<string | null>(null)
   const [milestoneClient, setMilestoneClient] = useState<any | null>(null)
@@ -99,56 +97,16 @@ export function DashboardOverview() {
   const [showRankPromotionModal, setShowRankPromotionModal] = useState(false)
   const [promotedRank, setPromotedRank] = useState<string | null>(null)
 
-  // Load pinned items from localStorage (with Safari-safe error handling)
-  useEffect(() => {
-    // Safety check for localStorage availability (Safari private mode, etc.)
-    const isLocalStorageAvailable = () => {
-      try {
-        const testKey = "__test__"
-        window.localStorage.setItem(testKey, testKey)
-        window.localStorage.removeItem(testKey)
-        return true
-      } catch (e) {
-        return false
-      }
-    }
-
-    if (!isLocalStorageAvailable()) {
-      console.warn("localStorage not available (possibly Safari private mode)")
-      return
-    }
-
-    try {
-      const savedTools = localStorage.getItem("pinnedTools")
-      if (savedTools) {
-        const parsed = JSON.parse(savedTools)
-        if (Array.isArray(parsed)) {
-          setPinnedToolIds(parsed)
-        }
-      }
-    } catch (e) {
-      console.error("Failed to parse pinned tools:", e)
-    }
-
-    try {
-      const savedResources = localStorage.getItem("pinnedResources")
-      if (savedResources) {
-        const parsed = JSON.parse(savedResources)
-        if (Array.isArray(parsed)) {
-          setPinnedResourceIds(parsed)
-        }
-      }
-    } catch (e) {
-      console.error("Failed to parse pinned resources:", e)
-    }
-  }, [])
-
-  // Get pinned tools and resources
+  // Pinned coach tools (from user_bookmarks with source='coach_tool')
+  const pinnedToolIds = useMemo(() => getBookmarkedIds("coach_tool"), [getBookmarkedIds])
   const pinnedTools = useMemo(() => {
     return COACH_TOOLS.filter(t => pinnedToolIds.includes(t.id))
   }, [pinnedToolIds])
 
-  // Fetch pinned resources from the database
+  // Pinned external resources (from user_bookmarks with source='external_resource')
+  const pinnedResourceIds = useMemo(() => getBookmarkedIds("external_resource"), [getBookmarkedIds])
+
+  // Fetch pinned external resource details from the database
   useEffect(() => {
     if (pinnedResourceIds.length === 0) {
       setPinnedResources([])
@@ -167,9 +125,9 @@ export function DashboardOverview() {
     fetchPinnedResources()
   }, [pinnedResourceIds, supabase])
 
-  // Get bookmarked training resources
+  // Bookmarked training resources (from user_bookmarks with source='training')
   const bookmarkedTrainingResources = useMemo(() => {
-    const bookmarkedIds = getBookmarkedIds()
+    const bookmarkedIds = getBookmarkedIds("training")
     return trainingResources.filter(r => bookmarkedIds.includes(r.id))
   }, [trainingResources, getBookmarkedIds])
 

@@ -106,7 +106,7 @@ export function AdminResources({ onClose }: { onClose?: () => void }) {
     saveAndLeave,
     cancelLeave,
   } = useAdminChanges({
-    storageKeys: ["pinnedResources", "resources-search-history"],
+    storageKeys: ["resources-search-history"],
   })
 
   useEffect(() => {

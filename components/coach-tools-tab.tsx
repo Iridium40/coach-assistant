@@ -1,9 +1,11 @@
 "use client"
 
-import { useState, useMemo, useEffect, useCallback } from "react"
+import { useState, useMemo } from "react"
 import { Droplets, Dumbbell, Activity, Users, Wrench, Share2, BookOpen, Search, ClipboardList, Compass } from "lucide-react"
 import { SearchWithHistory } from "@/components/search-with-history"
 import { ToolCard } from "@/components/coach-tools/tool-card"
+import { useBookmarks } from "@/hooks/use-bookmarks"
+import { useUserData } from "@/contexts/user-data-context"
 import { WaterCalculator } from "@/components/coach-tools/water-calculator"
 import { ExerciseGuide } from "@/components/coach-tools/exercise-guide"
 import { MetabolicHealthInfo } from "@/components/coach-tools/metabolic-health-info"
@@ -87,51 +89,14 @@ const COACH_TOOLS = [
 ]
 
 export function CoachToolsTab() {
-  const [pinnedToolIds, setPinnedToolIds] = useState<string[]>([])
+  const { user } = useUserData()
+  const { isBookmarked, toggleBookmark, getBookmarkedIds } = useBookmarks(user)
   const [searchQuery, setSearchQuery] = useState("")
 
-  // Load pinned tools from localStorage on mount (Safari-safe)
-  useEffect(() => {
-    const isLocalStorageAvailable = () => {
-      try {
-        const testKey = "__test__"
-        window.localStorage.setItem(testKey, testKey)
-        window.localStorage.removeItem(testKey)
-        return true
-      } catch (e) {
-        return false
-      }
-    }
+  const pinnedToolIds = useMemo(() => getBookmarkedIds("coach_tool"), [getBookmarkedIds])
 
-    if (!isLocalStorageAvailable()) {
-      console.warn("localStorage not available (possibly Safari private mode)")
-      return
-    }
-
-    try {
-      const savedTools = localStorage.getItem("pinnedTools")
-      if (savedTools) {
-        const parsed = JSON.parse(savedTools)
-        if (Array.isArray(parsed)) {
-          setPinnedToolIds(parsed)
-        }
-      }
-    } catch (e) {
-      console.error("Failed to parse pinned tools:", e)
-    }
-  }, [])
-
-  // Toggle pin status for tools (Safari-safe)
   const toggleToolPin = (toolId: string) => {
-    const newPinned = pinnedToolIds.includes(toolId)
-      ? pinnedToolIds.filter((id) => id !== toolId)
-      : [...pinnedToolIds, toolId]
-    setPinnedToolIds(newPinned)
-    try {
-      localStorage.setItem("pinnedTools", JSON.stringify(newPinned))
-    } catch (e) {
-      console.warn("Failed to save pinned tools to localStorage:", e)
-    }
+    toggleBookmark(toolId, "coach_tool")
   }
 
   // Filter coach tools by search query

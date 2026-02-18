@@ -1,9 +1,10 @@
 "use client"
 
-import { useState, useMemo, useEffect, useCallback } from "react"
+import { useState, useMemo, useEffect } from "react"
 import { useSearchParams } from "next/navigation"
 import { ResourceCard } from "@/components/resource-card"
 import { useUserData } from "@/contexts/user-data-context"
+import { useBookmarks } from "@/hooks/use-bookmarks"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import {
@@ -29,14 +30,16 @@ interface Resource {
 }
 
 export function ExternalResourcesTab() {
-  const { profile } = useUserData()
+  const { user, profile } = useUserData()
+  const { isBookmarked, toggleBookmark, getBookmarkedIds } = useBookmarks(user)
   const searchParams = useSearchParams()
   const categoryParam = searchParams.get("category")
   const [selectedCategory, setSelectedCategory] = useState<string>(categoryParam || "All")
-  const [pinnedIds, setPinnedIds] = useState<string[]>([])
   const [dbResources, setDbResources] = useState<DBExternalResource[]>([])
   const [loadingResources, setLoadingResources] = useState(true)
   const [searchQuery, setSearchQuery] = useState("")
+
+  const pinnedIds = useMemo(() => getBookmarkedIds("external_resource"), [getBookmarkedIds])
 
   // Fetch resources from database
   useEffect(() => {
@@ -64,49 +67,8 @@ export function ExternalResourcesTab() {
     }
   }, [categoryParam])
 
-  // Load pinned resources and tools from localStorage on mount (Safari-safe)
-  useEffect(() => {
-    // Safety check for localStorage availability (Safari private mode, etc.)
-    const isLocalStorageAvailable = () => {
-      try {
-        const testKey = "__test__"
-        window.localStorage.setItem(testKey, testKey)
-        window.localStorage.removeItem(testKey)
-        return true
-      } catch (e) {
-        return false
-      }
-    }
-
-    if (!isLocalStorageAvailable()) {
-      console.warn("localStorage not available (possibly Safari private mode)")
-      return
-    }
-
-    try {
-      const savedResources = localStorage.getItem("pinnedResources")
-      if (savedResources) {
-        const parsed = JSON.parse(savedResources)
-        if (Array.isArray(parsed)) {
-          setPinnedIds(parsed)
-        }
-      }
-    } catch (e) {
-      console.error("Failed to parse pinned resources:", e)
-    }
-  }, [])
-
-  // Toggle pin status for resources (Safari-safe)
   const togglePin = (resourceId: string) => {
-    const newPinned = pinnedIds.includes(resourceId)
-      ? pinnedIds.filter((id) => id !== resourceId)
-      : [...pinnedIds, resourceId]
-    setPinnedIds(newPinned)
-    try {
-      localStorage.setItem("pinnedResources", JSON.stringify(newPinned))
-    } catch (e) {
-      console.warn("Failed to save pinned resources to localStorage:", e)
-    }
+    toggleBookmark(resourceId, "external_resource")
   }
 
   // Convert database resources to the Resource format (preserving sort_order)

@@ -1,25 +1,27 @@
 "use client"
 
-import { useState, useEffect, useCallback } from "react"
+import { useState, useEffect, useCallback, useMemo } from "react"
 import { createClient } from "@/lib/supabase/client"
 import { User } from "@supabase/supabase-js"
+
+export type BookmarkSource = "training" | "coach_tool" | "external_resource"
 
 export interface Bookmark {
   id: string
   user_id: string
   resource_id: string
+  source: BookmarkSource
   bookmarked_at: string
 }
 
 export function useBookmarks(user: User | null) {
-  const [bookmarks, setBookmarks] = useState<Set<string>>(new Set())
+  const [bookmarks, setBookmarks] = useState<Bookmark[]>([])
   const [loading, setLoading] = useState(true)
-  const supabase = createClient()
+  const supabase = useMemo(() => createClient(), [])
 
-  // Load user's bookmarks
   const loadBookmarks = useCallback(async () => {
     if (!user) {
-      setBookmarks(new Set())
+      setBookmarks([])
       setLoading(false)
       return
     }
@@ -27,7 +29,7 @@ export function useBookmarks(user: User | null) {
     try {
       const { data, error } = await supabase
         .from("user_bookmarks")
-        .select("resource_id")
+        .select("id, user_id, resource_id, source, bookmarked_at")
         .eq("user_id", user.id)
 
       if (error) {
@@ -35,8 +37,7 @@ export function useBookmarks(user: User | null) {
         return
       }
 
-      const bookmarkSet = new Set(data?.map((b) => b.resource_id) || [])
-      setBookmarks(bookmarkSet)
+      setBookmarks(data || [])
     } catch (err) {
       console.error("Error loading bookmarks:", err)
     } finally {
@@ -44,62 +45,56 @@ export function useBookmarks(user: User | null) {
     }
   }, [user, supabase])
 
-  // Initial load
   useEffect(() => {
     loadBookmarks()
   }, [loadBookmarks])
 
-  // Check if a resource is bookmarked
-  const isBookmarked = useCallback((resourceId: string): boolean => {
-    return bookmarks.has(resourceId)
+  const isBookmarked = useCallback((resourceId: string, source?: BookmarkSource): boolean => {
+    if (source) {
+      return bookmarks.some(b => b.resource_id === resourceId && b.source === source)
+    }
+    return bookmarks.some(b => b.resource_id === resourceId)
   }, [bookmarks])
 
-  // Toggle bookmark status
-  const toggleBookmark = useCallback(async (resourceId: string): Promise<boolean> => {
+  const toggleBookmark = useCallback(async (resourceId: string, source: BookmarkSource = "training"): Promise<boolean> => {
     if (!user) return false
 
-    const wasBookmarked = bookmarks.has(resourceId)
+    const existing = bookmarks.find(b => b.resource_id === resourceId && b.source === source)
 
     try {
-      if (wasBookmarked) {
-        // Remove bookmark
+      if (existing) {
         const { error } = await supabase
           .from("user_bookmarks")
           .delete()
           .eq("user_id", user.id)
           .eq("resource_id", resourceId)
+          .eq("source", source)
 
         if (error) {
           console.error("Error removing bookmark:", error)
           return false
         }
 
-        // Optimistic update
-        setBookmarks((prev) => {
-          const newSet = new Set(prev)
-          newSet.delete(resourceId)
-          return newSet
-        })
+        setBookmarks(prev => prev.filter(b => !(b.resource_id === resourceId && b.source === source)))
       } else {
-        // Add bookmark
-        const { error } = await supabase
+        const { data, error } = await supabase
           .from("user_bookmarks")
           .insert({
             user_id: user.id,
             resource_id: resourceId,
+            source,
           })
+          .select()
+          .single()
 
         if (error) {
           console.error("Error adding bookmark:", error)
           return false
         }
 
-        // Optimistic update
-        setBookmarks((prev) => {
-          const newSet = new Set(prev)
-          newSet.add(resourceId)
-          return newSet
-        })
+        if (data) {
+          setBookmarks(prev => [...prev, data])
+        }
       }
 
       return true
@@ -109,9 +104,11 @@ export function useBookmarks(user: User | null) {
     }
   }, [user, bookmarks, supabase])
 
-  // Get all bookmarked resource IDs
-  const getBookmarkedIds = useCallback((): string[] => {
-    return Array.from(bookmarks)
+  const getBookmarkedIds = useCallback((source?: BookmarkSource): string[] => {
+    if (source) {
+      return bookmarks.filter(b => b.source === source).map(b => b.resource_id)
+    }
+    return bookmarks.map(b => b.resource_id)
   }, [bookmarks])
 
   return {
