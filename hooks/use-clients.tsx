@@ -161,7 +161,6 @@ export function useClients() {
       is_coach_prospect: false,
       am_done: false,
       pm_done: false,
-      last_touchpoint_date: today,
       notes: newClient.notes?.trim() || null
     }
 
@@ -297,39 +296,36 @@ export function useClients() {
     return updateClient(id, { status })
   }, [updateClient])
 
-  // Check if client needs attention
-  // 1. Has a scheduled check-in for today or past (and not checked in yet)
-  // 2. Last check-in was over 10 days ago
+  // Check if client needs attention (hasn't been checked in today)
+  // 1. Has a scheduled check-in for today or past
+  // 2. Client is in first 30 days (daily touchpoints expected)
+  // 3. Client beyond 30 days without a recurring schedule
   const needsAttention = useCallback((client: Client): boolean => {
     if (client.status !== 'active') return false
-    
-    // If already checked in today, no attention needed
     if (client.am_done) return false
-    
+
     const now = new Date()
     const todayStr = now.toISOString().split('T')[0]
-    
-    // Check if there's a scheduled check-in for today or past
+
+    // Scheduled check-in due today or overdue
     if (client.next_scheduled_at) {
-      const scheduledDate = new Date(client.next_scheduled_at)
-      const scheduledDateStr = scheduledDate.toISOString().split('T')[0]
+      const scheduledDateStr = new Date(client.next_scheduled_at).toISOString().split('T')[0]
       if (scheduledDateStr <= todayStr) {
         return true
       }
     }
-    
-    // Check if last check-in was over 10 days ago
-    if (client.last_touchpoint_date) {
-      const lastCheckIn = new Date(client.last_touchpoint_date)
-      const daysSinceLastCheckIn = Math.floor((now.getTime() - lastCheckIn.getTime()) / (1000 * 60 * 60 * 24))
-      if (daysSinceLastCheckIn >= 10) {
-        return true
-      }
-    } else {
-      // No last check-in date means they've never been checked in
+
+    // First 30 days: daily check-ins are expected
+    const programDay = getProgramDay(client.start_date)
+    if (programDay <= 30) {
       return true
     }
-    
+
+    // Beyond 30 days: flag if no recurring schedule is set up
+    if (!client.recurring_frequency || client.recurring_frequency === 'none') {
+      return true
+    }
+
     return false
   }, [])
 

@@ -66,10 +66,19 @@ export function TodaysFocus({
   const todayEnd = new Date()
   todayEnd.setHours(23, 59, 59, 999)
 
-  // Get clients needing touchpoints (limited)
-  const clientsNeedingAction = clients
-    .filter(c => c.status === "active" && needsAttention(c))
-    .slice(0, 3)
+  // Get new clients who started today (Day 1)
+  const newClientsToday = clients.filter(c => {
+    if (c.status !== "active") return false
+    const programDay = getProgramDay(c.start_date)
+    return programDay === 1
+  })
+
+  // Get other clients needing touchpoints (exclude Day 1 clients shown separately)
+  const newClientIds = new Set(newClientsToday.map((c: any) => c.id))
+  const allClientsNeedingAction = clients
+    .filter(c => c.status === "active" && needsAttention(c) && !newClientIds.has(c.id))
+  const clientsNeedingAction = allClientsNeedingAction.slice(0, 5)
+  const moreClientsCount = allClientsNeedingAction.length - clientsNeedingAction.length
 
   // Get HAs scheduled for today
   const haScheduledToday = prospects.filter(p => 
@@ -105,7 +114,7 @@ export function TodaysFocus({
     .slice(0, 2)
 
   // Separate coaching actions from calendar events
-  const hasCoachingActions = clientsNeedingAction.length > 0 || haScheduledToday.length > 0 || milestoneClients.length > 0 || todaysReminders.length > 0
+  const hasCoachingActions = newClientsToday.length > 0 || clientsNeedingAction.length > 0 || haScheduledToday.length > 0 || milestoneClients.length > 0 || todaysReminders.length > 0
   const hasCalendarEvents = meetingsToday.length > 0
 
   // Get timezone abbreviation
@@ -208,6 +217,39 @@ export function TodaysFocus({
 
           {hasCoachingActions ? (
             <div className="space-y-2">
+              {/* New Clients Started Today */}
+              {newClientsToday.map((client: any) => (
+                <div
+                  key={`new-${client.id}`}
+                  className="flex items-center justify-between p-2.5 bg-white rounded-lg border border-green-300"
+                >
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-lg bg-green-100 flex items-center justify-center">
+                      <span className="text-sm">🎉</span>
+                    </div>
+                    <div>
+                      <div className="font-medium text-sm text-gray-900">{client.label}</div>
+                      <div className="text-xs text-green-600">New client — Day 1! Welcome check-in needed</div>
+                    </div>
+                  </div>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => toggleTouchpoint(client.id, "am_done")}
+                    className={`h-7 text-xs px-3 ${client.am_done ? "bg-green-100 text-green-700 border-green-300" : "text-green-600 border-green-200"}`}
+                  >
+                    {client.am_done ? (
+                      <>
+                        <CheckCircle className="h-3 w-3 mr-1" />
+                        Done
+                      </>
+                    ) : (
+                      "Welcome"
+                    )}
+                  </Button>
+                </div>
+              ))}
+
               {/* HAs Scheduled Today */}
               {haScheduledToday.map(prospect => (
                 <div
@@ -273,6 +315,15 @@ export function TodaysFocus({
                   </div>
                 )
               })}
+
+              {/* More clients link */}
+              {moreClientsCount > 0 && (
+                <Link href="/client-tracker" className="block">
+                  <div className="text-center py-1.5 text-xs text-orange-600 hover:text-orange-800 hover:underline">
+                    + {moreClientsCount} more client{moreClientsCount > 1 ? "s" : ""} need check-ins → View Client Tracker
+                  </div>
+                </Link>
+              )}
 
               {/* Milestone Celebrations */}
               {milestoneClients.map(client => {
