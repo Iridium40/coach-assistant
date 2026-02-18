@@ -265,7 +265,7 @@ export function ClientCard({
               <SelectItem value="active">⭐ Client</SelectItem>
               <SelectItem value="goal_achieved">🏆 Goal Achieved</SelectItem>
               <SelectItem value="future_coach">🌟 Future Coach</SelectItem>
-              <SelectItem value="coach_launched">🚀 Launched</SelectItem>
+              <SelectItem value="coach_launched">🚀 Coach Launched</SelectItem>
               <SelectItem value="completed">✅ Completed</SelectItem>
               <SelectItem value="paused">⏸️ Paused</SelectItem>
             </SelectContent>
