@@ -71,10 +71,10 @@ export function Header({ onSettingsClick, onHomeClick, onAnnouncementsClick, onR
     { id: "dashboard" as const, label: "Dashboard", href: "/dashboard", fullAccessOnly: true },
     { id: "my-business" as const, label: "My Business", href: "/prospect-tracker", fullAccessOnly: true },
     { id: "calendar" as const, label: "Calendar", href: "/calendar", fullAccessOnly: true },
-    { id: "training" as const, label: "Training", href: "/training", fullAccessOnly: false },
+    { id: "training" as const, label: "Coaching Resource Library", href: "/training", fullAccessOnly: false },
     { id: "coach-tools" as const, label: "Coach Tools", href: "/coach-tools", fullAccessOnly: true },
     { id: "resources" as const, label: "External Resources", href: "/resources", fullAccessOnly: true },
-    { id: "recipes" as const, label: "Meal Planner", href: "/recipes", fullAccessOnly: true },
+    { id: "recipes" as const, label: "Meal Planning & Recipes", href: "/recipes", fullAccessOnly: true },
   ]
   
   // Filter nav items based on org access
