@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from "react"
 import Link from "next/link"
+import { useSearchParams } from "next/navigation"
 import { useClients, getDayPhase, getProgramDay, type ClientStatus, type RecurringFrequency, type Client } from "@/hooks/use-clients"
 import { useCoaches } from "@/hooks/use-coaches"
 import { useDebounce } from "@/hooks/use-debounce"
@@ -80,6 +81,7 @@ const HOUR_OPTIONS = Array.from({ length: 12 }, (_, i) => i + 1)
 const MINUTE_OPTIONS = ["00", "15", "30", "45"]
 
 export default function ClientTrackerPage() {
+  const searchParams = useSearchParams()
   const {
     clients,
     loading,
@@ -109,7 +111,11 @@ export default function ClientTrackerPage() {
   const [showCompleteConfirm, setShowCompleteConfirm] = useState(false)
   const [clientToComplete, setClientToComplete] = useState<Client | null>(null)
   const [selectedClient, setSelectedClient] = useState<Client | null>(null)
-  const [filterStatus, setFilterStatus] = useState<ClientStatus | "all" | "needs_attention">("all")
+  const [filterStatus, setFilterStatus] = useState<ClientStatus | "all" | "needs_attention">(() => {
+    const filterParam = searchParams.get("filter")
+    if (filterParam === "needs_attention") return "needs_attention"
+    return "all"
+  })
   const [searchTerm, setSearchTerm] = useState("")
   const [viewMode, setViewMode] = useState<"list" | "week">("list")
   const [weekOffset, setWeekOffset] = useState(0) // 0 = current week, 1 = next week, etc.

@@ -232,21 +232,14 @@ export function TodaysFocus({
                       <div className="text-xs text-green-600">New client — Day 1! Welcome check-in needed</div>
                     </div>
                   </div>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => toggleTouchpoint(client.id, "am_done")}
-                    className={`h-7 text-xs px-3 ${client.am_done ? "bg-green-100 text-green-700 border-green-300" : "text-green-600 border-green-200"}`}
-                  >
-                    {client.am_done ? (
-                      <>
-                        <CheckCircle className="h-3 w-3 mr-1" />
-                        Done
-                      </>
-                    ) : (
-                      "Welcome"
-                    )}
-                  </Button>
+                  <Link href="/client-tracker?filter=needs_attention">
+                    <Button
+                      size="sm"
+                      className="h-7 text-xs px-3 bg-green-500 hover:bg-green-600 text-white"
+                    >
+                      Welcome
+                    </Button>
+                  </Link>
                 </div>
               ))}
 
@@ -297,28 +290,21 @@ export function TodaysFocus({
                         <div className="text-xs text-orange-600">Check-in needed</div>
                       </div>
                     </div>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => toggleTouchpoint(client.id, "am_done")}
-                      className={`h-7 text-xs px-3 ${client.am_done ? "bg-green-100 text-green-700 border-green-300" : "text-green-600 border-green-200"}`}
-                    >
-                      {client.am_done ? (
-                        <>
-                          <CheckCircle className="h-3 w-3 mr-1" />
-                          Done
-                        </>
-                      ) : (
-                        "Check In"
-                      )}
-                    </Button>
+                    <Link href="/client-tracker?filter=needs_attention">
+                      <Button
+                        size="sm"
+                        className="h-7 text-xs px-3 bg-orange-500 hover:bg-orange-600 text-white"
+                      >
+                        Check In
+                      </Button>
+                    </Link>
                   </div>
                 )
               })}
 
               {/* More clients link */}
               {moreClientsCount > 0 && (
-                <Link href="/client-tracker" className="block">
+                <Link href="/client-tracker?filter=needs_attention" className="block">
                   <div className="text-center py-1.5 text-xs text-orange-600 hover:text-orange-800 hover:underline">
                     + {moreClientsCount} more client{moreClientsCount > 1 ? "s" : ""} need check-ins → View Client Tracker
                   </div>
