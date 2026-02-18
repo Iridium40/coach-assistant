@@ -1073,7 +1073,7 @@ Suggested talking points:
 
       {/* ─── Schedule Call Modal ─── */}
       <Dialog open={showScheduleModal} onOpenChange={setShowScheduleModal}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-w-md max-h-[90vh] flex flex-col">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <CalendarPlus className="h-5 w-5 text-purple-600" />
@@ -1082,7 +1082,7 @@ Suggested talking points:
             <DialogDescription>Set a day and time for a coaching call.</DialogDescription>
           </DialogHeader>
           {selectedCoach && (
-            <div className="space-y-6">
+            <div className="space-y-4 overflow-y-auto flex-1 pr-1">
               {/* Coach Info */}
               <div className="bg-gray-50 rounded-lg p-3">
                 <div className="font-medium text-gray-900">{selectedCoach.label}</div>
@@ -1094,7 +1094,7 @@ Suggested talking points:
 
               {/* Day Picker */}
               <div>
-                <Label className="text-sm font-medium mb-3 block">Select Day</Label>
+                <Label className="text-sm font-medium mb-2 block">Select Day</Label>
                 <div className="grid grid-cols-7 gap-1">
                   {DAYS_OF_WEEK.map((day) => (
                     <button
@@ -1117,7 +1117,7 @@ Suggested talking points:
 
               {/* Time Picker */}
               <div>
-                <Label className="text-sm font-medium mb-3 block">Select Time</Label>
+                <Label className="text-sm font-medium mb-2 block">Select Time</Label>
                 <div className="flex items-center gap-2 justify-center">
                   <select
                     value={scheduleHour}
@@ -1166,7 +1166,7 @@ Suggested talking points:
 
               {/* Meeting Type Selector */}
               <div>
-                <Label className="text-sm font-medium mb-3 block">Meeting Type</Label>
+                <Label className="text-sm font-medium mb-2 block">Meeting Type</Label>
                 <div className="grid grid-cols-2 gap-3">
                   <button
                     type="button"

@@ -1116,7 +1116,7 @@ ${phase.milestone ? `\n🎉 MILESTONE: ${phase.label} - Celebrate this achieveme
 
       {/* Schedule Check-in Modal */}
       <Dialog open={showScheduleModal} onOpenChange={setShowScheduleModal}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-w-md max-h-[90vh] flex flex-col">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <CalendarPlus className="h-5 w-5 text-purple-600" />
@@ -1125,7 +1125,7 @@ ${phase.milestone ? `\n🎉 MILESTONE: ${phase.label} - Celebrate this achieveme
             <DialogDescription>Set a day and time for the client check-in.</DialogDescription>
           </DialogHeader>
           {selectedClient && (
-            <div className="space-y-6">
+            <div className="space-y-4 overflow-y-auto flex-1 pr-1">
               {/* Client Info */}
               <div className="bg-gray-50 rounded-lg p-3">
                 <div className="font-medium text-gray-900">{selectedClient.label}</div>
@@ -1136,7 +1136,7 @@ ${phase.milestone ? `\n🎉 MILESTONE: ${phase.label} - Celebrate this achieveme
 
               {/* Day Picker */}
               <div>
-                <Label className="text-sm font-medium mb-3 block">Select Day</Label>
+                <Label className="text-sm font-medium mb-2 block">Select Day</Label>
                 <div className="grid grid-cols-7 gap-1">
                   {DAYS_OF_WEEK.map((day) => (
                     <button
@@ -1159,7 +1159,7 @@ ${phase.milestone ? `\n🎉 MILESTONE: ${phase.label} - Celebrate this achieveme
 
               {/* Time Picker */}
               <div>
-                <Label className="text-sm font-medium mb-3 block">Select Time</Label>
+                <Label className="text-sm font-medium mb-2 block">Select Time</Label>
                 <div className="flex items-center gap-2 justify-center">
                   {/* Hour */}
                   <select
@@ -1211,7 +1211,7 @@ ${phase.milestone ? `\n🎉 MILESTONE: ${phase.label} - Celebrate this achieveme
 
               {/* Recurring Frequency */}
               <div>
-                <Label className="text-sm font-medium mb-3 block flex items-center gap-2">
+                <Label className="text-sm font-medium mb-2 block flex items-center gap-2">
                   <Repeat className="h-4 w-4 text-purple-500" />
                   Recurring
                 </Label>
@@ -1240,7 +1240,7 @@ ${phase.milestone ? `\n🎉 MILESTONE: ${phase.label} - Celebrate this achieveme
 
               {/* Meeting Type Selector */}
               <div>
-                <Label className="text-sm font-medium mb-3 block">Meeting Type</Label>
+                <Label className="text-sm font-medium mb-2 block">Meeting Type</Label>
                 <div className="grid grid-cols-2 gap-3">
                   <button
                     type="button"

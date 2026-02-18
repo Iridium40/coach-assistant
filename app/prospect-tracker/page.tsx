@@ -1157,7 +1157,7 @@ Talking Points:
 
       {/* Schedule HA Modal */}
       <Dialog open={showHAScheduleModal} onOpenChange={setShowHAScheduleModal}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-w-md max-h-[90vh] flex flex-col">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <CalendarPlus className="h-5 w-5 text-blue-600" />
@@ -1166,7 +1166,7 @@ Talking Points:
             <DialogDescription>Set a date and time for the health assessment.</DialogDescription>
           </DialogHeader>
           {schedulingProspect && (
-            <div className="space-y-6">
+            <div className="space-y-4 overflow-y-auto flex-1 pr-1">
               {/* Prospect Info */}
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                 <div className="font-semibold text-blue-900">{schedulingProspect.label}</div>
@@ -1189,7 +1189,7 @@ Talking Points:
 
               {/* Time Picker */}
               <div>
-                <Label className="text-sm font-medium mb-3 block">Select Time</Label>
+                <Label className="text-sm font-medium mb-2 block">Select Time</Label>
                 <div className="flex items-center gap-2 justify-center">
                   {/* Hour */}
                   <select
@@ -1241,7 +1241,7 @@ Talking Points:
 
               {/* Meeting Type Selector */}
               <div>
-                <Label className="text-sm font-medium mb-3 block">Meeting Type</Label>
+                <Label className="text-sm font-medium mb-2 block">Meeting Type</Label>
                 <div className="grid grid-cols-2 gap-3">
                   <button
                     type="button"
