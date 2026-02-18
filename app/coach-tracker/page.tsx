@@ -63,13 +63,22 @@ import {
   X,
   Phone,
   Video,
+  Lightbulb,
+  ChevronDown,
+  ChevronUp,
 } from "lucide-react"
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
 import { ReminderButton } from "@/components/reminders-panel"
 import { ScheduleCalendarOptions } from "@/components/schedule-calendar-options"
 import { sendCalendarInviteEmail } from "@/lib/email"
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible"
 import { ErrorBoundary } from "@/components/ui/error-boundary"
+import { CoachRankGuide } from "@/components/coach-tracker/coach-rank-guide"
 import type { CalendarEvent } from "@/lib/calendar-utils"
 
 // Days of the week
@@ -117,6 +126,7 @@ function CoachCard({
 
   const [editingNotes, setEditingNotes] = useState(false)
   const [notesValue, setNotesValue] = useState(coach.notes || "")
+  const [showGuide, setShowGuide] = useState(false)
   const notesRef = useRef<HTMLTextAreaElement>(null)
 
   useEffect(() => {
@@ -343,6 +353,28 @@ function CoachCard({
             </button>
           )}
         </div>
+
+        {/* Rank Guide & Focus */}
+        <Collapsible open={showGuide} onOpenChange={setShowGuide}>
+          <CollapsibleTrigger asChild>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="w-full mt-3 pt-3 border-t flex items-center justify-center gap-2 text-gray-500 hover:text-gray-700 hover:bg-gray-50"
+            >
+              <Lightbulb className="h-4 w-4 text-amber-500" />
+              <span className="text-xs">Rank Guide & Focus</span>
+              {showGuide ? (
+                <ChevronUp className="h-4 w-4" />
+              ) : (
+                <ChevronDown className="h-4 w-4" />
+              )}
+            </Button>
+          </CollapsibleTrigger>
+          <CollapsibleContent className="mt-3">
+            <CoachRankGuide rank={coach.rank} />
+          </CollapsibleContent>
+        </Collapsible>
       </CardContent>
     </Card>
   )
