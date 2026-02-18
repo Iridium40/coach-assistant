@@ -87,7 +87,7 @@ export function Header({ onSettingsClick, onHomeClick, onAnnouncementsClick, onR
     { label: "100's List Tracker", href: "/prospect-tracker", description: "Track your prospect pipeline" },
     { label: "Client Tracker", href: "/client-tracker", description: "Touchpoints & milestones" },
     { label: "Coach Tracker", href: "/coach-tracker", description: "Track team development & ranks" },
-    { label: "Rank Calculator", href: "/my-business", description: "Track rank progress" },
+    ...(isAdmin ? [{ label: "Rank Calculator", href: "/my-business", description: "Track rank progress" }] : []),
   ]
 
   const isBusinessPage = currentActiveTab === "my-business"
