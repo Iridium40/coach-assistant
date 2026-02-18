@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo } from "react"
+import { useState, useMemo, Suspense } from "react"
 import Link from "next/link"
 import { useSearchParams } from "next/navigation"
 import { useClients, getDayPhase, getProgramDay, type ClientStatus, type RecurringFrequency, type Client } from "@/hooks/use-clients"
@@ -81,6 +81,14 @@ const HOUR_OPTIONS = Array.from({ length: 12 }, (_, i) => i + 1)
 const MINUTE_OPTIONS = ["00", "15", "30", "45"]
 
 export default function ClientTrackerPage() {
+  return (
+    <Suspense>
+      <ClientTrackerContent />
+    </Suspense>
+  )
+}
+
+function ClientTrackerContent() {
   const searchParams = useSearchParams()
   const {
     clients,
