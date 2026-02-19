@@ -56,7 +56,7 @@ export function Header({ onSettingsClick, onHomeClick, onAnnouncementsClick, onR
         pathname?.startsWith("/coach-tracker") ||
         pathname?.startsWith("/my-business")) return "my-business"
     if (pathname?.startsWith("/training")) return "training"
-    if (pathname?.startsWith("/coach-tools")) return "coach-tools"
+    if (pathname?.startsWith("/coach-tools") || pathname?.startsWith("/client-calendar")) return "coach-tools"
     if (pathname?.startsWith("/resources")) return "resources"
     if (pathname?.startsWith("/recipes")) return "recipes"
     if (pathname?.startsWith("/calendar")) return "calendar"

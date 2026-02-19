@@ -1,7 +1,8 @@
 "use client"
 
 import { useState, useMemo, useCallback } from "react"
-import { Droplets, Dumbbell, Activity, Users, Wrench, Share2, BookOpen, Search, ClipboardList, Compass } from "lucide-react"
+import { Droplets, Dumbbell, Activity, Users, Wrench, Share2, BookOpen, Search, ClipboardList, Compass, CalendarDays, ExternalLink } from "lucide-react"
+import Link from "next/link"
 import { SearchWithHistory } from "@/components/search-with-history"
 import { ToolCard } from "@/components/coach-tools/tool-card"
 import { useBookmarks } from "@/hooks/use-bookmarks"
@@ -158,6 +159,28 @@ export function CoachToolsTab() {
           </div>
         )}
       </div>
+
+      {/* Client Support Calendar - Featured Link */}
+      {(!searchQuery || "client support calendar creating empowered clients".includes(searchQuery.toLowerCase())) && (
+        <Link
+          href="/client-calendar"
+          className="block mb-6 rounded-lg border border-[hsl(var(--optavia-green))]/30 bg-gradient-to-r from-[hsl(var(--optavia-green-light))] to-white hover:shadow-md transition-all group"
+        >
+          <div className="flex items-center gap-4 p-4">
+            <div className="flex-shrink-0 w-12 h-12 rounded-lg bg-[hsl(var(--optavia-green))]/10 flex items-center justify-center group-hover:bg-[hsl(var(--optavia-green))]/20 transition-colors">
+              <CalendarDays className="h-6 w-6 text-[hsl(var(--optavia-green))]" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2">
+                <h3 className="font-semibold text-optavia-dark">Client Support Calendar</h3>
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[hsl(var(--optavia-green))]/10 text-[hsl(var(--optavia-green))] uppercase tracking-wide">Full Page</span>
+              </div>
+              <p className="text-sm text-optavia-gray mt-0.5">Day-by-day coaching scripts, videos, graphics, and check-in guides for Month 1 and Month 2.</p>
+            </div>
+            <ExternalLink className="h-5 w-5 text-optavia-gray group-hover:text-[hsl(var(--optavia-green))] transition-colors flex-shrink-0" />
+          </div>
+        </Link>
+      )}
 
       {/* Coach Tools Grid */}
       {filteredCoachTools.length > 0 && (
