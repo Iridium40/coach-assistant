@@ -5,6 +5,13 @@ ADD COLUMN IF NOT EXISTS coach_name TEXT;
 
 COMMENT ON COLUMN public.profiles.coach_name IS 'Free-form text: the name of the coach who referred or supports this user';
 
+-- Add signup_access_code column to profiles table
+-- Stores the access code text the user entered during sign-up
+ALTER TABLE public.profiles
+ADD COLUMN IF NOT EXISTS signup_access_code TEXT;
+
+COMMENT ON COLUMN public.profiles.signup_access_code IS 'The access code the user entered during self-service sign-up';
+
 -- Update the handle_new_user function to also extract coach_name from user metadata
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER AS $$

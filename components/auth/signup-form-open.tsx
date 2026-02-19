@@ -140,12 +140,13 @@ export function SignupFormOpen({ onSuccess, onSwitchToLogin }: SignupFormOpenPro
 
     await incrementCodeUsage(accessCode)
 
-    if (coachName.trim()) {
-      await supabase
-        .from("profiles")
-        .update({ coach_name: coachName.trim() })
-        .eq("id", signUpData.user.id)
-    }
+    await supabase
+      .from("profiles")
+      .update({
+        ...(coachName.trim() ? { coach_name: coachName.trim() } : {}),
+        signup_access_code: accessCode.trim().toUpperCase(),
+      })
+      .eq("id", signUpData.user.id)
 
     setEmailSent(true)
     setLoading(false)
