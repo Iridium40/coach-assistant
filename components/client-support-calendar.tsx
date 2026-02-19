@@ -107,6 +107,29 @@ function DetailDrawer({
     setTimeout(() => setCopiedIdx(null), 2000)
   }
 
+  const buildCopyAllText = (): string => {
+    const parts: string[] = []
+
+    for (const task of day.tasks) {
+      if (task.hasScript && task.script) {
+        parts.push(task.script)
+      }
+    }
+
+    const links: string[] = []
+    for (const task of day.tasks) {
+      if (task.videoUrl) links.push(`${task.icon} ${task.title}: ${task.videoUrl}`)
+      if (task.graphicPlaceholder) links.push(`${task.icon} ${task.title}: ${task.graphicPlaceholder}`)
+      if (task.resourceUrl) links.push(`${task.icon} ${task.title}: ${task.resourceUrl}`)
+    }
+
+    if (links.length > 0) {
+      parts.push("\n---\n📎 Resources & Media:\n" + links.join("\n"))
+    }
+
+    return parts.join("\n\n")
+  }
+
   return (
     <div className="fixed inset-0 z-50 flex justify-end">
       <div onClick={onClose} className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
@@ -130,6 +153,18 @@ function DetailDrawer({
 
         {/* Tasks */}
         <div className="p-4 space-y-3">
+          {/* Copy All button */}
+          <button
+            onClick={() => copyText(buildCopyAllText(), "copy-all")}
+            className="w-full py-2.5 rounded-lg font-bold text-sm transition-colors flex items-center justify-center gap-2"
+            style={{
+              background: copiedIdx === "copy-all" ? "#d1fae5" : "linear-gradient(135deg, #003B2E, #00A651)",
+              color: copiedIdx === "copy-all" ? "#065f46" : "#ffffff",
+              border: copiedIdx === "copy-all" ? "1px solid #bbf7d0" : "none",
+            }}
+          >
+            {copiedIdx === "copy-all" ? "✅ Copied Everything!" : "📋 Copy All — Script + Links"}
+          </button>
           {day.tasks.map((task, i) => {
             const taskKey = `${dayKey}-${i}`
             const done = !!completedTasks[taskKey]

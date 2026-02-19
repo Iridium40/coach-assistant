@@ -254,6 +254,34 @@ export function ClientCalendarDialog({
                 )}
               </div>
 
+              {/* Copy All button */}
+              <button
+                onClick={() => {
+                  const parts: string[] = []
+                  for (const task of selectedDay.data.tasks) {
+                    if (task.hasScript && task.script) parts.push(task.script)
+                  }
+                  const links: string[] = []
+                  for (const task of selectedDay.data.tasks) {
+                    if (task.videoUrl) links.push(`${task.icon} ${task.title}: ${task.videoUrl}`)
+                    if (task.graphicPlaceholder) links.push(`${task.icon} ${task.title}: ${task.graphicPlaceholder}`)
+                    if (task.resourceUrl) links.push(`${task.icon} ${task.title}: ${task.resourceUrl}`)
+                  }
+                  if (links.length > 0) {
+                    parts.push("\n---\n📎 Resources & Media:\n" + links.join("\n"))
+                  }
+                  copyText(parts.join("\n\n"), "copy-all")
+                }}
+                className="w-full py-2 rounded-lg font-bold text-[13px] transition-colors flex items-center justify-center gap-2 mb-2"
+                style={{
+                  background: copiedIdx === "copy-all" ? "#d1fae5" : "linear-gradient(135deg, #003B2E, #00A651)",
+                  color: copiedIdx === "copy-all" ? "#065f46" : "#ffffff",
+                  border: copiedIdx === "copy-all" ? "1px solid #bbf7d0" : "none",
+                }}
+              >
+                {copiedIdx === "copy-all" ? "✅ Copied Everything!" : "📋 Copy All — Script + Links"}
+              </button>
+
               <div className="space-y-2">
                 {selectedDay.data.tasks.map((task, i) => {
                   const taskKey = `${selectedDay.key}-${i}`
