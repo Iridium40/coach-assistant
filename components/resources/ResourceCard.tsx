@@ -1,6 +1,7 @@
 "use client"
 
-import { ExternalLink, Video, FileText, MessageSquare, Link as LinkIcon, CheckCircle, Hash, Utensils, Leaf, Scale, Cookie, UtensilsCrossed, FileWarning, Phone, Stethoscope, DollarSign, Settings, Package } from 'lucide-react'
+import { useState } from 'react'
+import { ExternalLink, Copy, Check, Video, FileText, MessageSquare, Link as LinkIcon, CheckCircle, Hash, Utensils, Leaf, Scale, Cookie, UtensilsCrossed, FileWarning, Phone, Stethoscope, DollarSign, Settings, Package } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -101,8 +102,18 @@ export function ResourceCard({
   showTags = false,
 }: ResourceCardProps) {
   const resourceType = features?.type
-  // Ensure tags is always an array
   const tags = Array.isArray(features?.tags) ? features.tags : []
+  const [copied, setCopied] = useState(false)
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(url)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    } catch { /* clipboard unavailable */ }
+  }
+
+  const isShareableUrl = url && !url.startsWith('#')
   
   if (compact) {
     return (
@@ -129,15 +140,28 @@ export function ResourceCard({
               ))}
             </div>
           )}
-          <Button
-            size="sm"
-            variant="outline"
-            className="h-7 text-xs border-[hsl(var(--optavia-green))] text-[hsl(var(--optavia-green))] hover:bg-[hsl(var(--optavia-green-light))]"
-            onClick={() => window.open(url, '_blank')}
-          >
-            {buttonText}
-            <ExternalLink className="ml-1 h-3 w-3" />
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              size="sm"
+              variant="outline"
+              className="h-7 text-xs border-[hsl(var(--optavia-green))] text-[hsl(var(--optavia-green))] hover:bg-[hsl(var(--optavia-green-light))]"
+              onClick={() => window.open(url, '_blank')}
+            >
+              {buttonText}
+              <ExternalLink className="ml-1 h-3 w-3" />
+            </Button>
+            {isShareableUrl && (
+              <Button
+                size="sm"
+                variant="outline"
+                className={`h-7 text-xs ${copied ? "border-green-300 text-green-700 bg-green-50" : "border-gray-200 text-gray-600 hover:bg-gray-50"}`}
+                onClick={handleCopy}
+              >
+                {copied ? <Check className="h-3 w-3 mr-1" /> : <Copy className="h-3 w-3 mr-1" />}
+                {copied ? "Copied!" : "Copy Link"}
+              </Button>
+            )}
+          </div>
         </div>
       </div>
     )
@@ -170,16 +194,27 @@ export function ResourceCard({
           </div>
         )}
       </CardHeader>
-      <CardContent>
+      <CardContent className="flex gap-2">
         <Button
           size="sm"
           variant="outline"
-          className="w-full border-[hsl(var(--optavia-green))] text-[hsl(var(--optavia-green))] hover:bg-[hsl(var(--optavia-green-light))]"
+          className="flex-1 border-[hsl(var(--optavia-green))] text-[hsl(var(--optavia-green))] hover:bg-[hsl(var(--optavia-green-light))]"
           onClick={() => window.open(url, '_blank')}
         >
           {buttonText}
           <ExternalLink className="ml-2 h-4 w-4" />
         </Button>
+        {isShareableUrl && (
+          <Button
+            size="sm"
+            variant="outline"
+            className={`${copied ? "border-green-300 text-green-700 bg-green-50" : "border-gray-200 text-gray-600 hover:bg-gray-50"}`}
+            onClick={handleCopy}
+          >
+            {copied ? <Check className="h-4 w-4 mr-1" /> : <Copy className="h-4 w-4 mr-1" />}
+            {copied ? "Copied!" : "Copy Link"}
+          </Button>
+        )}
       </CardContent>
     </Card>
   )
