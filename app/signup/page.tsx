@@ -1,8 +1,8 @@
 "use client"
 
-import { Suspense } from "react"
+import { Suspense, useEffect } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
-import { SignupForm } from "@/components/auth/signup-form"
+import { SignupFormOpen } from "@/components/auth/signup-form-open"
 import { Footer } from "@/components/footer"
 
 function SignupPageContent() {
@@ -10,8 +10,21 @@ function SignupPageContent() {
   const searchParams = useSearchParams()
   const inviteKey = searchParams.get("invite")
 
-  const handleSuccess = () => {
-    router.push("/login")
+  useEffect(() => {
+    if (inviteKey) {
+      router.replace(`/set-password?invite=${inviteKey}`)
+    }
+  }, [inviteKey, router])
+
+  if (inviteKey) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-white">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[hsl(var(--optavia-green))] mx-auto mb-4"></div>
+          <p className="text-optavia-gray">Redirecting...</p>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -28,10 +41,9 @@ function SignupPageContent() {
           </picture>
         </div>
         <div className="w-full max-w-md space-y-4">
-          <SignupForm
-            onSuccess={handleSuccess}
+          <SignupFormOpen
+            onSuccess={() => router.push("/login")}
             onSwitchToLogin={() => router.push("/login")}
-            inviteKey={inviteKey}
           />
         </div>
       </div>

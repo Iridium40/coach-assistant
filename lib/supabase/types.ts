@@ -8,8 +8,17 @@ export interface Database {
           full_name: string | null
           avatar_url: string | null
           is_new_coach: boolean
+          user_role: string | null
+          coach_rank: string | null
           optavia_id: string | null
           parent_optavia_id: string | null
+          sponsor_id: string | null
+          coach_name: string | null
+          phone_number: string | null
+          notification_email: string | null
+          notification_phone: string | null
+          org_id: number | null
+          last_sign_in_at: string | null
           created_at: string
           updated_at: string
         }
@@ -19,8 +28,14 @@ export interface Database {
           full_name?: string | null
           avatar_url?: string | null
           is_new_coach?: boolean
+          user_role?: string | null
+          coach_rank?: string | null
           optavia_id?: string | null
           parent_optavia_id?: string | null
+          sponsor_id?: string | null
+          coach_name?: string | null
+          phone_number?: string | null
+          org_id?: number | null
           created_at?: string
           updated_at?: string
         }
@@ -30,10 +45,51 @@ export interface Database {
           full_name?: string | null
           avatar_url?: string | null
           is_new_coach?: boolean
+          user_role?: string | null
+          coach_rank?: string | null
           optavia_id?: string | null
           parent_optavia_id?: string | null
+          sponsor_id?: string | null
+          coach_name?: string | null
+          phone_number?: string | null
+          org_id?: number | null
           created_at?: string
           updated_at?: string
+        }
+      }
+      signup_access_codes: {
+        Row: {
+          id: string
+          code: string
+          label: string | null
+          is_active: boolean
+          max_uses: number | null
+          times_used: number
+          created_by: string | null
+          created_at: string
+          expires_at: string | null
+        }
+        Insert: {
+          id?: string
+          code: string
+          label?: string | null
+          is_active?: boolean
+          max_uses?: number | null
+          times_used?: number
+          created_by?: string | null
+          created_at?: string
+          expires_at?: string | null
+        }
+        Update: {
+          id?: string
+          code?: string
+          label?: string | null
+          is_active?: boolean
+          max_uses?: number | null
+          times_used?: number
+          created_by?: string | null
+          created_at?: string
+          expires_at?: string | null
         }
       }
       user_progress: {
