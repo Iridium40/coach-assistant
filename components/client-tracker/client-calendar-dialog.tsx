@@ -145,10 +145,16 @@ export function ClientCalendarDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[85vh] overflow-hidden flex flex-col p-0 gap-0">
+      <DialogContent showCloseButton={false} className="max-w-2xl max-h-[85vh] overflow-hidden flex flex-col p-0 gap-0">
         {/* Header */}
-        <div className="px-5 py-4 bg-[#1a2744] text-white rounded-t-lg flex-shrink-0">
-          <div className="text-lg font-extrabold tracking-tight" style={{ fontFamily: "'Montserrat', sans-serif" }}>
+        <div className="px-5 py-4 bg-[#1a2744] text-white rounded-t-lg flex-shrink-0 relative">
+          <button
+            onClick={() => onOpenChange(false)}
+            className="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/15 text-white flex items-center justify-center hover:bg-white/30 transition-colors text-lg"
+          >
+            ✕
+          </button>
+          <div className="text-lg font-extrabold tracking-tight pr-10" style={{ fontFamily: "'Montserrat', sans-serif" }}>
             {clientName}&apos;s Journey
           </div>
           <div className="flex items-center gap-3 mt-1.5 text-sm text-slate-300">
