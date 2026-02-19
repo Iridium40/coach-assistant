@@ -75,3 +75,8 @@ CREATE POLICY "Anon can increment usage on active codes"
   TO anon
   USING (is_active = true)
   WITH CHECK (is_active = true);
+
+-- Seed default access code
+INSERT INTO public.signup_access_codes (code, label, is_active)
+VALUES ('OPTAVIA', 'Default signup code', true)
+ON CONFLICT (code) DO NOTHING;

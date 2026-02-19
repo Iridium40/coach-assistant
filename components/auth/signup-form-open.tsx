@@ -22,7 +22,7 @@ export function SignupFormOpen({ onSuccess, onSwitchToLogin }: SignupFormOpenPro
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
-  const [accessCode, setAccessCode] = useState("")
+  const [accessCode, setAccessCode] = useState("OPTAVIA")
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [loading, setLoading] = useState(false)
