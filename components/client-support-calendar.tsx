@@ -460,24 +460,26 @@ export function ClientSupportCalendar() {
             )}
           </p>
 
-          {/* Progress bar */}
-          <div className="flex items-center gap-3 mt-4">
-            <div className="flex items-center gap-2 bg-white/5 rounded-lg px-3.5 py-2">
-              <span className="text-xs text-slate-400 font-semibold">Progress:</span>
-              <span className="text-lg font-extrabold text-[#00A651]" style={{ fontFamily: "'Montserrat', sans-serif" }}>
-                {totalTasks > 0 ? Math.round((totalCompleted / totalTasks) * 100) : 0}%
-              </span>
+          {/* Progress bar — only shown when viewing for a specific client */}
+          {clientId && (
+            <div className="flex items-center gap-3 mt-4">
+              <div className="flex items-center gap-2 bg-white/5 rounded-lg px-3.5 py-2">
+                <span className="text-xs text-slate-400 font-semibold">Progress:</span>
+                <span className="text-lg font-extrabold text-[#00A651]" style={{ fontFamily: "'Montserrat', sans-serif" }}>
+                  {totalTasks > 0 ? Math.round((totalCompleted / totalTasks) * 100) : 0}%
+                </span>
+              </div>
+              <div className="flex-1 h-2 rounded-full bg-white/10">
+                <div
+                  className="h-full rounded-full transition-all duration-500"
+                  style={{ width: `${totalTasks > 0 ? (totalCompleted / totalTasks) * 100 : 0}%`, background: "#00A651" }}
+                />
+              </div>
+              <div className="text-xs text-slate-400 font-medium">
+                {totalCompleted}/{totalTasks}
+              </div>
             </div>
-            <div className="flex-1 h-2 rounded-full bg-white/10">
-              <div
-                className="h-full rounded-full transition-all duration-500"
-                style={{ width: `${totalTasks > 0 ? (totalCompleted / totalTasks) * 100 : 0}%`, background: "#00A651" }}
-              />
-            </div>
-            <div className="text-xs text-slate-400 font-medium">
-              {totalCompleted}/{totalTasks}
-            </div>
-          </div>
+          )}
 
           {/* Month Tabs */}
           <div className="flex gap-1 mt-4">
