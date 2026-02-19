@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useCallback } from "react"
-import { Dialog, DialogContent } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { ChevronLeft, ChevronRight, Copy, Check, ExternalLink } from "lucide-react"
 import {
@@ -146,6 +146,7 @@ export function ClientCalendarDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent showCloseButton={false} className="max-w-2xl max-h-[85vh] overflow-hidden flex flex-col p-0 gap-0">
+        <DialogTitle className="sr-only">{clientName}&apos;s Journey</DialogTitle>
         {/* Header */}
         <div className="px-5 py-4 bg-gradient-to-r from-[hsl(var(--optavia-green))] to-[hsl(var(--optavia-green-dark))] text-white rounded-t-lg flex-shrink-0 relative">
           <button
