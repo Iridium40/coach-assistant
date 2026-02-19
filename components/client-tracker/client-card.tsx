@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/collapsible"
 import {
   Calendar,
+  CalendarDays,
   Star,
   MessageSquare,
   CalendarPlus,
@@ -33,10 +34,12 @@ import {
   Edit2,
   Check,
 } from "lucide-react"
+import Link from "next/link"
 import { ReminderButton } from "@/components/reminders-panel"
 import { ClientContextualResources } from "@/components/resources"
 import { getDayPhase, getProgramDay, type Client, type ClientStatus } from "@/hooks/use-clients"
 import { isMilestoneDay } from "@/hooks/use-touchpoint-templates"
+import { getClientCalendarProgress } from "@/lib/client-calendar-data"
 
 interface ClientCardProps {
   client: Client
@@ -76,6 +79,8 @@ export function ClientCard({
   const programDay = getProgramDay(client.start_date)
   const phase = getDayPhase(programDay)
   const attention = needsAttention(client)
+  const calendarProgress = getClientCalendarProgress(client.id, programDay)
+  const calendarUrl = `/client-calendar?clientId=${encodeURIComponent(client.id)}&clientName=${encodeURIComponent(client.label)}&startDate=${encodeURIComponent(client.start_date)}`
 
   // Sync notes value when client data changes externally
   useEffect(() => {
@@ -191,6 +196,38 @@ export function ClientCard({
             </div>
           </div>
         </div>
+
+        {/* Calendar Journey Progress */}
+        {client.status !== "paused" && programDay <= 35 && (
+          <Link
+            href={calendarUrl}
+            className="mt-3 flex items-center gap-3 p-2.5 rounded-lg bg-gradient-to-r from-indigo-50 to-blue-50 border border-indigo-100 hover:border-indigo-200 hover:shadow-sm transition-all group"
+          >
+            <div className="w-9 h-9 rounded-lg bg-indigo-100 group-hover:bg-indigo-200 flex items-center justify-center flex-shrink-0 transition-colors">
+              <CalendarDays className="h-4.5 w-4.5 text-indigo-600" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-semibold text-indigo-900">
+                  {programDay <= 30 ? `Month 1 — Day ${programDay}` : "Month 2"}
+                </span>
+                <span className="text-[11px] font-bold text-indigo-600">
+                  {calendarProgress.completed}/{calendarProgress.totalDue}
+                </span>
+              </div>
+              <div className="mt-1 h-1.5 rounded-full bg-indigo-100">
+                <div
+                  className="h-full rounded-full transition-all duration-500"
+                  style={{
+                    width: `${calendarProgress.percentage}%`,
+                    background: calendarProgress.percentage === 100 ? "#00A651" : "#4f46e5",
+                  }}
+                />
+              </div>
+            </div>
+            <ChevronDown className="h-4 w-4 text-indigo-400 group-hover:text-indigo-600 -rotate-90 flex-shrink-0 transition-colors" />
+          </Link>
+        )}
 
         {/* Scheduled Time Row */}
         {client.status !== "paused" && client.next_scheduled_at && (
