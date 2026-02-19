@@ -34,9 +34,9 @@ import {
   Edit2,
   Check,
 } from "lucide-react"
-import Link from "next/link"
 import { ReminderButton } from "@/components/reminders-panel"
 import { ClientContextualResources } from "@/components/resources"
+import { ClientCalendarDialog } from "@/components/client-tracker/client-calendar-dialog"
 import { getDayPhase, getProgramDay, type Client, type ClientStatus } from "@/hooks/use-clients"
 import { isMilestoneDay } from "@/hooks/use-touchpoint-templates"
 import { getClientCalendarProgress } from "@/lib/client-calendar-data"
@@ -73,6 +73,7 @@ export function ClientCard({
   needsAttention,
 }: ClientCardProps) {
   const [showResources, setShowResources] = useState(false)
+  const [showCalendar, setShowCalendar] = useState(false)
   const [editingNotes, setEditingNotes] = useState(false)
   const [notesValue, setNotesValue] = useState(client.notes || "")
   const notesRef = useRef<HTMLTextAreaElement>(null)
@@ -80,7 +81,6 @@ export function ClientCard({
   const phase = getDayPhase(programDay)
   const attention = needsAttention(client)
   const calendarProgress = getClientCalendarProgress(client.id, programDay)
-  const calendarUrl = `/client-calendar?clientId=${encodeURIComponent(client.id)}&clientName=${encodeURIComponent(client.label)}&startDate=${encodeURIComponent(client.start_date)}`
 
   // Sync notes value when client data changes externally
   useEffect(() => {
@@ -199,9 +199,9 @@ export function ClientCard({
 
         {/* Calendar Journey Progress */}
         {client.status !== "paused" && programDay <= 35 && (
-          <Link
-            href={calendarUrl}
-            className="mt-3 flex items-center gap-3 p-2.5 rounded-lg bg-gradient-to-r from-indigo-50 to-blue-50 border border-indigo-100 hover:border-indigo-200 hover:shadow-sm transition-all group"
+          <button
+            onClick={() => setShowCalendar(true)}
+            className="mt-3 w-full flex items-center gap-3 p-2.5 rounded-lg bg-gradient-to-r from-indigo-50 to-blue-50 border border-indigo-100 hover:border-indigo-200 hover:shadow-sm transition-all group text-left"
           >
             <div className="w-9 h-9 rounded-lg bg-indigo-100 group-hover:bg-indigo-200 flex items-center justify-center flex-shrink-0 transition-colors">
               <CalendarDays className="h-4.5 w-4.5 text-indigo-600" />
@@ -226,7 +226,7 @@ export function ClientCard({
               </div>
             </div>
             <ChevronDown className="h-4 w-4 text-indigo-400 group-hover:text-indigo-600 -rotate-90 flex-shrink-0 transition-colors" />
-          </Link>
+          </button>
         )}
 
         {/* Scheduled Time Row */}
@@ -470,6 +470,16 @@ export function ClientCard({
           </CollapsibleContent>
         </Collapsible>
       </CardContent>
+
+      {/* Calendar Dialog */}
+      <ClientCalendarDialog
+        open={showCalendar}
+        onOpenChange={setShowCalendar}
+        clientId={client.id}
+        clientName={client.label}
+        startDate={client.start_date}
+        programDay={programDay}
+      />
     </Card>
   )
 }
