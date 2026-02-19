@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useRef, useEffect } from "react"
+import { useState, useRef, useEffect, useMemo } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -76,11 +76,13 @@ export function ClientCard({
   const [showCalendar, setShowCalendar] = useState(false)
   const [editingNotes, setEditingNotes] = useState(false)
   const [notesValue, setNotesValue] = useState(client.notes || "")
+  const [progressVersion, setProgressVersion] = useState(0)
   const notesRef = useRef<HTMLTextAreaElement>(null)
   const programDay = getProgramDay(client.start_date)
   const phase = getDayPhase(programDay)
   const attention = needsAttention(client)
-  const calendarProgress = getClientCalendarProgress(client.id, programDay)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const calendarProgress = useMemo(() => getClientCalendarProgress(client.id, programDay), [client.id, programDay, progressVersion])
 
   // Sync notes value when client data changes externally
   useEffect(() => {
@@ -220,7 +222,7 @@ export function ClientCard({
                   className="h-full rounded-full transition-all duration-500"
                   style={{
                     width: `${calendarProgress.percentage}%`,
-                    background: calendarProgress.percentage === 100 ? "#00A651" : "#4f46e5",
+                    background: calendarProgress.percentage === 100 ? "#37B6AE" : "#4f46e5",
                   }}
                 />
               </div>
@@ -474,7 +476,10 @@ export function ClientCard({
       {/* Calendar Dialog */}
       <ClientCalendarDialog
         open={showCalendar}
-        onOpenChange={setShowCalendar}
+        onOpenChange={(open) => {
+          setShowCalendar(open)
+          if (!open) setProgressVersion(v => v + 1)
+        }}
         clientId={client.id}
         clientName={client.label}
         startDate={client.start_date}

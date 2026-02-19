@@ -18,6 +18,7 @@ export interface UserProfile {
   coach_rank: string | null
   optavia_id: string | null
   sponsor_id: string | null
+  coach_name: string | null
   phone_number: string | null
   notification_email: string | null
   notification_phone: string | null

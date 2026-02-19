@@ -10,6 +10,7 @@ import { useAuth } from "@/hooks/use-auth"
 import { useToast } from "@/hooks/use-toast"
 import { createClient } from "@/lib/supabase/client"
 import { sendWelcomeEmail } from "@/lib/email"
+import { Eye, EyeOff, Check } from "lucide-react"
 
 interface SignupFormProps {
   onSuccess?: () => void
@@ -20,19 +21,21 @@ interface SignupFormProps {
 export function SignupForm({ onSuccess, onSwitchToLogin, inviteKey }: SignupFormProps) {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
+  const [confirmPassword, setConfirmPassword] = useState("")
   const [fullName, setFullName] = useState("")
-  const [isNewCoach, setIsNewCoach] = useState(true)
+  const [coachName, setCoachName] = useState("")
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [loading, setLoading] = useState(false)
   const [validatingInvite, setValidatingInvite] = useState(!!inviteKey)
   const [inviteValid, setInviteValid] = useState<boolean | null>(null)
+  const [inviteEmail, setInviteEmail] = useState<string | null>(null)
   const { signUp } = useAuth()
   const { toast } = useToast()
   const supabase = createClient()
 
-  // Validate invite key on mount
   useEffect(() => {
     if (!inviteKey) {
-      setInviteValid(false) // No invite required - allow signup
       setValidatingInvite(false)
       return
     }
@@ -56,7 +59,6 @@ export function SignupForm({ onSuccess, onSwitchToLogin, inviteKey }: SignupForm
           return
         }
 
-        // Check if invite has expired
         if (data.expires_at && new Date(data.expires_at) < new Date()) {
           setInviteValid(false)
           toast({
@@ -67,7 +69,6 @@ export function SignupForm({ onSuccess, onSwitchToLogin, inviteKey }: SignupForm
           return
         }
 
-        // Check if invite is already used
         if (data.used_by) {
           setInviteValid(false)
           toast({
@@ -78,14 +79,15 @@ export function SignupForm({ onSuccess, onSwitchToLogin, inviteKey }: SignupForm
           return
         }
 
-        // Check if invite is for a specific email
+        setInviteValid(true)
         if (data.invited_email) {
-          // We'll validate the email matches when they submit
-          setInviteValid(true)
-        } else {
-          setInviteValid(true) // Open invite
+          setInviteEmail(data.invited_email)
+          setEmail(data.invited_email)
         }
-      } catch (error: any) {
+        if (data.invited_full_name) {
+          setFullName(data.invited_full_name)
+        }
+      } catch {
         setInviteValid(false)
         toast({
           title: "Error",
@@ -103,37 +105,37 @@ export function SignupForm({ onSuccess, onSwitchToLogin, inviteKey }: SignupForm
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    // Validate invite if present
-    if (inviteKey) {
-      if (inviteValid === false) {
-        toast({
-          title: "Invalid Invite",
-          description: "You must use a valid invite link to sign up",
-          variant: "destructive",
-        })
-        return
-      }
-
-      // Check if invite is for a specific email
-      const { data: inviteData } = await supabase
-        .from("invites")
-        .select("invited_email")
-        .eq("invite_key", inviteKey)
-        .single()
-
-      if (inviteData?.invited_email && inviteData.invited_email !== email) {
-        toast({
-          title: "Email Mismatch",
-          description: `This invite is for ${inviteData.invited_email}`,
-          variant: "destructive",
-        })
-        return
-      }
-    } else {
-      // Require invite for signup
+    if (password.length < 6) {
       toast({
-        title: "Invite Required",
-        description: "You must have an invite link to sign up",
+        title: "Error",
+        description: "Password must be at least 6 characters",
+        variant: "destructive",
+      })
+      return
+    }
+
+    if (password !== confirmPassword) {
+      toast({
+        title: "Error",
+        description: "Passwords do not match",
+        variant: "destructive",
+      })
+      return
+    }
+
+    if (inviteKey && inviteValid === false) {
+      toast({
+        title: "Invalid Invite",
+        description: "The invite link is no longer valid. You can still sign up without it.",
+        variant: "destructive",
+      })
+      return
+    }
+
+    if (inviteKey && inviteEmail && inviteEmail !== email) {
+      toast({
+        title: "Email Mismatch",
+        description: `This invite is for ${inviteEmail}. Please use that email or sign up without the invite.`,
         variant: "destructive",
       })
       return
@@ -141,9 +143,19 @@ export function SignupForm({ onSuccess, onSwitchToLogin, inviteKey }: SignupForm
 
     setLoading(true)
 
-    const { data: signUpData, error } = await signUp(email, password, fullName)
+    const { data: signUpData, error } = await signUp(email, password, fullName, coachName || undefined)
 
     if (error) {
+      if (error.message?.includes("already registered") || error.message?.includes("already exists")) {
+        toast({
+          title: "Account Exists",
+          description: "An account with this email already exists. Please sign in instead.",
+          variant: "destructive",
+        })
+        setLoading(false)
+        setTimeout(() => onSwitchToLogin?.(), 2000)
+        return
+      }
       toast({
         title: "Error",
         description: error.message,
@@ -153,8 +165,14 @@ export function SignupForm({ onSuccess, onSwitchToLogin, inviteKey }: SignupForm
       return
     }
 
-    // Mark invite as used
-    if (inviteKey && signUpData?.user) {
+    if (signUpData?.user && coachName) {
+      await supabase
+        .from("profiles")
+        .update({ coach_name: coachName })
+        .eq("id", signUpData.user.id)
+    }
+
+    if (inviteKey && inviteValid && signUpData?.user) {
       await supabase
         .from("invites")
         .update({
@@ -164,23 +182,20 @@ export function SignupForm({ onSuccess, onSwitchToLogin, inviteKey }: SignupForm
         .eq("invite_key", inviteKey)
     }
 
-    // Send welcome email
     if (signUpData?.user && email && fullName) {
       try {
         await sendWelcomeEmail({
           to: email,
           fullName: fullName,
-          // Coach rank will be set later in settings, so we don't include it here
         })
       } catch (emailError) {
-        // Don't fail signup if email fails, just log it
         console.error("Failed to send welcome email:", emailError)
       }
     }
 
     toast({
-      title: "Success",
-      description: "Account created! Please check your email to verify your account.",
+      title: "Account Created!",
+      description: "Please check your email to verify your account, then sign in.",
     })
     onSuccess?.()
     setLoading(false)
@@ -205,22 +220,31 @@ export function SignupForm({ onSuccess, onSwitchToLogin, inviteKey }: SignupForm
         <CardHeader>
           <CardTitle className="text-2xl font-heading text-optavia-dark">Invalid Invite</CardTitle>
           <CardDescription className="text-optavia-gray">
-            This invite link is invalid, expired, or has already been used
+            This invite link is invalid, expired, or has already been used.
           </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="text-center space-y-4">
             <p className="text-optavia-gray">
-              Please contact the person who sent you this link for a new invite.
+              You can still create an account without an invite.
             </p>
+            <Button
+              onClick={() => {
+                setInviteValid(null)
+                window.history.replaceState({}, "", "/signup")
+              }}
+              className="w-full bg-[hsl(var(--optavia-green))] hover:bg-[hsl(var(--optavia-green-dark))] text-white"
+            >
+              Sign Up Without Invite
+            </Button>
             {onSwitchToLogin && (
-              <Button
+              <button
+                type="button"
                 onClick={onSwitchToLogin}
-                variant="outline"
-                className="w-full border-gray-300 text-optavia-dark hover:bg-gray-100"
+                className="text-sm text-[hsl(var(--optavia-green))] hover:underline"
               >
-                Sign In Instead
-              </Button>
+                Back to Sign In
+              </button>
             )}
           </div>
         </CardContent>
@@ -233,7 +257,9 @@ export function SignupForm({ onSuccess, onSwitchToLogin, inviteKey }: SignupForm
       <CardHeader>
         <CardTitle className="text-2xl font-heading text-optavia-dark">Create Account</CardTitle>
         <CardDescription className="text-optavia-gray">
-          {inviteKey ? "Sign up with your invite link" : "Sign up for Coach Assistant Hub"}
+          {inviteKey && inviteValid
+            ? "Complete your account setup"
+            : "Sign up for Coach Assistant Hub"}
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -243,46 +269,115 @@ export function SignupForm({ onSuccess, onSwitchToLogin, inviteKey }: SignupForm
             <Input
               id="fullName"
               type="text"
-              placeholder="John Doe"
+              placeholder="Jane Doe"
               value={fullName}
               onChange={(e) => setFullName(e.target.value)}
+              required
+              disabled={loading || !!(inviteKey && inviteValid && fullName)}
+              className="bg-white border-gray-300 text-optavia-dark"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="coachName" className="text-optavia-dark">Who is your coach?</Label>
+            <Input
+              id="coachName"
+              type="text"
+              placeholder="Your coach's name"
+              value={coachName}
+              onChange={(e) => setCoachName(e.target.value)}
               required
               disabled={loading}
               className="bg-white border-gray-300 text-optavia-dark"
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="email" className="text-optavia-dark">Email</Label>
+            <Label htmlFor="signup-email" className="text-optavia-dark">Email</Label>
             <Input
-              id="email"
+              id="signup-email"
               type="email"
               placeholder="you@example.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              disabled={loading}
-              className="bg-white border-gray-300 text-optavia-dark"
+              disabled={loading || !!inviteEmail}
+              className={`bg-white border-gray-300 text-optavia-dark ${inviteEmail ? "bg-gray-50" : ""}`}
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="password" className="text-optavia-dark">Password</Label>
-            <Input
-              id="password"
-              type="password"
-              placeholder="••••••••"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              minLength={6}
-              disabled={loading}
-              className="bg-white border-gray-300 text-optavia-dark"
-            />
+            <Label htmlFor="signup-password" className="text-optavia-dark">Password</Label>
+            <div className="relative">
+              <Input
+                id="signup-password"
+                type={showPassword ? "text" : "password"}
+                placeholder=""
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                minLength={6}
+                disabled={loading}
+                autoComplete="new-password"
+                className="bg-white border-gray-300 text-optavia-dark pr-10"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                tabIndex={-1}
+              >
+                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
+            </div>
+            <p className="text-xs text-optavia-gray">Must be at least 6 characters</p>
           </div>
+          <div className="space-y-2">
+            <Label htmlFor="confirmPassword" className="text-optavia-dark">Confirm Password</Label>
+            <div className="relative">
+              <Input
+                id="confirmPassword"
+                type={showConfirmPassword ? "text" : "password"}
+                placeholder=""
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                required
+                minLength={6}
+                disabled={loading}
+                autoComplete="new-password"
+                className={`bg-white border-gray-300 text-optavia-dark pr-10 ${
+                  confirmPassword && password && confirmPassword === password
+                    ? "border-green-500 focus:border-green-500"
+                    : ""
+                }`}
+              />
+              <button
+                type="button"
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                tabIndex={-1}
+              >
+                {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
+            </div>
+            {confirmPassword && (
+              <div className={`flex items-center gap-1 text-xs ${
+                password === confirmPassword ? "text-green-600" : "text-red-500"
+              }`}>
+                {password === confirmPassword ? (
+                  <>
+                    <Check className="h-3 w-3" />
+                    <span>Passwords match</span>
+                  </>
+                ) : (
+                  <span>Passwords do not match</span>
+                )}
+              </div>
+            )}
+          </div>
+
           <div className="space-y-3 pt-2 border-t">
             <p className="text-sm text-optavia-gray text-center">
-              By clicking "Sign Up", you agree that you have read and agree to the{" "}
+              By clicking &ldquo;Create Account&rdquo;, you agree to our{" "}
               <Link href="/terms" target="_blank" className="text-[hsl(var(--optavia-green))] hover:underline">
-                Terms and Conditions
+                Terms
               </Link>
               {", "}
               <Link href="/privacy" target="_blank" className="text-[hsl(var(--optavia-green))] hover:underline">
@@ -290,16 +385,20 @@ export function SignupForm({ onSuccess, onSwitchToLogin, inviteKey }: SignupForm
               </Link>
               {", and "}
               <Link href="/cookies" target="_blank" className="text-[hsl(var(--optavia-green))] hover:underline">
-                Cookie Usage Policy
+                Cookie Policy
               </Link>
-              . You also acknowledge that your information will be stored and that you can request deletion of your account and data
-              at any time. Data deletion will result in permanent loss of access to the Service.
+              .
             </p>
           </div>
 
-          <Button type="submit" className="w-full bg-[hsl(var(--optavia-green))] hover:bg-[hsl(var(--optavia-green-dark))] text-white" disabled={loading}>
-            {loading ? "Creating account..." : "Sign Up"}
+          <Button
+            type="submit"
+            className="w-full bg-[hsl(var(--optavia-green))] hover:bg-[hsl(var(--optavia-green-dark))] text-white"
+            disabled={loading}
+          >
+            {loading ? "Creating account..." : "Create Account"}
           </Button>
+
           {onSwitchToLogin && (
             <div className="text-center text-sm text-optavia-gray">
               Already have an account?{" "}
@@ -317,4 +416,3 @@ export function SignupForm({ onSuccess, onSwitchToLogin, inviteKey }: SignupForm
     </Card>
   )
 }
-

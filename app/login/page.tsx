@@ -32,7 +32,10 @@ export default function LoginPage() {
           <LoginForm onSuccess={handleSuccess} />
           <div className="text-center text-sm text-optavia-gray">
             <p>
-              Need an account? Contact your administrator for an invitation.
+              Don&apos;t have an account?{" "}
+              <Link href="/signup" className="text-[hsl(var(--optavia-green))] hover:underline font-medium">
+                Create one
+              </Link>
             </p>
           </div>
         </div>
