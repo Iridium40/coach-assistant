@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo, useEffect } from "react"
+import { useState, useMemo, useEffect, useCallback } from "react"
 import { useSearchParams } from "next/navigation"
 import { ResourceCard } from "@/components/resource-card"
 import { useUserData } from "@/contexts/user-data-context"
