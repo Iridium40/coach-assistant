@@ -147,23 +147,23 @@ export function ClientCalendarDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent showCloseButton={false} className="max-w-2xl max-h-[85vh] overflow-hidden flex flex-col p-0 gap-0">
         {/* Header */}
-        <div className="px-5 py-4 bg-[#1a2744] text-white rounded-t-lg flex-shrink-0 relative">
+        <div className="px-5 py-4 bg-gradient-to-r from-[hsl(var(--optavia-green))] to-[hsl(var(--optavia-green-dark))] text-white rounded-t-lg flex-shrink-0 relative">
           <button
             onClick={() => onOpenChange(false)}
-            className="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/15 text-white flex items-center justify-center hover:bg-white/30 transition-colors text-lg"
+            className="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/20 text-white flex items-center justify-center hover:bg-white/30 transition-colors text-lg"
           >
             ✕
           </button>
           <div className="text-lg font-extrabold tracking-tight pr-10" style={{ fontFamily: "'Montserrat', sans-serif" }}>
             {clientName}&apos;s Journey
           </div>
-          <div className="flex items-center gap-3 mt-1.5 text-sm text-slate-300">
+          <div className="flex items-center gap-3 mt-1.5 text-sm text-white/80">
             <span>Day {programDay}</span>
-            <span className="text-slate-500">•</span>
+            <span className="text-white/40">•</span>
             <span>{pct}% complete ({totalCompleted}/{totalTasks})</span>
           </div>
-          <div className="mt-2 h-1.5 rounded-full bg-white/10">
-            <div className="h-full rounded-full transition-all" style={{ width: `${pct}%`, background: "#00A651" }} />
+          <div className="mt-2 h-1.5 rounded-full bg-white/20">
+            <div className="h-full rounded-full transition-all bg-white" style={{ width: `${pct}%` }} />
           </div>
         </div>
 
@@ -224,13 +224,13 @@ export function ClientCalendarDialog({
         <div className="px-5 pt-2 pb-1 flex gap-2 flex-shrink-0">
           <button
             onClick={() => { setViewMonth2(false); setCurrentWeek(isMonth2 ? 5 : getWeekForDay(programDay)); setSelectedDay(null) }}
-            className={`text-xs font-semibold px-3 py-1 rounded-full transition-colors ${!viewMonth2 ? "bg-[#1a2744] text-white" : "bg-gray-100 text-gray-500 hover:bg-gray-200"}`}
+            className={`text-xs font-semibold px-3 py-1 rounded-full transition-colors ${!viewMonth2 ? "bg-[hsl(var(--optavia-green))] text-white" : "bg-gray-100 text-gray-500 hover:bg-gray-200"}`}
           >
             Month 1
           </button>
           <button
             onClick={() => { setViewMonth2(true); setCurrentWeek(1); setSelectedDay(null) }}
-            className={`text-xs font-semibold px-3 py-1 rounded-full transition-colors ${viewMonth2 ? "bg-[#1a2744] text-white" : "bg-gray-100 text-gray-500 hover:bg-gray-200"}`}
+            className={`text-xs font-semibold px-3 py-1 rounded-full transition-colors ${viewMonth2 ? "bg-[hsl(var(--optavia-green))] text-white" : "bg-gray-100 text-gray-500 hover:bg-gray-200"}`}
           >
             Month 2
           </button>
@@ -263,24 +263,47 @@ export function ClientCalendarDialog({
               {/* Copy All button */}
               <button
                 onClick={() => {
-                  const parts: string[] = []
-                  for (const task of selectedDay.data.tasks) {
-                    if (task.hasScript && task.script) parts.push(task.script)
-                  }
-                  const links: string[] = []
-                  for (const task of selectedDay.data.tasks) {
-                    if (task.videoUrl) links.push(`${task.icon} ${task.title}: ${task.videoUrl}`)
-                    if (task.graphicPlaceholder) links.push(`${task.icon} ${task.title}: ${task.graphicPlaceholder}`)
-                    if (task.resourceUrl) links.push(`${task.icon} ${task.title}: ${task.resourceUrl}`)
-                  }
-                  if (links.length > 0) {
-                    parts.push("\n---\n📎 Resources & Media:\n" + links.join("\n"))
+                  const tasks = selectedDay.data.tasks
+                  const usedUrls = new Set<string>()
+
+                  const urlTasks = tasks
+                    .filter(t => t.videoUrl || t.graphicPlaceholder || t.resourceUrl)
+                    .map(t => ({
+                      url: (t.videoUrl || t.graphicPlaceholder || t.resourceUrl)!,
+                      titleWords: t.title.toLowerCase().split(/\s+/).filter(w => w.length > 3),
+                      icon: t.icon,
+                      title: t.title,
+                    }))
+
+                  let scriptText = tasks
+                    .filter(t => t.hasScript && t.script)
+                    .map(t => t.script!)
+                    .join("\n\n")
+
+                  scriptText = scriptText.replace(/__([^_]+)__/g, (match, inner) => {
+                    const innerLower = inner.toLowerCase()
+                    const found = urlTasks.find(ut => ut.titleWords.some(w => innerLower.includes(w)) && !usedUrls.has(ut.url))
+                    if (found) { usedUrls.add(found.url); return `${match}\n👉 ${found.url}` }
+                    return match
+                  })
+
+                  scriptText = scriptText.replace(/\[([A-Z][^\]]{3,})\]/g, (match, inner) => {
+                    const innerLower = inner.toLowerCase()
+                    const found = urlTasks.find(ut => ut.titleWords.some(w => innerLower.includes(w)) && !usedUrls.has(ut.url))
+                    if (found) { usedUrls.add(found.url); return `${match}\n👉 ${found.url}` }
+                    return match
+                  })
+
+                  const parts = [scriptText]
+                  const remaining = urlTasks.filter(ut => !usedUrls.has(ut.url))
+                  if (remaining.length > 0) {
+                    parts.push("📎 Resources & Media:\n" + remaining.map(r => `${r.icon} ${r.title}: ${r.url}`).join("\n"))
                   }
                   copyText(parts.join("\n\n"), "copy-all")
                 }}
                 className="w-full py-2 rounded-lg font-bold text-[13px] transition-colors flex items-center justify-center gap-2 mb-2"
                 style={{
-                  background: copiedIdx === "copy-all" ? "#d1fae5" : "linear-gradient(135deg, #003B2E, #00A651)",
+                  background: copiedIdx === "copy-all" ? "#d1fae5" : "linear-gradient(135deg, hsl(176, 57.6%, 38.8%), hsl(176, 53.6%, 46.5%))",
                   color: copiedIdx === "copy-all" ? "#065f46" : "#ffffff",
                   border: copiedIdx === "copy-all" ? "1px solid #bbf7d0" : "none",
                 }}
@@ -298,7 +321,7 @@ export function ClientCalendarDialog({
                         <button
                           onClick={() => toggleTask(taskKey)}
                           className="w-5 h-5 rounded-full border-2 flex-shrink-0 mt-0.5 flex items-center justify-center text-[10px] text-white"
-                          style={{ borderColor: done ? "#00A651" : "#d1d5db", background: done ? "#00A651" : "transparent" }}
+                          style={{ borderColor: done ? "#37B6AE" : "#d1d5db", background: done ? "#37B6AE" : "transparent" }}
                         >
                           {done && "✓"}
                         </button>

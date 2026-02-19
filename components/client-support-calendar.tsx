@@ -108,23 +108,52 @@ function DetailDrawer({
   }
 
   const buildCopyAllText = (): string => {
-    const parts: string[] = []
+    const usedUrls = new Set<string>()
 
-    for (const task of day.tasks) {
-      if (task.hasScript && task.script) {
-        parts.push(task.script)
+    // Build a list of tasks with URLs for placeholder matching
+    const urlTasks = day.tasks
+      .filter(t => t.videoUrl || t.graphicPlaceholder || t.resourceUrl)
+      .map(t => ({
+        url: (t.videoUrl || t.graphicPlaceholder || t.resourceUrl)!,
+        titleWords: t.title.toLowerCase().split(/\s+/).filter(w => w.length > 3),
+        icon: t.icon,
+        title: t.title,
+      }))
+
+    // Collect scripts and inline matching URLs at placeholder locations
+    let scriptText = day.tasks
+      .filter(t => t.hasScript && t.script)
+      .map(t => t.script!)
+      .join("\n\n")
+
+    // Replace __PLACEHOLDER__ patterns with matching URLs
+    scriptText = scriptText.replace(/__([^_]+)__/g, (match, inner) => {
+      const innerLower = inner.toLowerCase()
+      const found = urlTasks.find(ut => ut.titleWords.some(w => innerLower.includes(w)) && !usedUrls.has(ut.url))
+      if (found) {
+        usedUrls.add(found.url)
+        return `${match}\n👉 ${found.url}`
       }
-    }
+      return match
+    })
 
-    const links: string[] = []
-    for (const task of day.tasks) {
-      if (task.videoUrl) links.push(`${task.icon} ${task.title}: ${task.videoUrl}`)
-      if (task.graphicPlaceholder) links.push(`${task.icon} ${task.title}: ${task.graphicPlaceholder}`)
-      if (task.resourceUrl) links.push(`${task.icon} ${task.title}: ${task.resourceUrl}`)
-    }
+    // Replace [PLACEHOLDER] patterns (uppercase, 4+ chars) with matching URLs
+    scriptText = scriptText.replace(/\[([A-Z][^\]]{3,})\]/g, (match, inner) => {
+      const innerLower = inner.toLowerCase()
+      const found = urlTasks.find(ut => ut.titleWords.some(w => innerLower.includes(w)) && !usedUrls.has(ut.url))
+      if (found) {
+        usedUrls.add(found.url)
+        return `${match}\n👉 ${found.url}`
+      }
+      return match
+    })
 
-    if (links.length > 0) {
-      parts.push("\n---\n📎 Resources & Media:\n" + links.join("\n"))
+    const parts = [scriptText]
+
+    // Append any media that wasn't inlined via placeholder
+    const remaining = urlTasks.filter(ut => !usedUrls.has(ut.url))
+    if (remaining.length > 0) {
+      parts.push("📎 Resources & Media:\n" + remaining.map(r => `${r.icon} ${r.title}: ${r.url}`).join("\n"))
     }
 
     return parts.join("\n\n")
@@ -135,7 +164,7 @@ function DetailDrawer({
       <div onClick={onClose} className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
       <div className="relative w-[min(480px,90vw)] bg-white h-full overflow-y-auto shadow-2xl">
         {/* Header */}
-        <div className="sticky top-0 z-10 px-6 py-5" style={{ background: "linear-gradient(135deg, #003B2E, #00A651)" }}>
+        <div className="sticky top-0 z-10 px-6 py-5" style={{ background: "linear-gradient(135deg, hsl(176, 57.6%, 38.8%), hsl(176, 53.6%, 46.5%))" }}>
           <button onClick={onClose} className="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/20 text-white flex items-center justify-center hover:bg-white/30 transition-colors">
             ✕
           </button>
@@ -158,7 +187,7 @@ function DetailDrawer({
             onClick={() => copyText(buildCopyAllText(), "copy-all")}
             className="w-full py-2.5 rounded-lg font-bold text-sm transition-colors flex items-center justify-center gap-2"
             style={{
-              background: copiedIdx === "copy-all" ? "#d1fae5" : "linear-gradient(135deg, #003B2E, #00A651)",
+              background: copiedIdx === "copy-all" ? "#d1fae5" : "linear-gradient(135deg, hsl(176, 57.6%, 38.8%), hsl(176, 53.6%, 46.5%))",
               color: copiedIdx === "copy-all" ? "#065f46" : "#ffffff",
               border: copiedIdx === "copy-all" ? "1px solid #bbf7d0" : "none",
             }}
@@ -182,8 +211,8 @@ function DetailDrawer({
                     onClick={() => onToggle(taskKey)}
                     className="w-6 h-6 rounded-full border-2 flex-shrink-0 mt-0.5 flex items-center justify-center text-xs text-white transition-colors"
                     style={{
-                      borderColor: done ? "#00A651" : "#d1d5db",
-                      background: done ? "#00A651" : "transparent",
+                      borderColor: done ? "#37B6AE" : "#d1d5db",
+                      background: done ? "#37B6AE" : "transparent",
                     }}
                   >
                     {done && "✓"}
@@ -345,7 +374,7 @@ function CalendarCell({
       className={`flex-1 min-w-0 min-h-[100px] p-2 rounded-md transition-all relative hover:scale-[1.02] hover:z-10 ${isCurrentDay ? "ring-2 ring-yellow-400 ring-offset-1" : ""}`}
       style={{
         background: hasTasks ? weekColor.bg : "#f9fafb",
-        border: allDone ? "2px solid #00A651" : `1px solid ${hasTasks ? weekColor.border : "#e5e7eb"}`,
+        border: allDone ? "2px solid #37B6AE" : `1px solid ${hasTasks ? weekColor.border : "#e5e7eb"}`,
         cursor: hasTasks ? "pointer" : "default",
         opacity: hasTasks ? 1 : 0.5,
       }}
@@ -385,7 +414,7 @@ function CalendarCell({
         <div className="mt-1 h-[3px] rounded-sm bg-black/10">
           <div
             className="h-full rounded-sm transition-all duration-300"
-            style={{ width: `${(completedCount / day.tasks.length) * 100}%`, background: "#00A651" }}
+            style={{ width: `${(completedCount / day.tasks.length) * 100}%`, background: "#37B6AE" }}
           />
         </div>
       )}
@@ -468,15 +497,15 @@ export function ClientSupportCalendar() {
   const isSelectedDayCurrentDay = !!(selectedDayKey && isDayCurrentDay(selectedDayKey))
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="min-h-screen bg-[hsl(var(--optavia-bg-alt))]">
       {/* Header */}
-      <div className="bg-[#1a2744]">
+      <div className="bg-gradient-to-r from-[hsl(var(--optavia-green))] to-[hsl(var(--optavia-green-dark))]">
         <div className="max-w-[1100px] mx-auto px-5 pt-6 pb-4">
           {/* Back link when viewing for a specific client */}
           {clientId && (
             <Link
               href="/client-tracker"
-              className="inline-flex items-center gap-1.5 text-sm text-slate-400 hover:text-white mb-3 transition-colors"
+              className="inline-flex items-center gap-1.5 text-sm text-white/70 hover:text-white mb-3 transition-colors"
             >
               <ArrowLeft className="h-4 w-4" />
               Back to Client Tracker
@@ -484,12 +513,12 @@ export function ClientSupportCalendar() {
           )}
 
           <h1 className="text-2xl sm:text-[28px] font-black text-white tracking-tight" style={{ fontFamily: "'Montserrat', sans-serif" }}>
-            {clientName ? `${clientName.toUpperCase()}'S JOURNEY` : "CREATING EMPOWERED CLIENTS"}
+            {clientName ? `${clientName.toUpperCase()}'S JOURNEY` : "CLIENT SUPPORT CALENDAR"}
           </h1>
-          <p className="text-base text-slate-400 italic mt-1" style={{ fontFamily: "Georgia, serif" }}>
+          <p className="text-base text-white/70 italic mt-1" style={{ fontFamily: "Georgia, serif" }}>
             {activeMonth === "month1" ? "Month One Guide" : "Month Two Guide"}
             {programDay !== null && programDay > 0 && (
-              <span className="not-italic text-slate-300 ml-2">
+              <span className="not-italic text-white/90 ml-2">
                 — Day {programDay}
               </span>
             )}
@@ -498,19 +527,18 @@ export function ClientSupportCalendar() {
           {/* Progress bar — only shown when viewing for a specific client */}
           {clientId && (
             <div className="flex items-center gap-3 mt-4">
-              <div className="flex items-center gap-2 bg-white/5 rounded-lg px-3.5 py-2">
-                <span className="text-xs text-slate-400 font-semibold">Progress:</span>
-                <span className="text-lg font-extrabold text-[#00A651]" style={{ fontFamily: "'Montserrat', sans-serif" }}>
+              <div className="flex items-center gap-2 bg-white/10 rounded-lg px-3.5 py-2">
+                <span className="text-xs text-white/70 font-semibold">Progress:</span>
+                <span className="text-lg font-extrabold text-white" style={{ fontFamily: "'Montserrat', sans-serif" }}>
                   {totalTasks > 0 ? Math.round((totalCompleted / totalTasks) * 100) : 0}%
                 </span>
               </div>
-              <div className="flex-1 h-2 rounded-full bg-white/10">
+              <div className="flex-1 h-2 rounded-full bg-white/20">
                 <div
-                  className="h-full rounded-full transition-all duration-500"
-                  style={{ width: `${totalTasks > 0 ? (totalCompleted / totalTasks) * 100 : 0}%`, background: "#00A651" }}
+                  className="h-full rounded-full transition-all duration-500 bg-white"
                 />
               </div>
-              <div className="text-xs text-slate-400 font-medium">
+              <div className="text-xs text-white/80 font-medium">
                 {totalCompleted}/{totalTasks}
               </div>
             </div>
@@ -525,8 +553,8 @@ export function ClientSupportCalendar() {
                 className="px-6 py-2.5 border-none cursor-pointer font-bold text-[13px] rounded-t-lg transition-colors"
                 style={{
                   fontFamily: "'Montserrat', sans-serif",
-                  background: activeMonth === tab ? "#e8ecf1" : "rgba(255,255,255,0.05)",
-                  color: activeMonth === tab ? "#1a2744" : "#94a3b8",
+                  background: activeMonth === tab ? "#ffffff" : "rgba(255,255,255,0.15)",
+                  color: activeMonth === tab ? "hsl(176, 53.6%, 46.5%)" : "rgba(255,255,255,0.7)",
                 }}
               >
                 {tab === "month1" ? "Month One" : "Month Two"}
