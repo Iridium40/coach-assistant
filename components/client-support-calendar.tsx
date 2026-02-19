@@ -160,11 +160,11 @@ function DetailDrawer({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex justify-end">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div onClick={onClose} className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
-      <div className="relative w-[min(480px,90vw)] bg-white h-full overflow-y-auto shadow-2xl">
+      <div className="relative w-full max-w-xl max-h-[85vh] bg-white rounded-xl overflow-y-auto shadow-2xl">
         {/* Header */}
-        <div className="sticky top-0 z-10 px-6 py-5" style={{ background: "linear-gradient(135deg, hsl(176, 57.6%, 38.8%), hsl(176, 53.6%, 46.5%))" }}>
+        <div className="sticky top-0 z-10 px-6 py-5 rounded-t-xl" style={{ background: "linear-gradient(135deg, hsl(176, 57.6%, 38.8%), hsl(176, 53.6%, 46.5%))" }}>
           <button onClick={onClose} className="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/20 text-white flex items-center justify-center hover:bg-white/30 transition-colors">
             ✕
           </button>
