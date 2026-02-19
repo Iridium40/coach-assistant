@@ -101,7 +101,7 @@ export function getTriggerForDay(
 
   // Default to ongoing for day 31+
   if (day >= 31) {
-    return triggers.find(t => t.trigger_key === "ongoing") || null
+    return triggers.find(t => t.trigger_key === "ongoing" || t.trigger_key === "cec_ongoing") || null
   }
 
   return null
