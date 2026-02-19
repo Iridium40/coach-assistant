@@ -339,7 +339,7 @@ INSERT INTO external_resources (id, title, description, url, button_text, catego
 (gen_random_uuid(), 'Journey Kickoff Video', 'Watch this 20-minute video to understand YOUR path to fat burn.', 'https://vimeo.com/1158234614/d128997deb', 'Watch Video', 'cec_resource',
  '{"type":"video","tags":["cec","kickoff"],"show_in":["client_tracker"],"relevant_days":[0,1]}', 10, true, false, 'client_day_0_or_1', '🎬'),
 
-(gen_random_uuid(), '5&1 Daily Tracker', 'Printable daily tracker for the 5 & 1 Plan.', 'SUPABASE_BUCKET/5-and-1-daily-tracker.png', 'View Tracker', 'cec_resource',
+(gen_random_uuid(), '5&1 Daily Tracker', 'Printable daily tracker for the 5 & 1 Plan.', 'https://rcucmbujkdwvrcjistub.supabase.co/storage/v1/object/public/CEC/5-and-1-daily-tracker.png', 'View Tracker', 'cec_resource',
  '{"type":"graphic","tags":["cec","tracker"],"show_in":["client_tracker"],"relevant_days":[0,1]}', 20, true, false, 'client_day_0_or_1', '📋'),
 
 (gen_random_uuid(), 'Lean and Green Video', 'Everything you need to know about the Lean & Green meal.', 'https://vimeo.com/414057972', 'Watch Video', 'cec_resource',
@@ -347,7 +347,7 @@ INSERT INTO external_resources (id, title, description, url, button_text, catego
 
 -- Day 1 Resources
 INSERT INTO external_resources (id, title, description, url, button_text, category, features, sort_order, is_active, is_dynamic, show_condition, icon) VALUES
-(gen_random_uuid(), 'Day 1 Foundation Graphic', 'Send this motivational graphic on Day 1.', 'SUPABASE_BUCKET/day-1-foundation-day.png', 'View Graphic', 'cec_resource',
+(gen_random_uuid(), 'Day 1 Foundation Graphic', 'Send this motivational graphic on Day 1.', 'https://rcucmbujkdwvrcjistub.supabase.co/storage/v1/object/public/CEC/day-1-foundation-day.png', 'View Graphic', 'cec_resource',
  '{"type":"graphic","tags":["cec","daily"],"show_in":["client_tracker"],"relevant_days":[1]}', 40, true, false, 'client_day_1', '🖼'),
 
 (gen_random_uuid(), 'What is Fat Burn Video', 'Help your client understand the science behind fat burn.', 'https://vimeo.com/1044531642/fde0ddc92e', 'Watch Video', 'cec_resource',
@@ -355,12 +355,12 @@ INSERT INTO external_resources (id, title, description, url, button_text, catego
 
 -- Day 2
 INSERT INTO external_resources (id, title, description, url, button_text, category, features, sort_order, is_active, is_dynamic, show_condition, icon) VALUES
-(gen_random_uuid(), 'Day 2 Transition Graphic', 'Send this graphic on Day 2 — Transition Day.', 'SUPABASE_BUCKET/day-2-transition-day.png', 'View Graphic', 'cec_resource',
+(gen_random_uuid(), 'Day 2 Transition Graphic', 'Send this graphic on Day 2 — Transition Day.', 'https://rcucmbujkdwvrcjistub.supabase.co/storage/v1/object/public/CEC/day-2-transition-day.png', 'View Graphic', 'cec_resource',
  '{"type":"graphic","tags":["cec","daily"],"show_in":["client_tracker"],"relevant_days":[2]}', 60, true, false, 'client_day_2', '🖼');
 
 -- Day 3
 INSERT INTO external_resources (id, title, description, url, button_text, category, features, sort_order, is_active, is_dynamic, show_condition, icon) VALUES
-(gen_random_uuid(), 'Day 3 Ignition Graphic', 'Send this graphic on Day 3 — Ignition Day.', 'SUPABASE_BUCKET/day-3-ignition-day.png', 'View Graphic', 'cec_resource',
+(gen_random_uuid(), 'Day 3 Ignition Graphic', 'Send this graphic on Day 3 — Ignition Day.', 'https://rcucmbujkdwvrcjistub.supabase.co/storage/v1/object/public/CEC/day-3-ignition-day.png', 'View Graphic', 'cec_resource',
  '{"type":"graphic","tags":["cec","daily"],"show_in":["client_tracker"],"relevant_days":[3]}', 70, true, false, 'client_day_3', '🖼'),
 
 (gen_random_uuid(), 'Chasing Goals Video', 'Shift your mindset — chase goals, not taste.', 'https://vimeo.com/723522647', 'Watch Video', 'cec_resource',
@@ -368,7 +368,7 @@ INSERT INTO external_resources (id, title, description, url, button_text, catego
 
 -- Day 4
 INSERT INTO external_resources (id, title, description, url, button_text, category, features, sort_order, is_active, is_dynamic, show_condition, icon) VALUES
-(gen_random_uuid(), 'Day 4 Fat Burn Graphic', 'Send this graphic on Day 4 — Fat Burn Day.', 'SUPABASE_BUCKET/day-4-fat-burn-day.png', 'View Graphic', 'cec_resource',
+(gen_random_uuid(), 'Day 4 Fat Burn Graphic', 'Send this graphic on Day 4 — Fat Burn Day.', 'https://rcucmbujkdwvrcjistub.supabase.co/storage/v1/object/public/CEC/day-4-fat-burn-day.png', 'View Graphic', 'cec_resource',
  '{"type":"graphic","tags":["cec","daily"],"show_in":["client_tracker"],"relevant_days":[4]}', 90, true, false, 'client_day_4', '🖼'),
 
 (gen_random_uuid(), 'How to Protect Your Fat Burn', 'Send AFTER the Day 4 check-in call.', 'https://vimeo.com/1163428641', 'Watch Video', 'cec_resource',
@@ -381,7 +381,7 @@ INSERT INTO external_resources (id, title, description, url, button_text, catego
 
 -- Day 8 Celebration
 INSERT INTO external_resources (id, title, description, url, button_text, category, features, sort_order, is_active, is_dynamic, show_condition, icon) VALUES
-(gen_random_uuid(), 'Day 8 Celebration Graphic', 'Week 1 Celebration + Community Post graphic.', 'SUPABASE_BUCKET/day-8-celebration-community.png', 'View Graphic', 'cec_resource',
+(gen_random_uuid(), 'Day 8 Celebration Graphic', 'Week 1 Celebration + Community Post graphic.', 'https://rcucmbujkdwvrcjistub.supabase.co/storage/v1/object/public/CEC/day-8-celebration-community.png', 'View Graphic', 'cec_resource',
  '{"type":"graphic","tags":["cec","celebration"],"show_in":["client_tracker"],"relevant_days":[7,8]}', 110, true, false, 'client_day_8', '🥳');
 
 -- Days 15-20 Premier Order
@@ -394,10 +394,10 @@ INSERT INTO external_resources (id, title, description, url, button_text, catego
 (gen_random_uuid(), 'Office Hours Video', 'How to Use Coach Office Hours — send after graduation call.', 'https://youtu.be/phRN32R_pHc', 'Watch Video', 'cec_resource',
  '{"type":"video","tags":["cec","office_hours"],"show_in":["client_tracker"],"relevant_days":[20,21]}', 130, true, false, 'client_day_21', '🎬'),
 
-(gen_random_uuid(), 'Office Hours Graphic', 'Weekly Office Hours schedule graphic to save.', 'SUPABASE_BUCKET/office-hours-graphic.png', 'View Graphic', 'cec_resource',
+(gen_random_uuid(), 'Office Hours Graphic', 'Weekly Office Hours schedule graphic to save.', 'https://rcucmbujkdwvrcjistub.supabase.co/storage/v1/object/public/CEC/office-hours-graphic.png', 'View Graphic', 'cec_resource',
  '{"type":"graphic","tags":["cec","office_hours"],"show_in":["client_tracker"],"relevant_days":[20,21]}', 140, true, false, 'client_day_21', '🖼'),
 
-(gen_random_uuid(), 'Client R/Y/G Support Graphic', 'Red/Yellow/Green system guide for client.', 'SUPABASE_BUCKET/client-ryg-support-graphic.png', 'View Graphic', 'cec_resource',
+(gen_random_uuid(), 'Client R/Y/G Support Graphic', 'Red/Yellow/Green system guide for client.', 'https://rcucmbujkdwvrcjistub.supabase.co/storage/v1/object/public/CEC/client-ryg-support-graphic.png', 'View Graphic', 'cec_resource',
  '{"type":"graphic","tags":["cec","ryg"],"show_in":["client_tracker"],"relevant_days":[20,21,22]}', 150, true, false, 'client_day_21', '🚦');
 
 -- Day 28+ Ongoing Support

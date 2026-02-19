@@ -25,7 +25,7 @@ export const CALENDAR_DAYS: Record<string, CalendarDayData> = {
     tasks: [
       { type: "text", title: "Day Before Start Text", icon: "💬", hasScript: true, script: `I'm so excited for you… tomorrow is Day 1 of your Metabolic Reset, and tonight is just about getting ready so you can wake up and roll right into success. 🙌🏼 Here's your quick Pre-Day 1 checklist so we're all synced up for the morning:\n\n1️⃣ Watch this 20 minute video and read through the spiral guide that came in your box. We will have a quick 15-20 minute call to make sure you feel clear about YOUR path to fat burn. __JOURNEY KICKOFF VIDEO__\n\n2️⃣ Save this Client Linktree to your phone __CLIENT LINKTREE__\n\n3️⃣ Have your Renpho charged and ready. First thing tomorrow, hop on your scale before water, coffee, or clothes.\n✔️ Weight ✔️ Body fat % ✔️ Visceral fat ✔️ Skeletal muscle % ✔️ Metabolic age ✔️ Protein % ✔️ Hydration %\n\n4️⃣ Grab a tape measure. Tomorrow morning, measure your W.A.T.C.H.=Waist, Arm, Thigh, Chest, Hips\n\n5️⃣ Hydration plan ready. Fill a water bottle tonight… 💦\n\n6️⃣ Lay out your 5 fuelings + Lean & Green plan. ✨\n\n7️⃣ Sleep! Your metabolism loves a solid night's sleep. 😴\n\n8️⃣ Your mindset. This isn't about perfection…it's about consistency. 🤝\n\nText me in the morning with:\n📍 Renpho reading 📍 Measurements 📍 How you're feeling\n\nAnd then… we're off! 🚀` },
       { type: "video", title: "Kickoff Call Video", icon: "🎬", videoUrl: "https://vimeo.com/1158234614/d128997deb" },
-      { type: "resource", title: "5&1 Tracker", icon: "📋", note: "Mention in the Kickoff Call", graphicPlaceholder: "SUPABASE_BUCKET/5-and-1-daily-tracker.png" },
+      { type: "resource", title: "5&1 Tracker", icon: "📋", note: "Mention in the Kickoff Call", graphicPlaceholder: "https://rcucmbujkdwvrcjistub.supabase.co/storage/v1/object/public/CEC/5-and-1-daily-tracker.png" },
       { type: "video", title: "Lean and Green Video", icon: "🥗", videoUrl: "https://vimeo.com/414057972" },
     ]
   },
@@ -33,7 +33,7 @@ export const CALENDAR_DAYS: Record<string, CalendarDayData> = {
     label: "Day 1",
     phase: "Foundation Day",
     tasks: [
-      { type: "graphic", title: "Send Daily Graphic", icon: "🖼", graphicPlaceholder: "SUPABASE_BUCKET/day-1-foundation-day.png" },
+      { type: "graphic", title: "Send Daily Graphic", icon: "🖼", graphicPlaceholder: "https://rcucmbujkdwvrcjistub.supabase.co/storage/v1/object/public/CEC/day-1-foundation-day.png" },
       { type: "text", title: "Send Day 1 Text", icon: "💬", hasScript: true, script: `🌅 DAY 1 — FOUNDATION DAY\nHELLO Day 1!! 🎉\nWelcome to your reset — and take a breath. This works when it's simple. No perfection. No pressure. No overthinking. Just consistency.\n\nHere's your only focus today: Your 5 Fat-Burn Anchors\n1️⃣ Choose 5 fuelings + keep backups nearby (purse, car, desk = success strategy 😅)\n2️⃣ Hydrate like it matters (64–100 oz water) + aim for 7 hours sleep\n3️⃣ Eat within 30 min of waking → then every 2–3 hours\n4️⃣ Follow the plan precisely — if it's not in the guide, it's not in your mouth\n5️⃣ Track it. Awareness creates results.\n\n🔥 Fat burn loves structure.\n🔥 Simplicity = consistency.\n🔥 Consistency = transformation.\n\nToday is about establishing rhythm, not chasing results.\n📸 Please weigh in today (smart scale data is gold), take pics + measurements. This is your baseline.\n\nText me what's for dinner tonight 💚 We're building momentum from Day 1.` },
       { type: "video", title: "What is Fat Burn Video", icon: "🔥", videoUrl: "https://vimeo.com/1044531642/fde0ddc92e" },
       { type: "call", title: "Daily Check In Questions Days 1-4", icon: "📞", hasScript: true, script: `DAY 1-4 DAILY CHECK IN QUESTIONS\n*Important to not provide the answers to them*\n\n• What time did you wake up?\n• What time did you eat for the first time?\n• Do you drink coffee? Do you put anything in your coffee?\n• How many ounces of water have you had today?\n• Did you set your timers / use the eat wise app?\n  - How far apart?\n• Did you go past 3 hours at any time without eating?\n  - How many fuelings have you had in your day?\n• What did you have for your lean and green meal?\n  - How many ounces of protein (before or after you cooked it)?\n• How many servings of vegetables?\n• Did you measure or weigh your vegetables?\n• What time are you planning to go to bed?\n• When time is your last fueling?\n  - If you come close to the 2.5 hr mark and you are not asleep, please add a small serving of protein in to balance your blood sugars.\n• Did you eat anything outside of the program today?\n\nLet us know if you have any EXTRA activity in your day!!!` },
@@ -43,7 +43,7 @@ export const CALENDAR_DAYS: Record<string, CalendarDayData> = {
     label: "Day 2",
     phase: "Transition Day",
     tasks: [
-      { type: "graphic", title: "Daily Graphic", icon: "🖼", graphicPlaceholder: "SUPABASE_BUCKET/day-2-transition-day.png" },
+      { type: "graphic", title: "Daily Graphic", icon: "🖼", graphicPlaceholder: "https://rcucmbujkdwvrcjistub.supabase.co/storage/v1/object/public/CEC/day-2-transition-day.png" },
       { type: "text", title: "Day 2 Text", icon: "💬", hasScript: true, script: `🌤 DAY 2 — TRANSITION DAY\nHELLO Day 2!! 🤍\nYour body is shifting gears — and that's a good thing.\nYou're moving from sugar-burning → fat-burning.\n\nIf you feel:\n• tired • foggy • a little hungry • headache-ish • low energy\nThat's not failure — it's metabolic adaptation.\n\nSupport tools:\n🥒 Dill pickle or celery\n🍵 Chicken broth\n💧 Sugar-free electrolytes (up to 3/day)\n🚰 Extra water\n\nWhen insulin drops, your body releases water + minerals — replacing them keeps fat burn smooth and comfortable. This phase passes quickly — and what follows is:\n⚡ energy 😴 better sleep 🔥 fat loss 🧠 mental clarity 🍽 less hunger\n\nSmall mindset task today: Create a non-food reward list for every 10 lbs lost (new clothes, massage, trip, gym shoes, facial, nails, etc.) Send it to me 💛\n\nSuccess is built with structure + support — and you're not doing this alone.\n📸 Send me your Day 1 tracker when you can.` },
       { type: "call", title: "Daily Check In Questions Days 1-4", icon: "📞" },
     ]
@@ -52,7 +52,7 @@ export const CALENDAR_DAYS: Record<string, CalendarDayData> = {
     label: "Day 3",
     phase: "Ignition Day",
     tasks: [
-      { type: "graphic", title: "Daily Graphic + Day 3 Text", icon: "🖼", graphicPlaceholder: "SUPABASE_BUCKET/day-3-ignition-day.png" },
+      { type: "graphic", title: "Daily Graphic + Day 3 Text", icon: "🖼", graphicPlaceholder: "https://rcucmbujkdwvrcjistub.supabase.co/storage/v1/object/public/CEC/day-3-ignition-day.png" },
       { type: "text", title: "Day 3 Text", icon: "💬", hasScript: true, script: `🌱 DAY 3 — IGNITION DAY\nHELLO Day 3!! ✨\nYou're approaching fat-burn ignition 🔥\nThis is where the magic starts happening internally — even if the scale hasn't caught up yet.\n\nWatch this video to shift your mindset to success:\n👉 [CHASING GOALS VIDEO]\n\nFocus today:\n• Weigh + measure your Lean & Green\n• Eat every 2–3 hours\n• Stay hydrated\n• Track everything\n• No improvising — structure creates results\n\nThis isn't a diet — it's metabolic retraining.\n\n📸 Snap your tracker + send it to me — I want to coach you, not just cheer you on 💪` },
       { type: "video", title: "Chasing Your Goals Instead of Chasing Taste Video", icon: "🎯", videoUrl: "https://vimeo.com/723522647" },
       { type: "call", title: "Daily Check In Questions Days 1-4", icon: "📞" },
@@ -62,7 +62,7 @@ export const CALENDAR_DAYS: Record<string, CalendarDayData> = {
     label: "Day 4",
     phase: "Fat Burn Day",
     tasks: [
-      { type: "graphic", title: "Daily Graphic + Day 4 Text", icon: "🖼", graphicPlaceholder: "SUPABASE_BUCKET/day-4-fat-burn-day.png" },
+      { type: "graphic", title: "Daily Graphic + Day 4 Text", icon: "🖼", graphicPlaceholder: "https://rcucmbujkdwvrcjistub.supabase.co/storage/v1/object/public/CEC/day-4-fat-burn-day.png" },
       { type: "text", title: "Day 4 Text", icon: "💬", hasScript: true, script: `🔥 DAY 4 — FAT BURN DAY\nHELLO Day 4!! 🔥\nYou should officially be entering fat-burning mode today.\nIf hunger pops up:\n🚰 Drink water ⏱ Wait 15 minutes\n\nMost of the time it passes — it's habit hunger, not true hunger.\n\nWhat starts happening now:\n✔ More energy ✔ Better sleep ✔ Reduced cravings ✔ Clearer thinking ✔ Fat loss momentum ✔ Appetite regulation\n\nThis is where people start saying: "I don't feel obsessed with food anymore."\nAnd that's metabolic freedom.\n\n💬 Reflection question: Who in your life would benefit from feeling this way too?\n\n📸 Send me your updated tracker. Let's lock in this fat-burn phase strong.` },
       { type: "call", title: "Daily Check In Questions Days 1-4", icon: "📞" },
       { type: "video", title: "Send How to Protect Your Hard-Earned Fat Burn", icon: "🛡", videoUrl: "https://vimeo.com/1163428641", note: "Send AFTER the Day 4 call" },
@@ -75,7 +75,7 @@ export const CALENDAR_DAYS: Record<string, CalendarDayData> = {
     label: "Day 8",
     phase: "Celebration",
     tasks: [
-      { type: "graphic", title: "Daily Graphic", icon: "🖼", graphicPlaceholder: "SUPABASE_BUCKET/day-8-celebration-community.png" },
+      { type: "graphic", title: "Daily Graphic", icon: "🖼", graphicPlaceholder: "https://rcucmbujkdwvrcjistub.supabase.co/storage/v1/object/public/CEC/day-8-celebration-community.png" },
       { type: "text", title: "Day 8 Text", icon: "💬", hasScript: true, script: `🥳 DAY 8 — CELEBRATION + COMMUNITY POST COACHING\nHELLO Day 8!! 🎉\nYou did it — Week ONE complete. And that matters more than the scale number.\n\nFirst — send me:\n📊 Your Week 1 scale results\n📈 Your smart scale snapshot\n💬 What you're already noticing\n\nNow let's celebrate properly — and anchor this win 💛\n\n✨ Client Page Celebration Post\nHere's a simple template:\n"Week 1 done 🎉 I started this for fat loss, but what I'm noticing already is:\n• (example: more energy)\n• (example: better sleep)\n• (example: less cravings)\n\nI didn't think I could stick to something this structured — but I did. Grateful for coaching, support, and a plan that actually feels sustainable."\n\nWeek 1 = water weight + inflammation drop\nWeeks 2+ = true fat loss phase 🔥\n\nSo proud of you. We're just getting started 💛` },
       { type: "call", title: "Check In Call", icon: "📞", note: "Celebration Call + Schedule Week 3 Call" },
     ]
@@ -147,7 +147,8 @@ export const CALENDAR_DAYS: Record<string, CalendarDayData> = {
     tasks: [
       { type: "text", title: "Red/Yellow/Green Support Model Text", icon: "🚦", hasScript: true, script: `Hey [Client NAME] 💛\nI am so proud of you…you have officially graduated to our next level of support! 🎉\n\nWe use a simple Red • Yellow • Green system\nThese are not labels, but signals to help us support you in the best way possible.\n\n👉 Starting now, when you check in on Monday mornings, please send:\n• Your smart scale full report (if you have one)\n• AND the color that best describes your week.\n\n🟢 Green — things are flowing\n🟡 Yellow — a small adjustment is needed\n🔴 Red — you need extra support\n\n🔥 Coach Office Hours are live, open-support Zoom calls.\n👉 If you're Yellow or Red, we strongly encourage you to attend that week.\nEven Green clients are welcome!\n\n⬇️ Please watch this short video + save these graphics ⬇️` },
       { type: "video", title: "How to Use Office Hours Video", icon: "🎬", videoUrl: "https://youtu.be/phRN32R_pHc" },
-      { type: "graphic", title: "Office Hours Graphic", icon: "🖼", graphicPlaceholder: "SUPABASE_BUCKET/office-hours-graphic.png" },
+      { type: "graphic", title: "Office Hours Graphic", icon: "🖼", graphicPlaceholder: "https://rcucmbujkdwvrcjistub.supabase.co/storage/v1/object/public/CEC/office-hours-graphic.png" },
+      { type: "graphic", title: "Client R/Y/G Support Graphic", icon: "🚦", graphicPlaceholder: "https://rcucmbujkdwvrcjistub.supabase.co/storage/v1/object/public/CEC/client-ryg-support-graphic.png" },
     ]
   },
   "4-fri": { label: "", tasks: [] },
