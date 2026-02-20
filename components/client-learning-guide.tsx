@@ -1,10 +1,99 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 
 interface Screenshot {
   img: string
   title: string
+}
+
+interface JourneyStage {
+  id: string
+  days: string
+  label: string
+  emoji: string
+  color: string
+  action: string
+  actionType: "text" | "call"
+  description: string
+  tips: string[]
+  isMilestone?: boolean
+}
+
+const JOURNEY_STAGES: JourneyStage[] = [
+  {
+    id: "critical", days: "1-3", label: "Critical Phase", emoji: "🔴", color: "#ef4444",
+    actionType: "text", action: "Daily encouragement texts",
+    description: "The hardest days! Your client needs extra support as their body adjusts. Check in daily.",
+    tips: ["Text every single day during this phase", "Remind them this is temporary — it gets easier", "Ask about energy, hunger, and how they're feeling", "Celebrate every small win"],
+  },
+  {
+    id: "week1", days: "4-6", label: "Week 1", emoji: "🟠", color: "#f97316",
+    actionType: "text", action: "Check-in texts",
+    description: "They're building momentum! Keep the encouragement going as they establish their routine.",
+    tips: ["Ask about their favorite Fuelings", "Check if they have Lean & Green questions", "Remind them Day 7 milestone is coming!"],
+  },
+  {
+    id: "week1_complete", days: "7", label: "Week 1 Complete!", emoji: "🎉", color: "#22c55e",
+    actionType: "call", action: "Schedule celebration call", isMilestone: true,
+    description: "FIRST MILESTONE! They made it through the hardest week. This deserves recognition!",
+    tips: ["Schedule a call to celebrate this win", "Ask what was harder/easier than expected", "Discuss any NSVs (non-scale victories)", "Set them up for a strong Week 2"],
+  },
+  {
+    id: "week2", days: "8-13", label: "Week 2", emoji: "🔵", color: "#3b82f6",
+    actionType: "text", action: "Routine-building texts",
+    description: "They're in a groove now. Focus on reinforcing their new habits and routines.",
+    tips: ["Ask about changes they're noticing", "Encourage them to try new recipes", "Build excitement for the 2-week mark"],
+  },
+  {
+    id: "two_weeks", days: "14", label: "2 Weeks!", emoji: "⭐", color: "#22c55e",
+    actionType: "call", action: "Schedule celebration call", isMilestone: true,
+    description: "TWO WEEKS of consistency! They're proving to themselves they can do this.",
+    tips: ["Celebrate their commitment", "Review their progress and wins", "Discuss any adjustments needed", "Preview the big Day 21 milestone!"],
+  },
+  {
+    id: "week3", days: "15-20", label: "Week 3", emoji: "🟣", color: "#8b5cf6",
+    actionType: "text", action: '"Almost there" texts',
+    description: "The home stretch to habit formation! Build anticipation for the 21-day milestone.",
+    tips: ['Remind them: "21 days = habit formed!"', "Ask about NSVs and mindset shifts", "Get them excited for Day 21"],
+  },
+  {
+    id: "twenty_one", days: "21", label: "21 Days — Habit Formed!", emoji: "💎", color: "#10b981",
+    actionType: "call", action: "Schedule celebration call", isMilestone: true,
+    description: "MAJOR MILESTONE! Science says 21 days forms a habit. Their brain is literally rewired!",
+    tips: ["BIG celebration energy for this call!", "Explain the science of habit formation", "Compare how they feel now vs Day 1", "Document all their wins and NSVs", "Consider a 3-way call with your upline"],
+  },
+  {
+    id: "week4", days: "22-29", label: "Week 4", emoji: "🩵", color: "#06b6d4",
+    actionType: "text", action: "Momentum texts",
+    description: "The habit is formed — now they're strengthening it. One month is right around the corner!",
+    tips: ["Build excitement for ONE MONTH", "Ask them to reflect on their journey", '"What would Day 1 you think about this?"'],
+  },
+  {
+    id: "one_month", days: "30", label: "ONE MONTH!", emoji: "👑", color: "#f59e0b",
+    actionType: "call", action: "Schedule celebration call", isMilestone: true,
+    description: "THE BIG ONE! 30 days of commitment. This is a lifestyle now, not a diet.",
+    tips: ["Make this celebration SPECIAL", "Full transformation review", "Compare Day 1 to Day 30 in every way", "Discuss their \"why\" and future goals", "Consider: Are they interested in coaching?", "3-way call with upline for recognition"],
+  },
+  {
+    id: "ongoing", days: "31+", label: "Ongoing Journey", emoji: "🟢", color: "#22c55e",
+    actionType: "text", action: "Regular check-ins",
+    description: "They've built the foundation. Continue supporting their journey with consistent touchpoints.",
+    tips: ["Check in at least every 10 days", "Celebrate 60, 90, 120 day milestones", "Watch for coaching interest", "Support their transition phases"],
+  },
+]
+
+const SPECIAL_STATUSES = {
+  coachProspect: {
+    label: "Coach Prospect", emoji: "⭐",
+    description: "This client shows interest in becoming a coach! Nurture their curiosity about the business opportunity.",
+    tips: ["Share your coaching journey", "Invite them to team calls", "Connect them with your upline", "Help them see the possibilities"],
+  },
+  paused: {
+    label: "Paused", emoji: "⏸️",
+    description: "Life happens. When a client needs to pause, keep the relationship warm for when they're ready to return.",
+    tips: ["No judgment — circumstances change", "Check in occasionally to show you care", "Leave the door open for their return", "They may come back stronger than ever"],
+  },
 }
 
 const SUPABASE_IMG = "https://rcucmbujkdwvrcjistub.supabase.co/storage/v1/object/public/user_training"
@@ -41,6 +130,148 @@ function SsBtn({ label, onClick }: { label: string; onClick: () => void }) {
     <button onClick={onClick} style={{ display: "inline-flex", alignItems: "center", gap: "5px", padding: "6px 14px", fontSize: "11px", fontWeight: 700, fontFamily: "'Montserrat', sans-serif", color: "#1a2744", background: "linear-gradient(135deg, #f1f5f9, #e8ecf1)", border: "1px solid #d1d5db", borderRadius: "8px", cursor: "pointer", transition: "all 0.2s", boxShadow: "0 1px 3px rgba(0,0,0,0.04)" }}>
       📸 {label}
     </button>
+  )
+}
+
+function ClientJourneyTimeline() {
+  const [activeStage, setActiveStage] = useState<string | null>(null)
+  const toggle = useCallback((id: string) => setActiveStage((prev) => (prev === id ? null : id)), [])
+
+  return (
+    <div style={{ marginBottom: "20px" }}>
+      {/* Legend */}
+      <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "center", gap: "14px", padding: "10px 14px", background: "#f8fafc", borderRadius: "10px", border: "1px solid #e2e8f0", marginBottom: "12px", fontSize: "12px" }}>
+        <span style={{ display: "flex", alignItems: "center", gap: "5px", color: "#64748b" }}><span style={{ width: "8px", height: "8px", borderRadius: "50%", background: "#3b82f6", display: "inline-block" }} /> 📱 Text Check-in</span>
+        <span style={{ display: "flex", alignItems: "center", gap: "5px", color: "#64748b" }}><span style={{ width: "8px", height: "8px", borderRadius: "50%", background: "#22c55e", display: "inline-block" }} /> 📅 Celebration Call</span>
+        <span style={{ fontSize: "10px", fontWeight: 700, color: "#92400e", background: "#fef3c7", padding: "2px 8px", borderRadius: "4px" }}>MILESTONE</span>
+      </div>
+
+      {JOURNEY_STAGES.map((stage, i) => (
+        <div key={stage.id}>
+          <button
+            onClick={() => toggle(stage.id)}
+            style={{ width: "100%", display: "flex", alignItems: "center", gap: "10px", padding: "10px 12px", background: activeStage === stage.id ? "#f8fafc" : "transparent", border: "none", borderBottom: "1px solid #f1f5f9", cursor: "pointer", textAlign: "left", borderRadius: activeStage === stage.id ? "10px" : 0, transition: "background 0.15s" }}
+          >
+            <div style={{ width: "32px", height: "32px", borderRadius: "8px", background: stage.color, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "16px", flexShrink: 0, boxShadow: stage.isMilestone ? "0 0 0 2px #fff, 0 0 0 4px #86efac" : "0 1px 3px rgba(0,0,0,0.12)" }}>
+              {stage.emoji}
+            </div>
+            <div style={{ flex: 1 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "6px", flexWrap: "wrap" }}>
+                <span style={{ fontSize: "10px", fontFamily: "monospace", background: "#f1f5f9", color: "#64748b", padding: "1px 6px", borderRadius: "4px" }}>Day {stage.days}</span>
+                <span style={{ fontFamily: "'Montserrat', sans-serif", fontWeight: 700, fontSize: "13px", color: "#1e293b" }}>{stage.label}</span>
+                {stage.isMilestone && <span style={{ fontSize: "9px", fontWeight: 700, color: "#92400e", background: "#fef3c7", padding: "1px 6px", borderRadius: "3px" }}>MILESTONE</span>}
+              </div>
+              <div style={{ fontSize: "11px", color: stage.actionType === "call" ? "#7c3aed" : "#3b82f6", fontWeight: 600 }}>
+                {stage.actionType === "call" ? "📅" : "📱"} {stage.action}
+              </div>
+            </div>
+            <span style={{ color: "#94a3b8", fontSize: "14px", transition: "transform 0.2s", transform: activeStage === stage.id ? "rotate(180deg)" : "rotate(0)" }}>▾</span>
+          </button>
+
+          {activeStage === stage.id && (
+            <div style={{ padding: "8px 12px 14px 54px", fontSize: "13px", color: "#475569", lineHeight: 1.5 }}>
+              <p style={{ margin: "0 0 8px" }}>{stage.description}</p>
+              {stage.tips.map((tip, ti) => (
+                <div key={ti} style={{ display: "flex", alignItems: "flex-start", gap: "6px", marginBottom: "3px" }}>
+                  <span style={{ color: "#22c55e", marginTop: "2px", fontSize: "12px" }}>✓</span>
+                  <span style={{ fontSize: "12px", color: "#374151" }}>{tip}</span>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Special statuses after One Month */}
+          {stage.id === "one_month" && (
+            <div style={{ marginLeft: "42px", marginBottom: "4px", marginTop: "4px" }}>
+              <div style={{ fontSize: "10px", color: "#94a3b8", fontWeight: 700, textTransform: "uppercase", letterSpacing: "1px", marginBottom: "6px", paddingLeft: "4px" }}>Special Statuses</div>
+
+              {/* Coach Prospect */}
+              <button
+                onClick={() => toggle("coach_prospect")}
+                style={{ width: "100%", display: "flex", alignItems: "center", gap: "8px", padding: "8px 10px", background: activeStage === "coach_prospect" ? "#fffbeb" : "transparent", border: "1px solid #fde68a", borderRadius: "8px", cursor: "pointer", textAlign: "left", marginBottom: "6px" }}
+              >
+                <span style={{ fontSize: "14px" }}>{SPECIAL_STATUSES.coachProspect.emoji}</span>
+                <span style={{ fontSize: "12px", fontWeight: 600, color: "#92400e", flex: 1 }}>{SPECIAL_STATUSES.coachProspect.label}</span>
+              </button>
+              {activeStage === "coach_prospect" && (
+                <div style={{ padding: "6px 10px 12px 32px", fontSize: "12px", color: "#475569", lineHeight: 1.5, marginBottom: "6px" }}>
+                  <p style={{ margin: "0 0 6px" }}>{SPECIAL_STATUSES.coachProspect.description}</p>
+                  {SPECIAL_STATUSES.coachProspect.tips.map((tip, ti) => (
+                    <div key={ti} style={{ display: "flex", alignItems: "flex-start", gap: "6px", marginBottom: "2px" }}>
+                      <span style={{ color: "#f59e0b", marginTop: "2px" }}>★</span>
+                      <span style={{ fontSize: "12px", color: "#64748b" }}>{tip}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Paused */}
+              <button
+                onClick={() => toggle("paused")}
+                style={{ width: "100%", display: "flex", alignItems: "center", gap: "8px", padding: "8px 10px", background: activeStage === "paused" ? "#f8fafc" : "transparent", border: "1px dashed #d1d5db", borderRadius: "8px", cursor: "pointer", textAlign: "left" }}
+              >
+                <span style={{ fontSize: "14px" }}>{SPECIAL_STATUSES.paused.emoji}</span>
+                <span style={{ fontSize: "12px", fontWeight: 600, color: "#64748b", flex: 1 }}>{SPECIAL_STATUSES.paused.label}</span>
+                <span style={{ fontSize: "10px", color: "#94a3b8" }}>(can return anytime)</span>
+              </button>
+              {activeStage === "paused" && (
+                <div style={{ padding: "6px 10px 12px 32px", fontSize: "12px", color: "#475569", lineHeight: 1.5 }}>
+                  <p style={{ margin: "0 0 6px" }}>{SPECIAL_STATUSES.paused.description}</p>
+                  {SPECIAL_STATUSES.paused.tips.map((tip, ti) => (
+                    <div key={ti} style={{ display: "flex", alignItems: "flex-start", gap: "6px", marginBottom: "2px" }}>
+                      <span style={{ color: "#94a3b8", marginTop: "2px" }}>•</span>
+                      <span style={{ fontSize: "12px", color: "#64748b" }}>{tip}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Connector dot */}
+          {i < JOURNEY_STAGES.length - 1 && stage.id !== "one_month" && (
+            <div style={{ display: "flex", justifyContent: "flex-start", paddingLeft: "26px" }}>
+              <div style={{ width: "2px", height: "8px", background: stage.isMilestone ? "linear-gradient(#86efac, #e2e8f0)" : "#e2e8f0" }} />
+            </div>
+          )}
+        </div>
+      ))}
+
+      {/* Needs Attention Triggers */}
+      <div style={{ padding: "14px 16px", marginTop: "14px", background: "#fef2f2", border: "1px solid #fecaca", borderRadius: "10px" }}>
+        <h4 style={{ fontFamily: "'Montserrat', sans-serif", fontWeight: 800, fontSize: "12px", color: "#b91c1c", marginBottom: "8px", display: "flex", alignItems: "center", gap: "6px" }}>🚨 &quot;Needs Attention&quot; Triggers</h4>
+        {[
+          { num: "1", text: "Scheduled check-in is due — Meeting date is today or past" },
+          { num: "2", text: "10+ days since last check-in — Time to reach out!" },
+          { num: "3", text: "Never checked in — New client needs first touchpoint" },
+        ].map((t) => (
+          <div key={t.num} style={{ display: "flex", alignItems: "flex-start", gap: "6px", marginBottom: "4px" }}>
+            <span style={{ color: "#ef4444", fontSize: "12px", fontWeight: 700 }}>{t.num}.</span>
+            <span style={{ fontSize: "12px", color: "#374151" }}>{t.text}</span>
+          </div>
+        ))}
+      </div>
+
+      {/* Milestone Summary */}
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: "8px", marginTop: "14px" }}>
+        {[
+          { emoji: "🎉", day: "Day 7", sub: "Week 1" },
+          { emoji: "⭐", day: "Day 14", sub: "2 Weeks" },
+          { emoji: "💎", day: "Day 21", sub: "Habit!" },
+          { emoji: "👑", day: "Day 30", sub: "1 Month" },
+        ].map((m) => (
+          <div key={m.day} style={{ textAlign: "center", padding: "10px 6px", background: "#f0fdf4", borderRadius: "10px", border: "1px solid #d1fae5" }}>
+            <div style={{ fontSize: "20px", marginBottom: "2px" }}>{m.emoji}</div>
+            <div style={{ fontFamily: "'Montserrat', sans-serif", fontWeight: 800, fontSize: "13px", color: "#065f46" }}>{m.day}</div>
+            <div style={{ fontSize: "10px", color: "#94a3b8" }}>{m.sub}</div>
+          </div>
+        ))}
+      </div>
+
+      <p style={{ textAlign: "center", fontSize: "11px", color: "#94a3b8", marginTop: "8px" }}>
+        👆 Tap any stage to see coaching tips
+      </p>
+    </div>
   )
 }
 
@@ -98,6 +329,12 @@ export function ClientLearningGuide({ onClose }: { onClose: () => void }) {
                 </span>
               ))}
             </div>
+
+            {/* The First 30 Days — Day by Day */}
+            <div style={{ fontFamily: "'Montserrat', sans-serif", fontWeight: 800, fontSize: "11px", color: "#94a3b8", textTransform: "uppercase", letterSpacing: "1.5px", marginBottom: "10px", display: "flex", alignItems: "center", gap: "10px" }}>
+              The First 30 Days — Day by Day<span style={{ flex: 1, height: "1px", background: "linear-gradient(90deg, #e2e8f0, transparent)" }} />
+            </div>
+            <ClientJourneyTimeline />
 
             {/* Features */}
             <div style={{ fontFamily: "'Montserrat', sans-serif", fontWeight: 800, fontSize: "11px", color: "#94a3b8", textTransform: "uppercase", letterSpacing: "1.5px", marginBottom: "10px", display: "flex", alignItems: "center", gap: "10px" }}>

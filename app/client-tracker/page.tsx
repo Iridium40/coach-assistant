@@ -55,7 +55,6 @@ import {
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
 import { MilestoneActionModal } from "@/components/milestone-action-modal"
-import { ClientJourneyGuide } from "@/components/client-journey-guide"
 import { ClientLearningGuide } from "@/components/client-learning-guide"
 import { GraduationCap, Trophy, Heart, Download } from "lucide-react"
 import { ScheduleCalendarOptions } from "@/components/schedule-calendar-options"
@@ -112,7 +111,6 @@ function ClientTrackerContent() {
   const [editingClient, setEditingClient] = useState<Client | null>(null)
   const [showTextModal, setShowTextModal] = useState(false)
   const [showScheduleModal, setShowScheduleModal] = useState(false)
-  const [showGuideModal, setShowGuideModal] = useState(false)
   const [showLearningGuide, setShowLearningGuide] = useState(false)
   const [showMilestoneModal, setShowMilestoneModal] = useState(false)
   const [milestoneCount, setMilestoneCount] = useState(0)
@@ -571,13 +569,6 @@ ${phase.milestone ? `\n🎉 MILESTONE: ${phase.label} - Celebrate this achieveme
               >
                 <GraduationCap className="h-4 w-4 sm:mr-2" />
                 <span className="hidden sm:inline">Learn Client Tracker</span>
-              </Button>
-              <Button
-                className="bg-[#f88221] border-[#f88221] text-white hover:bg-[#e07520] text-xs sm:text-sm"
-                onClick={() => setShowGuideModal(true)}
-              >
-                <GraduationCap className="h-4 w-4 sm:mr-2" />
-                <span className="hidden sm:inline">Learn the Client Journey</span>
               </Button>
               <Link href="/prospect-tracker">
                 <Button variant="outline" className="bg-white/10 border-white/30 text-white hover:bg-white/20 text-xs sm:text-sm">
@@ -1379,18 +1370,6 @@ ${phase.milestone ? `\n🎉 MILESTONE: ${phase.label} - Celebrate this achieveme
               Cancel
             </Button>
           </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Client Journey Guide Modal */}
-      <Dialog open={showGuideModal} onOpenChange={setShowGuideModal}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-hidden">
-          <DialogHeader>
-            <DialogTitle className="text-xl font-bold text-center">
-              Learn the Client Journey
-            </DialogTitle>
-          </DialogHeader>
-          <ClientJourneyGuide />
         </DialogContent>
       </Dialog>
 
