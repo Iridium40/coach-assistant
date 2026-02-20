@@ -561,7 +561,7 @@ Talking Points:
             </div>
             <div className="flex flex-wrap gap-2 sm:gap-3">
               <Button
-                className="bg-amber-500 border-amber-500 text-white hover:bg-amber-600 text-xs sm:text-sm"
+                className="bg-[#f88221] border-[#f88221] text-white hover:bg-[#e07520] text-xs sm:text-sm"
                 onClick={() => setShowLearningGuide(true)}
               >
                 <GraduationCap className="h-4 w-4 sm:mr-2" />
