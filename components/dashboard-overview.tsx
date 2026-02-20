@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Announcements } from "@/components/announcements"
 import { ProfileSetupProgress, ProfileSetupAnnouncement } from "@/components/profile-setup-card"
+import { BusinessGettingStartedProgress, BusinessGettingStartedGuide } from "@/components/business-getting-started"
 import { useUserData } from "@/contexts/user-data-context"
 import { createClient } from "@/lib/supabase/client"
 import {
@@ -100,6 +101,7 @@ export function DashboardOverview() {
   const [showRankPromotionModal, setShowRankPromotionModal] = useState(false)
   const [promotedRank, setPromotedRank] = useState<string | null>(null)
   const [showSetupGuide, setShowSetupGuide] = useState(false)
+  const [showBusinessGuide, setShowBusinessGuide] = useState(false)
 
   // Pinned coach tools (from user_bookmarks with source='coach_tool')
   const pinnedToolIds = useMemo(() => getBookmarkedIds("coach_tool"), [getBookmarkedIds])
@@ -256,6 +258,28 @@ export function DashboardOverview() {
           profile={profile as any}
           onClose={() => setShowSetupGuide(false)}
           onNavigate={() => { setShowSetupGuide(false); router.push("/settings") }}
+        />
+      )}
+
+      {/* Business Getting Started — shows after profile setup is done, until they have 1 prospect + 1 client */}
+      {!profile?.is_new_coach && (prospects.length === 0 || clients.length === 0) && (
+        <div className="mt-4">
+          <BusinessGettingStartedProgress
+            prospectCount={prospects.length}
+            clientCount={clients.length}
+            onOpenGuide={() => setShowBusinessGuide(true)}
+            onNavigateProspects={() => router.push("/prospect-tracker")}
+            onNavigateClients={() => router.push("/client-tracker")}
+          />
+        </div>
+      )}
+
+      {/* Business Getting Started Guide Modal */}
+      {showBusinessGuide && (
+        <BusinessGettingStartedGuide
+          onClose={() => setShowBusinessGuide(false)}
+          onNavigateProspects={() => { setShowBusinessGuide(false); router.push("/prospect-tracker") }}
+          onNavigateClients={() => { setShowBusinessGuide(false); router.push("/client-tracker") }}
         />
       )}
 
