@@ -118,7 +118,7 @@ The Coach Assistant Hub Team
 
     // Send email using Resend
     const { data, error } = await resend.emails.send({
-      from: "Coach Assistant Hub <onboarding@coachassistancehub.com>", // Update this with your verified domain
+      from: "Coach Assistant Hub <noreply@coachassistanthub.com>",
       to: [to],
       subject: subject,
       html: htmlContent,

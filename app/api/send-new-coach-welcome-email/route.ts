@@ -677,7 +677,7 @@ You've got this! Your transformation journey continues... 💚
 
     // Send email using Resend
     const { data, error } = await resend.emails.send({
-      from: "Coach Assistant Hub <onboarding@coachassistancehub.com>",
+      from: "Coach Assistant Hub <noreply@coachassistanthub.com>",
       to: [to],
       subject: subject,
       html: htmlContent,

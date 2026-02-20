@@ -91,7 +91,7 @@ export async function POST(request: NextRequest) {
     }
 
     const { error } = await resend.emails.send({
-      from: "Coach Assistant Hub <onboarding@coachassistancehub.com>",
+      from: "Coach Assistant Hub <noreply@coachassistanthub.com>",
       to: [user.email],
       subject: emailContent.subject,
       html: emailContent.html,

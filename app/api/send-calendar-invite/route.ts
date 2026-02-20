@@ -213,7 +213,7 @@ ${fromName || "Your Coach"}
 
     // Send email with ICS attachment using Resend (supports multiple recipients)
     const { data, error } = await resend.emails.send({
-      from: `Coach Assistant Hub <onboarding@coachassistancehub.com>`,
+      from: "Coach Assistant Hub <noreply@coachassistanthub.com>",
       replyTo: fromEmail,
       to: toEmails,
       subject: subject,

@@ -351,7 +351,7 @@ export async function POST(request: NextRequest) {
           inviteId: inviteData.id,
           inviteLink,
           emailPayload: {
-            from: "Coach Assistant Hub <onboarding@coachassistancehub.com>",
+            from: "Coach Assistant Hub <noreply@coachassistanthub.com>",
             to: [email],
             subject,
             html,
