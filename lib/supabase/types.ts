@@ -198,6 +198,7 @@ export interface Database {
           priority: "low" | "normal" | "high" | "urgent"
           is_active: boolean
           send_push: boolean
+          first_login_only: boolean
           created_by: string | null
           created_at: string
           updated_at: string
@@ -209,6 +210,7 @@ export interface Database {
           priority?: "low" | "normal" | "high" | "urgent"
           is_active?: boolean
           send_push?: boolean
+          first_login_only?: boolean
           created_by?: string | null
           created_at?: string
           updated_at?: string
@@ -220,6 +222,7 @@ export interface Database {
           priority?: "low" | "normal" | "high" | "urgent"
           is_active?: boolean
           send_push?: boolean
+          first_login_only?: boolean
           created_by?: string | null
           created_at?: string
           updated_at?: string

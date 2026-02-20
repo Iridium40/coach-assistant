@@ -57,7 +57,7 @@ export async function POST(request: NextRequest) {
             </span>
           </div>
           
-          <div style="color: #333; font-size: 16px; line-height: 1.6; white-space: pre-wrap;">
+          <div style="color: #333; font-size: 16px; line-height: 1.6;">
             ${announcementContent}
           </div>
         </div>

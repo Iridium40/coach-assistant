@@ -23,8 +23,9 @@ import { useToast } from "@/hooks/use-toast"
 import { useAdminChanges } from "@/hooks/use-admin-changes"
 import { AdminSaveButton } from "@/components/admin-save-button"
 import { sendAnnouncementEmail } from "@/lib/email"
-import { X, Plus, Edit, Trash2, Search, Send, RefreshCw } from "lucide-react"
+import { X, Plus, Edit, Trash2, Search, Send, RefreshCw, Eye, Code } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
+import DOMPurify from "dompurify"
 
 interface Announcement {
   id: string
@@ -34,6 +35,7 @@ interface Announcement {
   is_active: boolean
   send_push: boolean
   send_email: boolean
+  first_login_only: boolean
   push_scheduled_at: string | null
   start_date: string | null
   end_date: string | null
@@ -59,9 +61,12 @@ export function AdminAnnouncements({ onClose }: { onClose?: () => void }) {
   const [content, setContent] = useState("")
   const [priority, setPriority] = useState<"low" | "normal" | "high" | "urgent">("normal")
   const [isActive, setIsActive] = useState(true)
-  const [sendPushNow, setSendPushNow] = useState(false) // true = send now, false = schedule
-  const [pushScheduledAt, setPushScheduledAt] = useState("")
-  const [sendEmail, setSendEmail] = useState(false) // Send email notification
+  const [sendPushNow, setSendPushNow] = useState(false)
+  const [sendEmail, setSendEmail] = useState(false)
+  const [firstLoginOnly, setFirstLoginOnly] = useState(false)
+  const [startDate, setStartDate] = useState("")
+  const [endDate, setEndDate] = useState("")
+  const [showPreview, setShowPreview] = useState(false)
 
   // Check if user is admin (case-insensitive)
   const isAdmin = profile?.user_role?.toLowerCase() === "admin"
@@ -111,8 +116,11 @@ export function AdminAnnouncements({ onClose }: { onClose?: () => void }) {
     setPriority("normal")
     setIsActive(true)
     setSendPushNow(false)
-    setPushScheduledAt("")
     setSendEmail(false)
+    setFirstLoginOnly(false)
+    setStartDate("")
+    setEndDate("")
+    setShowPreview(false)
     setEditingId(null)
     setShowForm(false)
   }
@@ -125,10 +133,11 @@ export function AdminAnnouncements({ onClose }: { onClose?: () => void }) {
     setContent(announcement.content)
     setPriority(announcement.priority)
     setIsActive(announcement.is_active)
-    // If push_scheduled_at exists, it's scheduled; otherwise it's "send now"
-    setSendPushNow(!announcement.push_scheduled_at && announcement.send_push)
-    setPushScheduledAt(announcement.push_scheduled_at ? new Date(announcement.push_scheduled_at).toISOString().slice(0, 16) : "")
+    setSendPushNow(false)
     setSendEmail(announcement.send_email || false)
+    setFirstLoginOnly(announcement.first_login_only || false)
+    setStartDate(announcement.start_date ? new Date(announcement.start_date).toISOString().slice(0, 16) : "")
+    setEndDate(announcement.end_date ? new Date(announcement.end_date).toISOString().slice(0, 16) : "")
     setEditingId(announcement.id)
     setShowForm(true)
   }
@@ -257,14 +266,15 @@ export function AdminAnnouncements({ onClose }: { onClose?: () => void }) {
     e?.stopPropagation()
     e?.preventDefault()
     
-    // Pre-fill form with announcement data
     setTitle(announcement.title)
     setContent(announcement.content)
     setPriority(announcement.priority)
-    setIsActive(true) // Set to active for resend
-    setSendPushNow(true) // Default to send now for resend
-    setPushScheduledAt("")
-    setSendEmail(true) // Default to send email for resend
+    setIsActive(true)
+    setSendPushNow(true)
+    setSendEmail(true)
+    setFirstLoginOnly(announcement.first_login_only || false)
+    setStartDate(announcement.start_date ? new Date(announcement.start_date).toISOString().slice(0, 16) : "")
+    setEndDate(announcement.end_date ? new Date(announcement.end_date).toISOString().slice(0, 16) : "")
     setEditingId(announcement.id)
     setShowForm(true)
   }
@@ -274,20 +284,20 @@ export function AdminAnnouncements({ onClose }: { onClose?: () => void }) {
 
     if (!user) return
 
+    const parsedStartDate = startDate ? new Date(startDate).toISOString() : null
+    const parsedEndDate = endDate ? new Date(endDate).toISOString() : null
+
     const announcementData = {
       title,
       content,
       priority,
       is_active: isActive,
-      send_push: true, // Always true if we're setting notification time
-      send_email: sendEmail, // Send email notifications
-      // If sendPushNow is true, push_scheduled_at is null (send immediately)
-      // If sendPushNow is false, use the scheduled date/time
-      push_scheduled_at: !sendPushNow && pushScheduledAt 
-        ? new Date(pushScheduledAt).toISOString() 
-        : null,
-      start_date: null,
-      end_date: null,
+      send_push: true,
+      send_email: sendEmail,
+      first_login_only: firstLoginOnly,
+      push_scheduled_at: !sendPushNow && parsedStartDate ? parsedStartDate : null,
+      start_date: parsedStartDate,
+      end_date: parsedEndDate,
       created_by: user.id,
     }
 
@@ -457,24 +467,138 @@ export function AdminAnnouncements({ onClose }: { onClose?: () => void }) {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="content" className="text-optavia-dark">Message</Label>
-                <Textarea
-                  id="content"
-                  value={content}
-                  onChange={(e) => setContent(e.target.value)}
-                  onClick={(e) => e.stopPropagation()}
-                  onFocus={(e) => e.stopPropagation()}
-                  required
-                  rows={8}
-                  className="border-gray-300 focus:border-[hsl(var(--optavia-green))] focus:ring-[hsl(var(--optavia-green-light))] min-h-[150px]"
-                />
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="content" className="text-optavia-dark">Message</Label>
+                  <div className="flex items-center gap-1 bg-gray-100 rounded-md p-0.5">
+                    <button
+                      type="button"
+                      onClick={() => setShowPreview(false)}
+                      className={`flex items-center gap-1.5 px-3 py-1 rounded text-xs font-medium transition-colors ${
+                        !showPreview
+                          ? "bg-white text-optavia-dark shadow-sm"
+                          : "text-optavia-gray hover:text-optavia-dark"
+                      }`}
+                    >
+                      <Code className="h-3 w-3" />
+                      HTML
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setShowPreview(true)}
+                      className={`flex items-center gap-1.5 px-3 py-1 rounded text-xs font-medium transition-colors ${
+                        showPreview
+                          ? "bg-white text-optavia-dark shadow-sm"
+                          : "text-optavia-gray hover:text-optavia-dark"
+                      }`}
+                    >
+                      <Eye className="h-3 w-3" />
+                      Preview
+                    </button>
+                  </div>
+                </div>
+                {!showPreview ? (
+                  <Textarea
+                    id="content"
+                    value={content}
+                    onChange={(e) => setContent(e.target.value)}
+                    onClick={(e) => e.stopPropagation()}
+                    onFocus={(e) => e.stopPropagation()}
+                    required
+                    rows={8}
+                    placeholder="Type plain text or paste HTML for rich formatting..."
+                    className="border-gray-300 focus:border-[hsl(var(--optavia-green))] focus:ring-[hsl(var(--optavia-green-light))] min-h-[150px] font-mono text-sm"
+                  />
+                ) : (
+                  <div
+                    className="border border-gray-300 rounded-md p-4 min-h-[150px] bg-white prose prose-sm max-w-none overflow-auto"
+                    dangerouslySetInnerHTML={{
+                      __html: content
+                        ? DOMPurify.sanitize(content, {
+                            ADD_TAGS: ["iframe"],
+                            ADD_ATTR: ["target", "rel", "style"],
+                          })
+                        : '<p class="text-gray-400 italic">Nothing to preview yet...</p>',
+                    }}
+                  />
+                )}
+                <p className="text-xs text-optavia-gray">
+                  Supports HTML for rich formatting (bold, links, lists, images, etc.) or plain text.
+                </p>
               </div>
 
-              {/* Notification Settings - Compact Layout */}
+              {/* Visibility & Targeting */}
+              <div className="bg-gray-50 rounded-lg p-4 space-y-4">
+                <h4 className="font-medium text-optavia-dark text-sm">Visibility & Targeting</h4>
+
+                {/* Date Range */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="flex flex-col gap-1.5 p-3 bg-white rounded-md border border-gray-200">
+                    <Label htmlFor="startDate" className="text-optavia-dark text-sm">
+                      Start Date/Time
+                    </Label>
+                    <Input
+                      id="startDate"
+                      type="datetime-local"
+                      value={startDate}
+                      onChange={(e) => setStartDate(e.target.value)}
+                      onClick={(e) => e.stopPropagation()}
+                      onFocus={(e) => e.stopPropagation()}
+                      className="border-gray-300 focus:border-[hsl(var(--optavia-green))] focus:ring-[hsl(var(--optavia-green-light))]"
+                    />
+                    <p className="text-xs text-optavia-gray">Leave empty to show immediately</p>
+                  </div>
+                  <div className="flex flex-col gap-1.5 p-3 bg-white rounded-md border border-gray-200">
+                    <Label htmlFor="endDate" className="text-optavia-dark text-sm">
+                      End Date/Time
+                    </Label>
+                    <Input
+                      id="endDate"
+                      type="datetime-local"
+                      value={endDate}
+                      onChange={(e) => setEndDate(e.target.value)}
+                      onClick={(e) => e.stopPropagation()}
+                      onFocus={(e) => e.stopPropagation()}
+                      min={startDate || undefined}
+                      className="border-gray-300 focus:border-[hsl(var(--optavia-green))] focus:ring-[hsl(var(--optavia-green-light))]"
+                    />
+                    <p className="text-xs text-optavia-gray">Leave empty to show indefinitely</p>
+                  </div>
+                </div>
+
+                {/* First Login Only Toggle */}
+                <div className="flex items-center justify-between sm:justify-start sm:gap-3 p-3 bg-white rounded-md border border-gray-200">
+                  <div className="flex-1">
+                    <Label htmlFor="firstLoginOnly" className="cursor-pointer text-optavia-dark text-sm">
+                      First Login Only
+                    </Label>
+                    <p className="text-xs text-optavia-gray mt-0.5">
+                      Only show to new users on their first login (e.g. complete your profile, feature tips)
+                    </p>
+                  </div>
+                  <Switch
+                    id="firstLoginOnly"
+                    checked={firstLoginOnly}
+                    onCheckedChange={setFirstLoginOnly}
+                  />
+                </div>
+
+                {/* Summary */}
+                <p className="text-xs text-optavia-gray">
+                  {!startDate && !endDate && !firstLoginOnly && "This announcement will show to all users immediately and remain until dismissed."}
+                  {startDate && !endDate && !firstLoginOnly && `Starts ${new Date(startDate).toLocaleString()} and shows until dismissed.`}
+                  {!startDate && endDate && !firstLoginOnly && `Shows immediately until ${new Date(endDate).toLocaleString()}.`}
+                  {startDate && endDate && !firstLoginOnly && `Visible from ${new Date(startDate).toLocaleString()} to ${new Date(endDate).toLocaleString()}.`}
+                  {firstLoginOnly && !startDate && !endDate && "Only shown to new users on their first login, until dismissed."}
+                  {firstLoginOnly && startDate && !endDate && `Only shown to new users starting ${new Date(startDate).toLocaleString()}.`}
+                  {firstLoginOnly && !startDate && endDate && `Only shown to new users until ${new Date(endDate).toLocaleString()}.`}
+                  {firstLoginOnly && startDate && endDate && `Only shown to new users from ${new Date(startDate).toLocaleString()} to ${new Date(endDate).toLocaleString()}.`}
+                </p>
+              </div>
+
+              {/* Notification Settings */}
               <div className="bg-gray-50 rounded-lg p-4 space-y-4">
                 <h4 className="font-medium text-optavia-dark text-sm">Notification Settings</h4>
                 
-                {/* Toggles Row */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="flex items-center justify-between sm:justify-start sm:gap-3 p-3 bg-white rounded-md border border-gray-200">
                     <Label htmlFor="sendPushNow" className="cursor-pointer text-optavia-dark text-sm">
@@ -498,30 +622,11 @@ export function AdminAnnouncements({ onClose }: { onClose?: () => void }) {
                   </div>
                 </div>
 
-                {/* Schedule Time - Only shown when not sending now */}
-                {!sendPushNow && (
-                  <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 p-3 bg-white rounded-md border border-gray-200">
-                    <Label htmlFor="pushScheduledAt" className="text-optavia-dark text-sm whitespace-nowrap">
-                      Schedule for:
-                    </Label>
-                    <Input
-                      id="pushScheduledAt"
-                      type="datetime-local"
-                      value={pushScheduledAt}
-                      onChange={(e) => setPushScheduledAt(e.target.value)}
-                      onClick={(e) => e.stopPropagation()}
-                      onFocus={(e) => e.stopPropagation()}
-                      className="border-gray-300 focus:border-[hsl(var(--optavia-green))] focus:ring-[hsl(var(--optavia-green-light))] flex-1"
-                    />
-                  </div>
-                )}
-
-                {/* Helper text */}
                 <p className="text-xs text-optavia-gray">
-                  {sendPushNow 
-                    ? "Notifications will be sent immediately when announcement is saved." 
-                    : "Select a date and time to schedule the notification."}
-                  {sendEmail && " Email will be sent to users with notifications enabled."}
+                  {sendPushNow && sendEmail && "Push and email notifications will be sent immediately on save."}
+                  {sendPushNow && !sendEmail && "Push notification will be sent immediately on save."}
+                  {!sendPushNow && sendEmail && "Email will be sent immediately on save."}
+                  {!sendPushNow && !sendEmail && "No notifications will be sent. The announcement will appear in-app based on visibility settings above."}
                 </p>
               </div>
 
@@ -622,17 +727,34 @@ export function AdminAnnouncements({ onClose }: { onClose?: () => void }) {
                       ) : (
                         <Badge variant="outline">Inactive</Badge>
                       )}
+                      {announcement.first_login_only && (
+                        <Badge className="bg-purple-500">First Login</Badge>
+                      )}
                     </div>
-                    <CardDescription className="text-optavia-gray">
+                    <CardDescription className="text-optavia-gray text-xs sm:text-sm">
                       Created: {new Date(announcement.created_at).toLocaleString()}
                       {announcement.updated_at && announcement.updated_at !== announcement.created_at && (
                         <> • <span className="text-[hsl(var(--optavia-green))] font-medium">Last Sent: {new Date(announcement.updated_at).toLocaleString()}</span></>
                       )}
-                      {announcement.start_date && (
-                        <> • Starts: {new Date(announcement.start_date).toLocaleString()}</>
-                      )}
-                      {announcement.end_date && (
-                        <> • Ends: {new Date(announcement.end_date).toLocaleString()}</>
+                      {(announcement.start_date || announcement.end_date) && (
+                        <>
+                          <br className="sm:hidden" />
+                          <span className="text-optavia-dark font-medium">
+                            {" • "}
+                            {announcement.start_date && announcement.end_date
+                              ? `Visible: ${new Date(announcement.start_date).toLocaleString()} → ${new Date(announcement.end_date).toLocaleString()}`
+                              : announcement.start_date
+                                ? `Starts: ${new Date(announcement.start_date).toLocaleString()}`
+                                : `Ends: ${new Date(announcement.end_date!).toLocaleString()}`
+                            }
+                          </span>
+                          {announcement.end_date && new Date(announcement.end_date) < new Date() && (
+                            <span className="text-red-500 font-medium"> (Expired)</span>
+                          )}
+                          {announcement.start_date && new Date(announcement.start_date) > new Date() && (
+                            <span className="text-amber-500 font-medium"> (Scheduled)</span>
+                          )}
+                        </>
                       )}
                     </CardDescription>
                   </div>
@@ -673,7 +795,15 @@ export function AdminAnnouncements({ onClose }: { onClose?: () => void }) {
                 </div>
               </CardHeader>
               <CardContent>
-                <p className="text-sm text-optavia-gray whitespace-pre-wrap">{announcement.content}</p>
+                <div
+                  className="text-sm text-optavia-gray prose prose-sm max-w-none [&_a]:text-[hsl(var(--optavia-green))] [&_a]:underline"
+                  dangerouslySetInnerHTML={{
+                    __html: DOMPurify.sanitize(announcement.content, {
+                      ADD_TAGS: ["iframe"],
+                      ADD_ATTR: ["target", "rel", "style"],
+                    }),
+                  }}
+                />
               </CardContent>
             </Card>
           ))

@@ -8,6 +8,7 @@ import { X, Bell, AlertCircle, Info, AlertTriangle } from "lucide-react"
 import { createClient } from "@/lib/supabase/client"
 import { useAuth } from "@/hooks/use-auth"
 import { useSupabaseData } from "@/hooks/use-supabase-data"
+import DOMPurify from "dompurify"
 
 interface Announcement {
   id: string
@@ -16,6 +17,7 @@ interface Announcement {
   priority: "low" | "normal" | "high" | "urgent"
   is_active: boolean
   send_push: boolean
+  first_login_only: boolean
   start_date: string | null
   end_date: string | null
   created_at: string
@@ -23,7 +25,7 @@ interface Announcement {
 
 export function Announcements() {
   const { user } = useAuth()
-  const { notificationSettings } = useSupabaseData(user)
+  const { profile, notificationSettings } = useSupabaseData(user)
   const [announcements, setAnnouncements] = useState<Announcement[]>([])
   const [readAnnouncements, setReadAnnouncements] = useState<Set<string>>(new Set())
   const [loading, setLoading] = useState(true)
@@ -46,7 +48,7 @@ export function Announcements() {
       .select("*")
       .eq("is_active", true)
       .order("created_at", { ascending: false })
-      .limit(5)
+      .limit(10)
 
     if (!error && data) {
       // Filter by start_date and end_date if they exist
@@ -124,11 +126,13 @@ export function Announcements() {
     return null
   }
 
-  // Filter out read announcements if user has disabled announcements
+  const isNewUser = profile?.is_new_coach ?? false
+
   const unreadAnnouncements = announcements.filter(
     (announcement) =>
       !readAnnouncements.has(announcement.id) &&
-      (notificationSettings?.announcements_enabled ?? true)
+      (notificationSettings?.announcements_enabled ?? true) &&
+      (!announcement.first_login_only || isNewUser)
   )
 
   if (unreadAnnouncements.length === 0) {
@@ -173,7 +177,15 @@ export function Announcements() {
             </div>
           </CardHeader>
           <CardContent>
-            <p className="text-sm text-optavia-gray whitespace-pre-wrap">{announcement.content}</p>
+            <div
+              className="text-sm text-optavia-gray prose prose-sm max-w-none [&_a]:text-blue-600 [&_a]:underline"
+              dangerouslySetInnerHTML={{
+                __html: DOMPurify.sanitize(announcement.content, {
+                  ADD_TAGS: ["iframe"],
+                  ADD_ATTR: ["target", "rel", "style"],
+                }),
+              }}
+            />
             <Button
               variant="outline"
               size="sm"
