@@ -261,15 +261,13 @@ export function DashboardOverview() {
         />
       )}
 
-      {/* Business Getting Started — shows after profile setup is done, until they have 1 prospect + 1 client */}
+      {/* My Business Learning — shows after profile setup is done, until they have 1 prospect + 1 client */}
       {!profile?.is_new_coach && (prospects.length === 0 || clients.length === 0) && (
         <div className="mt-4">
           <BusinessGettingStartedProgress
             prospectCount={prospects.length}
             clientCount={clients.length}
             onOpenGuide={() => setShowBusinessGuide(true)}
-            onNavigateProspects={() => router.push("/prospect-tracker")}
-            onNavigateClients={() => router.push("/client-tracker")}
           />
         </div>
       )}

@@ -27,8 +27,6 @@ export interface BusinessGettingStartedProgressProps {
   prospectCount: number
   clientCount: number
   onOpenGuide: () => void
-  onNavigateProspects: () => void
-  onNavigateClients: () => void
 }
 
 interface Screenshot {
@@ -323,108 +321,43 @@ export function BusinessGettingStartedGuide({ onClose, onNavigateProspects, onNa
 
 
 // ═══════════════════════════════════════════════════════════
-// COMPONENT 2: DASHBOARD PROGRESS CARD
-// Shows until user has at least 1 prospect AND 1 client.
+// COMPONENT 2: DASHBOARD CARD
+// Simple "My Business Learning" card that opens the guide.
+// Auto-hides when user has at least 1 prospect AND 1 client.
 // ═══════════════════════════════════════════════════════════
 
-export function BusinessGettingStartedProgress({ prospectCount, clientCount, onOpenGuide, onNavigateProspects, onNavigateClients }: BusinessGettingStartedProgressProps) {
-  const hasProspect = prospectCount > 0
-  const hasClient = clientCount > 0
-  const doneCount = (hasProspect ? 1 : 0) + (hasClient ? 1 : 0)
-  const pct = Math.round((doneCount / 2) * 100)
-
-  if (hasProspect && hasClient) return null
+export function BusinessGettingStartedProgress({ prospectCount, clientCount, onOpenGuide }: BusinessGettingStartedProgressProps) {
+  if (prospectCount > 0 && clientCount > 0) return null
 
   return (
-    <div style={{ background: "#fff", borderRadius: "14px", border: "1px solid #e2e8f0", overflow: "hidden", boxShadow: "0 1px 4px rgba(0,0,0,0.04)", fontFamily: "'Open Sans', -apple-system, sans-serif" }}>
-      {/* Header */}
-      <div style={{ padding: "16px 20px", background: "linear-gradient(135deg, #003B2E, #00A651)", display: "flex", alignItems: "center", gap: "12px" }}>
-        <div style={{ width: "42px", height: "42px", borderRadius: "50%", background: "rgba(255,255,255,0.15)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-          <span style={{ fontSize: "22px" }}>🚀</span>
-        </div>
-        <div style={{ flex: 1 }}>
-          <h3 style={{ margin: 0, fontFamily: "'Montserrat', sans-serif", fontWeight: 800, fontSize: "15px", color: "#fff" }}>
-            Build Your Business
-          </h3>
-          <p style={{ margin: "2px 0 0", fontSize: "12px", color: "rgba(255,255,255,0.75)" }}>
-            {doneCount} of 2 steps complete
-          </p>
-        </div>
-        <div style={{ width: "48px", height: "48px", borderRadius: "50%", background: "rgba(255,255,255,0.1)", display: "flex", alignItems: "center", justifyContent: "center", position: "relative" }}>
-          <svg width="48" height="48" viewBox="0 0 48 48" style={{ position: "absolute", transform: "rotate(-90deg)" }}>
-            <circle cx="24" cy="24" r="20" fill="none" stroke="rgba(255,255,255,0.15)" strokeWidth="4" />
-            <circle cx="24" cy="24" r="20" fill="none" stroke="#fff" strokeWidth="4" strokeDasharray={`${(pct / 100) * 125.6} 125.6`} strokeLinecap="round" style={{ transition: "stroke-dasharray 0.5s ease" }} />
-          </svg>
-          <span style={{ fontSize: "13px", fontWeight: 800, color: "#fff", fontFamily: "'Montserrat', sans-serif", position: "relative" }}>{pct}%</span>
-        </div>
+    <button
+      onClick={onOpenGuide}
+      style={{
+        width: "100%", display: "flex", alignItems: "center", gap: "14px",
+        padding: "16px 20px", background: "#fff", borderRadius: "14px",
+        border: "1px solid #e2e8f0", cursor: "pointer",
+        boxShadow: "0 1px 4px rgba(0,0,0,0.04)",
+        fontFamily: "'Open Sans', -apple-system, sans-serif",
+        transition: "all 0.2s", textAlign: "left",
+      }}
+    >
+      <div style={{
+        width: "46px", height: "46px", borderRadius: "12px",
+        background: "linear-gradient(135deg, #003B2E, #00A651)",
+        display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
+        boxShadow: "0 2px 8px rgba(0,166,81,0.2)",
+      }}>
+        <span style={{ fontSize: "24px" }}>🚀</span>
       </div>
-
-      {/* Checklist */}
-      <div style={{ padding: "12px 20px 4px" }}>
-        {/* Prospect step */}
-        <div style={{ display: "flex", alignItems: "center", gap: "10px", padding: "9px 0", borderBottom: "1px solid #f8fafc" }}>
-          <div style={{
-            width: "22px", height: "22px", borderRadius: "6px", display: "flex", alignItems: "center", justifyContent: "center",
-            background: hasProspect ? "#00A651" : "#f1f5f9", color: hasProspect ? "#fff" : "#94a3b8", fontSize: "11px", fontWeight: 800,
-            fontFamily: "'Montserrat', sans-serif", flexShrink: 0, transition: "all 0.3s",
-          }}>
-            {hasProspect ? "✓" : "1"}
-          </div>
-          <span style={{ fontSize: "13px", fontWeight: hasProspect ? 500 : 600, color: hasProspect ? "#9ca3af" : "#374151", textDecoration: hasProspect ? "line-through" : "none", flex: 1 }}>
-            📋 Add your first prospect to the 100&apos;s List
-          </span>
-          {hasProspect && <span style={{ fontSize: "9px", fontWeight: 700, color: "#065f46", background: "#d1fae5", padding: "1px 6px", borderRadius: "3px" }}>{prospectCount} added</span>}
-        </div>
-
-        {/* Client step */}
-        <div style={{ display: "flex", alignItems: "center", gap: "10px", padding: "9px 0" }}>
-          <div style={{
-            width: "22px", height: "22px", borderRadius: "6px", display: "flex", alignItems: "center", justifyContent: "center",
-            background: hasClient ? "#00A651" : "#f1f5f9", color: hasClient ? "#fff" : "#94a3b8", fontSize: "11px", fontWeight: 800,
-            fontFamily: "'Montserrat', sans-serif", flexShrink: 0, transition: "all 0.3s",
-          }}>
-            {hasClient ? "✓" : "2"}
-          </div>
-          <span style={{ fontSize: "13px", fontWeight: hasClient ? 500 : 600, color: hasClient ? "#9ca3af" : "#374151", textDecoration: hasClient ? "line-through" : "none", flex: 1 }}>
-            👥 Add your first client to the Client Tracker
-          </span>
-          {hasClient && <span style={{ fontSize: "9px", fontWeight: 700, color: "#065f46", background: "#d1fae5", padding: "1px 6px", borderRadius: "3px" }}>{clientCount} added</span>}
-        </div>
+      <div style={{ flex: 1 }}>
+        <h3 style={{ margin: 0, fontFamily: "'Montserrat', sans-serif", fontWeight: 800, fontSize: "15px", color: "#1e293b" }}>
+          My Business Learning
+        </h3>
+        <p style={{ margin: "2px 0 0", fontSize: "13px", color: "#64748b" }}>
+          Learn how to use your 100&apos;s List and Client Tracker
+        </p>
       </div>
-
-      {/* Next Step Nudge */}
-      {!hasProspect && (
-        <div style={{ margin: "4px 20px 0", padding: "10px 14px", background: "#fffbeb", borderRadius: "8px", border: "1px solid #fde68a", display: "flex", alignItems: "center", gap: "8px" }}>
-          <span style={{ fontSize: "16px" }}>👉</span>
-          <p style={{ margin: 0, fontSize: "12px", color: "#92400e", fontWeight: 600 }}>
-            Next: <strong>Add your first prospect</strong> — start building your 100&apos;s List!
-          </p>
-        </div>
-      )}
-      {hasProspect && !hasClient && (
-        <div style={{ margin: "4px 20px 0", padding: "10px 14px", background: "#eff6ff", borderRadius: "8px", border: "1px solid #bfdbfe", display: "flex", alignItems: "center", gap: "8px" }}>
-          <span style={{ fontSize: "16px" }}>👉</span>
-          <p style={{ margin: 0, fontSize: "12px", color: "#1e40af", fontWeight: 600 }}>
-            Next: <strong>Add your first client</strong> — start tracking their journey!
-          </p>
-        </div>
-      )}
-
-      {/* Actions */}
-      <div style={{ padding: "14px 20px 16px", display: "flex", gap: "8px" }}>
-        {!hasProspect ? (
-          <button onClick={onNavigateProspects} style={{ flex: 1, padding: "11px", background: "linear-gradient(135deg, #f59e0b, #f97316)", color: "#fff", border: "none", borderRadius: "10px", fontFamily: "'Montserrat', sans-serif", fontWeight: 700, fontSize: "13px", cursor: "pointer", boxShadow: "0 2px 8px rgba(249,115,22,0.2)", transition: "all 0.2s" }}>
-            📋 Go to 100&apos;s List →
-          </button>
-        ) : (
-          <button onClick={onNavigateClients} style={{ flex: 1, padding: "11px", background: "linear-gradient(135deg, #3b82f6, #6366f1)", color: "#fff", border: "none", borderRadius: "10px", fontFamily: "'Montserrat', sans-serif", fontWeight: 700, fontSize: "13px", cursor: "pointer", boxShadow: "0 2px 8px rgba(99,102,241,0.2)", transition: "all 0.2s" }}>
-            👥 Go to Client Tracker →
-          </button>
-        )}
-        <button onClick={onOpenGuide} style={{ padding: "11px 16px", background: "#f1f5f9", color: "#475569", border: "1px solid #e2e8f0", borderRadius: "10px", fontFamily: "'Montserrat', sans-serif", fontWeight: 700, fontSize: "13px", cursor: "pointer", transition: "all 0.2s", whiteSpace: "nowrap" }}>
-          🚀 Guide
-        </button>
-      </div>
-    </div>
+      <div style={{ color: "#94a3b8", fontSize: "20px", flexShrink: 0 }}>→</div>
+    </button>
   )
 }
