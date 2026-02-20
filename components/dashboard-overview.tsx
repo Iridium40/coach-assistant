@@ -2,10 +2,12 @@
 
 import { useState, useEffect, useMemo } from "react"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Announcements } from "@/components/announcements"
+import ProfileSetupCard from "@/components/profile-setup-card"
 import { useUserData } from "@/contexts/user-data-context"
 import { createClient } from "@/lib/supabase/client"
 import {
@@ -73,6 +75,7 @@ const COACH_TOOLS: { id: string; title: string; icon: LucideIcon; component: Rea
 export function DashboardOverview() {
   const { user, profile, badges, recipes, favoriteRecipes, completedResources } = useUserData()
   const supabase = createClient()
+  const router = useRouter()
 
   // CRM hooks
   const { prospects, stats: prospectStats } = useProspects()
@@ -234,6 +237,17 @@ export function DashboardOverview() {
 
       {/* Announcements */}
       <Announcements />
+
+      {/* Profile Setup Card for new users */}
+      {profile?.is_new_coach && (
+        <div className="mt-4">
+          <ProfileSetupCard
+            mode="dashboard"
+            profile={profile as any}
+            onNavigate={() => router.push("/settings")}
+          />
+        </div>
+      )}
 
       {/* Coach Tip of the Day */}
       <div className="mt-6">
