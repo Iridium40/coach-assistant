@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server"
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 
-// Resend Segment ID for Coaching Amplifier audience tracking
+// Resend Segment ID for Coach Assistant Hub audience tracking
 const RESEND_SEGMENT_ID = process.env.RESEND_SEGMENT_ID
 
 /**
@@ -26,7 +26,7 @@ async function addContactToResendSegment(email: string): Promise<void> {
       return
     }
 
-    console.log(`Added ${email} to Coaching Amplifier segment`, segmentData)
+    console.log(`Added ${email} to Coach Assistant Hub segment`, segmentData)
   } catch (error: any) {
     console.warn(`Failed to add ${email} to segment:`, error.message)
   }
@@ -416,12 +416,12 @@ export async function POST(request: NextRequest) {
                 <div class="card-icon">🔐</div>
                 <div>
                     <h2 class="card-title">Set Up Your Account</h2>
-                    <p class="card-subtitle">First, create your Coaching Amplifier account</p>
+                    <p class="card-subtitle">First, create your Coach Assistant Hub account</p>
                 </div>
             </div>
             
             <p style="color: #555; margin-bottom: 16px;">
-                You've been invited by <strong>${invitedByName}</strong> to join <strong>Coaching Amplifier</strong>, your hub for coaching resources, training, and support.
+                You've been invited by <strong>${invitedByName}</strong> to join <strong>Coach Assistant Hub</strong>, your hub for coaching resources, training, and support.
             </p>
             
             ${coachRank ? `
@@ -606,7 +606,7 @@ export async function POST(request: NextRequest) {
 
         <!-- Footer -->
         <div class="footer">
-            <div class="logo-text">Coaching Amplifier Team</div>
+            <div class="logo-text">Coach Assistant Hub Team</div>
             <p>You've got this! Your transformation journey continues... 💚</p>
         </div>
     </div>
@@ -623,7 +623,7 @@ Your journey to helping others transform their lives starts here.
 🔐 SET UP YOUR ACCOUNT FIRST
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-You've been invited by ${invitedByName} to join Coaching Amplifier, your hub for coaching resources, training, and support.
+You've been invited by ${invitedByName} to join Coach Assistant Hub, your hub for coaching resources, training, and support.
 
 ${coachRank ? `Your Coach Rank: ${coachRank}\n\n` : ""}Click the link below to set your password and create your account:
 
@@ -672,12 +672,12 @@ Passcode: OPTAVIA
 
 You've got this! Your transformation journey continues... 💚
 
-- Coaching Amplifier Team
+- Coach Assistant Hub Team
     `
 
     // Send email using Resend
     const { data, error } = await resend.emails.send({
-      from: "Coaching Amplifier <onboarding@coachingamplifier.com>",
+      from: "Coach Assistant Hub <onboarding@coachassistancehub.com>",
       to: [to],
       subject: subject,
       html: htmlContent,

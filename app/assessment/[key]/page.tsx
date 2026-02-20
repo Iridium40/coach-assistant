@@ -604,7 +604,7 @@ export default function HealthAssessmentPage({ params }: { params: Promise<{ key
               {/* Privacy Disclaimer */}
               <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
                 <p className="text-xs text-optavia-gray leading-relaxed">
-                  <strong className="text-optavia-dark">Privacy Notice:</strong> The information you provide in this Health Assessment is sent directly to your health coach's email inbox—and nowhere else. Coaching Amplifier does not store your responses on our servers, and no one other than your health coach will ever have access to this information. By submitting this assessment, you agree to share your responses with your health coach.
+                  <strong className="text-optavia-dark">Privacy Notice:</strong> The information you provide in this Health Assessment is sent directly to your health coach's email inbox—and nowhere else. Coach Assistant Hub does not store your responses on our servers, and no one other than your health coach will ever have access to this information. By submitting this assessment, you agree to share your responses with your health coach.
                 </p>
               </div>
               

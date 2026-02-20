@@ -21,7 +21,7 @@ export default function CookiesPage() {
 
             <section className="mb-8">
               <h2 className="text-2xl font-heading font-bold mb-4">2. How We Use Cookies</h2>
-              <p className="text-optavia-gray mb-4">Coaching Amplifier uses cookies for the following purposes:</p>
+              <p className="text-optavia-gray mb-4">Coach Assistant Hub uses cookies for the following purposes:</p>
               <ul className="list-disc pl-6 text-optavia-gray mb-4 space-y-2">
                 <li>
                   <strong>Authentication:</strong> To keep you logged in and maintain your session

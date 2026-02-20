@@ -12,7 +12,7 @@ export interface EmailTemplateOptions {
  * In production, this should be an absolute URL to the hosted logo
  */
 export function getLogoUrl(): string {
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://www.coachingamplifier.com"
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://www.coachassistancehub.com"
   return `${baseUrl}/branding/ca_logo.png`
 }
 
@@ -20,7 +20,7 @@ export function getLogoUrl(): string {
  * Get the dark mode logo URL for emails
  */
 export function getDarkLogoUrl(): string {
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://www.coachingamplifier.com"
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://www.coachassistancehub.com"
   return `${baseUrl}/branding/ca_logo_dark.png`
 }
 
@@ -64,7 +64,7 @@ export function getEmailHeader(title: string, subtitle?: string): string {
  * Generate the email footer (supports dark mode)
  */
 export function getEmailFooter(): string {
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://www.coachingamplifier.com"
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://www.coachassistancehub.com"
   
   return `
     <div class="email-border" style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #eee; text-align: center;">
@@ -145,7 +145,7 @@ export function getModuleCompletionEmailTemplate(options: {
   unlockedModuleRank?: string
   appUrl?: string
 }): { subject: string; html: string; text: string } {
-  const appUrl = options.appUrl || process.env.NEXT_PUBLIC_APP_URL || "http://www.coachingamplifier.com"
+  const appUrl = options.appUrl || process.env.NEXT_PUBLIC_APP_URL || "http://www.coachassistancehub.com"
   const trainingUrl = `${appUrl}/training`
   const academyUrl = options.unlockedModuleNumber 
     ? `${appUrl}/academy/module-${options.unlockedModuleNumber}`

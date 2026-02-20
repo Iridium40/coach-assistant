@@ -22,7 +22,7 @@ export function generateGenericICSContent(event: CalendarEvent, attendeeEmail?: 
     return date.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '')
   }
   
-  const uid = event.uid || `${Date.now()}-${Math.random().toString(36).substr(2, 9)}@coachingamplifier.com`
+  const uid = event.uid || `${Date.now()}-${Math.random().toString(36).substr(2, 9)}@coachassistancehub.com`
   const now = formatDate(new Date())
   
   // Escape special characters for ICS
@@ -60,7 +60,7 @@ export function generateGenericICSContent(event: CalendarEvent, attendeeEmail?: 
   if (organizerEmail) {
     lines.push(`ORGANIZER;CN=Coach:mailto:${organizerEmail}`)
   } else {
-    lines.push(`ORGANIZER;CN=Coach Assistant Hub:mailto:noreply@coachingamplifier.com`)
+    lines.push(`ORGANIZER;CN=Coach Assistant Hub:mailto:noreply@coachassistancehub.com`)
   }
   
   // Add attendee (the client/prospect receiving the invite)
@@ -208,7 +208,7 @@ export function generateICSContent(call: ZoomCall): string {
     return date.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '')
   }
   
-  const uid = `${call.id}@coachingamplifier.com`
+  const uid = `${call.id}@coachassistancehub.com`
   const now = formatDate(new Date())
   
   // Build description with meeting details
@@ -248,7 +248,7 @@ export function generateICSContent(call: ZoomCall): string {
     `DESCRIPTION:${escapeICS(description)}`,
     call.zoom_link ? `URL:${call.zoom_link}` : '',
     'STATUS:CONFIRMED',
-    `ORGANIZER;CN=Coach Assistant Hub:mailto:noreply@coachingamplifier.com`,
+    `ORGANIZER;CN=Coach Assistant Hub:mailto:noreply@coachassistancehub.com`,
     'END:VEVENT',
     'END:VCALENDAR'
   ].filter(Boolean).join('\r\n')

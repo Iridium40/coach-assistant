@@ -24,7 +24,7 @@ function SetPasswordPageContent() {
           <div className="mb-8 sm:mb-12">
             <img 
               src="/branding/ca_logo.png" 
-              alt="Coaching Amplifier" 
+              alt="Coach Assistant Hub" 
               className="h-16 sm:h-20 md:h-24 w-auto mx-auto"
             />
           </div>
@@ -54,7 +54,7 @@ function SetPasswordPageContent() {
         <div className="mb-8 sm:mb-12">
           <img 
             src="/branding/ca_logo.png" 
-            alt="Coaching Amplifier" 
+            alt="Coach Assistant Hub" 
             className="h-16 sm:h-20 md:h-24 w-auto mx-auto"
           />
         </div>

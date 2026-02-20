@@ -364,7 +364,7 @@ ${phase.milestone ? `\n🎉 MILESTONE: ${phase.label} - Celebrate this achieveme
       startDate: targetDate,
       endDate: endDate,
       location: location || undefined,
-      uid: `client-${selectedClient.id}-${Date.now()}@coachingamplifier.com`,
+      uid: `client-${selectedClient.id}-${Date.now()}@coachassistancehub.com`,
     }
   }
 

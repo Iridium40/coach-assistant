@@ -240,7 +240,7 @@ function ClientMealPlanContent() {
               <source srcSet="/branding/ca_hub_logo.svg" type="image/svg+xml" />
               <img
                 src="/branding/ca_hub_logo.png"
-                alt="Coaching Amplifier"
+                alt="Coach Assistant Hub"
                 className="h-10 w-auto"
               />
             </picture>
@@ -538,16 +538,16 @@ function ClientMealPlanContent() {
               <source srcSet="/branding/ca_hub_logo.svg" type="image/svg+xml" />
               <img
                 src="/branding/ca_hub_logo.png"
-                alt="Coaching Amplifier"
+                alt="Coach Assistant Hub"
                 className="h-8 w-auto brightness-0 invert"
               />
             </picture>
           </div>
           <p className="text-gray-400 text-sm">
-            Powered by Coaching Amplifier • Supporting OPTAVIA Health Coaches
+            Powered by Coach Assistant Hub • Supporting OPTAVIA Health Coaches
           </p>
           <p className="text-gray-500 text-xs mt-2">
-            © {new Date().getFullYear()} Coaching Amplifier. All rights reserved.
+            © {new Date().getFullYear()} Coach Assistant Hub. All rights reserved.
           </p>
         </div>
       </footer>

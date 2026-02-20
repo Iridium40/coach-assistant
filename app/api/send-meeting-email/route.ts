@@ -35,7 +35,7 @@ export async function POST(request: NextRequest) {
 
     // Create email content
     const subject = `📅 New Meeting Scheduled: ${meetingTitle}`
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://www.coachingamplifier.com"
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://www.coachassistancehub.com"
     
     const header = getEmailHeader("New Meeting Scheduled", "A new meeting has been added to your calendar")
     
@@ -118,7 +118,7 @@ export async function POST(request: NextRequest) {
         
         <p style="font-size: 16px; color: #333; margin: 30px 0 0 0;">
           Best regards,<br>
-          <strong>The Coaching Amplifier Team</strong>
+          <strong>The Coach Assistant Hub Team</strong>
         </p>
       </div>
     `
@@ -157,12 +157,12 @@ View in Calendar: ${appUrl}/calendar
 Tip: Add this meeting to your personal calendar using the "Add to Calendar" button in the app.
 
 Best regards,
-The Coaching Amplifier Team
+The Coach Assistant Hub Team
     `
 
     // Send email using Resend
     const { data, error } = await resend.emails.send({
-      from: "Coaching Amplifier <onboarding@coachingamplifier.com>",
+      from: "Coach Assistant Hub <onboarding@coachassistancehub.com>",
       to: [to],
       subject: subject,
       html: htmlContent,

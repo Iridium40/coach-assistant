@@ -67,14 +67,14 @@ export async function POST(request: NextRequest) {
 
     switch (email_action_type) {
       case "signup": {
-        const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://www.coachingamplifier.com"
+        const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://www.coachassistancehub.com"
         const confirmUrl = buildVerifyUrl(token_hash, "signup", redirect_to || appUrl)
         emailContent = getSignupConfirmationEmail(fullName, confirmUrl)
         break
       }
 
       case "recovery": {
-        const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://www.coachingamplifier.com"
+        const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://www.coachassistancehub.com"
         const resetUrl = buildVerifyUrl(token_hash, "recovery", redirect_to || `${appUrl}/reset-password`)
         emailContent = getPasswordRecoveryEmail(fullName, resetUrl)
         break
@@ -91,7 +91,7 @@ export async function POST(request: NextRequest) {
     }
 
     const { error } = await resend.emails.send({
-      from: "Coach Assistant Hub <onboarding@coachingamplifier.com>",
+      from: "Coach Assistant Hub <onboarding@coachassistancehub.com>",
       to: [user.email],
       subject: emailContent.subject,
       html: emailContent.html,

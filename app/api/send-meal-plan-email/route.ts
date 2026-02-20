@@ -46,7 +46,7 @@ export async function POST(request: NextRequest) {
     
     const is5and1 = planType === "5&1"
 
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://www.coachingamplifier.com"
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://www.coachassistancehub.com"
 
     // Create shareable meal plan URL with encoded data
     const planDataForUrl = mealPlanEntries.map(entry => ({
@@ -273,7 +273,7 @@ Your OPTAVIA Health Coach
 
     // Send email using Resend
     const { data, error } = await resend.emails.send({
-      from: "Coaching Amplifier <onboarding@coachingamplifier.com>",
+      from: "Coach Assistant Hub <onboarding@coachassistancehub.com>",
       to: [to],
       subject: subject,
       html: htmlContent,

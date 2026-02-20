@@ -25,7 +25,7 @@ export async function POST(request: NextRequest) {
 
     // Create email content
     const subject = `🏆 Achievement Unlocked: ${badgeInfo.name}!`
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://www.coachingamplifier.com"
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://www.coachassistancehub.com"
     
     const header = getEmailHeader("Congratulations!", "You've earned a new achievement badge!")
     
@@ -70,14 +70,14 @@ export async function POST(request: NextRequest) {
         
         <p style="font-size: 16px; color: #333; margin: 30px 0 0 0;">
           Best regards,<br>
-          <strong>The Coaching Amplifier Team</strong>
+          <strong>The Coach Assistant Hub Team</strong>
         </p>
       </div>
     `
     
     const footer = getEmailFooter()
     
-    const htmlContent = getEmailWrapper(header + bodyContent + footer, "Badge Awarded - Coaching Amplifier")
+    const htmlContent = getEmailWrapper(header + bodyContent + footer, "Badge Awarded - Coach Assistant Hub")
 
     const textContent = `
 Congratulations! You've earned a new badge!
@@ -90,17 +90,17 @@ ${badgeDescription || `You've completed all resources in the ${badgeCategory} ca
 
 Your dedication to learning and growth is impressive. Keep up the excellent work!
 
-View your badges: ${process.env.NEXT_PUBLIC_APP_URL || "http://www.coachingamplifier.com"}
+View your badges: ${process.env.NEXT_PUBLIC_APP_URL || "http://www.coachassistancehub.com"}
 
 Continue completing resources to unlock more achievements and badges!
 
 Best regards,
-The Coaching Amplifier Team
+The Coach Assistant Hub Team
     `
 
     // Send email using Resend
     const { data, error } = await resend.emails.send({
-      from: "Coaching Amplifier <onboarding@coachingamplifier.com>", // Update this with your verified domain
+      from: "Coach Assistant Hub <onboarding@coachassistancehub.com>", // Update this with your verified domain
       to: [to],
       subject: subject,
       html: htmlContent,

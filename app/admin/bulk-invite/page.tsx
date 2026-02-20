@@ -69,7 +69,7 @@ export default function AdminBulkInvitePage() {
                 <div className="space-y-3">
                   <p className="text-sm font-semibold text-amber-800">Important Notice</p>
                   <p className="text-sm text-amber-700">
-                    Only active <strong>OPTAVIA Health Coaches</strong> should be invited to become users of Coaching Amplifier. 
+                    Only active <strong>OPTAVIA Health Coaches</strong> should be invited to become users of Coach Assistant Hub. 
                     By sending invites, you certify that all persons in your upload are active OPTAVIA Coaches in good standing.
                   </p>
                   <div className="p-3 bg-amber-100 rounded-lg border border-amber-300">

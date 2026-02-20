@@ -24,7 +24,7 @@ export default function TermsOfServicePage() {
                 Terms of Service & Disclaimers
               </h1>
               <p className="text-lg opacity-90">
-                Please read these terms carefully before using Coaching Amplifier.
+                Please read these terms carefully before using Coach Assistant Hub.
               </p>
             </div>
           </div>
@@ -43,7 +43,7 @@ export default function TermsOfServicePage() {
               </CardHeader>
               <CardContent className="prose prose-sm max-w-none text-optavia-gray">
                 <p>
-                  The information, strategies, scripts, and business advice provided in Coaching Amplifier 
+                  The information, strategies, scripts, and business advice provided in Coach Assistant Hub 
                   are based on the experiences of successful health coaches and are intended for 
                   <strong> educational purposes only</strong>.
                 </p>
@@ -53,7 +53,7 @@ export default function TermsOfServicePage() {
                   OPTAVIA's official policies and guidelines.
                 </p>
                 <p>
-                  <strong>Coaching Amplifier is an independent training resource</strong> and is not 
+                  <strong>Coach Assistant Hub is an independent training resource</strong> and is not 
                   officially affiliated with, endorsed by, or sponsored by OPTAVIA, Medifast, or any 
                   related entities. For official policies, procedures, and guidelines, always refer to 
                   OPTAVIA's official resources.
@@ -80,7 +80,7 @@ export default function TermsOfServicePage() {
               </CardHeader>
               <CardContent className="prose prose-sm max-w-none text-optavia-gray">
                 <p>
-                  The financial guidance provided in Coaching Amplifier is for <strong>general 
+                  The financial guidance provided in Coach Assistant Hub is for <strong>general 
                   informational purposes only</strong> and is based on common practices within the 
                   health coaching industry. This is <strong>not professional tax, legal, accounting, 
                   or financial advice</strong>.
@@ -96,7 +96,7 @@ export default function TermsOfServicePage() {
                   any financial decisions.
                 </p>
                 <p className="font-semibold text-amber-800 bg-amber-50 p-3 rounded-lg">
-                  Coaching Amplifier and its creators are not liable for any financial decisions 
+                  Coach Assistant Hub and its creators are not liable for any financial decisions 
                   made based on the information provided.
                 </p>
               </CardContent>
@@ -128,7 +128,7 @@ export default function TermsOfServicePage() {
                   individual coaches represent their personal results and may not be typical.
                 </p>
                 <p className="font-semibold text-blue-800 bg-blue-50 p-3 rounded-lg">
-                  Coaching Amplifier does not guarantee any level of income or business success.
+                  Coach Assistant Hub does not guarantee any level of income or business success.
                 </p>
               </CardContent>
             </Card>
@@ -256,7 +256,7 @@ export default function TermsOfServicePage() {
               <CardContent className="prose prose-sm max-w-none text-optavia-gray">
                 <p>
                   The information clients provide in Health Assessments is sent directly to the 
-                  coach's email inbox—and nowhere else. Coaching Amplifier does not store client 
+                  coach's email inbox—and nowhere else. Coach Assistant Hub does not store client 
                   responses on our servers, and no one other than the designated health coach 
                   will ever have access to this information.
                 </p>

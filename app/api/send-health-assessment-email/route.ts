@@ -118,7 +118,7 @@ export async function POST(request: NextRequest) {
     }
 
     const { data, error } = await resend.emails.send({
-      from: "Coaching Amplifier <noreply@coachingamplifier.com>",
+      from: "Coach Assistant Hub <noreply@coachassistancehub.com>",
       to: [to],
       subject: `New Health Assessment from ${clientFirstName} ${clientLastName}`,
       html: formatAssessment(),

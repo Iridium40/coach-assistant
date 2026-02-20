@@ -35,9 +35,9 @@ export async function POST(request: NextRequest) {
 
     // Create email content
     const subject = `Announcement: ${announcementTitle}`
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://www.coachingamplifier.com"
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://www.coachassistancehub.com"
     
-    const header = getEmailHeader("New Announcement", "Important update from Coaching Amplifier")
+    const header = getEmailHeader("New Announcement", "Important update from Coach Assistant Hub")
     
     const bodyContent = `
       <div style="padding: 30px 20px;">
@@ -70,23 +70,23 @@ export async function POST(request: NextRequest) {
         
         <div style="background-color: #f8f9fa; padding: 15px; border-radius: 6px; margin: 20px 0; border-left: 4px solid ${priorityColor};">
           <p style="margin: 0; font-size: 14px; color: #666;">
-            <strong>Note:</strong> This announcement is also available in your Coaching Amplifier dashboard. You can view all announcements and manage your notification preferences in your account settings.
+            <strong>Note:</strong> This announcement is also available in your Coach Assistant Hub dashboard. You can view all announcements and manage your notification preferences in your account settings.
           </p>
         </div>
         
         <p style="font-size: 16px; color: #333; margin: 30px 0 0 0;">
           Best regards,<br>
-          <strong>The Coaching Amplifier Team</strong>
+          <strong>The Coach Assistant Hub Team</strong>
         </p>
       </div>
     `
     
     const footer = getEmailFooter()
     
-    const htmlContent = getEmailWrapper(header + bodyContent + footer, "Coaching Amplifier Announcement")
+    const htmlContent = getEmailWrapper(header + bodyContent + footer, "Coach Assistant Hub Announcement")
 
     const textContent = `
-New Announcement from Coaching Amplifier
+New Announcement from Coach Assistant Hub
 
 Hi ${fullName},
 
@@ -98,15 +98,15 @@ ${announcementContent}
 
 View this announcement in the app: ${appUrl}
 
-Note: This announcement is also available in your Coaching Amplifier dashboard. You can view all announcements and manage your notification preferences in your account settings.
+Note: This announcement is also available in your Coach Assistant Hub dashboard. You can view all announcements and manage your notification preferences in your account settings.
 
 Best regards,
-The Coaching Amplifier Team
+The Coach Assistant Hub Team
     `
 
     // Send email using Resend
     const { data, error } = await resend.emails.send({
-      from: "Coaching Amplifier <onboarding@coachingamplifier.com>", // Update this with your verified domain
+      from: "Coach Assistant Hub <onboarding@coachassistancehub.com>", // Update this with your verified domain
       to: [to],
       subject: subject,
       html: htmlContent,

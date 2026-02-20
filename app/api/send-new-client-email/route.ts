@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
 
     // Create email content
     const subject = `🎉 Congratulations! New Client: ${clientName}`
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://www.coachingamplifier.com"
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://www.coachassistancehub.com"
     
     const header = getEmailHeader("Congratulations!", "You just changed someone's life!")
     
@@ -128,7 +128,7 @@ The Coach Assistant Hub Team
 
     // Send email using Resend
     const { data, error } = await resend.emails.send({
-      from: "Coach Assistant Hub <onboarding@coachingamplifier.com>",
+      from: "Coach Assistant Hub <onboarding@coachassistancehub.com>",
       to: [to],
       subject: subject,
       html: htmlContent,

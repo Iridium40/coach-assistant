@@ -16,17 +16,17 @@ export async function POST(request: NextRequest) {
     }
 
     // Create email content
-    const subject = `Welcome to Coaching Amplifier!`
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://www.coachingamplifier.com"
+    const subject = `Welcome to Coach Assistant Hub!`
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://www.coachassistancehub.com"
     
-    const header = getEmailHeader("Welcome to Coaching Amplifier!", "Your coaching journey starts here")
+    const header = getEmailHeader("Welcome to Coach Assistant Hub!", "Your coaching journey starts here")
     
     const bodyContent = `
       <div style="padding: 30px 20px;">
         <p style="font-size: 16px; color: #333; margin: 0 0 20px 0;">Hi ${fullName},</p>
         
         <p style="font-size: 16px; color: #333; margin: 0 0 20px 0;">
-          Welcome to <strong>Coaching Amplifier</strong>! We're excited to have you join our community of coaches dedicated to amplifying their business and supporting their clients.
+          Welcome to <strong>Coach Assistant Hub</strong>! We're excited to have you join our community of coaches dedicated to amplifying their business and supporting their clients.
         </p>
         
         ${coachRank ? `
@@ -80,21 +80,21 @@ export async function POST(request: NextRequest) {
         
         <p style="font-size: 16px; color: #333; margin: 20px 0 0 0;">
           Best regards,<br>
-          <strong>The Coaching Amplifier Team</strong>
+          <strong>The Coach Assistant Hub Team</strong>
         </p>
       </div>
     `
     
     const footer = getEmailFooter()
     
-    const htmlContent = getEmailWrapper(header + bodyContent + footer, "Welcome to Coaching Amplifier")
+    const htmlContent = getEmailWrapper(header + bodyContent + footer, "Welcome to Coach Assistant Hub")
 
     const textContent = `
-Welcome to Coaching Amplifier!
+Welcome to Coach Assistant Hub!
 
 Hi ${fullName},
 
-Welcome to Coaching Amplifier! We're excited to have you join our community of coaches dedicated to amplifying their business and supporting their clients.
+Welcome to Coach Assistant Hub! We're excited to have you join our community of coaches dedicated to amplifying their business and supporting their clients.
 
 ${coachRank ? `Your Coach Rank: ${coachRank}\n\n` : ""}
 What's Next?
@@ -120,12 +120,12 @@ Quick Tips to Get Started:
 If you have any questions or need assistance, don't hesitate to reach out. We're here to support your success!
 
 Best regards,
-The Coaching Amplifier Team
+The Coach Assistant Hub Team
     `
 
     // Send email using Resend
     const { data, error } = await resend.emails.send({
-      from: "Coaching Amplifier <onboarding@coachingamplifier.com>", // Update this with your verified domain
+      from: "Coach Assistant Hub <onboarding@coachassistancehub.com>", // Update this with your verified domain
       to: [to],
       subject: subject,
       html: htmlContent,

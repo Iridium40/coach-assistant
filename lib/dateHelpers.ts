@@ -1,5 +1,5 @@
 /**
- * Date helper utilities for the Coaching Amplifier app
+ * Date helper utilities for the Coach Assistant Hub app
  */
 
 /**

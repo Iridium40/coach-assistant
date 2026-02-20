@@ -1,5 +1,5 @@
 /**
- * Coaching Amplifier Academy Utilities
+ * Coach Assistant Hub Academy Utilities
  * Functions for rank-based access control and module navigation
  */
 

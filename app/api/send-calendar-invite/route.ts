@@ -21,7 +21,7 @@ function generateICSContent(
     return new Date(dateStr).toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '')
   }
   
-  const uid = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}@coachingamplifier.com`
+  const uid = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}@coachassistancehub.com`
   const now = formatDate(new Date().toISOString())
   
   const escapeICS = (str: string) => {
@@ -35,7 +35,7 @@ function generateICSContent(
   const lines = [
     'BEGIN:VCALENDAR',
     'VERSION:2.0',
-    'PRODID:-//Coaching Amplifier//Calendar//EN',
+    'PRODID:-//Coach Assistant Hub//Calendar//EN',
     'CALSCALE:GREGORIAN',
     'METHOD:REQUEST',
     'BEGIN:VEVENT',
@@ -114,7 +114,7 @@ export async function POST(request: NextRequest) {
     // Create email content
     const isHA = eventType === "ha"
     const subject = `📅 Calendar Invite: ${eventTitle}`
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://www.coachingamplifier.com"
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://www.coachassistancehub.com"
     
     const headerTitle = isHA ? "Health Assessment Scheduled" : "Check-in Scheduled"
     const headerSubtitle = isHA 
@@ -213,7 +213,7 @@ ${fromName || "Your Coach"}
 
     // Send email with ICS attachment using Resend (supports multiple recipients)
     const { data, error } = await resend.emails.send({
-      from: `Coaching Amplifier <onboarding@coachingamplifier.com>`,
+      from: `Coach Assistant Hub <onboarding@coachassistancehub.com>`,
       replyTo: fromEmail,
       to: toEmails,
       subject: subject,
