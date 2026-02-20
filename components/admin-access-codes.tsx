@@ -11,7 +11,7 @@ import { createClient } from "@/lib/supabase/client"
 import { useToast } from "@/hooks/use-toast"
 import { Badge } from "@/components/ui/badge"
 import {
-  Plus, Trash2, Copy, Check, ShieldCheck, Loader2, ArrowLeft,
+  Plus, Trash2, Copy, Check, ShieldCheck, Loader2, ArrowLeft, Edit2,
 } from "lucide-react"
 
 interface AccessCode {
@@ -40,6 +40,13 @@ export function AdminAccessCodes({ onClose }: { onClose?: () => void }) {
   const [newLabel, setNewLabel] = useState("")
   const [newMaxUses, setNewMaxUses] = useState("")
   const [newExpiresAt, setNewExpiresAt] = useState("")
+
+  const [editingCode, setEditingCode] = useState<AccessCode | null>(null)
+  const [editCode, setEditCode] = useState("")
+  const [editLabel, setEditLabel] = useState("")
+  const [editMaxUses, setEditMaxUses] = useState("")
+  const [editExpiresAt, setEditExpiresAt] = useState("")
+  const [editSubmitting, setEditSubmitting] = useState(false)
 
   const isAdmin = profile?.user_role?.toLowerCase() === "admin"
 
@@ -135,6 +142,45 @@ export function AdminAccessCodes({ onClose }: { onClose?: () => void }) {
     navigator.clipboard.writeText(code)
     setCopiedId(id)
     setTimeout(() => setCopiedId(null), 2000)
+  }
+
+  const startEdit = (code: AccessCode) => {
+    setEditingCode(code)
+    setEditCode(code.code)
+    setEditLabel(code.label || "")
+    setEditMaxUses(code.max_uses !== null ? String(code.max_uses) : "")
+    setEditExpiresAt(code.expires_at ? code.expires_at.slice(0, 16) : "")
+    setShowForm(false)
+  }
+
+  const handleUpdate = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!editingCode || !editCode.trim()) return
+
+    setEditSubmitting(true)
+
+    const { error } = await supabase
+      .from("signup_access_codes")
+      .update({
+        code: editCode.trim().toUpperCase(),
+        label: editLabel.trim() || null,
+        max_uses: editMaxUses ? parseInt(editMaxUses) : null,
+        expires_at: editExpiresAt || null,
+      })
+      .eq("id", editingCode.id)
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: error.message.includes("duplicate") ? "This code already exists." : error.message,
+        variant: "destructive",
+      })
+    } else {
+      toast({ title: "Access Code Updated", description: `Code "${editCode.toUpperCase()}" has been updated.` })
+      setEditingCode(null)
+      fetchCodes()
+    }
+    setEditSubmitting(false)
   }
 
   if (!isAdmin) {
@@ -252,6 +298,75 @@ export function AdminAccessCodes({ onClose }: { onClose?: () => void }) {
         </Card>
       )}
 
+      {/* Edit Form */}
+      {editingCode && (
+        <Card className="bg-white border border-[hsl(var(--optavia-green))]/30 shadow-sm ring-1 ring-[hsl(var(--optavia-green))]/10">
+          <CardHeader>
+            <CardTitle className="text-lg text-optavia-dark">Edit Access Code</CardTitle>
+            <CardDescription className="text-optavia-gray">
+              Update the details for code <span className="font-mono font-bold">{editingCode.code}</span>
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleUpdate} className="space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label className="text-optavia-dark">Code</Label>
+                  <Input
+                    value={editCode}
+                    onChange={(e) => setEditCode(e.target.value.toUpperCase())}
+                    placeholder="ACCESS123"
+                    required
+                    className="bg-white border-gray-300 text-optavia-dark uppercase tracking-wider font-mono"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-optavia-dark">Label (optional)</Label>
+                  <Input
+                    value={editLabel}
+                    onChange={(e) => setEditLabel(e.target.value)}
+                    placeholder="e.g. Spring 2026 Cohort"
+                    className="bg-white border-gray-300 text-optavia-dark"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-optavia-dark">Max Uses (optional)</Label>
+                  <Input
+                    type="number"
+                    min="1"
+                    value={editMaxUses}
+                    onChange={(e) => setEditMaxUses(e.target.value)}
+                    placeholder="Unlimited"
+                    className="bg-white border-gray-300 text-optavia-dark"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-optavia-dark">Expires (optional)</Label>
+                  <Input
+                    type="datetime-local"
+                    value={editExpiresAt}
+                    onChange={(e) => setEditExpiresAt(e.target.value)}
+                    className="bg-white border-gray-300 text-optavia-dark"
+                  />
+                </div>
+              </div>
+              <div className="flex justify-end gap-2 pt-2">
+                <Button type="button" variant="outline" onClick={() => setEditingCode(null)}>
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  disabled={editSubmitting}
+                  className="bg-[hsl(var(--optavia-green))] hover:bg-[hsl(var(--optavia-green-dark))] text-white"
+                >
+                  {editSubmitting ? <><Loader2 className="h-4 w-4 mr-1 animate-spin" /> Saving...</> : "Save Changes"}
+                </Button>
+              </div>
+            </form>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Codes List */}
       {loading ? (
         <div className="text-center py-12">
@@ -295,12 +410,20 @@ export function AdminAccessCodes({ onClose }: { onClose?: () => void }) {
                     </div>
 
                     <div className="flex items-center gap-3 flex-wrap">
-                      <Badge variant="outline" className={`text-xs ${effectivelyActive ? "border-green-300 text-green-700 bg-green-50" : "border-gray-300 text-gray-500"}`}>
+                      <Badge variant="outline" className={`text-xs ${effectivelyActive ? "border-green-300 text-green-700 bg-green-50" : isMaxed ? "border-red-300 text-red-700 bg-red-50" : "border-gray-300 text-gray-500"}`}>
                         {!code.is_active ? "Inactive" : isExpired ? "Expired" : isMaxed ? "Maxed Out" : "Active"}
                       </Badge>
 
-                      <span className="text-xs text-optavia-gray whitespace-nowrap">
-                        {code.times_used}{code.max_uses !== null ? `/${code.max_uses}` : ""} uses
+                      <span className={`text-sm font-semibold whitespace-nowrap rounded-md px-2 py-0.5 ${
+                        isMaxed
+                          ? "bg-red-50 text-red-700 border border-red-200"
+                          : code.max_uses !== null
+                            ? code.times_used >= (code.max_uses * 0.8)
+                              ? "bg-amber-50 text-amber-700 border border-amber-200"
+                              : "bg-gray-50 text-gray-700 border border-gray-200"
+                            : "text-optavia-gray text-xs font-normal"
+                      }`}>
+                        {code.times_used}{code.max_uses !== null ? ` / ${code.max_uses}` : ""} uses
                       </span>
 
                       {code.expires_at && (
@@ -318,8 +441,19 @@ export function AdminAccessCodes({ onClose }: { onClose?: () => void }) {
                       <Button
                         variant="ghost"
                         size="icon"
+                        onClick={() => startEdit(code)}
+                        className="text-gray-400 hover:text-[hsl(var(--optavia-green))] h-8 w-8"
+                        title="Edit code"
+                      >
+                        <Edit2 className="h-4 w-4" />
+                      </Button>
+
+                      <Button
+                        variant="ghost"
+                        size="icon"
                         onClick={() => deleteCode(code.id, code.code)}
                         className="text-gray-400 hover:text-red-500 h-8 w-8"
+                        title="Delete code"
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
