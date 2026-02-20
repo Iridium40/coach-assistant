@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Announcements } from "@/components/announcements"
-import ProfileSetupCard from "@/components/profile-setup-card"
+import { ProfileSetupProgress, ProfileSetupAnnouncement } from "@/components/profile-setup-card"
 import { useUserData } from "@/contexts/user-data-context"
 import { createClient } from "@/lib/supabase/client"
 import {
@@ -99,6 +99,7 @@ export function DashboardOverview() {
   const [showMilestoneModal, setShowMilestoneModal] = useState(false)
   const [showRankPromotionModal, setShowRankPromotionModal] = useState(false)
   const [promotedRank, setPromotedRank] = useState<string | null>(null)
+  const [showSetupGuide, setShowSetupGuide] = useState(false)
 
   // Pinned coach tools (from user_bookmarks with source='coach_tool')
   const pinnedToolIds = useMemo(() => getBookmarkedIds("coach_tool"), [getBookmarkedIds])
@@ -238,15 +239,24 @@ export function DashboardOverview() {
       {/* Announcements */}
       <Announcements />
 
-      {/* Profile Setup Card for new users */}
+      {/* Profile Setup Progress for new users */}
       {profile?.is_new_coach && (
         <div className="mt-4">
-          <ProfileSetupCard
-            mode="dashboard"
+          <ProfileSetupProgress
             profile={profile as any}
+            onOpenGuide={() => setShowSetupGuide(true)}
             onNavigate={() => router.push("/settings")}
           />
         </div>
+      )}
+
+      {/* Profile Setup Announcement Modal */}
+      {showSetupGuide && (
+        <ProfileSetupAnnouncement
+          profile={profile as any}
+          onClose={() => setShowSetupGuide(false)}
+          onNavigate={() => { setShowSetupGuide(false); router.push("/settings") }}
+        />
       )}
 
       {/* Coach Tip of the Day */}
