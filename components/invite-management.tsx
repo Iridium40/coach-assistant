@@ -7,8 +7,6 @@ import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { useUserData } from "@/contexts/user-data-context"
 import { useToast } from "@/hooks/use-toast"
-import { useAdminChanges } from "@/hooks/use-admin-changes"
-import { AdminSaveButton } from "@/components/admin-save-button"
 import { createClient } from "@/lib/supabase/client"
 import { generateInviteKey, createInviteLink } from "@/lib/invites"
 import { sendInviteEmail } from "@/lib/email"
@@ -53,18 +51,6 @@ export function InviteManagement({ onClose }: InviteManagementProps) {
     }
   }, [profile?.coach_rank])
 
-  // Track unsaved changes for admin
-  const { 
-    hasUnsavedChanges, 
-    isSaving, 
-    changeCount, 
-    trackChange, 
-    saveChanges,
-    showLeaveDialog,
-    confirmLeave,
-    saveAndLeave,
-    cancelLeave,
-  } = useAdminChanges()
 
   const handleGenerateInvite = async () => {
     if (!user) {
@@ -159,7 +145,6 @@ export function InviteManagement({ onClose }: InviteManagementProps) {
       // Reset form
       setFullName("")
       setEmail("")
-      trackChange()
     } catch (error: any) {
       toast({
         title: "Error",
@@ -383,17 +368,6 @@ export function InviteManagement({ onClose }: InviteManagementProps) {
 
       </div>
 
-      {/* Floating Save Button */}
-      <AdminSaveButton
-        hasUnsavedChanges={hasUnsavedChanges}
-        isSaving={isSaving}
-        changeCount={changeCount}
-        onSave={saveChanges}
-        showLeaveDialog={showLeaveDialog}
-        onConfirmLeave={confirmLeave}
-        onSaveAndLeave={saveAndLeave}
-        onCancelLeave={cancelLeave}
-      />
     </div>
   )
 }
