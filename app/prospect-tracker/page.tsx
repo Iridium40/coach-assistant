@@ -575,11 +575,11 @@ Talking Points:
               </Link>
               <Button
                 onClick={() => setShowAddModal(true)}
-                className="bg-white text-[hsl(var(--optavia-green))] hover:bg-white/90 text-xs sm:text-sm"
+                size="lg"
+                className="bg-white text-[hsl(var(--optavia-green))] hover:bg-white/90 font-bold text-sm sm:text-base px-5 sm:px-6 py-2.5 shadow-lg"
               >
-                <Plus className="h-4 w-4 mr-1 sm:mr-2" />
-                <span>Add</span>
-                <span className="hidden sm:inline ml-1">to List</span>
+                <Plus className="h-5 w-5 mr-1.5" />
+                Add Prospect
               </Button>
             </div>
           </div>
