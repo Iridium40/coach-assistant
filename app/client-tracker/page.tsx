@@ -568,7 +568,7 @@ ${phase.milestone ? `\n🎉 MILESTONE: ${phase.label} - Celebrate this achieveme
                 onClick={() => setShowLearningGuide(true)}
               >
                 <GraduationCap className="h-4 w-4 sm:mr-2" />
-                <span className="hidden sm:inline">Learn Client Tracker</span>
+                <span className="hidden sm:inline">Learn Client List</span>
               </Button>
               <Button
                 onClick={() => setShowAddModal(true)}
