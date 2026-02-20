@@ -706,13 +706,13 @@ Suggested talking points:
       <div className="bg-gradient-to-r from-[hsl(var(--optavia-green))] to-[hsl(var(--optavia-green-dark))] text-white">
         <div className="container mx-auto px-4 py-6">
           <div className="text-sm opacity-80 mb-1">
-            My Business &nbsp;›&nbsp; Coach Tracker
+            My Business &nbsp;›&nbsp; Coach List
           </div>
           <div className="flex items-center justify-between flex-wrap gap-4">
             <div className="flex items-center gap-3">
               <Rocket className="h-7 w-7" />
               <div>
-                <h1 className="text-2xl sm:text-3xl font-bold">My Coaches</h1>
+                <h1 className="text-2xl sm:text-3xl font-bold">Coach List</h1>
                 <p className="text-sm opacity-90">
                   Track team development, rank progression, and milestones
                 </p>
