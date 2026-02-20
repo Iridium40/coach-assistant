@@ -76,7 +76,6 @@ import { Footer } from "@/components/footer"
 import { ScheduleCalendarOptions } from "@/components/schedule-calendar-options"
 import { sendCalendarInviteEmail } from "@/lib/email"
 import { ShareHealthAssessment } from "@/components/share-health-assessment"
-import { PipelineProgressionGuide } from "@/components/pipeline-progression-guide"
 import { ProspectLearningGuide } from "@/components/prospect-learning-guide"
 import { ReminderButton } from "@/components/reminders-panel"
 import { ErrorBoundary } from "@/components/ui/error-boundary"
@@ -129,7 +128,6 @@ export default function ProspectTrackerPage() {
   const [showConvertModal, setShowConvertModal] = useState(false)
   const [showHAScheduleModal, setShowHAScheduleModal] = useState(false)
   const [showHASendModal, setShowHASendModal] = useState(false)
-  const [showGuideModal, setShowGuideModal] = useState(false)
   const [showLearningGuide, setShowLearningGuide] = useState(false)
   const [editingProspect, setEditingProspect] = useState<Prospect | null>(null)
   const [convertingProspect, setConvertingProspect] = useState<Prospect | null>(null)
@@ -568,13 +566,6 @@ Talking Points:
               >
                 <GraduationCap className="h-4 w-4 sm:mr-2" />
                 <span className="hidden sm:inline">Learn 100&apos;s List</span>
-              </Button>
-              <Button
-                className="bg-[#f88221] border-[#f88221] text-white hover:bg-[#e07520] text-xs sm:text-sm"
-                onClick={() => setShowGuideModal(true)}
-              >
-                <GraduationCap className="h-4 w-4 sm:mr-2" />
-                <span className="hidden sm:inline">Learn the 100&apos;s List Journey</span>
               </Button>
               <Link href="/client-tracker">
                 <Button variant="outline" className="bg-white/10 border-white/30 text-white hover:bg-white/20 text-xs sm:text-sm">
@@ -1424,18 +1415,6 @@ Talking Points:
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-
-      {/* 100's List Guide Modal */}
-      <Dialog open={showGuideModal} onOpenChange={setShowGuideModal}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-hidden">
-          <DialogHeader>
-            <DialogTitle className="text-xl font-bold text-center">
-              Learn the 100&apos;s List Journey
-            </DialogTitle>
-          </DialogHeader>
-          <PipelineProgressionGuide />
-        </DialogContent>
-      </Dialog>
 
       {/* Learn 100's List Training Guide */}
       {showLearningGuide && (

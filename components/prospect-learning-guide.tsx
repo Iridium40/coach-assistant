@@ -1,10 +1,60 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 
 interface Screenshot {
   img: string
   title: string
+}
+
+interface JourneyStage {
+  id: string
+  label: string
+  emoji: string
+  action: string
+  description: string
+  color: string
+  tips: string[]
+}
+
+const JOURNEY_STAGES: JourneyStage[] = [
+  {
+    id: "new", label: "New", emoji: "✨", color: "#3b82f6",
+    action: "Add to your 100's list",
+    description: "Someone you know who could benefit from OPTAVIA. Start with a nickname for privacy.",
+    tips: ["Think about who in your life struggles with health", "Add notes about how you know them"],
+  },
+  {
+    id: "reach_out", label: "Reach Out", emoji: "👋", color: "#2563eb",
+    action: "Make first contact",
+    description: "You've initiated conversation. Share your story, plant seeds, build curiosity.",
+    tips: ["Lead with your personal transformation", "Ask about their health goals", "Don't pitch — just share and invite curiosity"],
+  },
+  {
+    id: "interested", label: "Interested", emoji: "🔥", color: "#f59e0b",
+    action: "Send Health Assessment",
+    description: "They want to learn more! Send them the Health Assessment to understand their goals.",
+    tips: ["Strike while the iron is hot!", "Send the HA link right away", "Let them know you'll review it together"],
+  },
+  {
+    id: "ha_scheduled", label: "HA Scheduled", emoji: "📅", color: "#8b5cf6",
+    action: "Conduct the Health Assessment call",
+    description: "Meeting is booked! Prepare to walk through their HA and present the program.",
+    tips: ["Review their HA responses before the call", "Focus on THEIR goals and struggles", "Consider a 3-way call with your coach"],
+  },
+  {
+    id: "client", label: "Client!", emoji: "🎉", color: "#00A651",
+    action: "Welcome to OPTAVIA!",
+    description: "They've said YES! Onboard them, set their start date, and begin the journey together.",
+    tips: ["Celebrate this win! 🎊", "Set their program start date", "Schedule your first check-in", "Add them to My Clients"],
+  },
+]
+
+const OFF_RAMP = {
+  label: "Not Interested",
+  emoji: "⏸️",
+  description: "Not right now — and that's okay! Keep them on your list and nurture the relationship.",
+  tips: ["Don't take it personally", "Timing is everything", "Stay connected — circumstances change", "They may come back when ready"],
 }
 
 const SUPABASE_IMG = "https://rcucmbujkdwvrcjistub.supabase.co/storage/v1/object/public/user_training"
@@ -40,6 +90,80 @@ function SsBtn({ label, onClick }: { label: string; onClick: () => void }) {
     <button onClick={onClick} style={{ display: "inline-flex", alignItems: "center", gap: "5px", padding: "6px 14px", fontSize: "11px", fontWeight: 700, fontFamily: "'Montserrat', sans-serif", color: "#1a2744", background: "linear-gradient(135deg, #f1f5f9, #e8ecf1)", border: "1px solid #d1d5db", borderRadius: "8px", cursor: "pointer", transition: "all 0.2s", boxShadow: "0 1px 3px rgba(0,0,0,0.04)" }}>
       📸 {label}
     </button>
+  )
+}
+
+function JourneyTimeline() {
+  const [activeStage, setActiveStage] = useState<string | null>(null)
+  const toggle = useCallback((id: string) => setActiveStage((prev) => (prev === id ? null : id)), [])
+
+  return (
+    <div style={{ marginBottom: "20px" }}>
+      {JOURNEY_STAGES.map((stage, i) => (
+        <div key={stage.id}>
+          <button
+            onClick={() => toggle(stage.id)}
+            style={{ width: "100%", display: "flex", alignItems: "center", gap: "10px", padding: "10px 12px", background: activeStage === stage.id ? "#f8fafc" : "transparent", border: "none", borderBottom: "1px solid #f1f5f9", cursor: "pointer", textAlign: "left", borderRadius: activeStage === stage.id ? "10px" : 0, transition: "background 0.15s" }}
+          >
+            <div style={{ width: "32px", height: "32px", borderRadius: "8px", background: stage.color, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "16px", flexShrink: 0, boxShadow: "0 1px 3px rgba(0,0,0,0.12)" }}>
+              {stage.emoji}
+            </div>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontFamily: "'Montserrat', sans-serif", fontWeight: 700, fontSize: "13px", color: "#1e293b" }}>{stage.label}</div>
+              <div style={{ fontSize: "11px", color: "#00A651", fontWeight: 600 }}>→ {stage.action}</div>
+            </div>
+            <span style={{ color: "#94a3b8", fontSize: "14px", transition: "transform 0.2s", transform: activeStage === stage.id ? "rotate(180deg)" : "rotate(0)" }}>▾</span>
+          </button>
+
+          {activeStage === stage.id && (
+            <div style={{ padding: "8px 12px 14px 54px", fontSize: "13px", color: "#475569", lineHeight: 1.5 }}>
+              <p style={{ margin: "0 0 8px" }}>{stage.description}</p>
+              {stage.tips.map((tip, ti) => (
+                <div key={ti} style={{ display: "flex", alignItems: "flex-start", gap: "6px", marginBottom: "3px" }}>
+                  <span style={{ color: "#00A651", marginTop: "2px", fontSize: "12px" }}>✓</span>
+                  <span style={{ fontSize: "12px", color: "#374151" }}>{tip}</span>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Off-ramp after Interested */}
+          {stage.id === "interested" && (
+            <div style={{ marginLeft: "42px", marginBottom: "4px" }}>
+              <button
+                onClick={() => toggle("not_interested")}
+                style={{ width: "100%", display: "flex", alignItems: "center", gap: "8px", padding: "8px 10px", background: activeStage === "not_interested" ? "#f8fafc" : "transparent", border: "1px dashed #d1d5db", borderRadius: "8px", cursor: "pointer", textAlign: "left", marginTop: "2px", marginBottom: "4px" }}
+              >
+                <span style={{ fontSize: "14px" }}>{OFF_RAMP.emoji}</span>
+                <span style={{ fontSize: "12px", fontWeight: 600, color: "#64748b", flex: 1 }}>{OFF_RAMP.label}</span>
+                <span style={{ fontSize: "10px", color: "#94a3b8" }}>(for now)</span>
+              </button>
+              {activeStage === "not_interested" && (
+                <div style={{ padding: "6px 10px 12px 32px", fontSize: "12px", color: "#475569", lineHeight: 1.5 }}>
+                  <p style={{ margin: "0 0 6px" }}>{OFF_RAMP.description}</p>
+                  {OFF_RAMP.tips.map((tip, ti) => (
+                    <div key={ti} style={{ display: "flex", alignItems: "flex-start", gap: "6px", marginBottom: "2px" }}>
+                      <span style={{ color: "#94a3b8", marginTop: "2px" }}>•</span>
+                      <span style={{ fontSize: "12px", color: "#64748b" }}>{tip}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Connector dot between stages */}
+          {i < JOURNEY_STAGES.length - 1 && stage.id !== "interested" && (
+            <div style={{ display: "flex", justifyContent: "flex-start", paddingLeft: "26px" }}>
+              <div style={{ width: "2px", height: "8px", background: "#e2e8f0" }} />
+            </div>
+          )}
+        </div>
+      ))}
+      <p style={{ textAlign: "center", fontSize: "11px", color: "#94a3b8", marginTop: "6px" }}>
+        👆 Tap any stage to see tips
+      </p>
+    </div>
   )
 }
 
@@ -96,6 +220,12 @@ export function ProspectLearningGuide({ onClose }: { onClose: () => void }) {
                 </span>
               ))}
             </div>
+
+            {/* The Journey — Stage by Stage */}
+            <div style={{ fontFamily: "'Montserrat', sans-serif", fontWeight: 800, fontSize: "11px", color: "#94a3b8", textTransform: "uppercase", letterSpacing: "1.5px", marginBottom: "10px", display: "flex", alignItems: "center", gap: "10px" }}>
+              The Journey — Stage by Stage<span style={{ flex: 1, height: "1px", background: "linear-gradient(90deg, #e2e8f0, transparent)" }} />
+            </div>
+            <JourneyTimeline />
 
             {/* Features */}
             <div style={{ fontFamily: "'Montserrat', sans-serif", fontWeight: 800, fontSize: "11px", color: "#94a3b8", textTransform: "uppercase", letterSpacing: "1.5px", marginBottom: "10px", display: "flex", alignItems: "center", gap: "10px" }}>
