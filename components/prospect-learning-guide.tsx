@@ -181,7 +181,7 @@ export function ProspectLearningGuide({ onClose }: { onClose: () => void }) {
         <div style={{ maxWidth: "660px", width: "100%", background: "linear-gradient(170deg, #fff 0%, #f8fafb 100%)", borderRadius: "24px", overflow: "hidden", boxShadow: "0 8px 40px rgba(0,0,0,0.2)", animation: "plgSlideUp 0.3s ease", margin: "auto" }}>
 
           {/* HEADER */}
-          <div style={{ background: "linear-gradient(135deg, #92400e 0%, #f59e0b 50%, #fbbf24 100%)", padding: "36px 36px 32px", textAlign: "center", position: "relative", overflow: "hidden" }}>
+          <div style={{ background: "linear-gradient(135deg, #2A9C95 0%, #37B6AE 50%, #5cbdab 100%)", padding: "36px 36px 32px", textAlign: "center", position: "relative", overflow: "hidden" }}>
             <div style={{ position: "absolute", top: "-80px", right: "-50px", width: "240px", height: "240px", borderRadius: "50%", background: "radial-gradient(circle, rgba(255,255,255,0.12), transparent 70%)" }} />
             <div style={{ position: "absolute", bottom: "-60px", left: "-30px", width: "180px", height: "180px", borderRadius: "50%", background: "radial-gradient(circle, rgba(255,255,255,0.08), transparent 70%)" }} />
             <button onClick={onClose} style={{ position: "absolute", top: "14px", right: "14px", width: "32px", height: "32px", borderRadius: "50%", border: "none", background: "rgba(255,255,255,0.15)", color: "#fff", fontSize: "16px", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1 }}>✕</button>
@@ -198,9 +198,9 @@ export function ProspectLearningGuide({ onClose }: { onClose: () => void }) {
           <div style={{ maxHeight: "calc(80vh - 200px)", overflowY: "auto", padding: "28px 32px 14px" }}>
 
             {/* Intro */}
-            <div style={{ padding: "16px 18px", marginBottom: "24px", background: "linear-gradient(135deg, #fffbeb, #fef3c7)", border: "1px solid #fde68a", borderRadius: "12px", position: "relative", fontSize: "14px", color: "#475569", lineHeight: 1.65 }}>
+            <div style={{ padding: "16px 18px", marginBottom: "24px", background: "linear-gradient(135deg, #eaf7f6, #d5f0ee)", border: "1px solid #a7ddd9", borderRadius: "12px", position: "relative", fontSize: "14px", color: "#475569", lineHeight: 1.65 }}>
               <span style={{ position: "absolute", top: "-10px", left: "14px", fontSize: "16px", background: "#fff", padding: "0 4px", borderRadius: "6px" }}>🔒</span>
-              Your 100&apos;s List is <strong style={{ color: "#92400e" }}>privacy-first</strong> — you only store nicknames and labels here. All real contact information stays in OPTAVIA&apos;s official coach portal.
+              Your 100&apos;s List is <strong style={{ color: "#2A9C95" }}>privacy-first</strong> — you only store nicknames and labels here. All real contact information stays in OPTAVIA&apos;s official coach portal.
             </div>
 
             {/* Pipeline */}
@@ -250,7 +250,7 @@ export function ProspectLearningGuide({ onClose }: { onClose: () => void }) {
             </div>
 
             {/* Coaching Guide Highlight */}
-            <div style={{ display: "flex", alignItems: "flex-start", gap: "12px", padding: "14px 16px", marginBottom: "18px", background: "#fffbeb", border: "1px solid #fde68a", borderRadius: "10px" }}>
+            <div style={{ display: "flex", alignItems: "flex-start", gap: "12px", padding: "14px 16px", marginBottom: "18px", background: "#eaf7f6", border: "1px solid #a7ddd9", borderRadius: "10px" }}>
               <span style={{ fontSize: "22px", flexShrink: 0 }}>💡</span>
               <div>
                 <h4 style={{ fontFamily: "'Montserrat', sans-serif", fontWeight: 800, fontSize: "13px", color: "#1e293b", marginBottom: "3px" }}>Coaching Guide & Resources</h4>
@@ -259,7 +259,7 @@ export function ProspectLearningGuide({ onClose }: { onClose: () => void }) {
             </div>
 
             {/* Share HA Highlight */}
-            <div style={{ display: "flex", alignItems: "flex-start", gap: "12px", padding: "14px 16px", marginBottom: "18px", background: "#fffbeb", border: "1px solid #fde68a", borderRadius: "10px" }}>
+            <div style={{ display: "flex", alignItems: "flex-start", gap: "12px", padding: "14px 16px", marginBottom: "18px", background: "#eaf7f6", border: "1px solid #a7ddd9", borderRadius: "10px" }}>
               <span style={{ fontSize: "22px", flexShrink: 0 }}>📋</span>
               <div>
                 <h4 style={{ fontFamily: "'Montserrat', sans-serif", fontWeight: 800, fontSize: "13px", color: "#1e293b", marginBottom: "3px" }}>How Share HA Works</h4>
@@ -295,7 +295,7 @@ export function ProspectLearningGuide({ onClose }: { onClose: () => void }) {
             </div>
 
             {/* Why */}
-            <div style={{ padding: "14px 16px", borderRadius: "10px", display: "flex", alignItems: "flex-start", gap: "10px", background: "#fffbeb", border: "1px solid #fde68a", marginBottom: "4px" }}>
+            <div style={{ padding: "14px 16px", borderRadius: "10px", display: "flex", alignItems: "flex-start", gap: "10px", background: "#eaf7f6", border: "1px solid #a7ddd9", marginBottom: "4px" }}>
               <span style={{ fontSize: "18px", flexShrink: 0, marginTop: "1px" }}>🎯</span>
               <p style={{ fontSize: "13px", color: "#475569", lineHeight: 1.5, margin: 0 }}>
                 <strong style={{ color: "#1e293b" }}>Why it matters:</strong> Most coaches lose track of conversations and forget to follow up. Your 100&apos;s List keeps every prospect visible with their stage, meeting source, and notes — so no one falls through the cracks. As they progress, move them through stages and when they become a client, they flow into your Client Tracker automatically.
@@ -305,7 +305,7 @@ export function ProspectLearningGuide({ onClose }: { onClose: () => void }) {
 
           {/* FOOTER */}
           <div style={{ padding: "20px 32px 28px", borderTop: "1px solid #f1f5f9" }}>
-            <button onClick={onClose} style={{ width: "100%", padding: "15px", border: "none", borderRadius: "14px", fontFamily: "'Montserrat', sans-serif", fontWeight: 700, fontSize: "15px", cursor: "pointer", textAlign: "center", color: "#fff", background: "linear-gradient(135deg, #f59e0b, #f97316)", boxShadow: "0 4px 16px rgba(249,115,22,0.3)", transition: "all 0.25s" }}>
+            <button onClick={onClose} style={{ width: "100%", padding: "15px", border: "none", borderRadius: "14px", fontFamily: "'Montserrat', sans-serif", fontWeight: 700, fontSize: "15px", cursor: "pointer", textAlign: "center", color: "#fff", background: "linear-gradient(135deg, #2A9C95, #37B6AE)", boxShadow: "0 4px 16px rgba(55,182,174,0.3)", transition: "all 0.25s" }}>
               Got It! →
             </button>
             <p style={{ textAlign: "center", marginTop: "12px", fontSize: "12px", color: "#94a3b8" }}>

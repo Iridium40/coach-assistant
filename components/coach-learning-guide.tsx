@@ -132,7 +132,7 @@ export function CoachLearningGuide({ onClose }: { onClose: () => void }) {
         <div style={{ maxWidth: "660px", width: "100%", background: "linear-gradient(170deg, #fff 0%, #f8fafb 100%)", borderRadius: "24px", overflow: "hidden", boxShadow: "0 8px 40px rgba(0,0,0,0.2)", animation: "coachSlideUp 0.3s ease", margin: "auto" }}>
 
           {/* HEADER */}
-          <div style={{ background: "linear-gradient(135deg, #4c1d95 0%, #7c3aed 50%, #a78bfa 100%)", padding: "36px 36px 32px", textAlign: "center", position: "relative", overflow: "hidden" }}>
+          <div style={{ background: "linear-gradient(135deg, #2A9C95 0%, #37B6AE 50%, #5cbdab 100%)", padding: "36px 36px 32px", textAlign: "center", position: "relative", overflow: "hidden" }}>
             <div style={{ position: "absolute", top: "-80px", right: "-50px", width: "240px", height: "240px", borderRadius: "50%", background: "radial-gradient(circle, rgba(255,255,255,0.12), transparent 70%)" }} />
             <div style={{ position: "absolute", bottom: "-60px", left: "-30px", width: "180px", height: "180px", borderRadius: "50%", background: "radial-gradient(circle, rgba(255,255,255,0.08), transparent 70%)" }} />
             <button onClick={onClose} style={{ position: "absolute", top: "14px", right: "14px", width: "32px", height: "32px", borderRadius: "50%", border: "none", background: "rgba(255,255,255,0.15)", color: "#fff", fontSize: "16px", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1 }}>✕</button>
@@ -149,9 +149,9 @@ export function CoachLearningGuide({ onClose }: { onClose: () => void }) {
           <div style={{ maxHeight: "calc(80vh - 200px)", overflowY: "auto", padding: "28px 32px 14px" }}>
 
             {/* Intro */}
-            <div style={{ padding: "16px 18px", marginBottom: "24px", background: "linear-gradient(135deg, #f5f3ff, #ede9fe)", border: "1px solid #c4b5fd", borderRadius: "12px", position: "relative", fontSize: "14px", color: "#475569", lineHeight: 1.65 }}>
+            <div style={{ padding: "16px 18px", marginBottom: "24px", background: "linear-gradient(135deg, #eaf7f6, #d5f0ee)", border: "1px solid #a7ddd9", borderRadius: "12px", position: "relative", fontSize: "14px", color: "#475569", lineHeight: 1.65 }}>
               <span style={{ position: "absolute", top: "-10px", left: "14px", fontSize: "16px", background: "#fff", padding: "0 4px", borderRadius: "6px" }}>🔒</span>
-              Just like your other trackers, the Coach List is <strong style={{ color: "#4c1d95" }}>privacy-first</strong> — use nicknames or first names only. All official coach information stays in OPTAVIA&apos;s coach portal.
+              Just like your other trackers, the Coach List is <strong style={{ color: "#2A9C95" }}>privacy-first</strong> — use nicknames or first names only. All official coach information stays in OPTAVIA&apos;s coach portal.
             </div>
 
             {/* Pipeline */}
@@ -206,29 +206,29 @@ export function CoachLearningGuide({ onClose }: { onClose: () => void }) {
             </div>
 
             {/* Rank Guide */}
-            <div style={{ display: "flex", alignItems: "flex-start", gap: "12px", padding: "14px 16px", marginBottom: "14px", background: "#f5f3ff", border: "1px solid #c4b5fd", borderRadius: "10px" }}>
+            <div style={{ display: "flex", alignItems: "flex-start", gap: "12px", padding: "14px 16px", marginBottom: "14px", background: "#eaf7f6", border: "1px solid #a7ddd9", borderRadius: "10px" }}>
               <span style={{ fontSize: "22px", flexShrink: 0 }}>💡</span>
               <div>
                 <h4 style={{ fontFamily: "'Montserrat', sans-serif", fontWeight: 800, fontSize: "13px", color: "#1e293b", marginBottom: "3px" }}>Rank Guide & Focus</h4>
-                <p style={{ fontSize: "12px", color: "#475569", lineHeight: 1.5, margin: 0 }}>Every coach card has an expandable <strong style={{ color: "#4c1d95" }}>Rank Guide & Focus</strong> section. It shows <strong style={{ color: "#4c1d95" }}>Coach Focus</strong> — what that coach should be working on, and <strong style={{ color: "#4c1d95" }}>Your Actions</strong> — what you should be doing as their mentor. Plus a <strong style={{ color: "#4c1d95" }}>Next Goal</strong> to keep them moving forward.</p>
+                <p style={{ fontSize: "12px", color: "#475569", lineHeight: 1.5, margin: 0 }}>Every coach card has an expandable <strong style={{ color: "#2A9C95" }}>Rank Guide & Focus</strong> section. It shows <strong style={{ color: "#2A9C95" }}>Coach Focus</strong> — what that coach should be working on, and <strong style={{ color: "#2A9C95" }}>Your Actions</strong> — what you should be doing as their mentor. Plus a <strong style={{ color: "#2A9C95" }}>Next Goal</strong> to keep them moving forward.</p>
               </div>
             </div>
 
             {/* Rank Tracking */}
-            <div style={{ display: "flex", alignItems: "flex-start", gap: "12px", padding: "14px 16px", marginBottom: "14px", background: "#f5f3ff", border: "1px solid #c4b5fd", borderRadius: "10px" }}>
+            <div style={{ display: "flex", alignItems: "flex-start", gap: "12px", padding: "14px 16px", marginBottom: "14px", background: "#eaf7f6", border: "1px solid #a7ddd9", borderRadius: "10px" }}>
               <span style={{ fontSize: "22px", flexShrink: 0 }}>🏅</span>
               <div>
                 <h4 style={{ fontFamily: "'Montserrat', sans-serif", fontWeight: 800, fontSize: "13px", color: "#1e293b", marginBottom: "3px" }}>Rank Tracking</h4>
-                <p style={{ fontSize: "12px", color: "#475569", lineHeight: 1.5, margin: 0 }}>Use the <strong style={{ color: "#4c1d95" }}>Rank</strong> button on each coach card to update their OPTAVIA rank as they progress. The rank and stage work together — stage tracks their development phase while rank tracks their official OPTAVIA position.</p>
+                <p style={{ fontSize: "12px", color: "#475569", lineHeight: 1.5, margin: 0 }}>Use the <strong style={{ color: "#2A9C95" }}>Rank</strong> button on each coach card to update their OPTAVIA rank as they progress. The rank and stage work together — stage tracks their development phase while rank tracks their official OPTAVIA position.</p>
               </div>
             </div>
 
             {/* Schedule */}
-            <div style={{ display: "flex", alignItems: "flex-start", gap: "12px", padding: "14px 16px", marginBottom: "18px", background: "#f5f3ff", border: "1px solid #c4b5fd", borderRadius: "10px" }}>
+            <div style={{ display: "flex", alignItems: "flex-start", gap: "12px", padding: "14px 16px", marginBottom: "18px", background: "#eaf7f6", border: "1px solid #a7ddd9", borderRadius: "10px" }}>
               <span style={{ fontSize: "22px", flexShrink: 0 }}>📅</span>
               <div>
                 <h4 style={{ fontFamily: "'Montserrat', sans-serif", fontWeight: 800, fontSize: "13px", color: "#1e293b", marginBottom: "3px" }}>Schedule Mentoring Sessions</h4>
-                <p style={{ fontSize: "12px", color: "#475569", lineHeight: 1.5, margin: 0 }}>Tap <strong style={{ color: "#4c1d95" }}>Schedule</strong> on any coach card to set up mentoring calls, 1-on-1s, or team meetings. Consistent coaching is the #1 factor in a new coach&apos;s success — the scheduler makes it easy to stay on top of your mentoring cadence across your entire team.</p>
+                <p style={{ fontSize: "12px", color: "#475569", lineHeight: 1.5, margin: 0 }}>Tap <strong style={{ color: "#2A9C95" }}>Schedule</strong> on any coach card to set up mentoring calls, 1-on-1s, or team meetings. Consistent coaching is the #1 factor in a new coach&apos;s success — the scheduler makes it easy to stay on top of your mentoring cadence across your entire team.</p>
               </div>
             </div>
 
@@ -239,18 +239,18 @@ export function CoachLearningGuide({ onClose }: { onClose: () => void }) {
             <div style={{ padding: "16px 18px", background: "linear-gradient(135deg, #f0fdf4, #ecfdf5)", border: "1px solid #d1fae5", borderRadius: "10px", marginBottom: "14px" }}>
               <h4 style={{ fontFamily: "'Montserrat', sans-serif", fontWeight: 800, fontSize: "12px", color: "#065f46", textTransform: "uppercase", letterSpacing: "1px", marginBottom: "10px", display: "flex", alignItems: "center", gap: "6px" }}>🎯 Step by Step</h4>
               {[
-                <>Go to <strong style={{ color: "#4c1d95" }}>My Business → Coach List</strong></>,
-                <>Click <strong style={{ color: "#4c1d95" }}>+ Add Coach</strong> in the top-right corner</>,
-                <>Enter their <strong style={{ color: "#4c1d95" }}>Name / Nickname</strong> — something you&apos;ll recognize</>,
-                <>Select their <strong style={{ color: "#4c1d95" }}>Stage</strong> — New Coach, Building, Certified, or Leader</>,
-                <>Choose their <strong style={{ color: "#4c1d95" }}>OPTAVIA Rank</strong> from the dropdown</>,
-                <>Set their <strong style={{ color: "#4c1d95" }}>Launch Date</strong> — we&apos;ll calculate their day counter and week automatically</>,
-                <>Enter their current <strong style={{ color: "#4c1d95" }}>Clients</strong> and <strong style={{ color: "#4c1d95" }}>Prospects</strong> counts</>,
-                <>Add any <strong style={{ color: "#4c1d95" }}>Notes</strong> — coaching goals, next steps, or context (optional)</>,
-                <>Click <strong style={{ color: "#4c1d95" }}>Add Coach</strong> — their card appears with day counter, stage, rank, and the full Rank Guide!</>,
+                <>Go to <strong style={{ color: "#2A9C95" }}>My Business → Coach List</strong></>,
+                <>Click <strong style={{ color: "#2A9C95" }}>+ Add Coach</strong> in the top-right corner</>,
+                <>Enter their <strong style={{ color: "#2A9C95" }}>Name / Nickname</strong> — something you&apos;ll recognize</>,
+                <>Select their <strong style={{ color: "#2A9C95" }}>Stage</strong> — New Coach, Building, Certified, or Leader</>,
+                <>Choose their <strong style={{ color: "#2A9C95" }}>OPTAVIA Rank</strong> from the dropdown</>,
+                <>Set their <strong style={{ color: "#2A9C95" }}>Launch Date</strong> — we&apos;ll calculate their day counter and week automatically</>,
+                <>Enter their current <strong style={{ color: "#2A9C95" }}>Clients</strong> and <strong style={{ color: "#2A9C95" }}>Prospects</strong> counts</>,
+                <>Add any <strong style={{ color: "#2A9C95" }}>Notes</strong> — coaching goals, next steps, or context (optional)</>,
+                <>Click <strong style={{ color: "#2A9C95" }}>Add Coach</strong> — their card appears with day counter, stage, rank, and the full Rank Guide!</>,
               ].map((text, i) => (
                 <div key={i} style={{ display: "flex", gap: "10px", padding: "8px 0", alignItems: "flex-start", borderBottom: i < 8 ? "1px solid rgba(0,166,81,0.1)" : "none" }}>
-                  <div style={{ width: "24px", height: "24px", borderRadius: "6px", background: "#7c3aed", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Montserrat', sans-serif", fontWeight: 800, fontSize: "11px", flexShrink: 0, boxShadow: "0 1px 4px rgba(124,58,237,0.25)" }}>{i + 1}</div>
+                  <div style={{ width: "24px", height: "24px", borderRadius: "6px", background: "#37B6AE", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Montserrat', sans-serif", fontWeight: 800, fontSize: "11px", flexShrink: 0, boxShadow: "0 1px 4px rgba(55,182,174,0.25)" }}>{i + 1}</div>
                   <div style={{ fontSize: "13px", color: "#374151", lineHeight: 1.45 }}>{text}</div>
                 </div>
               ))}
@@ -264,7 +264,7 @@ export function CoachLearningGuide({ onClose }: { onClose: () => void }) {
             </div>
 
             {/* Why */}
-            <div style={{ padding: "14px 16px", borderRadius: "10px", display: "flex", alignItems: "flex-start", gap: "10px", background: "#f5f3ff", border: "1px solid #c4b5fd", marginBottom: "4px" }}>
+            <div style={{ padding: "14px 16px", borderRadius: "10px", display: "flex", alignItems: "flex-start", gap: "10px", background: "#eaf7f6", border: "1px solid #a7ddd9", marginBottom: "4px" }}>
               <span style={{ fontSize: "18px", flexShrink: 0, marginTop: "1px" }}>🎯</span>
               <p style={{ fontSize: "13px", color: "#475569", lineHeight: 1.5, margin: 0 }}>
                 <strong style={{ color: "#1e293b" }}>Why it matters:</strong> The coaches you sponsor are building their businesses too — and your mentorship makes the difference between a coach who thrives and one who stalls. The Coach List gives you a clear view of where each coach stands, what they should be focused on, and exactly how you can help them. With scheduled mentoring sessions, rank tracking, and built-in guidance for every stage, you can support a growing team without losing track of anyone.
@@ -274,7 +274,7 @@ export function CoachLearningGuide({ onClose }: { onClose: () => void }) {
 
           {/* FOOTER */}
           <div style={{ padding: "20px 32px 28px", borderTop: "1px solid #f1f5f9" }}>
-            <button onClick={onClose} style={{ width: "100%", padding: "15px", border: "none", borderRadius: "14px", fontFamily: "'Montserrat', sans-serif", fontWeight: 700, fontSize: "15px", cursor: "pointer", textAlign: "center", color: "#fff", background: "linear-gradient(135deg, #4c1d95, #7c3aed)", boxShadow: "0 4px 16px rgba(124,58,237,0.3)", transition: "all 0.25s" }}>
+            <button onClick={onClose} style={{ width: "100%", padding: "15px", border: "none", borderRadius: "14px", fontFamily: "'Montserrat', sans-serif", fontWeight: 700, fontSize: "15px", cursor: "pointer", textAlign: "center", color: "#fff", background: "linear-gradient(135deg, #2A9C95, #37B6AE)", boxShadow: "0 4px 16px rgba(55,182,174,0.3)", transition: "all 0.25s" }}>
               Got It! →
             </button>
             <p style={{ textAlign: "center", marginTop: "12px", fontSize: "12px", color: "#94a3b8" }}>
