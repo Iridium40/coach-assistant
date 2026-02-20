@@ -40,14 +40,11 @@ export function SignupFormOpen({ onSuccess, onSwitchToLogin }: SignupFormOpenPro
       .select("id, code, is_active, max_uses, usage_count, expires_at")
       .eq("code", code.trim().toUpperCase())
       .eq("is_active", true)
-      .single()
+      .maybeSingle()
 
     if (error) {
       console.error("Access code validation error:", error.message, error.code)
-      if (error.code === "PGRST301" || error.code === "42P01" || error.message?.includes("relation")) {
-        return { valid: false, reason: "Access code verification is temporarily unavailable. Please try again in a moment." }
-      }
-      return { valid: false, reason: "Access code not found. Please check the code and try again." }
+      return { valid: false, reason: "Access code verification is temporarily unavailable. Please try again in a moment." }
     }
     if (!data) return { valid: false, reason: "Access code not found. Please check the code and try again." }
     if (data.expires_at && new Date(data.expires_at) < new Date()) return { valid: false, reason: "This access code has expired. Please contact your coach for a new one." }
@@ -61,7 +58,7 @@ export function SignupFormOpen({ onSuccess, onSwitchToLogin }: SignupFormOpenPro
       .from("signup_access_codes")
       .select("id, usage_count")
       .eq("code", code.trim().toUpperCase())
-      .single()
+      .maybeSingle()
 
     if (data) {
       await supabase
