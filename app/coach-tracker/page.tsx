@@ -66,8 +66,10 @@ import {
   Lightbulb,
   ChevronDown,
   ChevronUp,
+  GraduationCap,
 } from "lucide-react"
 import { Header } from "@/components/header"
+import { CoachLearningGuide } from "@/components/coach-learning-guide"
 import { Footer } from "@/components/footer"
 import { ReminderButton } from "@/components/reminders-panel"
 import { ScheduleCalendarOptions } from "@/components/schedule-calendar-options"
@@ -401,6 +403,7 @@ export default function CoachTrackerPage() {
 
   // Modals
   const [showAddModal, setShowAddModal] = useState(false)
+  const [showLearningGuide, setShowLearningGuide] = useState(false)
   const [showScheduleModal, setShowScheduleModal] = useState(false)
   const [showClearConfirm, setShowClearConfirm] = useState(false)
   const [coachToClear, setCoachToClear] = useState<string | null>(null)
@@ -718,14 +721,23 @@ Suggested talking points:
                 </p>
               </div>
             </div>
-            <Button
-              onClick={openAddModal}
-              size="lg"
-              className="bg-white text-[hsl(var(--optavia-green))] hover:bg-white/90 font-bold text-sm sm:text-base px-5 sm:px-6 py-2.5 shadow-lg"
-            >
-              <Plus className="h-5 w-5 mr-1.5" />
-              Add Coach
-            </Button>
+            <div className="flex flex-wrap gap-2 sm:gap-3">
+              <Button
+                className="bg-[#f88221] border-[#f88221] text-white hover:bg-[#e07520] text-xs sm:text-sm"
+                onClick={() => setShowLearningGuide(true)}
+              >
+                <GraduationCap className="h-4 w-4 sm:mr-2" />
+                <span className="hidden sm:inline">Learn Coach List</span>
+              </Button>
+              <Button
+                onClick={openAddModal}
+                size="lg"
+                className="bg-white text-[hsl(var(--optavia-green))] hover:bg-white/90 font-bold text-sm sm:text-base px-5 sm:px-6 py-2.5 shadow-lg"
+              >
+                <Plus className="h-5 w-5 mr-1.5" />
+                Add Coach
+              </Button>
+            </div>
           </div>
         </div>
       </div>
@@ -880,6 +892,11 @@ Suggested talking points:
       </div>
 
       <Footer />
+
+      {/* Learn Coach List Training Guide */}
+      {showLearningGuide && (
+        <CoachLearningGuide onClose={() => setShowLearningGuide(false)} />
+      )}
 
       {/* ─── Add/Edit Coach Modal ─── */}
       <Dialog open={showAddModal || !!editingCoach} onOpenChange={(open) => {

@@ -567,12 +567,6 @@ Talking Points:
                 <GraduationCap className="h-4 w-4 sm:mr-2" />
                 <span className="hidden sm:inline">Learn 100&apos;s List</span>
               </Button>
-              <Link href="/client-tracker">
-                <Button variant="outline" className="bg-white/10 border-white/30 text-white hover:bg-white/20 text-xs sm:text-sm">
-                  <Users className="h-4 w-4 sm:mr-2" />
-                  <span className="hidden sm:inline">My Clients</span>
-                </Button>
-              </Link>
               <Button
                 onClick={() => setShowAddModal(true)}
                 size="lg"
