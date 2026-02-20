@@ -34,7 +34,7 @@ export function SignupFormOpen({ onSuccess, onSwitchToLogin }: SignupFormOpenPro
   const passwordsMatch = password.length > 0 && confirmPassword.length > 0 && password === confirmPassword
   const passwordLongEnough = password.length >= 6
 
-  const validateAccessCode = async (code: string): Promise<boolean> => {
+  const validateAccessCode = async (code: string): Promise<{ valid: boolean; reason?: string }> => {
     const { data, error } = await supabase
       .from("signup_access_codes")
       .select("id, code, is_active, max_uses, times_used, expires_at")
@@ -42,11 +42,18 @@ export function SignupFormOpen({ onSuccess, onSwitchToLogin }: SignupFormOpenPro
       .eq("is_active", true)
       .single()
 
-    if (error || !data) return false
-    if (data.expires_at && new Date(data.expires_at) < new Date()) return false
-    if (data.max_uses != null && (data.times_used ?? 0) >= data.max_uses) return false
+    if (error) {
+      console.error("Access code validation error:", error.message, error.code)
+      if (error.code === "PGRST301" || error.code === "42P01" || error.message?.includes("relation")) {
+        return { valid: false, reason: "Access code verification is temporarily unavailable. Please try again in a moment." }
+      }
+      return { valid: false, reason: "Access code not found. Please check the code and try again." }
+    }
+    if (!data) return { valid: false, reason: "Access code not found. Please check the code and try again." }
+    if (data.expires_at && new Date(data.expires_at) < new Date()) return { valid: false, reason: "This access code has expired. Please contact your coach for a new one." }
+    if (data.max_uses != null && (data.times_used ?? 0) >= data.max_uses) return { valid: false, reason: "This access code has reached its usage limit. Please contact your coach." }
 
-    return true
+    return { valid: true }
   }
 
   const incrementCodeUsage = async (code: string) => {
@@ -94,11 +101,11 @@ export function SignupFormOpen({ onSuccess, onSwitchToLogin }: SignupFormOpenPro
 
     setLoading(true)
 
-    const isValid = await validateAccessCode(accessCode)
-    if (!isValid) {
+    const { valid, reason } = await validateAccessCode(accessCode)
+    if (!valid) {
       toast({
         title: "Invalid Access Code",
-        description: "The access code is invalid, expired, or has reached its usage limit. Please check with your coach.",
+        description: reason || "The access code is invalid, expired, or has reached its usage limit. Please check with your coach.",
         variant: "destructive",
       })
       setLoading(false)
