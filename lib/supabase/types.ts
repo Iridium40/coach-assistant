@@ -245,6 +245,53 @@ export interface Database {
           read_at?: string
         }
       }
+      client_support_resources: {
+        Row: {
+          id: string
+          title: string
+          description: string | null
+          icon: string | null
+          url: string
+          category: string
+          color: string | null
+          is_video: boolean
+          sort_order: number
+          is_active: boolean
+          created_by: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          title: string
+          description?: string | null
+          icon?: string | null
+          url: string
+          category: string
+          color?: string | null
+          is_video?: boolean
+          sort_order?: number
+          is_active?: boolean
+          created_by?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          title?: string
+          description?: string | null
+          icon?: string | null
+          url?: string
+          category?: string
+          color?: string | null
+          is_video?: boolean
+          sort_order?: number
+          is_active?: boolean
+          created_by?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+      }
     }
   }
 }

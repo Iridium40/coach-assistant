@@ -13,6 +13,10 @@ import {
   saveCompletedTasks,
   getMonth1TotalTasks,
 } from "@/lib/client-calendar-data"
+import { createClient } from "@/lib/supabase/client"
+import type { Database } from "@/lib/supabase/types"
+
+type ClientSupportResource = Database["public"]["Tables"]["client_support_resources"]["Row"]
 
 // ========================================
 // VISUAL CONSTANTS
@@ -435,8 +439,29 @@ export function ClientSupportCalendar() {
   const [selectedDay, setSelectedDay] = useState<CalendarDayData | null>(null)
   const [selectedDayKey, setSelectedDayKey] = useState<string | null>(null)
   const [completedTasks, setCompletedTasks] = useState<Record<string, boolean>>({})
+  const [supportMode, setSupportMode] = useState<"calendar" | "resources" | null>(clientId ? "calendar" : null)
+  const [resources, setResources] = useState<ClientSupportResource[]>([])
+  const [resourcesLoading, setResourcesLoading] = useState(false)
 
   const programDay = startDateParam ? getProgramDayFromStartDate(startDateParam) : null
+
+  useEffect(() => {
+    if (supportMode === "resources" && resources.length === 0) {
+      const fetchResources = async () => {
+        setResourcesLoading(true)
+        const supabase = createClient()
+        const { data } = await supabase
+          .from("client_support_resources")
+          .select("*")
+          .eq("is_active", true)
+          .order("category")
+          .order("sort_order")
+        setResources(data || [])
+        setResourcesLoading(false)
+      }
+      fetchResources()
+    }
+  }, [supportMode, resources.length])
 
   // Load persisted progress for this client
   useEffect(() => {
@@ -496,13 +521,177 @@ export function ClientSupportCalendar() {
 
   const isSelectedDayCurrentDay = !!(selectedDayKey && isDayCurrentDay(selectedDayKey))
 
+  const resourceCategories = [...new Set(resources.map(r => r.category))]
+
+  // ========================================
+  // CHOOSER VIEW
+  // ========================================
+  if (supportMode === null) {
+    return (
+      <div className="min-h-screen bg-[#f1f5f9] flex flex-col items-center justify-center px-5 py-10" style={{ fontFamily: "'Open Sans', -apple-system, sans-serif" }}>
+        <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800;900&family=Open+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+        <div className="text-center mb-10">
+          <h1 className="text-2xl sm:text-[32px] font-black text-[#1a2744] tracking-tight" style={{ fontFamily: "'Montserrat', sans-serif" }}>
+            CLIENT SUPPORT RESOURCES
+          </h1>
+          <p className="mt-2 text-base text-slate-500">
+            Choose how you want to support your client&apos;s journey
+          </p>
+        </div>
+
+        <div className="flex gap-6 flex-wrap justify-center max-w-[800px]">
+          {/* Client Journey Calendar */}
+          <button
+            onClick={() => setSupportMode("calendar")}
+            className="flex-1 min-w-[300px] max-w-[380px] p-8 bg-white border-2 border-gray-200 rounded-2xl text-left transition-all hover:border-[hsl(var(--optavia-green))] hover:shadow-lg hover:-translate-y-0.5"
+          >
+            <div
+              className="w-14 h-14 rounded-[14px] flex items-center justify-center text-[28px] mb-4"
+              style={{ background: "linear-gradient(135deg, hsl(176, 57.6%, 38.8%), hsl(176, 53.6%, 46.5%))" }}
+            >
+              📅
+            </div>
+            <h2 className="text-xl font-extrabold text-gray-900 mb-2" style={{ fontFamily: "'Montserrat', sans-serif" }}>
+              Client Journey Calendar
+            </h2>
+            <p className="text-sm text-gray-500 leading-relaxed mb-4">
+              Interactive 30-day calendar with daily tasks, copyable scripts, video links, and graphics. Track progress day by day.
+            </p>
+            <div className="flex gap-2 flex-wrap">
+              {["Day-by-day tasks", "Copy scripts", "Videos & graphics", "Month 1 & 2"].map(tag => (
+                <span key={tag} className="text-[11px] px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 font-semibold">{tag}</span>
+              ))}
+            </div>
+          </button>
+
+          {/* Master Resource List */}
+          <button
+            onClick={() => setSupportMode("resources")}
+            className="flex-1 min-w-[300px] max-w-[380px] p-8 bg-white border-2 border-gray-200 rounded-2xl text-left transition-all hover:border-indigo-500 hover:shadow-lg hover:-translate-y-0.5"
+          >
+            <div
+              className="w-14 h-14 rounded-[14px] flex items-center justify-center text-[28px] mb-4"
+              style={{ background: "linear-gradient(135deg, #3730a3, #6366f1)" }}
+            >
+              📚
+            </div>
+            <h2 className="text-xl font-extrabold text-gray-900 mb-2" style={{ fontFamily: "'Montserrat', sans-serif" }}>
+              Master Resource List
+            </h2>
+            <p className="text-sm text-gray-500 leading-relaxed mb-4">
+              All client support documents, videos, and guides in one place. Quick access to everything you need.
+            </p>
+            <div className="flex gap-2 flex-wrap">
+              {["Docs & videos", "Quick links", "All phases"].map(tag => (
+                <span key={tag} className="text-[11px] px-2.5 py-1 rounded-full bg-indigo-50 text-indigo-700 font-semibold">{tag}</span>
+              ))}
+            </div>
+          </button>
+        </div>
+      </div>
+    )
+  }
+
+  // ========================================
+  // RESOURCE LIST VIEW
+  // ========================================
+  if (supportMode === "resources") {
+    return (
+      <div className="min-h-screen bg-[#f1f5f9]" style={{ fontFamily: "'Open Sans', -apple-system, sans-serif" }}>
+        <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800;900&family=Open+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+        {/* Header */}
+        <div style={{ background: "linear-gradient(135deg, #1e1b4b, #3730a3, #6366f1)" }} className="px-8 py-6 text-white">
+          <div className="max-w-[800px] mx-auto">
+            <button
+              onClick={() => setSupportMode(null)}
+              className="bg-white/15 border-none text-white px-3.5 py-1.5 rounded-md cursor-pointer text-[13px] font-semibold mb-3 hover:bg-white/25 transition-colors"
+            >
+              ← Back to Options
+            </button>
+            <h1 className="text-2xl font-black" style={{ fontFamily: "'Montserrat', sans-serif" }}>
+              Client Support Master Resource List
+            </h1>
+            <p className="text-sm text-white/80 mt-1.5">
+              Every document, video, and guide you need to support your clients — all in one place.
+            </p>
+          </div>
+        </div>
+
+        {/* Resources */}
+        <div className="max-w-[800px] mx-auto px-5 py-6 pb-10">
+          {resourcesLoading ? (
+            <div className="text-center py-12">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600 mx-auto"></div>
+              <p className="text-gray-500 mt-4">Loading resources...</p>
+            </div>
+          ) : resources.length === 0 ? (
+            <div className="text-center py-12 text-gray-500">
+              <p className="text-lg font-medium">No resources available yet.</p>
+              <p className="text-sm mt-1">Check back later or contact your admin.</p>
+            </div>
+          ) : (
+            resourceCategories.map(cat => {
+              const catResources = resources.filter(r => r.category === cat)
+              return (
+                <div key={cat} className="mb-8">
+                  <h2
+                    className="text-sm font-extrabold text-gray-500 uppercase tracking-widest mb-3"
+                    style={{ fontFamily: "'Montserrat', sans-serif" }}
+                  >
+                    {cat}
+                  </h2>
+                  <div className="flex flex-col gap-2.5">
+                    {catResources.map((resource) => (
+                      <a
+                        key={resource.id}
+                        href={resource.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-start gap-4 p-5 bg-white rounded-xl border border-gray-200 no-underline transition-all hover:shadow-md hover:translate-x-1"
+                        style={{ borderColor: undefined }}
+                      >
+                        <div
+                          className="w-11 h-11 rounded-[10px] flex items-center justify-center text-[22px] flex-shrink-0"
+                          style={{ background: `${resource.color || "#00A651"}15`, border: `1px solid ${resource.color || "#00A651"}30` }}
+                        >
+                          {resource.icon || "📄"}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2">
+                            <span className="font-bold text-[15px] text-gray-900">{resource.title}</span>
+                            {resource.is_video && (
+                              <span className="text-[10px] px-2 py-0.5 rounded bg-amber-100 text-amber-800 font-bold">VIDEO</span>
+                            )}
+                          </div>
+                          {resource.description && (
+                            <p className="mt-1 text-[13px] text-gray-500 leading-snug">{resource.description}</p>
+                          )}
+                        </div>
+                        <div className="flex-shrink-0 text-gray-400 text-lg mt-0.5">→</div>
+                      </a>
+                    ))}
+                  </div>
+                </div>
+              )
+            })
+          )}
+        </div>
+      </div>
+    )
+  }
+
+  // ========================================
+  // CALENDAR VIEW
+  // ========================================
   return (
     <div className="min-h-screen bg-[hsl(var(--optavia-bg-alt))]">
       {/* Header */}
       <div className="bg-gradient-to-r from-[hsl(var(--optavia-green))] to-[hsl(var(--optavia-green-dark))]">
         <div className="max-w-[1100px] mx-auto px-5 pt-6 pb-4">
           {/* Back link when viewing for a specific client */}
-          {clientId && (
+          {clientId ? (
             <Link
               href="/client-tracker"
               className="inline-flex items-center gap-1.5 text-sm text-white/70 hover:text-white mb-3 transition-colors"
@@ -510,6 +699,14 @@ export function ClientSupportCalendar() {
               <ArrowLeft className="h-4 w-4" />
               Back to Client Tracker
             </Link>
+          ) : (
+            <button
+              onClick={() => setSupportMode(null)}
+              className="inline-flex items-center gap-1.5 text-sm text-white/70 hover:text-white mb-3 transition-colors bg-transparent border-none cursor-pointer"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Back to Options
+            </button>
           )}
 
           <h1 className="text-2xl sm:text-[28px] font-black text-white tracking-tight" style={{ fontFamily: "'Montserrat', sans-serif" }}>
@@ -644,6 +841,23 @@ export function ClientSupportCalendar() {
             }
           </p>
         </div>
+
+        {/* Resource List CTA — only when standalone (no client context) */}
+        {!clientId && (
+          <div className="mt-3 p-4 bg-indigo-50 rounded-xl border border-indigo-200 flex items-center justify-between flex-wrap gap-3">
+            <div>
+              <p className="font-bold text-sm text-indigo-800 m-0">Prefer a simple resource list?</p>
+              <p className="text-[13px] text-gray-500 m-0 mt-0.5">All client support docs and videos in one place.</p>
+            </div>
+            <button
+              onClick={() => setSupportMode("resources")}
+              className="px-5 py-2.5 bg-indigo-600 text-white border-none rounded-lg font-bold text-[13px] cursor-pointer whitespace-nowrap hover:bg-indigo-700 transition-colors"
+              style={{ fontFamily: "'Montserrat', sans-serif" }}
+            >
+              📚 Master Resource List
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Detail Drawer */}
