@@ -108,6 +108,16 @@ export function HomeLanding() {
         </div>
 
         <div style={{ position: "relative", zIndex: 2, maxWidth: "820px", textAlign: "center" }}>
+          <div style={{ marginBottom: "24px" }}>
+            <picture>
+              <source srcSet="/branding/ca_hub_logo.svg" type="image/svg+xml" />
+              <img
+                src="/branding/ca_hub_logo.png"
+                alt="Coach Assistant Hub"
+                style={{ height: "120px", width: "auto", margin: "0 auto" }}
+              />
+            </picture>
+          </div>
           <div style={{
             display: "inline-flex", alignItems: "center", gap: "8px",
             padding: "8px 20px", borderRadius: "100px",

@@ -67,9 +67,10 @@ export interface Database {
           label: string | null
           is_active: boolean
           max_uses: number | null
-          times_used: number
+          usage_count: number
           created_by: string | null
           created_at: string
+          updated_at: string
           expires_at: string | null
         }
         Insert: {
@@ -78,7 +79,7 @@ export interface Database {
           label?: string | null
           is_active?: boolean
           max_uses?: number | null
-          times_used?: number
+          usage_count?: number
           created_by?: string | null
           created_at?: string
           expires_at?: string | null
@@ -89,7 +90,7 @@ export interface Database {
           label?: string | null
           is_active?: boolean
           max_uses?: number | null
-          times_used?: number
+          usage_count?: number
           created_by?: string | null
           created_at?: string
           expires_at?: string | null

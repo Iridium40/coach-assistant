@@ -1,20 +1,25 @@
 -- Create signup_access_codes table
 -- Access codes that new users must enter during self-registration
 CREATE TABLE IF NOT EXISTS public.signup_access_codes (
-  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  id UUID DEFAULT extensions.uuid_generate_v4() PRIMARY KEY,
   code TEXT NOT NULL UNIQUE,
   label TEXT,
   is_active BOOLEAN DEFAULT true,
   max_uses INTEGER,
-  times_used INTEGER DEFAULT 0,
-  created_by UUID REFERENCES public.profiles(id) ON DELETE SET NULL,
+  usage_count INTEGER DEFAULT 0,
+  created_by UUID REFERENCES auth.users(id) ON DELETE SET NULL,
   created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW(),
   expires_at TIMESTAMPTZ
 );
 
 -- Index for fast code lookups
 CREATE INDEX IF NOT EXISTS idx_signup_access_codes_code ON public.signup_access_codes(code);
-CREATE INDEX IF NOT EXISTS idx_signup_access_codes_active ON public.signup_access_codes(is_active);
+
+-- Auto-update updated_at
+CREATE TRIGGER update_signup_access_codes_updated_at
+  BEFORE UPDATE ON signup_access_codes
+  FOR EACH ROW EXECUTE FUNCTION handle_updated_at();
 
 COMMENT ON TABLE public.signup_access_codes IS 'Access codes required for self-service sign-up';
 
@@ -69,7 +74,7 @@ CREATE POLICY "Admins can delete access codes"
     )
   );
 
--- Allow anon to increment times_used during signup
+-- Allow anon to increment usage_count during signup
 CREATE POLICY "Anon can increment usage on active codes"
   ON public.signup_access_codes FOR UPDATE
   TO anon

@@ -20,7 +20,7 @@ interface AccessCode {
   label: string | null
   is_active: boolean
   max_uses: number | null
-  times_used: number
+  usage_count: number
   created_by: string | null
   created_at: string
   expires_at: string | null
@@ -384,7 +384,7 @@ export function AdminAccessCodes({ onClose }: { onClose?: () => void }) {
         <div className="space-y-3">
           {codes.map((code) => {
             const isExpired = code.expires_at && new Date(code.expires_at) < new Date()
-            const isMaxed = code.max_uses != null && (code.times_used ?? 0) >= code.max_uses
+            const isMaxed = code.max_uses != null && (code.usage_count ?? 0) >= code.max_uses
             const effectivelyActive = code.is_active && !isExpired && !isMaxed
 
             return (
@@ -418,12 +418,12 @@ export function AdminAccessCodes({ onClose }: { onClose?: () => void }) {
                         isMaxed
                           ? "bg-red-50 text-red-700 border border-red-200"
                           : code.max_uses != null
-                            ? (code.times_used ?? 0) >= (code.max_uses * 0.8)
+                            ? (code.usage_count ?? 0) >= (code.max_uses * 0.8)
                               ? "bg-amber-50 text-amber-700 border border-amber-200"
                               : "bg-gray-50 text-gray-700 border border-gray-200"
                             : "text-optavia-gray text-xs font-normal"
                       }`}>
-                        {code.times_used ?? 0}{code.max_uses != null ? ` / ${code.max_uses}` : ""} uses
+                        {code.usage_count ?? 0}{code.max_uses != null ? ` / ${code.max_uses}` : ""} uses
                       </span>
 
                       {code.expires_at && (

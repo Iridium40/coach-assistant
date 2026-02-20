@@ -37,7 +37,7 @@ export function SignupFormOpen({ onSuccess, onSwitchToLogin }: SignupFormOpenPro
   const validateAccessCode = async (code: string): Promise<{ valid: boolean; reason?: string }> => {
     const { data, error } = await supabase
       .from("signup_access_codes")
-      .select("id, code, is_active, max_uses, times_used, expires_at")
+      .select("id, code, is_active, max_uses, usage_count, expires_at")
       .eq("code", code.trim().toUpperCase())
       .eq("is_active", true)
       .single()
@@ -51,7 +51,7 @@ export function SignupFormOpen({ onSuccess, onSwitchToLogin }: SignupFormOpenPro
     }
     if (!data) return { valid: false, reason: "Access code not found. Please check the code and try again." }
     if (data.expires_at && new Date(data.expires_at) < new Date()) return { valid: false, reason: "This access code has expired. Please contact your coach for a new one." }
-    if (data.max_uses != null && (data.times_used ?? 0) >= data.max_uses) return { valid: false, reason: "This access code has reached its usage limit. Please contact your coach." }
+    if (data.max_uses != null && (data.usage_count ?? 0) >= data.max_uses) return { valid: false, reason: "This access code has reached its usage limit. Please contact your coach." }
 
     return { valid: true }
   }
@@ -59,14 +59,14 @@ export function SignupFormOpen({ onSuccess, onSwitchToLogin }: SignupFormOpenPro
   const incrementCodeUsage = async (code: string) => {
     const { data } = await supabase
       .from("signup_access_codes")
-      .select("id, times_used")
+      .select("id, usage_count")
       .eq("code", code.trim().toUpperCase())
       .single()
 
     if (data) {
       await supabase
         .from("signup_access_codes")
-        .update({ times_used: (data.times_used ?? 0) + 1 })
+        .update({ usage_count: (data.usage_count ?? 0) + 1 })
         .eq("id", data.id)
     }
   }
