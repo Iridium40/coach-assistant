@@ -44,7 +44,7 @@ export function SignupFormOpen({ onSuccess, onSwitchToLogin }: SignupFormOpenPro
 
     if (error || !data) return false
     if (data.expires_at && new Date(data.expires_at) < new Date()) return false
-    if (data.max_uses !== null && data.times_used >= data.max_uses) return false
+    if (data.max_uses != null && (data.times_used ?? 0) >= data.max_uses) return false
 
     return true
   }
@@ -59,7 +59,7 @@ export function SignupFormOpen({ onSuccess, onSwitchToLogin }: SignupFormOpenPro
     if (data) {
       await supabase
         .from("signup_access_codes")
-        .update({ times_used: data.times_used + 1 })
+        .update({ times_used: (data.times_used ?? 0) + 1 })
         .eq("id", data.id)
     }
   }
