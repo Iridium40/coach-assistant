@@ -85,6 +85,7 @@ export function useAuth() {
       email,
       password,
       options: {
+        emailRedirectTo: `${window.location.origin}/auth/confirm`,
         data: {
           full_name: fullName,
           ...(coachName ? { coach_name: coachName } : {}),
