@@ -22,11 +22,14 @@ function SetPasswordPageContent() {
       <div className="min-h-screen flex flex-col bg-white">
         <div className="flex-1 flex flex-col items-center justify-center px-4 py-12">
           <div className="mb-8 sm:mb-12">
-            <img 
-              src="/branding/ca_logo.png" 
-              alt="Coach Assistant Hub" 
-              className="h-16 sm:h-20 md:h-24 w-auto mx-auto"
-            />
+            <picture>
+              <source srcSet="/branding/calogo_large.svg" type="image/svg+xml" />
+              <img 
+                src="/branding/calogo_large.png" 
+                alt="Coach Assistant Hub" 
+                className="h-16 sm:h-20 md:h-24 w-auto mx-auto"
+              />
+            </picture>
           </div>
           <Card className="w-full max-w-md mx-auto bg-white border border-gray-200 shadow-lg">
             <CardContent className="pt-6">

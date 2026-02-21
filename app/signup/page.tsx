@@ -32,9 +32,9 @@ function SignupPageContent() {
       <div className="flex-1 flex flex-col items-center justify-center px-4 py-12">
         <div className="mb-8 sm:mb-12">
           <picture>
-            <source srcSet="/branding/ca_hub_logo.svg" type="image/svg+xml" />
+            <source srcSet="/branding/calogo_large.svg" type="image/svg+xml" />
             <img
-              src="/branding/ca_hub_logo.png"
+              src="/branding/calogo_large.png"
               alt="Coach Assistant Hub"
               className="h-16 sm:h-20 md:h-24 w-auto mx-auto"
             />

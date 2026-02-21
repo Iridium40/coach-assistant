@@ -93,10 +93,20 @@ export default function ResetPasswordPage() {
     setLoading(false)
   }
 
+  const logoBlock = (
+    <div className="mb-8">
+      <picture>
+        <source srcSet="/branding/calogo_large.svg" type="image/svg+xml" />
+        <img src="/branding/calogo_large.png" alt="Coach Assistant Hub" className="h-16 sm:h-20 md:h-24 w-auto mx-auto" />
+      </picture>
+    </div>
+  )
+
   // Loading state — verifying the reset link
   if (!ready && !sessionError) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-white to-gray-50 px-4">
+      <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-white to-gray-50 px-4">
+        {logoBlock}
         <Card className="w-full max-w-md mx-auto bg-white border border-gray-200 shadow-lg">
           <CardContent className="flex flex-col items-center justify-center py-12">
             <Loader2 className="h-8 w-8 animate-spin text-[hsl(var(--optavia-green))] mb-4" />
@@ -110,7 +120,8 @@ export default function ResetPasswordPage() {
   // Invalid or expired link
   if (sessionError && !ready) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-white to-gray-50 px-4">
+      <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-white to-gray-50 px-4">
+        {logoBlock}
         <Card className="w-full max-w-md mx-auto bg-white border border-gray-200 shadow-lg">
           <CardHeader className="text-center">
             <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-red-100">
@@ -141,7 +152,8 @@ export default function ResetPasswordPage() {
   // Success state
   if (success) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-white to-gray-50 px-4">
+      <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-white to-gray-50 px-4">
+        {logoBlock}
         <Card className="w-full max-w-md mx-auto bg-white border border-gray-200 shadow-lg">
           <CardHeader className="text-center">
             <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-green-100">
@@ -167,7 +179,8 @@ export default function ResetPasswordPage() {
 
   // Password form
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-white to-gray-50 px-4">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-white to-gray-50 px-4">
+      {logoBlock}
       <Card className="w-full max-w-md mx-auto bg-white border border-gray-200 shadow-lg">
         <CardHeader>
           <CardTitle className="text-2xl font-heading text-optavia-dark">Set New Password</CardTitle>

@@ -38,7 +38,17 @@ export default function ForgotPasswordPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-white to-gray-50 px-4">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-white to-gray-50 px-4">
+      <div className="mb-8">
+        <picture>
+          <source srcSet="/branding/calogo_large.svg" type="image/svg+xml" />
+          <img
+            src="/branding/calogo_large.png"
+            alt="Coach Assistant Hub"
+            className="h-16 sm:h-20 md:h-24 w-auto mx-auto"
+          />
+        </picture>
+      </div>
       <Card className="w-full max-w-md mx-auto bg-white border border-gray-200 shadow-lg">
         {sent ? (
           <>

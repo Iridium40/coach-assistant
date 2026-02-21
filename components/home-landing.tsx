@@ -80,8 +80,8 @@ export function HomeLanding() {
       }}>
         <Link href="/" style={{ display: "flex", alignItems: "center", gap: "10px", textDecoration: "none" }}>
           <picture>
-            <source srcSet="/branding/ca_hub_logo.svg" type="image/svg+xml" />
-            <img src="/branding/ca_hub_logo.png" alt="Coach Assistant Hub" style={{ height: "40px", width: "auto" }} />
+            <source srcSet="/branding/calogo_large.svg" type="image/svg+xml" />
+            <img src="/branding/calogo_large.png" alt="Coach Assistant Hub" style={{ height: "40px", width: "auto" }} />
           </picture>
         </Link>
         <Button
@@ -110,9 +110,9 @@ export function HomeLanding() {
         <div style={{ position: "relative", zIndex: 2, maxWidth: "820px", textAlign: "center" }}>
           <div style={{ marginBottom: "24px" }}>
             <picture>
-              <source srcSet="/branding/ca_hub_logo.svg" type="image/svg+xml" />
+              <source srcSet="/branding/calogo_large.svg" type="image/svg+xml" />
               <img
-                src="/branding/ca_hub_logo.png"
+                src="/branding/calogo_large.png"
                 alt="Coach Assistant Hub"
                 style={{ height: "120px", width: "auto", margin: "0 auto" }}
               />
