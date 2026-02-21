@@ -642,37 +642,13 @@ ${phase.milestone ? `\n🎉 MILESTONE: ${phase.label} - Celebrate this achieveme
         </div>
 
         {/* Quick Stats Row */}
-        <div className="flex flex-wrap items-center gap-3 mb-6 text-sm">
-          {stats.needsAttention > 0 && (
-            <button
-              onClick={() => setFilterStatus(filterStatus === "needs_attention" ? "all" : "needs_attention")}
-              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border font-medium transition-colors ${
-                filterStatus === "needs_attention"
-                  ? "bg-orange-600 border-orange-600 text-white"
-                  : "bg-orange-50 border-orange-200 text-orange-700 hover:bg-orange-100"
-              }`}
-            >
-              🚨 {stats.needsAttention} Need Attention
-            </button>
-          )}
-          {stats.milestonesToday > 0 && (
+        {stats.milestonesToday > 0 && (
+          <div className="flex flex-wrap items-center gap-3 mb-6 text-sm">
             <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-yellow-50 border border-yellow-200 text-yellow-700 font-medium">
               🎉 {stats.milestonesToday} Milestones Today
             </span>
-          )}
-          {stats.paused > 0 && (
-            <button
-              onClick={() => setFilterStatus(filterStatus === "paused" ? "all" : "paused")}
-              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border font-medium transition-colors ${
-                filterStatus === "paused"
-                  ? "bg-gray-700 border-gray-700 text-white"
-                  : "bg-gray-50 border-gray-200 text-gray-600 hover:bg-gray-100"
-              }`}
-            >
-              ⏸️ {stats.paused} Paused
-            </button>
-          )}
-        </div>
+          </div>
+        )}
 
         {/* Search, Filter and View Toggle */}
         <div className="flex flex-col gap-4 mb-6">
@@ -693,6 +669,7 @@ ${phase.milestone ? `\n🎉 MILESTONE: ${phase.label} - Celebrate this achieveme
               {([
                 { value: "all" as const, label: "All" },
                 { value: "active" as const, label: "Active" },
+                { value: "needs_attention" as const, label: `Needs Attention${stats.needsAttention > 0 ? ` (${stats.needsAttention})` : ""}` },
                 { value: "goal_achieved" as const, label: "Goal Achieved" },
                 { value: "future_coach" as const, label: "Future Coach" },
                 { value: "coach_launched" as const, label: "Launched" },
@@ -704,7 +681,15 @@ ${phase.milestone ? `\n🎉 MILESTONE: ${phase.label} - Celebrate this achieveme
                   variant={filterStatus === value ? "default" : "outline"}
                   size="sm"
                   onClick={() => setFilterStatus(value)}
-                  className={filterStatus === value ? "bg-[hsl(var(--optavia-green))]" : ""}
+                  className={
+                    filterStatus === value
+                      ? value === "needs_attention"
+                        ? "bg-orange-600 hover:bg-orange-700"
+                        : "bg-[hsl(var(--optavia-green))]"
+                      : value === "needs_attention" && stats.needsAttention > 0
+                        ? "border-orange-300 text-orange-700 hover:bg-orange-50"
+                        : ""
+                  }
                 >
                   {label}
                 </Button>

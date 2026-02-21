@@ -283,7 +283,7 @@ export function TodaysFocus({
                       <div className="text-xs text-green-600">New client — Day 1! Welcome check-in needed</div>
                     </div>
                   </div>
-                  <Link href="/client-tracker?filter=needs_attention">
+                  <Link href="/client-tracker">
                     <Button
                       size="sm"
                       className="h-7 text-xs px-3 bg-green-500 hover:bg-green-600 text-white"
