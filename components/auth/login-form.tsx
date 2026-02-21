@@ -30,11 +30,18 @@ export function LoginForm({ onSuccess, onSwitchToSignup }: LoginFormProps) {
     const { error } = await signIn(email, password)
 
     if (error) {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      })
+      let title = "Sign In Failed"
+      let description = error.message
+
+      if (error.message?.includes("Invalid login credentials")) {
+        title = "Incorrect Email or Password"
+        description = "The email or password you entered is incorrect. Please try again or reset your password."
+      } else if (error.message?.includes("Email not confirmed")) {
+        title = "Email Not Verified"
+        description = "Please check your inbox and click the confirmation link before signing in."
+      }
+
+      toast({ title, description, variant: "destructive" })
     } else {
       onSuccess?.()
     }
