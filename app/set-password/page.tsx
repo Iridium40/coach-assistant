@@ -27,7 +27,7 @@ function SetPasswordPageContent() {
               <img 
                 src="/branding/calogo_large.png" 
                 alt="Coach Assistant Hub" 
-                className="h-16 sm:h-20 md:h-24 w-auto mx-auto"
+                className="h-24 sm:h-32 md:h-40 w-auto mx-auto"
               />
             </picture>
           </div>
