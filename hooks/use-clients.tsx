@@ -74,12 +74,12 @@ export function getDayPhase(day: number): DayPhase {
   return { label: `Day ${day}`, color: '#37B6AE', bg: '#EAF7F6' }
 }
 
-export function getProgramDay(startDate: string): number {
+export function getProgramDay(startDate: string, referenceDate?: Date): number {
   const start = new Date(startDate)
-  const now = new Date()
-  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+  const ref = referenceDate ?? new Date()
+  const refDay = new Date(ref.getFullYear(), ref.getMonth(), ref.getDate())
   const startDay = new Date(start.getFullYear(), start.getMonth(), start.getDate())
-  const diffTime = today.getTime() - startDay.getTime()
+  const diffTime = refDay.getTime() - startDay.getTime()
   const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1
   return Math.max(1, diffDays)
 }

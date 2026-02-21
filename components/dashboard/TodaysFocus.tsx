@@ -18,6 +18,8 @@ import {
   Target,
   Bell,
   X,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react"
 import { useReminders } from "@/hooks/use-reminders"
 import { getProgramDay, getDayPhase } from "@/hooks/use-clients"
@@ -54,68 +56,88 @@ export function TodaysFocus({
 }: TodaysFocusProps) {
   const { reminders = [], completeReminder, isOverdue, isDueToday } = useReminders()
   const [, forceRefresh] = useState(0)
+  const [dayOffset, setDayOffset] = useState(0)
 
-  // Get today's reminders (due today or overdue, not completed)
-  const todaysReminders = reminders.filter(r => 
-    !r.is_completed && (isDueToday?.(r) || isOverdue?.(r))
-  ).slice(0, 3)
+  const selectedDate = new Date()
+  selectedDate.setDate(selectedDate.getDate() + dayOffset)
+  const isToday = dayOffset === 0
+  const isTomorrow = dayOffset === 1
+  const isYesterday = dayOffset === -1
 
-  const today = new Date().toISOString().split("T")[0]
-  const todayStart = new Date()
-  todayStart.setHours(0, 0, 0, 0)
-  const todayEnd = new Date()
-  todayEnd.setHours(23, 59, 59, 999)
+  const focusLabel = isToday
+    ? "Today's Focus"
+    : isTomorrow
+    ? "Tomorrow's Focus"
+    : isYesterday
+    ? "Yesterday's Focus"
+    : selectedDate.toLocaleDateString(undefined, { weekday: "long", month: "short", day: "numeric" })
 
-  // Get new clients who started today (Day 1)
-  const newClientsToday = clients.filter(c => {
+  // Get reminders for selected day
+  const selectedReminders = reminders.filter(r => {
+    if (r.is_completed) return false
+    if (isToday) return isDueToday?.(r) || isOverdue?.(r)
+    if (!r.due_date) return false
+    const dueDate = new Date(r.due_date).toISOString().split("T")[0]
+    return dueDate === selectedDate.toISOString().split("T")[0]
+  }).slice(0, 3)
+
+  const dayStart = new Date(selectedDate)
+  dayStart.setHours(0, 0, 0, 0)
+  const dayEnd = new Date(selectedDate)
+  dayEnd.setHours(23, 59, 59, 999)
+
+  // Get new clients who start on the selected day (Day 1)
+  const newClientsOnDay = clients.filter(c => {
     if (c.status !== "active") return false
-    const programDay = getProgramDay(c.start_date)
+    const programDay = getProgramDay(c.start_date, selectedDate)
     return programDay === 1
   })
 
-  // Get other clients needing touchpoints (exclude Day 1 clients shown separately)
-  const newClientIds = new Set(newClientsToday.map((c: any) => c.id))
-  const allClientsNeedingAction = clients
-    .filter(c => c.status === "active" && needsAttention(c) && !newClientIds.has(c.id))
+  // Get other clients needing touchpoints (only for today — future days haven't happened yet)
+  const newClientIds = new Set(newClientsOnDay.map((c: any) => c.id))
+  const allClientsNeedingAction = isToday
+    ? clients.filter(c => c.status === "active" && needsAttention(c) && !newClientIds.has(c.id))
+    : []
   const clientsNeedingAction = allClientsNeedingAction.slice(0, 5)
   const moreClientsCount = allClientsNeedingAction.length - clientsNeedingAction.length
 
-  // Get HAs scheduled for today
-  const haScheduledToday = prospects.filter(p => 
+  // Get HAs scheduled for selected day
+  const haScheduledOnDay = prospects.filter(p => 
     p.ha_scheduled_at && 
-    new Date(p.ha_scheduled_at) >= todayStart && 
-    new Date(p.ha_scheduled_at) <= todayEnd
+    new Date(p.ha_scheduled_at) >= dayStart && 
+    new Date(p.ha_scheduled_at) <= dayEnd
   ).slice(0, 3)
 
-  // Get meetings today (already filtered by date in parent, use occurrence_date)
-  const meetingsToday = upcomingMeetings
+  // Get meetings for selected day
+  const meetingsOnDay = upcomingMeetings
     .filter((m) => {
       const start = new Date(m.occurrence_date)
-      if (start < todayStart || start > todayEnd) return false
+      if (start < dayStart || start > dayEnd) return false
 
-      // Hide meetings that already ended (even if status didn't update)
-      const durationMins = typeof m.duration_minutes === "number" ? m.duration_minutes : 60
-      const end = new Date(start.getTime() + durationMins * 60_000)
-      const graceMs = 15 * 60_000 // keep for 15 minutes after end
-      if (Date.now() > end.getTime() + graceMs) return false
+      if (isToday) {
+        const durationMins = typeof m.duration_minutes === "number" ? m.duration_minutes : 60
+        const end = new Date(start.getTime() + durationMins * 60_000)
+        const graceMs = 15 * 60_000
+        if (Date.now() > end.getTime() + graceMs) return false
+      }
 
       return true
     })
     .slice(0, 3)
 
-  // Get milestone clients
+  // Get milestone clients for selected day
   const milestoneClients = clients
     .filter((c) => {
       if (c.status !== "active") return false
-      const day = getProgramDay(c.start_date)
+      const day = getProgramDay(c.start_date, selectedDate)
       if (![7, 14, 21, 30].includes(day)) return false
-      return !isMilestoneCelebratedToday({ clientId: c.id, programDay: day })
+      if (isToday) return !isMilestoneCelebratedToday({ clientId: c.id, programDay: day })
+      return true
     })
     .slice(0, 2)
 
-  // Separate coaching actions from calendar events
-  const hasCoachingActions = newClientsToday.length > 0 || clientsNeedingAction.length > 0 || haScheduledToday.length > 0 || milestoneClients.length > 0 || todaysReminders.length > 0
-  const hasCalendarEvents = meetingsToday.length > 0
+  const hasCoachingActions = newClientsOnDay.length > 0 || clientsNeedingAction.length > 0 || haScheduledOnDay.length > 0 || milestoneClients.length > 0 || selectedReminders.length > 0
+  const hasCalendarEvents = meetingsOnDay.length > 0
 
   // Get timezone abbreviation
   const getTimezoneAbbrev = (timezone: string): string => {
@@ -156,8 +178,38 @@ export function TodaysFocus({
         <div className="flex items-center justify-between">
           <CardTitle className="text-xl flex items-center gap-2 text-optavia-dark">
             <Target className="h-5 w-5 text-[hsl(var(--optavia-green))]" />
-            Today's Focus
+            {focusLabel}
           </CardTitle>
+          <div className="flex items-center gap-1">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 text-gray-500 hover:text-gray-700"
+              onClick={() => setDayOffset(d => d - 1)}
+              disabled={dayOffset <= -7}
+            >
+              <ChevronLeft className="h-5 w-5" />
+            </Button>
+            {!isToday && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-8 text-xs text-[hsl(var(--optavia-green))] hover:text-[hsl(var(--optavia-green))]"
+                onClick={() => setDayOffset(0)}
+              >
+                Today
+              </Button>
+            )}
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 text-gray-500 hover:text-gray-700"
+              onClick={() => setDayOffset(d => d + 1)}
+              disabled={dayOffset >= 7}
+            >
+              <ChevronRight className="h-5 w-5" />
+            </Button>
+          </div>
         </div>
       </CardHeader>
       <CardContent className="pt-0 space-y-4">
@@ -166,9 +218,9 @@ export function TodaysFocus({
           <div className="space-y-2">
             <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide flex items-center gap-1.5">
               <Calendar className="h-3.5 w-3.5" />
-              Today's Schedule
+              {isToday ? "Today's Schedule" : "Schedule"}
             </p>
-            {meetingsToday.map((meeting, idx) => (
+            {meetingsOnDay.map((meeting, idx) => (
               <div
                 key={`${meeting.id}-${idx}`}
                 className={`flex items-center justify-between p-2.5 bg-white rounded-lg border ${
@@ -217,8 +269,7 @@ export function TodaysFocus({
 
           {hasCoachingActions ? (
             <div className="space-y-2">
-              {/* New Clients Started Today */}
-              {newClientsToday.map((client: any) => (
+              {newClientsOnDay.map((client: any) => (
                 <div
                   key={`new-${client.id}`}
                   className="flex items-center justify-between p-2.5 bg-white rounded-lg border border-green-300"
@@ -243,8 +294,7 @@ export function TodaysFocus({
                 </div>
               ))}
 
-              {/* HAs Scheduled Today */}
-              {haScheduledToday.map(prospect => (
+              {haScheduledOnDay.map(prospect => (
                 <div
                   key={`ha-${prospect.id}`}
                   className="flex items-center justify-between p-2.5 bg-white rounded-lg border border-purple-200"
@@ -306,7 +356,7 @@ export function TodaysFocus({
               {moreClientsCount > 0 && (
                 <Link href="/client-tracker?filter=needs_attention" className="block">
                   <div className="text-center py-1.5 text-xs text-orange-600 hover:text-orange-800 hover:underline">
-                    + {moreClientsCount} more client{moreClientsCount > 1 ? "s" : ""} need check-ins → View Client Tracker
+                    + {moreClientsCount} more client{moreClientsCount > 1 ? "s" : ""} need check-ins → View Client List
                   </div>
                 </Link>
               )}
@@ -355,8 +405,7 @@ export function TodaysFocus({
                 )
               })}
 
-              {/* Today's Reminders */}
-              {todaysReminders.map(reminder => {
+              {selectedReminders.map(reminder => {
                 const reminderIsOverdue = isOverdue?.(reminder)
                 return (
                   <div
@@ -396,8 +445,14 @@ export function TodaysFocus({
             <div className="flex items-center gap-3 p-3 bg-green-50 rounded-lg border border-green-200">
               <CheckCircle className="h-6 w-6 text-green-500 flex-shrink-0" />
               <div>
-                <p className="font-medium text-green-700 text-sm">All coaching actions complete</p>
-                <p className="text-xs text-green-600/70 mt-0.5">No client check-ins, health assessments, milestones, or reminders pending.</p>
+                <p className="font-medium text-green-700 text-sm">
+                  {isToday ? "All coaching actions complete" : "No coaching actions scheduled"}
+                </p>
+                <p className="text-xs text-green-600/70 mt-0.5">
+                  {isToday
+                    ? "No client check-ins, health assessments, milestones, or reminders pending."
+                    : "No health assessments, milestones, or new clients for this day."}
+                </p>
               </div>
             </div>
           )}
