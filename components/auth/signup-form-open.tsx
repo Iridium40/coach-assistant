@@ -142,6 +142,16 @@ export function SignupFormOpen({ onSuccess, onSwitchToLogin }: SignupFormOpenPro
       return
     }
 
+    if (signUpData.user.identities?.length === 0) {
+      toast({
+        title: "Account Already Exists",
+        description: "An account with this email already exists. Please sign in or reset your password.",
+        variant: "destructive",
+      })
+      setLoading(false)
+      return
+    }
+
     await incrementCodeUsage(accessCode)
 
     await supabase
