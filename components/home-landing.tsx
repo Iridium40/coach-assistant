@@ -114,7 +114,7 @@ export function HomeLanding() {
               <img
                 src="/branding/calogo_large.png"
                 alt="Coach Assistant Hub"
-                style={{ height: "120px", width: "auto", margin: "0 auto" }}
+                style={{ height: "360px", width: "auto", margin: "0 auto" }}
               />
             </picture>
           </div>
