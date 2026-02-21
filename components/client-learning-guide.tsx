@@ -326,6 +326,37 @@ export function ClientLearningGuide({ onClose }: { onClose: () => void }) {
           {/* SCROLLABLE BODY */}
           <div style={{ maxHeight: "calc(80vh - 200px)", overflowY: "auto", padding: "28px 32px 14px" }}>
 
+            <CollapsibleSection title="Getting Started" emoji="🎯">
+              <div style={{ padding: "16px 18px", background: "linear-gradient(135deg, #f0fdf4, #ecfdf5)", border: "1px solid #d1fae5", borderRadius: "10px", marginBottom: "14px" }}>
+                <h4 style={{ fontFamily: "'Montserrat', sans-serif", fontWeight: 800, fontSize: "12px", color: "#065f46", textTransform: "uppercase", letterSpacing: "1px", marginBottom: "10px", display: "flex", alignItems: "center", gap: "6px" }}>🎯 Step by Step</h4>
+                {[
+                  <>Go to <strong style={{ color: "#065f46" }}>My Business → Client Tracker</strong></>,
+                  <>Click <strong style={{ color: "#065f46" }}>+ Add Client</strong> in the top-right corner</>,
+                  <>Enter a <strong style={{ color: "#065f46" }}>Label / Nickname</strong> you&apos;ll recognize (e.g., Jennifer, Mike)</>,
+                  <>Set their <strong style={{ color: "#065f46" }}>Start Date</strong> — we&apos;ll automatically calculate their program day and show milestone reminders</>,
+                  <>Click <strong style={{ color: "#065f46" }}>Add Client</strong> — their card appears with program day, phase, daily actions, and the full Client Journey!</>,
+                ].map((text, i) => (
+                  <div key={i} style={{ display: "flex", gap: "10px", padding: "8px 0", alignItems: "flex-start", borderBottom: i < 4 ? "1px solid rgba(0,166,81,0.1)" : "none" }}>
+                    <div style={{ width: "24px", height: "24px", borderRadius: "6px", background: "#00A651", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Montserrat', sans-serif", fontWeight: 800, fontSize: "11px", flexShrink: 0, boxShadow: "0 1px 4px rgba(0,166,81,0.2)" }}>{i + 1}</div>
+                    <div style={{ fontSize: "13px", color: "#374151", lineHeight: 1.45 }}>{text}</div>
+                  </div>
+                ))}
+              </div>
+
+              <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", marginBottom: "16px" }}>
+                <SsBtn label="See the Tracker" onClick={() => setLightbox(SCREENSHOTS["client-tracker"])} />
+                <SsBtn label="See the Add Form" onClick={() => setLightbox(SCREENSHOTS["add-client"])} />
+                <SsBtn label="See the Client Journey" onClick={() => setLightbox(SCREENSHOTS["client-journey"])} />
+              </div>
+
+              <div style={{ padding: "14px 16px", borderRadius: "10px", display: "flex", alignItems: "flex-start", gap: "10px", background: "#eaf7f6", border: "1px solid #a7ddd9" }}>
+                <span style={{ fontSize: "18px", flexShrink: 0, marginTop: "1px" }}>🎯</span>
+                <p style={{ fontSize: "13px", color: "#475569", lineHeight: 1.5, margin: 0 }}>
+                  <strong style={{ color: "#1e293b" }}>Why it matters:</strong> The first 30 days are make-or-break for client success. The Client Tracker gives you the exact script, video, or call to make on every single day — so you never wonder &quot;what should I send today?&quot; Your clients get consistent, professional support and you can manage multiple clients without anything slipping.
+                </p>
+              </div>
+            </CollapsibleSection>
+
             <CollapsibleSection title="Privacy & Labels" emoji="🔒">
               <div style={{ padding: "16px 18px", background: "linear-gradient(135deg, #eaf7f6, #d5f0ee)", border: "1px solid #a7ddd9", borderRadius: "12px", position: "relative", fontSize: "14px", color: "#475569", lineHeight: 1.65 }}>
                 <span style={{ position: "absolute", top: "-10px", left: "14px", fontSize: "16px", background: "#fff", padding: "0 4px", borderRadius: "6px" }}>🔒</span>
@@ -400,36 +431,6 @@ export function ClientLearningGuide({ onClose }: { onClose: () => void }) {
               </div>
             </CollapsibleSection>
 
-            <CollapsibleSection title="Add Your First Client" emoji="🎯">
-              <div style={{ padding: "16px 18px", background: "linear-gradient(135deg, #f0fdf4, #ecfdf5)", border: "1px solid #d1fae5", borderRadius: "10px", marginBottom: "14px" }}>
-                <h4 style={{ fontFamily: "'Montserrat', sans-serif", fontWeight: 800, fontSize: "12px", color: "#065f46", textTransform: "uppercase", letterSpacing: "1px", marginBottom: "10px", display: "flex", alignItems: "center", gap: "6px" }}>🎯 Step by Step</h4>
-                {[
-                  <>Go to <strong style={{ color: "#065f46" }}>My Business → Client Tracker</strong></>,
-                  <>Click <strong style={{ color: "#065f46" }}>+ Add Client</strong> in the top-right corner</>,
-                  <>Enter a <strong style={{ color: "#065f46" }}>Label / Nickname</strong> you&apos;ll recognize (e.g., Jennifer, Mike)</>,
-                  <>Set their <strong style={{ color: "#065f46" }}>Start Date</strong> — we&apos;ll automatically calculate their program day and show milestone reminders</>,
-                  <>Click <strong style={{ color: "#065f46" }}>Add Client</strong> — their card appears with program day, phase, daily actions, and the full Client Journey!</>,
-                ].map((text, i) => (
-                  <div key={i} style={{ display: "flex", gap: "10px", padding: "8px 0", alignItems: "flex-start", borderBottom: i < 4 ? "1px solid rgba(0,166,81,0.1)" : "none" }}>
-                    <div style={{ width: "24px", height: "24px", borderRadius: "6px", background: "#00A651", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Montserrat', sans-serif", fontWeight: 800, fontSize: "11px", flexShrink: 0, boxShadow: "0 1px 4px rgba(0,166,81,0.2)" }}>{i + 1}</div>
-                    <div style={{ fontSize: "13px", color: "#374151", lineHeight: 1.45 }}>{text}</div>
-                  </div>
-                ))}
-              </div>
-
-              <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", marginBottom: "16px" }}>
-                <SsBtn label="See the Tracker" onClick={() => setLightbox(SCREENSHOTS["client-tracker"])} />
-                <SsBtn label="See the Add Form" onClick={() => setLightbox(SCREENSHOTS["add-client"])} />
-                <SsBtn label="See the Client Journey" onClick={() => setLightbox(SCREENSHOTS["client-journey"])} />
-              </div>
-
-              <div style={{ padding: "14px 16px", borderRadius: "10px", display: "flex", alignItems: "flex-start", gap: "10px", background: "#eaf7f6", border: "1px solid #a7ddd9" }}>
-                <span style={{ fontSize: "18px", flexShrink: 0, marginTop: "1px" }}>🎯</span>
-                <p style={{ fontSize: "13px", color: "#475569", lineHeight: 1.5, margin: 0 }}>
-                  <strong style={{ color: "#1e293b" }}>Why it matters:</strong> The first 30 days are make-or-break for client success. The Client Tracker gives you the exact script, video, or call to make on every single day — so you never wonder &quot;what should I send today?&quot; Your clients get consistent, professional support and you can manage multiple clients without anything slipping.
-                </p>
-              </div>
-            </CollapsibleSection>
           </div>
 
           {/* FOOTER */}

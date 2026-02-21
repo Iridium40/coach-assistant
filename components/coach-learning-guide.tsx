@@ -169,6 +169,41 @@ export function CoachLearningGuide({ onClose }: { onClose: () => void }) {
           {/* SCROLLABLE BODY */}
           <div style={{ maxHeight: "calc(80vh - 200px)", overflowY: "auto", padding: "28px 32px 14px" }}>
 
+            <CollapsibleSection title="Getting Started" emoji="🎯">
+              <div style={{ padding: "16px 18px", background: "linear-gradient(135deg, #f0fdf4, #ecfdf5)", border: "1px solid #d1fae5", borderRadius: "10px", marginBottom: "14px" }}>
+                <h4 style={{ fontFamily: "'Montserrat', sans-serif", fontWeight: 800, fontSize: "12px", color: "#065f46", textTransform: "uppercase", letterSpacing: "1px", marginBottom: "10px", display: "flex", alignItems: "center", gap: "6px" }}>🎯 Step by Step</h4>
+                {[
+                  <>Go to <strong style={{ color: "#2A9C95" }}>My Business → Coach List</strong></>,
+                  <>Click <strong style={{ color: "#2A9C95" }}>+ Add Coach</strong> in the top-right corner</>,
+                  <>Enter their <strong style={{ color: "#2A9C95" }}>Name / Nickname</strong> — something you&apos;ll recognize</>,
+                  <>Select their <strong style={{ color: "#2A9C95" }}>Stage</strong> — New Coach, Building, Certified, or Leader</>,
+                  <>Choose their <strong style={{ color: "#2A9C95" }}>OPTAVIA Rank</strong> from the dropdown</>,
+                  <>Set their <strong style={{ color: "#2A9C95" }}>Launch Date</strong> — we&apos;ll calculate their day counter and week automatically</>,
+                  <>Enter their current <strong style={{ color: "#2A9C95" }}>Clients</strong> and <strong style={{ color: "#2A9C95" }}>Prospects</strong> counts</>,
+                  <>Add any <strong style={{ color: "#2A9C95" }}>Notes</strong> — coaching goals, next steps, or context (optional)</>,
+                  <>Click <strong style={{ color: "#2A9C95" }}>Add Coach</strong> — their card appears with day counter, stage, rank, and the full Rank Guide!</>,
+                ].map((text, i) => (
+                  <div key={i} style={{ display: "flex", gap: "10px", padding: "8px 0", alignItems: "flex-start", borderBottom: i < 8 ? "1px solid rgba(0,166,81,0.1)" : "none" }}>
+                    <div style={{ width: "24px", height: "24px", borderRadius: "6px", background: "#37B6AE", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Montserrat', sans-serif", fontWeight: 800, fontSize: "11px", flexShrink: 0, boxShadow: "0 1px 4px rgba(55,182,174,0.25)" }}>{i + 1}</div>
+                    <div style={{ fontSize: "13px", color: "#374151", lineHeight: 1.45 }}>{text}</div>
+                  </div>
+                ))}
+              </div>
+
+              <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", marginBottom: "16px" }}>
+                <SsBtn label="See the Tracker" onClick={() => setLightbox(SCREENSHOTS["coach-list"])} />
+                <SsBtn label="See the Add Form" onClick={() => setLightbox(SCREENSHOTS["add-coach"])} />
+                <SsBtn label="See the Rank Guide" onClick={() => setLightbox(SCREENSHOTS["rank-guide"])} />
+              </div>
+
+              <div style={{ padding: "14px 16px", borderRadius: "10px", display: "flex", alignItems: "flex-start", gap: "10px", background: "#eaf7f6", border: "1px solid #a7ddd9" }}>
+                <span style={{ fontSize: "18px", flexShrink: 0, marginTop: "1px" }}>🎯</span>
+                <p style={{ fontSize: "13px", color: "#475569", lineHeight: 1.5, margin: 0 }}>
+                  <strong style={{ color: "#1e293b" }}>Why it matters:</strong> The coaches you sponsor are building their businesses too — and your mentorship makes the difference between a coach who thrives and one who stalls. The Coach List gives you a clear view of where each coach stands, what they should be focused on, and exactly how you can help them. With scheduled mentoring sessions, rank tracking, and built-in guidance for every stage, you can support a growing team without losing track of anyone.
+                </p>
+              </div>
+            </CollapsibleSection>
+
             <CollapsibleSection title="Privacy & Labels" emoji="🔒">
               <div style={{ padding: "16px 18px", background: "linear-gradient(135deg, #eaf7f6, #d5f0ee)", border: "1px solid #a7ddd9", borderRadius: "12px", position: "relative", fontSize: "14px", color: "#475569", lineHeight: 1.65 }}>
                 <span style={{ position: "absolute", top: "-10px", left: "14px", fontSize: "16px", background: "#fff", padding: "0 4px", borderRadius: "6px" }}>🔒</span>
@@ -239,41 +274,6 @@ export function CoachLearningGuide({ onClose }: { onClose: () => void }) {
                   <h4 style={{ fontFamily: "'Montserrat', sans-serif", fontWeight: 800, fontSize: "13px", color: "#1e293b", marginBottom: "3px" }}>Schedule Mentoring Sessions</h4>
                   <p style={{ fontSize: "12px", color: "#475569", lineHeight: 1.5, margin: 0 }}>Tap <strong style={{ color: "#2A9C95" }}>Schedule</strong> on any coach card to set up mentoring calls, 1-on-1s, or team meetings. Consistent coaching is the #1 factor in a new coach&apos;s success — the scheduler makes it easy to stay on top of your mentoring cadence across your entire team.</p>
                 </div>
-              </div>
-            </CollapsibleSection>
-
-            <CollapsibleSection title="Add Your First Coach" emoji="🎯">
-              <div style={{ padding: "16px 18px", background: "linear-gradient(135deg, #f0fdf4, #ecfdf5)", border: "1px solid #d1fae5", borderRadius: "10px", marginBottom: "14px" }}>
-                <h4 style={{ fontFamily: "'Montserrat', sans-serif", fontWeight: 800, fontSize: "12px", color: "#065f46", textTransform: "uppercase", letterSpacing: "1px", marginBottom: "10px", display: "flex", alignItems: "center", gap: "6px" }}>🎯 Step by Step</h4>
-                {[
-                  <>Go to <strong style={{ color: "#2A9C95" }}>My Business → Coach List</strong></>,
-                  <>Click <strong style={{ color: "#2A9C95" }}>+ Add Coach</strong> in the top-right corner</>,
-                  <>Enter their <strong style={{ color: "#2A9C95" }}>Name / Nickname</strong> — something you&apos;ll recognize</>,
-                  <>Select their <strong style={{ color: "#2A9C95" }}>Stage</strong> — New Coach, Building, Certified, or Leader</>,
-                  <>Choose their <strong style={{ color: "#2A9C95" }}>OPTAVIA Rank</strong> from the dropdown</>,
-                  <>Set their <strong style={{ color: "#2A9C95" }}>Launch Date</strong> — we&apos;ll calculate their day counter and week automatically</>,
-                  <>Enter their current <strong style={{ color: "#2A9C95" }}>Clients</strong> and <strong style={{ color: "#2A9C95" }}>Prospects</strong> counts</>,
-                  <>Add any <strong style={{ color: "#2A9C95" }}>Notes</strong> — coaching goals, next steps, or context (optional)</>,
-                  <>Click <strong style={{ color: "#2A9C95" }}>Add Coach</strong> — their card appears with day counter, stage, rank, and the full Rank Guide!</>,
-                ].map((text, i) => (
-                  <div key={i} style={{ display: "flex", gap: "10px", padding: "8px 0", alignItems: "flex-start", borderBottom: i < 8 ? "1px solid rgba(0,166,81,0.1)" : "none" }}>
-                    <div style={{ width: "24px", height: "24px", borderRadius: "6px", background: "#37B6AE", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Montserrat', sans-serif", fontWeight: 800, fontSize: "11px", flexShrink: 0, boxShadow: "0 1px 4px rgba(55,182,174,0.25)" }}>{i + 1}</div>
-                    <div style={{ fontSize: "13px", color: "#374151", lineHeight: 1.45 }}>{text}</div>
-                  </div>
-                ))}
-              </div>
-
-              <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", marginBottom: "16px" }}>
-                <SsBtn label="See the Tracker" onClick={() => setLightbox(SCREENSHOTS["coach-list"])} />
-                <SsBtn label="See the Add Form" onClick={() => setLightbox(SCREENSHOTS["add-coach"])} />
-                <SsBtn label="See the Rank Guide" onClick={() => setLightbox(SCREENSHOTS["rank-guide"])} />
-              </div>
-
-              <div style={{ padding: "14px 16px", borderRadius: "10px", display: "flex", alignItems: "flex-start", gap: "10px", background: "#eaf7f6", border: "1px solid #a7ddd9" }}>
-                <span style={{ fontSize: "18px", flexShrink: 0, marginTop: "1px" }}>🎯</span>
-                <p style={{ fontSize: "13px", color: "#475569", lineHeight: 1.5, margin: 0 }}>
-                  <strong style={{ color: "#1e293b" }}>Why it matters:</strong> The coaches you sponsor are building their businesses too — and your mentorship makes the difference between a coach who thrives and one who stalls. The Coach List gives you a clear view of where each coach stands, what they should be focused on, and exactly how you can help them. With scheduled mentoring sessions, rank tracking, and built-in guidance for every stage, you can support a growing team without losing track of anyone.
-                </p>
               </div>
             </CollapsibleSection>
 
