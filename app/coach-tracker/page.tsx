@@ -537,7 +537,7 @@ Suggested talking points:
       startDate: targetDate,
       endDate: endDate,
       location: location || undefined,
-      uid: `coach-${selectedCoach.id}-${Date.now()}@coachassistancehub.com`,
+      uid: `coach-${selectedCoach.id}-${Date.now()}@coachassistanthub.com`,
     }
   }
 

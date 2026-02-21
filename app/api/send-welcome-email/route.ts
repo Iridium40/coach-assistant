@@ -17,7 +17,7 @@ export async function POST(request: NextRequest) {
 
     // Create email content
     const subject = `Welcome to Coach Assistant Hub!`
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://www.coachassistancehub.com"
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://www.coachassistanthub.com"
     
     const header = getEmailHeader("Welcome to Coach Assistant Hub!", "Your coaching journey starts here")
     

@@ -282,7 +282,7 @@ Talking Points:
       startDate: targetDate,
       endDate: endDate,
       location: location || undefined,
-      uid: `prospect-ha-${schedulingProspect.id}-${Date.now()}@coachassistancehub.com`,
+      uid: `prospect-ha-${schedulingProspect.id}-${Date.now()}@coachassistanthub.com`,
     }
   }
 

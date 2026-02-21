@@ -67,14 +67,14 @@ export async function POST(request: NextRequest) {
 
     switch (email_action_type) {
       case "signup": {
-        const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://www.coachassistancehub.com"
+        const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://www.coachassistanthub.com"
         const confirmUrl = buildVerifyUrl(token_hash, "signup", redirect_to || appUrl)
         emailContent = getSignupConfirmationEmail(fullName, confirmUrl)
         break
       }
 
       case "recovery": {
-        const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://www.coachassistancehub.com"
+        const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://www.coachassistanthub.com"
         const resetUrl = buildVerifyUrl(token_hash, "recovery", redirect_to || `${appUrl}/reset-password`)
         emailContent = getPasswordRecoveryEmail(fullName, resetUrl)
         break

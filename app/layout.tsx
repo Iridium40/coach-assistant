@@ -22,14 +22,14 @@ export const metadata: Metadata = {
   title: "Coach Assistant Hub",
   description: "Support for coaches with resources, training modules, and Lean & Green recipes",
   generator: "v0.app",
-  metadataBase: new URL("http://www.coachassistancehub.com"),
+  metadataBase: new URL("http://www.coachassistanthub.com"),
   alternates: {
     canonical: "/",
   },
   openGraph: {
     title: "Coach Assistant Hub",
     description: "Support for coaches with resources, training modules, and Lean & Green recipes",
-    url: "http://www.coachassistancehub.com",
+    url: "http://www.coachassistanthub.com",
     siteName: "Coach Assistant Hub",
   },
   icons: {

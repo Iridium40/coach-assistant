@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
 
     // Create email content
     const subject = `🎉 Congratulations! New Client: ${clientName}`
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://www.coachassistancehub.com"
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://www.coachassistanthub.com"
     
     const header = getEmailHeader("Congratulations!", "You just changed someone's life!")
     

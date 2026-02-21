@@ -35,7 +35,7 @@ export async function POST(request: NextRequest) {
 
     // Create email content
     const subject = `📅 New Meeting Scheduled: ${meetingTitle}`
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://www.coachassistancehub.com"
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://www.coachassistanthub.com"
     
     const header = getEmailHeader("New Meeting Scheduled", "A new meeting has been added to your calendar")
     

@@ -21,7 +21,7 @@ function generateICSContent(
     return new Date(dateStr).toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '')
   }
   
-  const uid = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}@coachassistancehub.com`
+  const uid = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}@coachassistanthub.com`
   const now = formatDate(new Date().toISOString())
   
   const escapeICS = (str: string) => {
@@ -114,7 +114,7 @@ export async function POST(request: NextRequest) {
     // Create email content
     const isHA = eventType === "ha"
     const subject = `📅 Calendar Invite: ${eventTitle}`
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://www.coachassistancehub.com"
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://www.coachassistanthub.com"
     
     const headerTitle = isHA ? "Health Assessment Scheduled" : "Check-in Scheduled"
     const headerSubtitle = isHA 

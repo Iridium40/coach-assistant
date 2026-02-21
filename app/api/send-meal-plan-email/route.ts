@@ -46,7 +46,7 @@ export async function POST(request: NextRequest) {
     
     const is5and1 = planType === "5&1"
 
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://www.coachassistancehub.com"
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://www.coachassistanthub.com"
 
     // Create shareable meal plan URL with encoded data
     const planDataForUrl = mealPlanEntries.map(entry => ({
