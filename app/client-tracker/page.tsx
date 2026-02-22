@@ -56,7 +56,8 @@ import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
 import { MilestoneActionModal } from "@/components/milestone-action-modal"
 import { ClientLearningGuide } from "@/components/client-learning-guide"
-import { GraduationCap, Trophy, Heart, Download } from "lucide-react"
+import { RecruitmentNavigator } from "@/components/coach-tools/recruitment-navigator"
+import { GraduationCap, Trophy, Heart, Download, Compass } from "lucide-react"
 import { ScheduleCalendarOptions } from "@/components/schedule-calendar-options"
 import { sendCalendarInviteEmail } from "@/lib/email"
 import { useUserData } from "@/contexts/user-data-context"
@@ -112,6 +113,7 @@ function ClientTrackerContent() {
   const [showTextModal, setShowTextModal] = useState(false)
   const [showScheduleModal, setShowScheduleModal] = useState(false)
   const [showLearningGuide, setShowLearningGuide] = useState(false)
+  const [showRecruitmentNav, setShowRecruitmentNav] = useState(false)
   const [showMilestoneModal, setShowMilestoneModal] = useState(false)
   const [milestoneCount, setMilestoneCount] = useState(0)
   const [showClearConfirm, setShowClearConfirm] = useState(false)
@@ -569,6 +571,13 @@ ${phase.milestone ? `\n🎉 MILESTONE: ${phase.label} - Celebrate this achieveme
               >
                 <GraduationCap className="h-4 w-4 sm:mr-2" />
                 <span className="hidden sm:inline">Learn Client List</span>
+              </Button>
+              <Button
+                className="bg-purple-600 border-purple-600 text-white hover:bg-purple-700 text-xs sm:text-sm"
+                onClick={() => setShowRecruitmentNav(true)}
+              >
+                <Compass className="h-4 w-4 sm:mr-2" />
+                <span className="hidden sm:inline">Recruit &amp; Re-Engage</span>
               </Button>
               <Button
                 onClick={() => setShowAddModal(true)}
@@ -1468,6 +1477,23 @@ ${phase.milestone ? `\n🎉 MILESTONE: ${phase.label} - Celebrate this achieveme
           >
             Keep Going! 💪
           </Button>
+        </DialogContent>
+      </Dialog>
+
+      {/* Recruitment & Re-Engagement Navigator */}
+      <Dialog open={showRecruitmentNav} onOpenChange={setShowRecruitmentNav}>
+        <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-none max-w-5xl">
+          <DialogHeader>
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-purple-100">
+                <Compass className="h-5 w-5 text-purple-600" />
+              </div>
+              <DialogTitle className="text-xl text-optavia-dark">Recruitment &amp; Re-Engagement Navigator</DialogTitle>
+            </div>
+          </DialogHeader>
+          <div className="mt-4">
+            <RecruitmentNavigator />
+          </div>
         </DialogContent>
       </Dialog>
 

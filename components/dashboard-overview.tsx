@@ -57,6 +57,7 @@ import { SocialMediaPromptGenerator } from "@/components/social-media-prompt-gen
 import { OPTAVIAReferenceGuide } from "@/components/coach-tools/optavia-reference-guide"
 import { ShareHALink } from "@/components/coach-tools/share-ha-link"
 import { ObjectionNavigator } from "@/components/coach-tools/objection-navigator"
+import { RecruitmentNavigator } from "@/components/coach-tools/recruitment-navigator"
 
 // Coach Tools definitions - must match IDs in coach-tools-tab.tsx for pinning to work
 const COACH_TOOLS: { id: string; title: string; icon: LucideIcon; component: React.ComponentType }[] = [
@@ -68,6 +69,7 @@ const COACH_TOOLS: { id: string; title: string; icon: LucideIcon; component: Rea
   { id: "metabolic-health", title: "Metabolic Health Education", icon: Activity, component: MetabolicHealthInfo },
   { id: "social-media-generator", title: "Social Media Post Generator", icon: Share2, component: SocialMediaPromptGenerator },
   { id: "objection-navigator", title: "Objection Navigator", icon: Compass, component: ObjectionNavigator },
+  { id: "recruitment-navigator", title: "Recruitment & Re-Engagement Navigator", icon: Users, component: RecruitmentNavigator },
   { id: "optavia-reference", title: "Condiments Quick Reference Guide", icon: BookOpen, component: OPTAVIAReferenceGuide },
 ]
 

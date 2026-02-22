@@ -16,6 +16,7 @@ import { ShareHALink } from "@/components/coach-tools/share-ha-link"
 import { SocialMediaPromptGenerator } from "@/components/social-media-prompt-generator"
 import { OPTAVIAReferenceGuide } from "@/components/coach-tools/optavia-reference-guide"
 import { ObjectionNavigator } from "@/components/coach-tools/objection-navigator"
+import { RecruitmentNavigator } from "@/components/coach-tools/recruitment-navigator"
 
 const COACH_TOOLS = [
   {
@@ -56,6 +57,14 @@ const COACH_TOOLS = [
     description: "Real-time conversation scripts for handling common prospect objections with confidence.",
     icon: Compass,
     component: ObjectionNavigator,
+    expandMode: "dialog" as const,
+  },
+  {
+    id: "recruitment-navigator",
+    title: "Recruitment & Re-Engagement Navigator",
+    description: "Guided scripts for team recruitment conversations and re-engaging former clients.",
+    icon: Users,
+    component: RecruitmentNavigator,
     expandMode: "dialog" as const,
   },
   {
