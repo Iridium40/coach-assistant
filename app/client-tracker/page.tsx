@@ -57,7 +57,8 @@ import { Footer } from "@/components/footer"
 import { MilestoneActionModal } from "@/components/milestone-action-modal"
 import { ClientLearningGuide } from "@/components/client-learning-guide"
 import { RecruitmentNavigator } from "@/components/coach-tools/recruitment-navigator"
-import { GraduationCap, Trophy, Heart, Download, Compass } from "lucide-react"
+import { ClientTroubleshootingDialog } from "@/components/coach-tools/client-troubleshooting-dialog"
+import { GraduationCap, Trophy, Heart, Download, Compass, Wrench } from "lucide-react"
 import { ScheduleCalendarOptions } from "@/components/schedule-calendar-options"
 import { sendCalendarInviteEmail } from "@/lib/email"
 import { useUserData } from "@/contexts/user-data-context"
@@ -114,6 +115,7 @@ function ClientTrackerContent() {
   const [showScheduleModal, setShowScheduleModal] = useState(false)
   const [showLearningGuide, setShowLearningGuide] = useState(false)
   const [showRecruitmentNav, setShowRecruitmentNav] = useState(false)
+  const [showTroubleshooting, setShowTroubleshooting] = useState(false)
   const [showMilestoneModal, setShowMilestoneModal] = useState(false)
   const [milestoneCount, setMilestoneCount] = useState(0)
   const [showClearConfirm, setShowClearConfirm] = useState(false)
@@ -573,13 +575,6 @@ ${phase.milestone ? `\n🎉 MILESTONE: ${phase.label} - Celebrate this achieveme
                 <span className="hidden sm:inline">Learn Client List</span>
               </Button>
               <Button
-                className="bg-purple-600 border-purple-600 text-white hover:bg-purple-700 text-xs sm:text-sm"
-                onClick={() => setShowRecruitmentNav(true)}
-              >
-                <Compass className="h-4 w-4 sm:mr-2" />
-                <span className="hidden sm:inline">Recruit &amp; Re-Engage</span>
-              </Button>
-              <Button
                 onClick={() => setShowAddModal(true)}
                 size="lg"
                 className="bg-white text-[hsl(var(--optavia-green))] hover:bg-white/90 font-bold text-sm sm:text-base px-5 sm:px-6 py-2.5 shadow-lg"
@@ -964,6 +959,62 @@ ${phase.milestone ? `\n🎉 MILESTONE: ${phase.label} - Celebrate this achieveme
           )}
         </div>
         )}
+
+        {/* Coach Tools */}
+        <div className="grid sm:grid-cols-2 gap-4 mt-8">
+          <Card className="bg-white border-2 border-gray-200 hover:border-orange-400 transition-all duration-300 hover:shadow-lg overflow-hidden">
+            <CardHeader className="pb-3">
+              <div className="flex items-start gap-3">
+                <div className="p-2 rounded-lg bg-orange-100">
+                  <Wrench className="h-5 w-5 text-orange-600" />
+                </div>
+                <div className="flex-1">
+                  <CardTitle className="text-lg text-optavia-dark">Client Troubleshooting Guide</CardTitle>
+                  <p className="text-sm text-optavia-gray mt-1">
+                    Quick solutions and scripts for common client issues and challenges.
+                  </p>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="pt-0">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowTroubleshooting(true)}
+                className="w-full border-gray-300 text-optavia-dark hover:bg-orange-50 hover:border-orange-400 hover:text-orange-700"
+              >
+                Open Tool
+              </Button>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-white border-2 border-gray-200 hover:border-purple-400 transition-all duration-300 hover:shadow-lg overflow-hidden">
+            <CardHeader className="pb-3">
+              <div className="flex items-start gap-3">
+                <div className="p-2 rounded-lg bg-purple-100">
+                  <Compass className="h-5 w-5 text-purple-600" />
+                </div>
+                <div className="flex-1">
+                  <CardTitle className="text-lg text-optavia-dark">Recruitment &amp; Re-Engagement</CardTitle>
+                  <p className="text-sm text-optavia-gray mt-1">
+                    Guided scripts for team recruitment and re-engaging former clients.
+                  </p>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="pt-0">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowRecruitmentNav(true)}
+                className="w-full border-gray-300 text-optavia-dark hover:bg-purple-50 hover:border-purple-400 hover:text-purple-700"
+              >
+                Open Tool
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+
         </ErrorBoundary>
       </div>
 
@@ -1477,6 +1528,23 @@ ${phase.milestone ? `\n🎉 MILESTONE: ${phase.label} - Celebrate this achieveme
           >
             Keep Going! 💪
           </Button>
+        </DialogContent>
+      </Dialog>
+
+      {/* Client Troubleshooting Guide */}
+      <Dialog open={showTroubleshooting} onOpenChange={setShowTroubleshooting}>
+        <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-none max-w-5xl">
+          <DialogHeader>
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-orange-100">
+                <Wrench className="h-5 w-5 text-orange-600" />
+              </div>
+              <DialogTitle className="text-xl text-optavia-dark">Client Troubleshooting Guide</DialogTitle>
+            </div>
+          </DialogHeader>
+          <div className="mt-4">
+            <ClientTroubleshootingDialog />
+          </div>
         </DialogContent>
       </Dialog>
 
