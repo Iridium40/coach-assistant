@@ -32,6 +32,13 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import {
   Users,
   Plus,
   Calendar,
@@ -668,37 +675,27 @@ ${phase.milestone ? `\n🎉 MILESTONE: ${phase.label} - Celebrate this achieveme
           </div>
           
           <div className="flex items-center justify-between gap-2">
-            {/* Filter Tabs */}
-            <div className="flex gap-2 flex-wrap">
-              {([
-                { value: "all" as const, label: "All" },
-                { value: "active" as const, label: "Active" },
-                { value: "needs_attention" as const, label: `Needs Attention${stats.needsAttention > 0 ? ` (${stats.needsAttention})` : ""}` },
-                { value: "goal_achieved" as const, label: "Goal Achieved" },
-                { value: "future_coach" as const, label: "Future Coach" },
-                { value: "coach_launched" as const, label: "Launched" },
-                { value: "completed" as const, label: "Completed" },
-                { value: "paused" as const, label: "Paused" },
-              ]).map(({ value, label }) => (
-                <Button
-                  key={value}
-                  variant={filterStatus === value ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setFilterStatus(value)}
-                  className={
-                    filterStatus === value
-                      ? value === "needs_attention"
-                        ? "bg-orange-600 hover:bg-orange-700"
-                        : "bg-[hsl(var(--optavia-green))]"
-                      : value === "needs_attention" && stats.needsAttention > 0
-                        ? "border-orange-300 text-orange-700 hover:bg-orange-50"
-                        : ""
-                  }
-                >
-                  {label}
-                </Button>
-              ))}
-            </div>
+            {/* Filter Dropdown */}
+            <Select
+              value={filterStatus}
+              onValueChange={(value) => setFilterStatus(value as ClientStatus | "all" | "needs_attention")}
+            >
+              <SelectTrigger className="w-[200px]">
+                <SelectValue placeholder="Filter clients" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Clients</SelectItem>
+                <SelectItem value="active">Active</SelectItem>
+                <SelectItem value="needs_attention">
+                  Needs Attention{stats.needsAttention > 0 ? ` (${stats.needsAttention})` : ""}
+                </SelectItem>
+                <SelectItem value="goal_achieved">Goal Achieved</SelectItem>
+                <SelectItem value="future_coach">Future Coach</SelectItem>
+                <SelectItem value="coach_launched">Launched</SelectItem>
+                <SelectItem value="completed">Completed</SelectItem>
+                <SelectItem value="paused">Paused</SelectItem>
+              </SelectContent>
+            </Select>
 
             {/* View Toggle & Export */}
             <div className="flex items-center gap-2">

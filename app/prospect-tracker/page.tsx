@@ -77,11 +77,12 @@ import { ScheduleCalendarOptions } from "@/components/schedule-calendar-options"
 import { sendCalendarInviteEmail } from "@/lib/email"
 import { ShareHealthAssessment } from "@/components/share-health-assessment"
 import { ProspectLearningGuide } from "@/components/prospect-learning-guide"
+import { ObjectionNavigator } from "@/components/coach-tools/objection-navigator"
 import { ReminderButton } from "@/components/reminders-panel"
 import { ErrorBoundary } from "@/components/ui/error-boundary"
 import { StatsCardsSkeleton, ProspectListSkeleton, WeekViewSkeleton } from "@/components/ui/skeleton-loaders"
 import { ProspectCard } from "@/components/prospect-tracker/prospect-card"
-import { HelpCircle } from "lucide-react"
+import { HelpCircle, Compass } from "lucide-react"
 import type { CalendarEvent } from "@/lib/calendar-utils"
 
 // Time options for HA scheduling
@@ -129,6 +130,7 @@ export default function ProspectTrackerPage() {
   const [showHAScheduleModal, setShowHAScheduleModal] = useState(false)
   const [showHASendModal, setShowHASendModal] = useState(false)
   const [showLearningGuide, setShowLearningGuide] = useState(false)
+  const [showObjectionNav, setShowObjectionNav] = useState(false)
   const [editingProspect, setEditingProspect] = useState<Prospect | null>(null)
   const [convertingProspect, setConvertingProspect] = useState<Prospect | null>(null)
   const [schedulingProspect, setSchedulingProspect] = useState<Prospect | null>(null)
@@ -940,6 +942,34 @@ Talking Points:
             )}
           </div>
         )}
+
+        {/* Objection Navigator Card */}
+        <Card className="mt-8 bg-white border-2 border-gray-200 hover:border-[hsl(var(--optavia-green))] transition-all duration-300 hover:shadow-lg overflow-hidden">
+          <CardHeader className="pb-3">
+            <div className="flex items-start gap-3">
+              <div className="p-2 rounded-lg bg-[hsl(var(--optavia-green-light))]">
+                <Compass className="h-5 w-5 text-[hsl(var(--optavia-green))]" />
+              </div>
+              <div className="flex-1">
+                <CardTitle className="text-lg text-optavia-dark">Objection Navigator</CardTitle>
+                <p className="text-sm text-optavia-gray mt-1">
+                  Real-time conversation scripts for handling common prospect objections with confidence.
+                </p>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent className="pt-0">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowObjectionNav(true)}
+              className="w-full border-gray-300 text-optavia-dark hover:bg-[hsl(var(--optavia-green-light))] hover:border-[hsl(var(--optavia-green))] hover:text-[hsl(var(--optavia-green))]"
+            >
+              Open Tool
+            </Button>
+          </CardContent>
+        </Card>
+
         </ErrorBoundary>
       </div>
 
@@ -1409,6 +1439,23 @@ Talking Points:
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Objection Navigator Dialog */}
+      <Dialog open={showObjectionNav} onOpenChange={setShowObjectionNav}>
+        <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-none max-w-5xl">
+          <DialogHeader>
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-[hsl(var(--optavia-green-light))]">
+                <Compass className="h-5 w-5 text-[hsl(var(--optavia-green))]" />
+              </div>
+              <DialogTitle className="text-xl text-optavia-dark">Objection Navigator</DialogTitle>
+            </div>
+          </DialogHeader>
+          <div className="mt-4">
+            <ObjectionNavigator />
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Learn 100's List Training Guide */}
       {showLearningGuide && (
