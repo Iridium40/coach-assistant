@@ -641,46 +641,23 @@ Talking Points:
           </div>
           
           <div className="flex items-center justify-between gap-2">
-            {/* Filter Tabs */}
-            <div className="flex gap-1 sm:gap-2 flex-wrap">
-              <TooltipProvider>
-                {(["all", "new", "interested", "converted", "not_interested", "not_closed"] as const).map((status) => {
-                  const statusTooltips: Record<string, string> = {
-                    new: "Reach Out",
-                    interested: "Send HA",
-                    converted: "Client Won!",
-                    not_interested: "Remove from 100's List",
-                    not_closed: "Set Reminder to Reach Out Again",
-                  }
-                  
-                  const button = (
-                    <Button
-                      key={status}
-                      variant={filterStatus === status ? "default" : "outline"}
-                      size="sm"
-                      onClick={() => setFilterStatus(status)}
-                      className={`text-xs sm:text-sm px-2 sm:px-3 ${filterStatus === status ? "bg-[hsl(var(--optavia-green))]" : ""}`}
-                    >
-                      {status === "all" ? "All" : statusConfig[status as ProspectStatus]?.label || status}
-                    </Button>
-                  )
-                  
-                  // "All" doesn't need a tooltip
-                  if (status === "all") return button
-                  
-                  return (
-                    <Tooltip key={status}>
-                      <TooltipTrigger asChild>
-                        {button}
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>{statusTooltips[status]}</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  )
-                })}
-              </TooltipProvider>
-            </div>
+            {/* Filter Dropdown */}
+            <Select
+              value={filterStatus}
+              onValueChange={(value) => setFilterStatus(value as ProspectStatus | "all")}
+            >
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Filter prospects" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Prospects</SelectItem>
+                <SelectItem value="new">New</SelectItem>
+                <SelectItem value="interested">Interested</SelectItem>
+                <SelectItem value="converted">Client Won</SelectItem>
+                <SelectItem value="not_interested">Not Interested</SelectItem>
+                <SelectItem value="not_closed">Not Closed</SelectItem>
+              </SelectContent>
+            </Select>
 
             {/* View Toggle & Export */}
             <div className="flex items-center gap-2 flex-shrink-0">

@@ -802,22 +802,20 @@ Suggested talking points:
             </div>
 
             <div className="flex items-center justify-between gap-2">
-              <div className="flex gap-2 flex-wrap">
-                {[
-                  { value: "all" as const, label: "All" },
-                  ...COACH_STAGES.map(s => ({ value: s.id as const, label: s.label })),
-                ].map(({ value, label }) => (
-                  <Button
-                    key={value}
-                    variant={filterStage === value ? "default" : "outline"}
-                    size="sm"
-                    onClick={() => setFilterStage(value)}
-                    className={filterStage === value ? "bg-[hsl(var(--optavia-green))]" : ""}
-                  >
-                    {label}
-                  </Button>
-                ))}
-              </div>
+              <Select
+                value={filterStage}
+                onValueChange={(value) => setFilterStage(value as CoachStage | "all")}
+              >
+                <SelectTrigger className="w-[180px]">
+                  <SelectValue placeholder="Filter coaches" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Coaches</SelectItem>
+                  {COACH_STAGES.map((stage) => (
+                    <SelectItem key={stage.id} value={stage.id}>{stage.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
 
               <Button
                 variant="outline"
